@@ -5,9 +5,9 @@
 #include "menu.hpp"
 
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
-
 #include "graphlet/dashboard/alarmlet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
+#include "graphlet/statuslet.hpp"
 
 #include "iotables/ai_metrics.hpp"
 #include "iotables/ai_doors.hpp"
@@ -16,7 +16,6 @@
 #include "iotables/di_pumps.hpp"
 #include "iotables/do_doors.hpp"
 
-#include "decorator/page.hpp"
 #include "decorator/ship.hpp"
 
 #include "module.hpp"
@@ -35,8 +34,6 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
-
-private enum HDMode { WindowUI = 0, Dashboard };
 
 // WARNING: order matters
 private enum class HD : unsigned int {
@@ -406,7 +403,6 @@ HopperDoorsPage::HopperDoorsPage(PLCMaster* plc) : Planet(__MODULE__), device(pl
 
 	this->device->push_confirmation_receiver(dashboard);
 
-	this->push_decorator(new PageDecorator());
 	this->push_decorator(decorator);
 }
 
@@ -420,24 +416,7 @@ void HopperDoorsPage::load(CanvasCreateResourcesReason reason, float width, floa
 	auto db = dynamic_cast<Doors*>(this->dashboard);
 
 	if (db != nullptr) {
-		float vinset = statusbar_height();
-
-		{ // load graphlets
-			this->change_mode(HDMode::Dashboard);
-			db->load(width, height, vinset);
-
-			this->change_mode(HDMode::WindowUI);
-			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
-			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
-		}
-
-		{ // delayed initializing
-			this->get_logger()->push_log_receiver(this->statusline);
-
-			if (this->device != nullptr) {
-				this->device->get_logger()->push_log_receiver(this->statusline);
-			}
-		}
+		db->load(width, height, statusbar_height());
 	}
 }
 
@@ -445,13 +424,7 @@ void HopperDoorsPage::reflow(float width, float height) {
 	auto db = dynamic_cast<Doors*>(this->dashboard);
 	
 	if (db != nullptr) {
-		float vinset = statusbar_height();
-
-		this->change_mode(HDMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
-		
-		this->change_mode(HDMode::Dashboard);
-		db->reflow(width, height, vinset);
+		db->reflow(width, height, statusbar_height());
 	}
 }
 

@@ -3,13 +3,10 @@
 #include "planet.hpp"
 #include "plc.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
-
 namespace WarGrey::SCADA {
 	private class DraughtsPage : public WarGrey::SCADA::Planet {
 	public:
-		~DraughtsPage() noexcept;
+		virtual ~DraughtsPage() noexcept;
 		DraughtsPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
@@ -28,9 +25,5 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 		Windows::UI::Xaml::Controls::MenuFlyout^ overflow_op;
-
-	private: // never deletes these graphlets mannually	
-		WarGrey::SCADA::Statusbarlet* statusbar;
-		WarGrey::SCADA::Statuslinelet* statusline;
 	};
 }

@@ -80,7 +80,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual void on_focus(WarGrey::SCADA::IGraphlet* g) {}
 		virtual bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) { return false; }
-		virtual void on_character(unsigned int keycode) {}
+		virtual bool on_character(unsigned int keycode) { return false; }
 		virtual void on_elapse(long long count, long long interval, long long uptime) {}
 		virtual void on_elapse(long long count, long long interval, long long uptime, long long elapsed) {}
 		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
@@ -89,6 +89,7 @@ namespace WarGrey::SCADA {
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_tap_selected(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float planet_x, float planet_y) {}
+		virtual void on_transfer(WarGrey::SCADA::IPlanet* from, WarGrey::SCADA::IPlanet* to) {}
 
 	public:
 		virtual void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) = 0;
@@ -248,7 +249,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
-		void on_character(unsigned int keycode) override;
+		bool on_character(unsigned int keycode) override;
 		void on_swipe(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) override;
 		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y) override;
 		void on_elapse(long long count, long long interval, long long uptime) override;

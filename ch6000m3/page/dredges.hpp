@@ -3,15 +3,12 @@
 #include "planet.hpp"
 #include "plc.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
-
 namespace WarGrey::SCADA {
 	private enum class DragView { PortSide, Starboard, Suctions, _ };
 
 	private class DredgesPage : public WarGrey::SCADA::Planet {
 	public:
-		~DredgesPage() noexcept;
+		virtual ~DredgesPage() noexcept;
 		DredgesPage(WarGrey::SCADA::PLCMaster* plc, WarGrey::SCADA::DragView type = WarGrey::SCADA::DragView::_);
 
 	public:
@@ -32,9 +29,5 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
-
-	private: // never deletes these graphlets mannually	
-		WarGrey::SCADA::Statusbarlet* statusbar;
-		WarGrey::SCADA::Statuslinelet* statusline;
 	};
 }

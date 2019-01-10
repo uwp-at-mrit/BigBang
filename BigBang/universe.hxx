@@ -95,14 +95,14 @@ namespace WarGrey::SCADA {
 		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
-			WarGrey::SCADA::IPlanet* first_planet = nullptr);
+			WarGrey::SCADA::IPlanet* heads_up_planet = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
 			WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
-			WarGrey::SCADA::IPlanet* first_planet = nullptr);
+			WarGrey::SCADA::IPlanet* heads_up_planet = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
@@ -110,11 +110,12 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
-			WarGrey::SCADA::IPlanet* first_planet = nullptr);
+			WarGrey::SCADA::IPlanet* heads_up_planet = nullptr);
 		
 	internal:
 		void refresh(WarGrey::SCADA::IPlanet* target) override;
 		read_only_property(WarGrey::SCADA::IPlanet*, current_planet);
+		read_only_property(WarGrey::SCADA::IPlanet*, heads_up_planet);
 		read_only_property(WarGrey::SCADA::IUniverseNavigator*, navigator);
 		read_only_property(int, current_planet_index);
 
@@ -134,7 +135,6 @@ namespace WarGrey::SCADA {
 		void disable_predefined_shortcuts(bool yes);
 
 	public:
-		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 		void transfer(int delta_idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 		void transfer_to(Platform::String^ name, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 		void transfer_to(int idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
@@ -147,10 +147,12 @@ namespace WarGrey::SCADA {
 		void on_navigate(int from_index, int to_index) override;
 
 	protected private:
-		virtual void construct() {}
-		void push_planet(WarGrey::SCADA::IPlanet* planet);
+		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason) {}
 		virtual void update(long long count, long long interval, long long uptime) {}
-		virtual void collapse();
+		
+	protected private:
+		void push_planet(WarGrey::SCADA::IPlanet* planet);
+		void collapse();
 		
 	private:
 		void do_refresh(Platform::Object^ sender, Platform::Object^ args);
@@ -165,19 +167,21 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^ args);
 
 	private:
+		void on_key(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
+		void on_character(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CharacterReceivedEventArgs^ args);
 		void on_pointer_pressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_moveout(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_translating_x();
-		
+
 	private:
-		void on_key(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
-		void on_character(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CharacterReceivedEventArgs^ args);
+		void notify_transfer(WarGrey::SCADA::IPlanet* from, WarGrey::SCADA::IPlanet* to);
 
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ display;
 		WarGrey::SCADA::IUniverseNavigator* _navigator;
+		WarGrey::SCADA::IPlanet* headup_planet;
 		WarGrey::SCADA::IPlanet* head_planet;
 		WarGrey::SCADA::IPlanet* recent_planet;
 

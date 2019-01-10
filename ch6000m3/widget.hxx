@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 		UniverseWidget(UniverseDisplay^ master, PLCMaster* plc);
 
 	protected:
-		void construct() override;
+		void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason) override;
 
 	private:
 		UniverseDisplay^ master;

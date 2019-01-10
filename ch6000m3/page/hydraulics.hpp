@@ -5,13 +5,10 @@
 
 #include "decorator/grid.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
-
 namespace WarGrey::SCADA {
 	private class HydraulicsPage : public WarGrey::SCADA::ITimeline {
 	public:
-		~HydraulicsPage() noexcept;
+		virtual ~HydraulicsPage() noexcept;
 		HydraulicsPage(WarGrey::SCADA::PLCMaster* plc = nullptr);
 
 	public:
@@ -38,10 +35,6 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::MenuFlyout^ gvisor_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ pump_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ heater_op;
-
-	private: // never deletes these graphlets mannually
-		WarGrey::SCADA::Statusbarlet* statusbar;
-		WarGrey::SCADA::Statuslinelet* statusline;
 
 	private:
 		WarGrey::SCADA::GridDecorator* grid;

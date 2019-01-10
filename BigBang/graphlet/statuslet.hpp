@@ -11,13 +11,16 @@ namespace WarGrey::SCADA {
 
     private class Statusbarlet : public virtual WarGrey::SCADA::IGraphlet {
     public:
-		Statusbarlet(Platform::String^ caption, WarGrey::SCADA::IPLCMaster* device = nullptr);
+		Statusbarlet(WarGrey::SCADA::IPLCMaster* device = nullptr);
 
     public:
         void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
         void update(long long count, long long interval, long long uptime) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		void set_caption(Platform::String^ caption, bool force = false);
         
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caption;
@@ -27,6 +30,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ retry_icon;
+		Platform::String^ title;
 		unsigned int retry_step;
 		float retry_icon_size;
 	};

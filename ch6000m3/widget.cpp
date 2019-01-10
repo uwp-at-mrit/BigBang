@@ -290,7 +290,7 @@ UniverseWidget::UniverseWidget(UniverseDisplay^ master, PLCMaster* plc) : Univer
 	this->use_global_mask_setting(false);
 }
 
-void UniverseWidget::construct() {
+void UniverseWidget::construct(CanvasCreateResourcesReason reason) {
 	initialize_the_timemachine(this->plc, timemachine_frame_per_second, timemachine_snapshot_interval);
 	this->push_planet(new Widget(this->master, this->plc));
 }

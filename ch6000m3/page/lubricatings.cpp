@@ -11,6 +11,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
+#include "graphlet/statuslet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 
@@ -21,8 +22,6 @@
 
 #include "iotables/do_hopper_pumps.hpp"
 
-#include "decorator/page.hpp"
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI::Xaml::Controls;
@@ -32,8 +31,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
-
-private enum LUMode { WindowUI = 0, Dashboard };
 
 private enum class LUOperation { Start, Stop, _ };
 private enum class LUGBOperation { Start, Stop, Auto, _ };
@@ -246,7 +243,6 @@ LubricatingsPage::LubricatingsPage(PLCMaster* plc) : Planet(__MODULE__), device(
 	
 	this->device->push_confirmation_receiver(ps_dashboard);
 	this->device->push_confirmation_receiver(sb_dashboard);
-	this->push_decorator(new PageDecorator());
 }
 
 LubricatingsPage::~LubricatingsPage() {
@@ -264,23 +260,8 @@ void LubricatingsPage::load(CanvasCreateResourcesReason reason, float width, flo
 		float vinset = statusbar_height();
 		float half_width = width * 0.5F;
 
-		{ // load graphlets
-			this->change_mode(LUMode::Dashboard);
-			ps_dashboard->load(0.0F,       half_width, height, vinset);
-			sb_dashboard->load(half_width, half_width, height, vinset);
-
-			this->change_mode(LUMode::WindowUI);
-			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
-			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
-		}
-
-		{ // delayed initializing
-			this->get_logger()->push_log_receiver(this->statusline);
-
-			if (this->device != nullptr) {
-				this->device->get_logger()->push_log_receiver(this->statusline);
-			}
-		}
+		ps_dashboard->load(0.0F, half_width, height, vinset);
+		sb_dashboard->load(half_width, half_width, height, vinset);
 	}
 }
 
@@ -292,10 +273,6 @@ void LubricatingsPage::reflow(float width, float height) {
 		float vinset = statusbar_height();
 		float half_width = width * 0.5F;
 		
-		this->change_mode(LUMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
-
-		this->change_mode(LUMode::Dashboard);
 		ps_dashboard->reflow(0.0F,       half_width, height, vinset);
 		sb_dashboard->reflow(half_width, half_width, height, vinset);
 	}

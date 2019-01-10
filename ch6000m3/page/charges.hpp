@@ -6,13 +6,10 @@
 
 #include "decorator/grid.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
-
 namespace WarGrey::SCADA {
 	private class ChargesPage : public WarGrey::SCADA::Planet {
 	public:
-		~ChargesPage() noexcept;
+		virtual ~ChargesPage() noexcept;
 		ChargesPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
@@ -42,10 +39,6 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::MenuFlyout^ sb_hopper_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ ps_underwater_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ sb_underwater_op;
-
-	private: // never deletes these graphlets mannually
-		WarGrey::SCADA::Statusbarlet* statusbar;
-		WarGrey::SCADA::Statuslinelet* statusline;
 
 	private:
 		WarGrey::SCADA::GridDecorator* grid;

@@ -105,12 +105,15 @@ void Keyboard::on_tap(float local_x, float local_y) {
 	}
 }
 
-void Keyboard::on_character(unsigned int key) {
+bool Keyboard::on_character(unsigned int key) {
+	bool handled = false;
 	VirtualKey received = this->find_received_key(key);
 
 	if (received != VirtualKey::None) {
-		this->master->on_key(received, true);
+		handled = this->master->on_key(received, true);
 	}
+
+	return handled;
 }
 
 bool Keyboard::on_key(VirtualKey key, bool wargrey_keyboard) {

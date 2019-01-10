@@ -9,7 +9,7 @@
 namespace WarGrey::SCADA {
 	private class HopperDoorsPage : public WarGrey::SCADA::Planet {
 	public:
-		~HopperDoorsPage() noexcept;
+		virtual ~HopperDoorsPage() noexcept;
 		HopperDoorsPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
@@ -30,9 +30,5 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::MenuFlyout^ gdoors35_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gdoors67_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gdoors17_op;
-
-	private: // never deletes these graphlets mannually	
-		WarGrey::SCADA::Statusbarlet* statusbar;
-		WarGrey::SCADA::Statuslinelet* statusline;
 	};
 }

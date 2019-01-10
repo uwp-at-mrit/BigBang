@@ -119,6 +119,8 @@ public:
 	}
 
 	bool on_pointer_released(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) override {
+		bool handled = false;
+
 		switch (puk) {
 		case PointerUpdateKind::LeftButtonReleased:
 		case PointerUpdateKind::LeftButtonPressed: {
@@ -133,11 +135,13 @@ public:
 
 				this_graphlet->refresh();
 				last_graphlet->refresh();
+
+				handled = true;
 			}
 		}; break;
 		}
 
-		return true;
+		return handled;
 	}
 
 private:
@@ -186,7 +190,7 @@ internal:
 
 		this->use_global_mask_setting(false);
 		this->min_width = (this->cell_width + this->gapsize) * float(this->column) + this->gapsize;
-		dynamic_cast<Planet*>(this->current_planet)->push_decorator(this->decorator);
+		dynamic_cast<Planet*>(this->heads_up_planet)->push_decorator(this->decorator);
 	}
 
 internal:
@@ -197,7 +201,7 @@ internal:
 		float y = (this->cell_height + this->gapsize) * float(idx / this->column) + this->gapsize;
 		float yoff = this->decorator->reserved_height();
 
-		this->current_planet->insert(thumbnail, x, y + yoff);
+		this->heads_up_planet->insert(thumbnail, x, y + yoff);
 		this->planets.insert(std::pair<IPlanet*, Navigationlet*>(planet, thumbnail));
 	}
 
@@ -205,12 +209,12 @@ internal:
 		auto it = this->planets.find(planet);
 
 		if (it != this->planets.end()) {
-			this->current_planet->set_selected(it->second);
+			this->heads_up_planet->set_selected(it->second);
 		}
 	}
 
 	int selected_index() {
-		auto selected = dynamic_cast<Navigationlet*>(this->current_planet->find_next_selected_graphlet(nullptr));
+		auto selected = dynamic_cast<Navigationlet*>(this->heads_up_planet->find_next_selected_graphlet(nullptr));
 		int index = 0;
 
 		if (selected != nullptr) {

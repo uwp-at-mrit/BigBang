@@ -16,6 +16,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::System;
+using namespace Windows::ApplicationModel;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -140,9 +141,8 @@ float WarGrey::SCADA::statusbar_height() {
 }
 
 /*************************************************************************************************/
-Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCMaster* device) : device(device) {
+Statusbarlet::Statusbarlet(IPLCMaster* device) : device(device) {
 	initialize_status_font();
-	this->caption = make_text_layout(speak(caption), status_font);
 }
 
 void Statusbarlet::construct() {
@@ -153,6 +153,7 @@ void Statusbarlet::construct() {
 
 	this->retry_icon_size = statusbar_height() * 0.618F;
 	this->retry_icon = geometry_freeze(polar_arrowhead(this->retry_icon_size * 0.5F, 0.0));
+	this->set_caption(nullptr, true);
 }
 
 void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
@@ -172,6 +173,17 @@ void Statusbarlet::update(long long count, long long interval, long long uptime)
 
 	if (statusbar->needs_update()) {
 		this->notify_updated();
+	}
+}
+
+void Statusbarlet::set_caption(Platform::String^ caption, bool force) {
+	if (caption == nullptr) {
+		caption = speak(Package::Current->DisplayName);
+	}
+
+	if (force || (!this->caption->Equals(this->title))) {
+		this->title = caption;
+		this->caption = make_text_layout(this->title, status_font);
 	}
 }
 

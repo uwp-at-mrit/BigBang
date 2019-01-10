@@ -8,7 +8,7 @@
 
 #include "graphlet/shapelet.hpp"
 #include "graphlet/buttonlet.hpp"
-#include "graphlet/togglet.hpp"
+#include "graphlet/statuslet.hpp"
 
 #include "graphlet/dashboard/cylinderlet.hpp"
 #include "graphlet/dashboard/densityflowmeterlet.hpp"
@@ -35,8 +35,6 @@
 #include "iotables/do_winches.hpp"
 #include "iotables/ao_devices.hpp"
 
-#include "decorator/page.hpp"
-
 #include "module.hpp"
 
 using namespace WarGrey::SCADA;
@@ -52,8 +50,6 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
-
-private enum DSMode { WindowUI = 0, Dashboard };
 
 // WARNING: order matters
 private enum class DS : unsigned int {
@@ -1727,7 +1723,6 @@ DredgesPage::DredgesPage(PLCMaster* plc, DragView type)
 	this->dashboard = dashboard;
 	this->device->push_confirmation_receiver(dashboard);
 
-	this->push_decorator(new PageDecorator());
 	this->push_decorator(new DragCableDecorator(dashboard));
 }
 
@@ -1741,22 +1736,7 @@ void DredgesPage::load(CanvasCreateResourcesReason reason, float width, float he
 	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 	
 	if (db != nullptr) {
-		{ // load graphlets
-			this->change_mode(DSMode::Dashboard);
-			db->load(width, height, statusbar_height());
-
-			this->change_mode(DSMode::WindowUI);
-			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
-			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
-		}
-
-		{ // delayed initializing
-			this->get_logger()->push_log_receiver(this->statusline);
-
-			if (this->device != nullptr) {
-				this->device->get_logger()->push_log_receiver(this->statusline);
-			}
-		}
+		db->load(width, height, statusbar_height());
 	}
 }
 
@@ -1764,10 +1744,6 @@ void DredgesPage::reflow(float width, float height) {
 	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 	
 	if (db != nullptr) {
-		this->change_mode(DSMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
-		
-		this->change_mode(DSMode::Dashboard);
 		db->reflow(width, height, statusbar_height());
 	}
 }

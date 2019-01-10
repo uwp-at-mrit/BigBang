@@ -12,6 +12,7 @@
 
 #include "graphlet/shapelet.hpp"
 #include "graphlet/buttonlet.hpp"
+#include "graphlet/statuslet.hpp"
 
 #include "graphlet/symbol/heaterlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
@@ -31,8 +32,6 @@
 #include "iotables/do_pumps.hpp"
 #include "iotables/do_devices.hpp"
 
-#include "decorator/page.hpp"
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI::Xaml::Controls;
@@ -42,8 +41,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
-
-private enum HSMode { WindowUI = 0, Dashboard };
 
 private enum class HSFunction { BOPOverride, _ };
 
@@ -233,6 +230,7 @@ public:
 				this->labels[HS::VisorState]->set_text("[" + speak(TankState::UltraLow) + "]");
 			}; break;
 			default: {
+				this->labels[HS::VisorState]->set_color(Colours::Green);
 				this->labels[HS::VisorState]->set_text("");
 			}
 			}
@@ -815,8 +813,6 @@ HydraulicsPage::HydraulicsPage(PLCMaster* plc) : ITimeline(__MODULE__), device(p
 	}
 
 	{ // load decorators
-		this->push_decorator(new PageDecorator());
-
 #ifdef _DEBUG
 		this->push_decorator(this->grid);
 #else
@@ -848,24 +844,9 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 		
 		dashboard->construct(gwidth, gheight);
 
-		{ // load graphlets
-			this->change_mode(HSMode::Dashboard);
-			dashboard->load_pump_station(width, height, gwidth, gheight);
-			dashboard->load_tanks(width, height, gwidth, gheight);
-			dashboard->load_devices(width, height, gwidth, gheight);
-
-			this->change_mode(HSMode::WindowUI);
-			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
-			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
-		}
-
-		{ // delayed initializing
-			this->get_logger()->push_log_receiver(this->statusline);
-
-			if (this->device != nullptr) {
-				this->device->get_logger()->push_log_receiver(this->statusline);
-			}
-		}
+		dashboard->load_pump_station(width, height, gwidth, gheight);
+		dashboard->load_tanks(width, height, gwidth, gheight);
+		dashboard->load_devices(width, height, gwidth, gheight);
 	}
 }
 
@@ -877,10 +858,6 @@ void HydraulicsPage::reflow(float width, float height) {
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		this->change_mode(HSMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
-
-		this->change_mode(HSMode::Dashboard);
 		dashboard->reflow_pump_station(width, height, gwidth, gheight, vinset);
 		dashboard->reflow_devices(width, height, gwidth, gheight, vinset);
 		dashboard->reflow_metrics(width, height, gwidth, gheight, vinset);

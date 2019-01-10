@@ -750,14 +750,18 @@ bool Planet::on_key(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
-void Planet::on_character(unsigned int keycode) {
+bool Planet::on_character(unsigned int keycode) {
+	bool handled = false;
+
 	if (this->keyboard->shown()) {
-		this->keyboard->on_character(keycode);
+		handled = this->keyboard->on_character(keycode);
 	}
 
-	if (this->focused_graphlet != nullptr) {
-		this->focused_graphlet->on_character(keycode);
+	if ((!handled) && (this->focused_graphlet != nullptr)) {
+		handled = this->focused_graphlet->on_character(keycode);
 	}
+
+	return handled;
 }
 
 void Planet::on_swipe(IGraphlet* g, float local_x, float local_y) {
@@ -765,9 +769,7 @@ void Planet::on_swipe(IGraphlet* g, float local_x, float local_y) {
 
 	if (!info->selected) {
 		if (this->can_select(g)) {
-			if (this->can_select_multiple()) {
-				unsafe_add_selected(this, g, info);
-			}
+			unsafe_add_selected(this, g, info);
 		}
 	}
 }
@@ -800,6 +802,7 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 		float local_y = y - this->keyboard_y;
 
 		this->keyboard->on_hover(local_x, local_y);
+
 		handled = true;
 	} else if (!pressed_on_keyboard) {
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
@@ -818,7 +821,10 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 #endif
 
 			this->figure_anchors.clear();
-			this->figure_anchors.push_back(float2(x, y));
+
+			if (this->can_select_multiple()) {
+				this->figure_anchors.push_back(float2(x, y));
+			}
 
 			if (pdt == PointerDeviceType::Touch) {
 				this->track_thickness = 8.0F;
@@ -886,8 +892,6 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 		if ((x != last_anchor.x) || (y != last_anchor.y)) {
 			this->figure_anchors.push_back(float2(x, y));
 		}
-
-		handled = true;
 	}
 
 	if (puk != PointerUpdateKind::LeftButtonPressed) {
@@ -898,6 +902,8 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 
 			if (this->keyboard->is_colliding_with_mouse(x, y, this->keyboard_x, this->keyboard_y)) {
 				this->keyboard->on_hover(local_x, local_y);
+
+				handled = true;
 			} else {
 				this->keyboard->on_goodbye(local_x, local_y);
 			}

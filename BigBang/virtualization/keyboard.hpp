@@ -62,7 +62,7 @@ namespace WarGrey::SCADA {
 		void on_hover(float local_x, float local_y) override;
 		void on_tap(float local_x, float local_y) override;
 		bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
-		void on_character(unsigned int keycode) override;
+		bool on_character(unsigned int keycode) override;
 		void on_goodbye(float local_x, float local_y) override;
 
 	protected:

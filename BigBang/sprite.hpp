@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) { return false; }
-		virtual void on_character(unsigned int keycode) {}
+		virtual bool on_character(unsigned int keycode) { return false; }
 		virtual void on_hover(float local_x, float local_y) {}
 		virtual void on_tap(float local_x, float local_y) {}
 		virtual void on_goodbye(float local_x, float local_y) {}

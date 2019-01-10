@@ -19,6 +19,8 @@ using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 
+using namespace Microsoft::Graphics::Canvas::UI;
+
 /*************************************************************************************************/
 private ref class TimeMachineUniverseDisplay sealed : public UniverseDisplay {
 internal:
@@ -106,8 +108,8 @@ public:
 	}
 
 protected:
-	void construct() override {
-		this->machine->construct();
+	void construct(CanvasCreateResourcesReason reason) override {
+		this->machine->construct(reason);
 	}
 
 private:

@@ -13,11 +13,12 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::System;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
-using namespace Windows::Devices::Input;
+
+using namespace Windows::System;
 using namespace Windows::Storage;
+using namespace Windows::Devices::Input;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Core;
@@ -62,6 +63,31 @@ static inline PlanetInfo* bind_planet_owership(IDisplay^ master, IPlanet* planet
 	planet->info = info;
 
 	return info;
+}
+
+static void construct_planet(IPlanet* planet, Syslog* logger, CanvasCreateResourcesReason reason, float width, float height) {
+	planet->begin_update_sequence();
+
+	try {
+		planet->construct(reason, width, height);
+		planet->load(reason, width, height);
+		planet->reflow(width, height);
+		planet->notify_surface_ready();
+
+		logger->log_message(Log::Debug, L"planet[%s] is constructed in region[%f, %f]", planet->name()->Data(), width, height);
+	} catch (Platform::Exception^ e) {
+		logger->log_message(Log::Critical, L"%s: constructing: %s", planet->name()->Data(), e->Message->Data());
+	}
+
+	planet->end_update_sequence();
+}
+
+static inline void reflow_planet(IPlanet* planet, float width, float height) {
+	if (planet->surface_ready()) {
+		planet->enter_critical_section();
+		planet->reflow(width, height);
+		planet->leave_critical_section();
+	}
 }
 
 static void draw_planet(CanvasDrawingSession^ ds, IPlanet* planet, float width, float height, Syslog* logger) {
@@ -233,17 +259,17 @@ Syslog* IDisplay::get_logger() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IPlanet* first_planet)
-	: UniverseDisplay(DisplayFit::None, 0.0F, 0.0F, logger, setting_name, navigator, first_planet) {}
+UniverseDisplay::UniverseDisplay(Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IPlanet* heads_up_planet)
+	: UniverseDisplay(DisplayFit::None, 0.0F, 0.0F, logger, setting_name, navigator, heads_up_planet) {}
 
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight
-	, Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IPlanet* first_planet)
-	: UniverseDisplay(mode, dwidth, dheight, dwidth, dheight, logger, setting_name, navigator, first_planet) {}
+	, Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IPlanet* heads_up_planet)
+	: UniverseDisplay(mode, dwidth, dheight, dwidth, dheight, logger, setting_name, navigator, heads_up_planet) {}
 
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight
-	, Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IPlanet* first_planet)
+	, Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IPlanet* heads_up_planet)
 	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight)
-	, figure_x0(std::nanf("swipe")), universe_settings(nullptr), shortcuts_enabled(true), follow_global_mask_setting(true) {
+	, figure_x0(std::nanf("swipe")), shortcuts_enabled(true), universe_settings(nullptr), follow_global_mask_setting(true) {
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Platform::Object^>(this, &UniverseDisplay::do_refresh);
 
@@ -262,8 +288,13 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 	// CanvasControl uses the shared one by default, while CanvasAnimatedControl is not.
 	// this->display->UseSharedDevice = true;
 
-	if (first_planet != nullptr) {
-		this->push_planet(first_planet);
+	if (heads_up_planet != nullptr) {
+		PlanetInfo* info = bind_planet_owership(this, heads_up_planet);
+
+		info->next = heads_up_planet;
+		info->prev = heads_up_planet;
+
+		this->headup_planet = heads_up_planet;
 	}
 
 	{ // initialize gesture
@@ -308,6 +339,10 @@ UniverseDisplay::~UniverseDisplay() {
 	this->transfer_clock->Stop();
 	this->collapse();
 	
+	if (this->headup_planet != nullptr) {
+		delete this->headup_planet;
+	}
+
 	if (this->_navigator != nullptr) {
 		delete this->_navigator;
 	}
@@ -315,6 +350,10 @@ UniverseDisplay::~UniverseDisplay() {
 
 IUniverseNavigator* UniverseDisplay::navigator::get() {
 	return this->_navigator;
+}
+
+IPlanet* UniverseDisplay::heads_up_planet::get() {
+	return this->headup_planet;
 }
 
 IPlanet* UniverseDisplay::current_planet::get() {
@@ -371,12 +410,18 @@ bool UniverseDisplay::surface_ready() {
 }
 
 void UniverseDisplay::refresh(IPlanet* which) {
-	if (this->recent_planet == which) {
+	if ((this->headup_planet == which) || (this->recent_planet == which)) {
 		this->display->Invalidate();
 	}
 }
 
 void UniverseDisplay::on_elapse(long long count, long long interval, long long uptime) {
+	if (this->headup_planet != nullptr) {
+		this->headup_planet->begin_update_sequence();
+		this->headup_planet->on_elapse(count, interval, uptime);
+		this->headup_planet->end_update_sequence();
+	}
+
 	if (this->head_planet != nullptr) {
 		IPlanet* child = PLANET_INFO(this->recent_planet)->next;
 		
@@ -394,6 +439,12 @@ void UniverseDisplay::on_elapse(long long count, long long interval, long long u
 }
 
 void UniverseDisplay::on_elapse(long long count, long long interval, long long uptime, long long elapsed) {
+	if (this->headup_planet != nullptr) {
+		this->headup_planet->begin_update_sequence();
+		this->headup_planet->on_elapse(count, interval, uptime, elapsed);
+		this->headup_planet->end_update_sequence();
+	}
+
 	if (this->head_planet != nullptr) {
 		IPlanet* child = PLANET_INFO(this->recent_planet)->next;
 
@@ -450,8 +501,7 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 	if ((this->recent_planet != nullptr) && (delta_idx != 0) && (!this->transfer_clock->IsEnabled)) {
 		bool animating = ((ms * count) > 0);
 
-		if (animating && (this->from_planet == nullptr)) {
-			// thread-safe is granteed for `from_planet`
+		if (this->from_planet == nullptr) {
 			this->from_planet = this->recent_planet;
 		}
 
@@ -467,10 +517,14 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 		}
 		this->leave_critical_section();
 
-		this->_navigator->select(this->recent_planet);
+		{ // trigger point
+			this->_navigator->select(this->recent_planet);
 
-		if (this->universe_settings != nullptr) {
-			this->universe_settings->Values->Insert(page_setting_key, this->recent_planet->name());
+			if (this->universe_settings != nullptr) {
+				this->universe_settings->Values->Insert(page_setting_key, this->recent_planet->name());
+			}
+
+			this->notify_transfer(this->from_planet, this->recent_planet);
 		}
 
 		if (animating) {
@@ -482,10 +536,9 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 			this->transfer_delta = width / float(count) * ((delta_idx > 0) ? -1.0F : 1.0F);
 			this->transferX = this->transfer_delta;
 			this->transfer_clock->Start();
-		} else if (this->from_planet != nullptr) {
+		} else {
 			this->get_logger()->log_message(Log::Debug, L"transferred immediately: %s ==> %s",
-				this->from_planet->name()->Data(),
-				this->recent_planet->name()->Data());
+				this->from_planet->name()->Data(), this->recent_planet->name()->Data());
 			this->from_planet = nullptr;
 			this->refresh(this->recent_planet);
 		}
@@ -522,7 +575,6 @@ void UniverseDisplay::transfer_to(int idx, unsigned int ms, unsigned int count) 
 	int delta_idx = idx - from_idx;
 
 	if (delta_idx != 0) {
-		this->from_planet = this->recent_planet;
 		this->transfer(delta_idx, ms, count);
 	}
 }
@@ -533,18 +585,6 @@ void UniverseDisplay::transfer_previous(unsigned int ms, unsigned int count) {
 
 void UniverseDisplay::transfer_next(unsigned int ms, unsigned int count) {
 	this->transfer(1, ms, count);
-}
-
-CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
-	CanvasRenderTarget^ snapshot = nullptr;
-
-	if (this->recent_planet != nullptr) {
-		Size region = this->display->Size;
-
-		snapshot = this->recent_planet->take_snapshot(region.Width, region.Height, nullptr, dpi);
-	}
-
-	return snapshot;
 }
 
 void UniverseDisplay::collapse() {
@@ -568,68 +608,62 @@ void UniverseDisplay::collapse() {
 }
 
 void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ args) {
-	if (this->head_planet != nullptr) {
+	if ((this->headup_planet != nullptr) || (this->head_planet != nullptr)) {
 		float nwidth = args->NewSize.Width;
 		float nheight = args->NewSize.Height;
 		float pwidth = args->PreviousSize.Width;
 		float pheight = args->PreviousSize.Height;
 
 		if ((nwidth > 0.0F) && (nheight > 0.0F) && ((nwidth != pwidth) || (nheight != pheight))) {
-			IPlanet* child = this->head_planet;
-			
 			this->get_logger()->log_message(Log::Debug, L"resize(%f, %f)", nwidth, nheight);
-			
-			do {
-				PlanetInfo* info = PLANET_INFO(child);
 
-				if (child->surface_ready()) {
-					child->enter_critical_section();
-					child->reflow(nwidth, nheight);
-					child->leave_critical_section();
-				}
+			if (this->headup_planet != nullptr) {
+				reflow_planet(this->headup_planet, nwidth, nheight);
+			}
 
-				child = info->next;
-			} while (child != this->head_planet);
+			if (this->head_planet != nullptr) {
+				IPlanet* child = this->head_planet;
+
+				do {
+					PlanetInfo* info = PLANET_INFO(child);
+
+					reflow_planet(child, nwidth, nheight);
+					child = info->next;
+				} while (child != this->head_planet);
+			}
 		}
 	}
 }
 
 void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args) {
+	Size region = this->display->Size;
+	
 	this->get_logger()->log_message(Log::Debug, L"construct planets because of %s", args->Reason.ToString()->Data());
 	
-	this->construct();
+	this->construct(args->Reason);
+
+	if (this->headup_planet != nullptr) {
+		construct_planet(this->headup_planet, this->get_logger(), args->Reason, region.Width, region.Height);
+	}
 
 	if (this->head_planet != nullptr) {
 		IPlanet* child = this->head_planet;
-		Size region = this->display->Size;
 		Platform::String^ last_page = nullptr;
 
 		do {
 			PlanetInfo* info = PLANET_INFO(child);
 
-			child->begin_update_sequence();
-
-			try {
-				child->construct(args->Reason, region.Width, region.Height);
-				child->load(args->Reason, region.Width, region.Height);
-				child->reflow(region.Width, region.Height);
-				child->notify_surface_ready();
-
-				this->get_logger()->log_message(Log::Debug, L"planet[%s] is constructed in region[%f, %f]",
-					child->name()->Data(), region.Width, region.Height);
-			} catch (Platform::Exception^ e) {
-				this->get_logger()->log_message(Log::Critical, L"%s: constructing: %s",
-					child->name()->Data(), e->Message->Data());
-			}
-
-			child->end_update_sequence();
-
+			construct_planet(child, this->get_logger(), args->Reason, region.Width, region.Height);
 			child = info->next;
 		} while (child != this->head_planet);
 	}
 
 	if (this->universe_settings != nullptr) {
 		this->transfer_to(this->universe_settings->Values->Lookup(page_setting_key)->ToString());
+	}
+
+	if ((this->recent_planet == this->head_planet) && (this->recent_planet != nullptr)) {
+		this->notify_transfer(nullptr, this->recent_planet);
 	}
 }
 
@@ -639,7 +673,7 @@ void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args)
 	float width = region.Width;
 	float height = region.Height;
 
-	// NOTE: only the current planet and the one transferred from need to be drawn
+	// NOTE: only the heads-up planet, current planet and the one transferred from need to be drawn
 
 	this->enter_critical_section();
 
@@ -648,13 +682,20 @@ void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args)
 			draw_planet(ds, this->recent_planet, width, height, this->get_logger());
 		} else {
 			float deltaX = ((this->transferX < 0.0F) ? width : -width);
+			float3x2 identity = ds->Transform;
 
 			ds->Transform = make_translation_matrix(this->transferX);
 			draw_planet(ds, this->from_planet, width, height, this->get_logger());
 
 			ds->Transform = make_translation_matrix(this->transferX + deltaX);
 			draw_planet(ds, this->recent_planet, width, height, this->get_logger());
+
+			ds->Transform = identity;
 		}
+	}
+
+	if (this->headup_planet != nullptr) {
+		draw_planet(ds, this->headup_planet, width, height, this->get_logger());
 	}
 
 	this->leave_critical_section();
@@ -700,7 +741,7 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 	if (this->canvas->CapturePointer(args->Pointer)) {
 		this->enter_critical_section();
 
-		if (this->recent_planet != nullptr) {
+		if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
 			bool maniplation = ((this->figures.size() > 0) || MENUED(args->KeyModifiers));
 			unsigned int id = args->Pointer->PointerId;
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
@@ -713,8 +754,19 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 				this->figure_x0 = pp->Position.X;
 				args->Handled = true;
 			} else {
+				bool handled = false;
+
 				this->figure_x0 = std::nanf("swipe");
-				args->Handled = this->recent_planet->on_pointer_pressed(pp->Position.X, pp->Position.Y, pdt, puk);
+
+				if (this->headup_planet != nullptr) {
+					handled = this->headup_planet->on_pointer_pressed(pp->Position.X, pp->Position.Y, pdt, puk);
+				}
+
+				if ((!handled) && (this->recent_planet != nullptr)) {
+					handled = this->recent_planet->on_pointer_pressed(pp->Position.X, pp->Position.Y, pdt, puk);
+				}
+
+				args->Handled = handled;
 			}
 		}
 
@@ -725,7 +777,7 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	this->enter_critical_section();
 
-	if (this->recent_planet != nullptr) {
+	if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
 		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 		PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 		
@@ -733,9 +785,21 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 			this->figure_x = pp->Position.X;
 			args->Handled = true;
 		} else {
-			args->Handled = this->recent_planet->on_pointer_moved(
-				pp->Position.X, pp->Position.Y,
-				pdt, pp->Properties->PointerUpdateKind);
+			bool handled = false;
+
+			if (this->headup_planet != nullptr) {
+				handled = this->headup_planet->on_pointer_moved(
+					pp->Position.X, pp->Position.Y,
+					pdt, pp->Properties->PointerUpdateKind);
+			}
+
+			if ((!handled) && (this->recent_planet != nullptr)) {
+				handled = this->recent_planet->on_pointer_moved(
+					pp->Position.X, pp->Position.Y,
+					pdt, pp->Properties->PointerUpdateKind);
+			}
+
+			args->Handled = handled;
 		}
 	}
 
@@ -748,14 +812,26 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 	if (it != this->figures.end()) {
 		this->canvas->ReleasePointerCapture(args->Pointer); // TODO: deal with PointerCaptureLost event;
 
-		if (this->recent_planet != nullptr) {
+		if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 
 			if (std::isnan(this->figure_x0)) {
+				bool handled = false;
+
 				this->enter_critical_section();
-				args->Handled = this->recent_planet->on_pointer_released(pp->Position.X, pp->Position.Y, pdt, it->second);
+
+				if (this->headup_planet != nullptr) {
+					handled = this->headup_planet->on_pointer_released(pp->Position.X, pp->Position.Y, pdt, it->second);
+				}
+
+				if ((!handled) && (this->recent_planet != nullptr)) {
+					handled = this->recent_planet->on_pointer_released(pp->Position.X, pp->Position.Y, pdt, it->second);
+				}
+
 				this->leave_critical_section();
+
+				args->Handled = handled;
 			} else {
 				if ((this->figures.size() == 2) || MENUED(args->KeyModifiers)) {
 					this->on_translating_x();
@@ -780,14 +856,26 @@ void UniverseDisplay::on_pointer_moveout(Platform::Object^ sender, PointerRouted
 		this->figures.erase(it);
 	}
 
-	if (this->recent_planet != nullptr) {
+	if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
 		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 		PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 
 		if (this->figures.size() == 0) {
-			args->Handled = this->recent_planet->on_pointer_moveout(
-				pp->Position.X, pp->Position.Y,
-				pdt, pp->Properties->PointerUpdateKind);
+			bool handled = false;
+
+			if (this->headup_planet != nullptr) {
+				handled = this->headup_planet->on_pointer_moveout(
+					pp->Position.X, pp->Position.Y,
+					pdt, pp->Properties->PointerUpdateKind);
+			} 
+
+			if ((!handled) && (this->recent_planet != nullptr)) {
+				handled = this->recent_planet->on_pointer_moveout(
+					pp->Position.X, pp->Position.Y,
+					pdt, pp->Properties->PointerUpdateKind);
+			}
+
+			args->Handled = handled;
 		}
 	}
 
@@ -797,8 +885,18 @@ void UniverseDisplay::on_pointer_moveout(Platform::Object^ sender, PointerRouted
 void UniverseDisplay::on_key(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
 	this->enter_critical_section();
 
-	if (this->recent_planet != nullptr) {
-		args->Handled = this->recent_planet->on_key(args->Key, false);
+	if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
+		bool handled = false;
+
+		if (this->headup_planet != nullptr) {
+			handled = this->headup_planet->on_key(args->Key, false);
+		}
+
+		if ((!handled) && (this->recent_planet != nullptr)) {
+			handled = this->recent_planet->on_key(args->Key, false);
+		}
+
+		args->Handled = handled;
 	}
 
 	this->leave_critical_section();
@@ -807,26 +905,35 @@ void UniverseDisplay::on_key(Platform::Object^ sender, KeyRoutedEventArgs^ args)
 void UniverseDisplay::on_character(CoreWindow^ sender, CharacterReceivedEventArgs^ args) {
 	this->enter_critical_section();
 
-	if (this->recent_planet != nullptr) {
+	if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
 		unsigned int keycode = args->KeyCode;
+		bool handled = false;
 
-		this->recent_planet->on_character(keycode);
+		if (this->headup_planet != nullptr) {
+			handled = this->headup_planet->on_character(keycode);
+		}
 
-		if (this->shortcuts_enabled) { // take temporary snapshot
-			switch (keycode) {
-			case 19: { // CTRL+S
-				this->recent_planet->save(
-					ms_apptemp_file(this->recent_planet->name(), ".png"),
-					this->actual_width, this->actual_height);
-			}; break;
-			case 4: { // CTRL+D
-				this->recent_planet->save_logo();
-			}; break;
-			case 12: { // CTRL+L
-				this->recent_planet->save_logo(-2.0F, -2.0F);
-			}; break;
+		if ((!handled) && (this->recent_planet != nullptr)) {
+			handled = this->recent_planet->on_character(keycode);
+
+			if (this->shortcuts_enabled) { // take temporary snapshot
+				switch (keycode) {
+				case 19: { // CTRL+S
+					this->recent_planet->save(
+						ms_apptemp_file(this->recent_planet->name(), ".png"),
+						this->actual_width, this->actual_height);
+				}; break;
+				case 4: { // CTRL+D
+					this->recent_planet->save_logo();
+				}; break;
+				case 12: { // CTRL+L
+					this->recent_planet->save_logo(-2.0F, -2.0F);
+				}; break;
+				}
 			}
 		}
+
+		args->Handled = handled;
 	}
 
 	this->leave_critical_section();
@@ -851,5 +958,22 @@ void UniverseDisplay::on_translating_x() {
 		this->transfer_next(256);
 	} else if (delta > distance) {
 		this->transfer_previous(256);
+	}
+}
+
+void UniverseDisplay::notify_transfer(IPlanet* from, IPlanet* to) {
+	if (this->headup_planet != nullptr) {
+		this->headup_planet->on_transfer(from, to);
+	}
+
+	if (this->head_planet != nullptr) {
+		IPlanet* child = this->head_planet;
+
+		do {
+			PlanetInfo* info = PLANET_INFO(child);
+
+			child->on_transfer(from, to);
+			child = info->next;
+		} while (child != this->head_planet);
 	}
 }

@@ -4,6 +4,7 @@
 #include "widget.hxx"
 #include "plc.hpp"
 
+#include "decorator/headsup.hpp"
 #include "navigator/thumbnail.hpp"
 #include "planet.hpp"
 #include "timer.hxx"
@@ -36,6 +37,7 @@ using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::UI;
 
 private ref class DredgerUniverse : public UniverseDisplay {
 public:
@@ -46,18 +48,11 @@ public:
 	}
 
 internal:
-	DredgerUniverse(Platform::String^ name, IUniverseNavigator* navigator)
-		: UniverseDisplay(make_system_logger(default_logging_level, name), name, navigator) {
-		this->device = new PLCMaster(make_system_logger(default_logging_level, name + ":PLC"), plc_master_suicide_timeout);
-	}
-
-internal:
-	PLCMaster* get_plc_device() {
-		return this->device;
-	}
+	DredgerUniverse(Platform::String^ name, PLCMaster* device, IUniverseNavigator* navigator, IPlanet* heads_up)
+		: UniverseDisplay(make_system_logger(default_logging_level, name), name, navigator, heads_up), device(device) {}
 
 protected:
-	void construct() override {
+	void construct(CanvasCreateResourcesReason reason) override {
 		// this->push_planet(new SplashScreen(620.0F));
 		// this->push_planet(new SplashScreen(1240.0F, 0.0F));
 		
@@ -108,7 +103,8 @@ public:
 	}
 
 internal:
-	DashboardUniverse(Platform::String^ name, IUniverseNavigator* navigator, unsigned int dbidx) : DredgerUniverse(name, navigator) {
+	DashboardUniverse(Platform::String^ name, PLCMaster* device, IUniverseNavigator* navigator, IPlanet* heads_up, unsigned int dbidx)
+		: DredgerUniverse(name, device, navigator, heads_up) {
 		this->page_turner = new PageEventListener(dbidx);
 		this->device->push_confirmation_receiver(this->page_turner);
 	}
@@ -141,14 +137,16 @@ public:
 public:
 	void construct(Platform::String^ name, Size region) {
 		Platform::String^ localhost = system_ipv4_address();
+		PLCMaster* device = new PLCMaster(make_system_logger(default_logging_level, name + ":PLC"), plc_master_suicide_timeout);
 		IUniverseNavigator* navigator = new ThumbnailNavigator(default_logging_level, name, region.Width / region.Height, 160.0F);
+		HeadsUpPlanet* heads_up = new HeadsUpPlanet(device);
 
 		if (localhost->Equals("192.168.0.11")) {
-			this->universe = ref new DashboardUniverse(name, navigator, left_paging_key);
+			this->universe = ref new DashboardUniverse(name, device, navigator, heads_up, left_paging_key);
 		} else if (localhost->Equals("192.168.0.12")) {
-			this->universe = ref new DashboardUniverse(name, navigator, right_paging_key);
+			this->universe = ref new DashboardUniverse(name, device, navigator, heads_up, right_paging_key);
 		} else {
-			this->universe = ref new DredgerUniverse(name, navigator);
+			this->universe = ref new DredgerUniverse(name, device, navigator, heads_up);
 		}
 
 		// TODO: Why SplitView::Content cannot do it on its own?
@@ -165,7 +163,7 @@ public:
 			
 			this->universe->navigator->min_height(region.Height * 0.85F);
 			
-			this->widget = ref new UniverseWidget(this->universe, this->universe->get_plc_device());
+			this->widget = ref new UniverseWidget(this->universe, device);
 			this->widget->min_width = this->universe->navigator->min_width();
 			this->widget->min_height = region.Height - this->universe->navigator->min_height();
 
@@ -182,7 +180,6 @@ public:
 		}
 	}
 	
-
 	void on_entered_background(EnteredBackgroundEventArgs^ args) {}
 	void on_background_activated(IBackgroundTaskInstance^ task) {}
 	void on_leaving_background(LeavingBackgroundEventArgs^ args) {}
@@ -221,8 +218,9 @@ private:
 	}
 
 private:
-	WarGrey::SCADA::CompositeTimerListener^ timeline;
-	WarGrey::SCADA::Timer^ timer;
+	CompositeTimerListener^ timeline;
+	Timer^ timer;
+	PLCMaster* device;
 
 private:
 	DredgerUniverse^ universe;

@@ -13,6 +13,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
+#include "graphlet/statuslet.hpp"
 #include "graphlet/buttonlet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
@@ -30,8 +31,6 @@
 #include "iotables/do_valves.hpp"
 #include "iotables/do_hopper_pumps.hpp"
 
-#include "decorator/page.hpp"
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -42,8 +41,6 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
-
-private enum LDMode { WindowUI = 0, Dashboard };
 
 private enum class CSFunction { Diagnostics, _ };
 
@@ -927,7 +924,6 @@ ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->device->push_confirmation_receiver(dashboard);
 
 	{ // load decorators
-		this->push_decorator(new PageDecorator());
 		this->push_decorator(new ShipDecorator(dashboard));
 
 #ifdef _DEBUG
@@ -960,23 +956,7 @@ void ChargesPage::load(CanvasCreateResourcesReason reason, float width, float he
 		this->grid->set_grid_height(gheight, vinset);
 		
 		dashboard->construct(gwidth, gheight);
-
-		{ // load graphlets
-			this->change_mode(LDMode::Dashboard);
-			dashboard->load(width, height, gwidth, gheight);
-			
-			this->change_mode(LDMode::WindowUI);
-			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
-			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
-		}
-
-		{ // delayed initializing
-			this->get_logger()->push_log_receiver(this->statusline);
-			
-			if (this->device != nullptr) {
-				this->device->get_logger()->push_log_receiver(this->statusline);
-			}
-		}
+		dashboard->load(width, height, gwidth, gheight);
 	}
 }
 
@@ -988,10 +968,6 @@ void ChargesPage::reflow(float width, float height) {
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		this->change_mode(LDMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
-
-		this->change_mode(LDMode::Dashboard);
 		dashboard->reflow(width, height, gwidth, gheight, vinset);
 	}
 }

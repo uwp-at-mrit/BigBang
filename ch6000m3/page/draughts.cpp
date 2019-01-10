@@ -9,6 +9,8 @@
 #include "graphlet/dashboard/cylinderlet.hpp"
 #include "graphlet/device/overflowlet.hpp"
 #include "graphlet/buttonlet.hpp"
+#include "graphlet/statuslet.hpp"
+#include "graphlet/textlet.hpp"
 
 #include "iotables/ai_metrics.hpp"
 #include "iotables/di_doors.hpp"
@@ -17,7 +19,6 @@
 #include "iotables/do_devices.hpp"
 #include "iotables/do_doors.hpp"
 
-#include "decorator/page.hpp"
 #include "decorator/ship.hpp"
 
 #include "module.hpp"
@@ -32,8 +33,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
-
-private enum DLMode { WindowUI = 0, Dashboard };
 
 // WARNING: order matters
 private enum class DL : unsigned int {
@@ -337,7 +336,6 @@ DraughtsPage::DraughtsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 
 	this->device->push_confirmation_receiver(dashboard);
 
-	this->push_decorator(new PageDecorator());
 	this->push_decorator(decorator);
 }
 
@@ -351,24 +349,7 @@ void DraughtsPage::load(CanvasCreateResourcesReason reason, float width, float h
 	auto db = dynamic_cast<Draughts*>(this->dashboard);
 
 	if (db != nullptr) {
-		float vinset = statusbar_height();
-
-		{ // load graphlets
-			this->change_mode(DLMode::Dashboard);
-			db->load(width, height, vinset);
-
-			this->change_mode(DLMode::WindowUI);
-			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
-			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
-		}
-
-		{ // delayed initializing
-			this->get_logger()->push_log_receiver(this->statusline);
-
-			if (this->device != nullptr) {
-				this->device->get_logger()->push_log_receiver(this->statusline);
-			}
-		}
+		db->load(width, height, statusbar_height());
 	}
 }
 
@@ -376,13 +357,7 @@ void DraughtsPage::reflow(float width, float height) {
 	auto db = dynamic_cast<Draughts*>(this->dashboard);
 	
 	if (db != nullptr) {
-		float vinset = statusbar_height();
-
-		this->change_mode(DLMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
-		
-		this->change_mode(DLMode::Dashboard);
-		db->reflow(width, height, vinset);
+		db->reflow(width, height, statusbar_height());
 	}
 }
 

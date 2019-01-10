@@ -5,13 +5,10 @@
 
 #include "decorator/grid.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
-
 namespace WarGrey::SCADA {
 	private class DischargesPage : public WarGrey::SCADA::Planet {
 	public:
-		~DischargesPage() noexcept;
+		virtual ~DischargesPage() noexcept;
 		DischargesPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
@@ -37,10 +34,6 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::MenuFlyout^ ps_hopper_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ sb_hopper_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gdischarge_op;
-
-	private: // never deletes these graphlets mannually
-		WarGrey::SCADA::Statusbarlet* statusbar;
-		WarGrey::SCADA::Statuslinelet* statusline;
 
 	private:
 		WarGrey::SCADA::GridDecorator* grid;

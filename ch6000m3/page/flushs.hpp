@@ -6,13 +6,10 @@
 
 #include "decorator/grid.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
-
 namespace WarGrey::SCADA {
 	private class FlushsPage : public WarGrey::SCADA::Planet {
 	public:
-		~FlushsPage() noexcept;
+		virtual ~FlushsPage() noexcept;
 		FlushsPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
@@ -48,10 +45,6 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::MenuFlyout^ sb_h_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ s2_h_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ p2_h_op;
-
-	private: // never deletes these graphlets mannually
-		WarGrey::SCADA::Statusbarlet* statusbar;
-		WarGrey::SCADA::Statuslinelet* statusline;
 
 	private:
 		WarGrey::SCADA::GridDecorator* grid;

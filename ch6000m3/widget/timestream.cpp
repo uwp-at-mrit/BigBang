@@ -11,6 +11,8 @@ using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;
 using namespace Windows::Storage;
 
+using namespace Microsoft::Graphics::Canvas::UI;
+
 /*************************************************************************************************/
 private class TimeStream : public TimeMachine, public PLCConfirmation {
 public:
@@ -37,7 +39,7 @@ public:
 	}
 
 public:
-	void construct() override {
+	void construct(CanvasCreateResourcesReason reason) override {
 		this->push_timeline(new HydraulicsPage());
 	}
 

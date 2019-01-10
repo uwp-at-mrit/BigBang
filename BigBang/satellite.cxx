@@ -38,14 +38,6 @@ public:
 		return !(this->closed);
 	}
 
-protected:
-	void collapse() override {
-		/** NOTE
-		 * By design, this is triggered after `deleting` the `satellite` by client applications,
-		 *  therefore, the `collapse` is overriden to avoid deleting the `satellite` twice.
-		 */
-	}
-
 private:
 	ISatellite* satellite; // its lifetime is managed by client applications
 	bool closed;

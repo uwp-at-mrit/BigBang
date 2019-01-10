@@ -14,6 +14,7 @@
 
 #include "graphlet/shapelet.hpp"
 #include "graphlet/buttonlet.hpp"
+#include "graphlet/statuslet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/symbol/pump/water_pumplet.hpp"
@@ -33,8 +34,6 @@
 #include "iotables/do_valves.hpp"
 #include "iotables/do_water_pumps.hpp"
 
-#include "decorator/page.hpp"
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -45,8 +44,6 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
-
-private enum FSMode { WindowUI = 0, Dashboard };
 
 static CanvasSolidColorBrush^ water_color = Colours::Green;
 
@@ -704,8 +701,6 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->device->push_confirmation_receiver(dashboard);
 
 	{ // load decorators
-		this->push_decorator(new PageDecorator());
-
 #ifdef _DEBUG
 		this->push_decorator(this->grid);
 #else
@@ -738,23 +733,7 @@ void FlushsPage::load(CanvasCreateResourcesReason reason, float width, float hei
 		this->grid->set_grid_height(gheight, vinset);
 		
 		dashboard->construct(gwidth, gheight);
-
-		{ // load graphlets
-			this->change_mode(FSMode::Dashboard);
-			dashboard->load(width, height, gwidth, gheight);
-			
-			this->change_mode(FSMode::WindowUI);
-			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
-			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
-		}
-
-		{ // delayed initializing
-			this->get_logger()->push_log_receiver(this->statusline);
-
-			if (this->device != nullptr) {
-				this->device->get_logger()->push_log_receiver(this->statusline);
-			}
-		}
+		dashboard->load(width, height, gwidth, gheight);
 	}
 }
 
@@ -766,10 +745,6 @@ void FlushsPage::reflow(float width, float height) {
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		this->change_mode(FSMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
-
-		this->change_mode(FSMode::Dashboard);
 		dashboard->reflow(width, height, gwidth, gheight, vinset);
 	}
 }

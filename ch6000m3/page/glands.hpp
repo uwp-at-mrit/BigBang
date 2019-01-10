@@ -5,13 +5,10 @@
 
 #include "decorator/grid.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
-
 namespace WarGrey::SCADA {
 	private class GlandsPage : public WarGrey::SCADA::Planet {
 	public:
-		~GlandsPage() noexcept;
+		virtual ~GlandsPage() noexcept;
 		GlandsPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
@@ -29,10 +26,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 		Windows::UI::Xaml::Controls::MenuFlyout^ pump_op;
-
-	private: // never deletes these graphlets mannually
-		WarGrey::SCADA::Statusbarlet* statusbar;
-		WarGrey::SCADA::Statuslinelet* statusline;
 
 	private:
 		WarGrey::SCADA::GridDecorator* grid;

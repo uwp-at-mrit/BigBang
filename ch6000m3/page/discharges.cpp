@@ -11,6 +11,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
+#include "graphlet/statuslet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
 #include "graphlet/device/winchlet.hpp"
 
@@ -40,8 +41,6 @@
 #include "iotables/do_winches.hpp"
 #include "iotables/do_hopper_pumps.hpp"
 
-#include "decorator/page.hpp"
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -53,8 +52,6 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
-
-private enum RSMode { WindowUI = 0, Dashboard };
 
 // WARNING: order matters
 private enum class RS : unsigned int {
@@ -935,7 +932,6 @@ DischargesPage::DischargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	this->device->push_confirmation_receiver(dashboard);
 
 	{ // load decorators
-		this->push_decorator(new PageDecorator());
 		this->push_decorator(new RainbowsDecorator(dashboard));
 
 #ifdef _DEBUG
@@ -968,23 +964,7 @@ void DischargesPage::load(CanvasCreateResourcesReason reason, float width, float
 		this->grid->set_grid_height(gheight, vinset);
 		
 		dashboard->construct(gwidth, gheight);
-
-		{ // load graphlets
-			this->change_mode(RSMode::Dashboard);
-			dashboard->load(width, height, gwidth, gheight);
-			
-			this->change_mode(RSMode::WindowUI);
-			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
-			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
-		}
-
-		{ // delayed initializing
-			this->get_logger()->push_log_receiver(this->statusline);
-			
-			if (this->device != nullptr) {
-				this->device->get_logger()->push_log_receiver(this->statusline);
-			}
-		}
+		dashboard->load(width, height, gwidth, gheight);
 	}
 }
 
@@ -996,10 +976,6 @@ void DischargesPage::reflow(float width, float height) {
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		this->change_mode(RSMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
-
-		this->change_mode(RSMode::Dashboard);
 		dashboard->reflow(width, height, gwidth, gheight, vinset);
 	}
 }
