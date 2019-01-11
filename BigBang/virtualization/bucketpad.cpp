@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "virtualization/datepad.hpp"
+#include "virtualization/bucketpad.hpp"
 
 #include "text.hpp"
 #include "planet.hpp"
@@ -34,7 +34,7 @@ const static KeyboardCell keys[] = {
 static std::map<VirtualKey, CanvasTextLayout^> key_labels;
 
 /*************************************************************************************************/
-Datepad::Datepad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
+Bucketpad::Bucketpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	CanvasTextFormat^ label_font = make_text_format("Consolas", fontsize);
 	
 	this->current_key = VirtualKey::None;
@@ -69,7 +69,7 @@ Datepad::Datepad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	}
 }
 
-void Datepad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
+void Bucketpad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
 	float Width = this->master->actual_width();
 	float Height = this->master->actual_height();
 	float width, height;
@@ -88,7 +88,7 @@ void Datepad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAncho
 	}
 }
 
-CanvasTextLayout^ Datepad::key_label(VirtualKey key) {
+CanvasTextLayout^ Bucketpad::key_label(VirtualKey key) {
 	CanvasTextLayout^ label = nullptr;
 	auto maybe_label = key_labels.find(key);
 

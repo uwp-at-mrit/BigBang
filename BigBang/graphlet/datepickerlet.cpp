@@ -1,6 +1,6 @@
 #include <cwchar>
 
-#include "graphlet/datepicklet.hpp"
+#include "graphlet/datepickerlet.hpp"
 
 #include "forward.hpp"
 #include "paint.hpp"
@@ -48,23 +48,23 @@ static inline Platform::String^ accumulate_number(Platform::String^ src, double 
 }
 
 /*************************************************************************************************/
-DatePicklet::DatePicklet(DatePickerState status, DatePickerStyle& style, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
-	: DatePicklet(status, unit, label, subscript) {
+DatePickerlet::DatePickerlet(DatePickerState status, DatePickerStyle& style, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
+	: DatePickerlet(status, unit, label, subscript) {
 	
 	/** TODO: Why does not it work if pass the `style` to IStatelet */
 	this->set_style(style);
 }
 
-DatePicklet::DatePicklet(DatePickerState status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
+DatePickerlet::DatePickerlet(DatePickerState status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: IStatelet(status), unit(unit), maximum(std::nanl("infinity")) {
 	/** TODO: Why does not it work if pass the `status` to IStatelet */
 	this->set_state(status);
 }
 
-void DatePicklet::construct() {
+void DatePickerlet::construct() {
 }
 
-void DatePicklet::update(long long count, long long interval, long long uptime) {
+void DatePickerlet::update(long long count, long long interval, long long uptime) {
 	if (count % 2 == 0) {
 		if (this->has_caret()) {
 			this->flashing = !this->flashing;
@@ -73,7 +73,7 @@ void DatePicklet::update(long long count, long long interval, long long uptime) 
 	}
 }
 
-void DatePicklet::fill_extent(float x, float y, float* w, float* h) {
+void DatePickerlet::fill_extent(float x, float y, float* w, float* h) {
 	DatePickerStyle style = this->get_style();
 
 	if (w != nullptr) {
@@ -92,7 +92,7 @@ void DatePicklet::fill_extent(float x, float y, float* w, float* h) {
 	}
 }
 
-void DatePicklet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
+void DatePickerlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
 	TextExtent label_box;
 	float tspace, bspace;
 
@@ -101,7 +101,7 @@ void DatePicklet::fill_margin(float x, float y, float* t, float* r, float* b, fl
 }
 
 /*
-void DatePicklet::on_value_changed(double value) {
+void DatePickerlet::on_value_changed(double value) {
 	DatePickerStyle style = this->get_style();
 
 	this->number = flstring(value, style.precision);
@@ -110,11 +110,11 @@ void DatePicklet::on_value_changed(double value) {
 }
 */
 
-void DatePicklet::on_state_changed(DatePickerState status) {
+void DatePickerlet::on_state_changed(DatePickerState status) {
 	this->enable_events(status == DatePickerState::Input);
 }
 
-bool DatePicklet::on_key(VirtualKey key, bool wargrey_keyboard) {
+bool DatePickerlet::on_key(VirtualKey key, bool wargrey_keyboard) {
 	static unsigned int num0 = static_cast<unsigned int>(VirtualKey::Number0);
 	static unsigned int pad0 = static_cast<unsigned int>(VirtualKey::NumberPad0);
 	unsigned int keycode = static_cast<unsigned int>(key);
@@ -185,7 +185,7 @@ bool DatePicklet::on_key(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
-void DatePicklet::own_caret(bool on) {
+void DatePickerlet::own_caret(bool on) {
 	this->flashing = on;
 
 	if (on) {
@@ -196,11 +196,11 @@ void DatePicklet::own_caret(bool on) {
 	}
 }
 
-void DatePicklet::set_maximum(long double maximum) {
+void DatePickerlet::set_maximum(long double maximum) {
 	this->maximum = maximum;
 }
 
-void DatePicklet::set_input_number(long double n, int precision) {
+void DatePickerlet::set_input_number(long double n, int precision) {
 	if (!std::isnan(this->maximum)) {
 		n = std::fminl(n, this->maximum);
 	}
@@ -208,7 +208,7 @@ void DatePicklet::set_input_number(long double n, int precision) {
 	this->input_number = flstring(n, precision);
 }
 
-long double DatePicklet::get_input_number() {
+long double DatePickerlet::get_input_number() {
 	long double v = 0.0;
 
 	if (this->input_number != nullptr) {
@@ -222,7 +222,7 @@ long double DatePicklet::get_input_number() {
 	return v;
 }
 
-void DatePicklet::prepare_style(DatePickerState status, DatePickerStyle& style) {
+void DatePickerlet::prepare_style(DatePickerState status, DatePickerStyle& style) {
 	CAS_SLOT(style.number_color, default_number_color);
 	CAS_SLOT(style.unit_color, default_unit_color);
 	CAS_SLOT(style.label_color, style.unit_color);
@@ -255,7 +255,7 @@ void DatePicklet::prepare_style(DatePickerState status, DatePickerStyle& style) 
 	// NOTE: the others can be `nullptr`
 }
 
-void DatePicklet::apply_style(DatePickerStyle& style) {
+void DatePickerlet::apply_style(DatePickerStyle& style) {
 	this->number_layout = make_text_layout(this->number, style.number_font);
 	this->number_box = get_text_extent(this->number_layout);
 	this->number09_box = get_text_extent("0123456789", style.number_font);
@@ -266,7 +266,7 @@ void DatePicklet::apply_style(DatePickerStyle& style) {
 	}
 }
 
-void DatePicklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void DatePickerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	DatePickerStyle style = this->get_style();
 	CanvasTextLayout^ nlayout = this->number_layout;
 	TextExtent nbox = this->number_box;

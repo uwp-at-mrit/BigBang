@@ -7,6 +7,7 @@
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/statuslet.hpp"
+#include "graphlet/datepickerlet.hpp"
 
 #include "string.hpp"
 #include "timer.hxx"
@@ -28,7 +29,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 
 private enum class TimeMachineIcon : unsigned int {
-	PickStartTimePoint, PickStopTimePoint, Quit,
+	Quit,
 	_
 };
 
@@ -161,8 +162,8 @@ public:
 			Platform::String^ caption = nullptr;
 
 			switch (id) {
-			case TimeMachineIcon::PickStartTimePoint: caption = L"⏳"; break;
-			case TimeMachineIcon::PickStopTimePoint: caption = L"⌛️"; break;
+			//case TimeMachineIcon::PickStartTimePoint: caption = L"⏳"; break;
+			//case TimeMachineIcon::PickStopTimePoint: caption = L"⌛️"; break;
 			case TimeMachineIcon::Quit: caption = L"🚪"; break;
 			}
 
@@ -198,15 +199,17 @@ public:
 		if (icon != nullptr) {
 			switch (icon->id) {
 			case TimeMachineIcon::Quit: this->master->hide(); break;
-			case TimeMachineIcon::PickStartTimePoint: case TimeMachineIcon::PickStopTimePoint: {
+			//case TimeMachineIcon::PickStartTimePoint: case TimeMachineIcon::PickStopTimePoint: {
 				
-			}; break;
+			//}; break;
 			}
 		}
 	}
 
 private: // never delete this graphlets manually
 	std::map<TimeMachineIcon, Credit<Labellet, TimeMachineIcon>*> icons;
+	DatePickerlet* start_time_picker;
+	DatePickerlet* stop_time_picker;
 
 private:
 	ITimeMachine* master;

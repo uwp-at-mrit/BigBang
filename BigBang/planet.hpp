@@ -320,7 +320,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IKeyboard* keyboard;
 		WarGrey::SCADA::IKeyboard* numpad;
 		WarGrey::SCADA::IKeyboard* arrowpad;
-		WarGrey::SCADA::IKeyboard* datepad;
+		WarGrey::SCADA::IKeyboard* bucketpad;
 		float keyboard_x;
 		float keyboard_y;
 

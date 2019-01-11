@@ -3,9 +3,9 @@
 #include "virtualization/keyboard.hpp"
 
 namespace WarGrey::SCADA {
-    private class Datepad : public WarGrey::SCADA::Keyboard {
+    private class Bucketpad : public WarGrey::SCADA::Keyboard {
     public:
-		Datepad(WarGrey::SCADA::IPlanet* master, float fontsize = 32.0F);
+		Bucketpad(WarGrey::SCADA::IPlanet* master, float fontsize = 32.0F);
 
 	public:
 		void fill_auto_position(float* x, float* y, WarGrey::SCADA::IGraphlet* g, WarGrey::SCADA::GraphletAnchor a) override;

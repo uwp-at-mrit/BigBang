@@ -44,12 +44,12 @@ namespace WarGrey::SCADA {
 		int precision = -1;
 	};
 
-	private class DatePicklet : public virtual WarGrey::SCADA::IStatelet<WarGrey::SCADA::DatePickerState, WarGrey::SCADA::DatePickerStyle> {
+	private class DatePickerlet : public virtual WarGrey::SCADA::IStatelet<WarGrey::SCADA::DatePickerState, WarGrey::SCADA::DatePickerStyle> {
 	public:
-		DatePicklet(WarGrey::SCADA::DatePickerState default_state, Platform::String^ unit,
+		DatePickerlet(WarGrey::SCADA::DatePickerState default_state, Platform::String^ unit,
 			Platform::String^ label, Platform::String^ subscript);
 
-		DatePicklet(WarGrey::SCADA::DatePickerState default_state, WarGrey::SCADA::DatePickerStyle& default_style,
+		DatePickerlet(WarGrey::SCADA::DatePickerState default_state, WarGrey::SCADA::DatePickerStyle& default_style,
 			Platform::String^ unit, Platform::String^ label, Platform::String^ subscript);
 
 	public:

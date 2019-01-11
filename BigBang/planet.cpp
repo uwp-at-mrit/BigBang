@@ -17,7 +17,7 @@
 
 #include "virtualization/numpad.hpp"
 #include "virtualization/arrowpad.hpp"
-#include "virtualization/datepad.hpp"
+#include "virtualization/bucketpad.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -228,7 +228,7 @@ Planet::Planet(Platform::String^ name, unsigned int initial_mode)
 	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
 	this->numpad = new Numpad(this);
 	this->arrowpad = new Arrowpad(this);
-	this->datepad = new Datepad(this);
+	this->bucketpad = new Bucketpad(this);
 
 	this->keyboard = this->numpad;
 }
@@ -242,7 +242,7 @@ Planet::~Planet() {
 
 	delete this->numpad;
 	delete this->arrowpad;
-	delete this->datepad;
+	delete this->bucketpad;
 }
 
 void Planet::change_mode(unsigned int mode) {
@@ -1091,7 +1091,7 @@ void Planet::switch_virtual_keyboard(ScreenKeyboard type) {
 	switch (type) {
 	case ScreenKeyboard::Numpad:   this->keyboard = this->numpad; break;
 	case ScreenKeyboard::Arrowpad: this->keyboard = this->arrowpad; break;
-	case ScreenKeyboard::Datepad:  this->keyboard = this->datepad; break;
+	case ScreenKeyboard::Bucketpad:  this->keyboard = this->bucketpad; break;
 	}
 }
 
@@ -1104,7 +1104,7 @@ void Planet::push_decorator(IPlanetDecorator* decorator) {
 }
 
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
-	IKeyboard* keyboards[] = { this->numpad, this->arrowpad, this->datepad };
+	IKeyboard* keyboards[] = { this->numpad, this->arrowpad, this->bucketpad };
 
 	for (unsigned int idx = 0; idx < (sizeof(keyboards) / sizeof(Keyboard*)); idx++) {
 		keyboards[idx]->sprite();

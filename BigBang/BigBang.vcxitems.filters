@@ -170,10 +170,10 @@
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datepicklet.cpp">
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\datepickerlet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\datepad.cpp">
+    <ClCompile Include="D:\WinSCADA\BigBang\virtualization\bucketpad.cpp">
       <Filter>virtualization</Filter>
     </ClCompile>
   </ItemGroup>
@@ -351,10 +351,10 @@
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)timemachine.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datepicklet.hpp">
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\datepickerlet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\datepad.hpp">
+    <ClInclude Include="D:\WinSCADA\BigBang\virtualization\bucketpad.hpp">
       <Filter>virtualization</Filter>
     </ClInclude>
   </ItemGroup>
