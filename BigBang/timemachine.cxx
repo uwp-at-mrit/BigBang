@@ -1,11 +1,16 @@
 ﻿#include <list>
+#include <map>
 
 #include "timemachine.hpp"
 
 #include "navigator/listview.hpp"
 
+#include "graphlet/textlet.hpp"
+#include "graphlet/statuslet.hpp"
+
 #include "string.hpp"
 #include "timer.hxx"
+#include "module.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -20,12 +25,18 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 
 using namespace Microsoft::Graphics::Canvas::UI;
+using namespace Microsoft::Graphics::Canvas::Text;
+
+private enum class TimeMachineIcon : unsigned int {
+	PickStartTimePoint, PickStopTimePoint, Quit,
+	_
+};
 
 /*************************************************************************************************/
 private ref class TimeMachineUniverseDisplay sealed : public UniverseDisplay {
 internal:
-	TimeMachineUniverseDisplay(Syslog* logger, ITimeMachine* entity, int frame_rate)
-		: UniverseDisplay(logger, nullptr, new ListViewNavigator(), nullptr)
+	TimeMachineUniverseDisplay(Syslog* logger, ITimeMachine* entity, int frame_rate, IPlanet* headsup)
+		: UniverseDisplay(logger, nullptr, new ListViewNavigator(), headsup)
 		, machine(entity), closed(true), current_timepoint(0LL) {
 	
 		this->use_global_mask_setting(false);
@@ -137,11 +148,75 @@ private:
 	long long direction;
 };
 
+private class TimeMachineHeadsUp : public Planet {
+public:
+	TimeMachineHeadsUp(ITimeMachine* master) : Planet(__MODULE__), master(master) {}
+
+public:
+	void load(CanvasCreateResourcesReason reason, float width, float height) override {
+		auto icon_font = make_text_format("Consolas", statusbar_height());
+		auto icon_color = Colours::make(Colours::GhostWhite, 0.64);
+
+		for (TimeMachineIcon id = _E0(TimeMachineIcon); id < TimeMachineIcon::_; id++) {
+			Platform::String^ caption = nullptr;
+
+			switch (id) {
+			case TimeMachineIcon::PickStartTimePoint: caption = L"⏳"; break;
+			case TimeMachineIcon::PickStopTimePoint: caption = L"⌛️"; break;
+			case TimeMachineIcon::Quit: caption = L"🚪"; break;
+			}
+
+			this->icons[id] = this->insert_one(new Credit<Labellet, TimeMachineIcon>(caption, icon_font, icon_color), id);
+		}
+	}
+
+	void reflow(float width, float height) override {
+		float icon_y = statusbar_height() * 0.25F;
+		float gapsize = icon_y * 2.0F;
+		float icon_rx = width - icon_y;
+		float icon_width;
+
+		for (unsigned int idx = _N(TimeMachineIcon); idx > 0; idx--) {
+			auto icon = this->icons[_E(TimeMachineIcon, idx - 1)];
+
+			this->get_logger()->log_message(Log::Info, _E(TimeMachineIcon, idx - 1).ToString());
+			icon->fill_extent(0.0F, 0.0F, &icon_width);
+			this->move_to(icon, icon_rx, icon_y, GraphletAnchor::RT);
+
+			icon_rx -= (icon_width + gapsize);
+		}
+	}
+
+public:
+	bool can_select(IGraphlet* g) override {
+		return (dynamic_cast<Labellet*>(g) != nullptr);
+	}
+
+	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
+		auto icon = dynamic_cast<Credit<Labellet, TimeMachineIcon>*>(g);
+
+		if (icon != nullptr) {
+			switch (icon->id) {
+			case TimeMachineIcon::Quit: this->master->hide(); break;
+			case TimeMachineIcon::PickStartTimePoint: case TimeMachineIcon::PickStopTimePoint: {
+				
+			}; break;
+			}
+		}
+	}
+
+private: // never delete this graphlets manually
+	std::map<TimeMachineIcon, Credit<Labellet, TimeMachineIcon>*> icons;
+
+private:
+	ITimeMachine* master;
+};
+
 /*************************************************************************************************/
 ITimeMachine::ITimeMachine(Platform::String^ dirname, int frame_rate, Syslog* logger
 	, Platform::String^ prefix, Platform::String^ suffix, RotationPeriod period, unsigned int period_count)
 	: IRotativeDirectory(dirname, prefix, suffix, period, period_count), ready(false) {
-	TimeMachineUniverseDisplay^ _universe = ref new TimeMachineUniverseDisplay(logger, this, frame_rate);
+	TimeMachineUniverseDisplay^ _universe = ref new TimeMachineUniverseDisplay(logger, this, frame_rate, new TimeMachineHeadsUp(this));
 
 	this->machine = ref new Flyout();
 	this->machine->Content = _universe->flyout_content();

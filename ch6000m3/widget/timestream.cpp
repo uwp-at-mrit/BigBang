@@ -3,6 +3,7 @@
 
 #include "page/hydraulics.hpp"
 
+#include "box.hpp"
 #include "system.hpp"
 #include "module.hpp"
 

@@ -195,10 +195,7 @@ private:
 			if (x <= this->Margin.Left) {
 				this->IsPaneOpen = true;
 				args->Handled = true;
-			} else if (x > this->OpenPaneLength) {
-				this->IsPaneOpen = false;
-				args->Handled = true;
-			}
+			} 
 		}
 	}
 
@@ -209,9 +206,6 @@ private:
 		if (pt->Properties->PointerUpdateKind == PointerUpdateKind::LeftButtonReleased) {
 			if (x <= normal_font_size) {
 				this->IsPaneOpen = true;
-				args->Handled = true;
-			} else if (x > this->OpenPaneLength) {
-				this->IsPaneOpen = false;
 				args->Handled = true;
 			}
 		}

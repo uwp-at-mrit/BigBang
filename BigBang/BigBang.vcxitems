@@ -29,6 +29,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datepicklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.cpp" />
@@ -62,6 +63,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\datepad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\primitive.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\togglet.cpp" />
@@ -91,6 +93,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datepicklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.hpp" />
@@ -129,6 +132,7 @@
       <FileType>Document</FileType>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\datepad.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sprite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\togglet.hpp" />

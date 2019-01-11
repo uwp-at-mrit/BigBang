@@ -1,14 +1,18 @@
 ﻿#include "virtualization/keyboard.hpp"
 #include "planet.hpp"
 
+#include "paint.hpp"
+#include "colorspace.hpp"
+#include "brushes.hxx"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
 using namespace Windows::System;
-
 using namespace Windows::UI;
-using namespace Windows::System;
+
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Text;
 
 static const long long keyboard_tap_duration = 2000000LL;
 
@@ -51,6 +55,17 @@ void Keyboard::sprite() {
 	}
 }
 
+void Keyboard::construct() {
+	Color fg = Colours::Background->Color;
+	Color bg = Colours::Foreground->Color;
+
+	this->foreground = make_solid_brush(fg, 1.0);
+	this->background = make_solid_brush(rgba(bg, 0.8));
+	this->border = make_solid_brush(rgba(fg, 0.618));
+	this->highlight = make_solid_brush(rgba(fg, 0.382));
+	this->taplight = make_solid_brush(rgba(bg, 0.618));
+}
+
 void Keyboard::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
@@ -90,6 +105,31 @@ void Keyboard::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	this->draw_after(ds, x, y, Width, Height);
 }
 
+void Keyboard::draw_before(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	ds->FillRoundedRectangle(x, y, this->width, this->height, this->radius, this->radius, this->background);
+}
+
+void Keyboard::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, bool tapped, float x, float y, float width, float height) {
+	auto label = this->key_label(key);
+
+	if (focused) {
+		auto highbrush = (tapped ? this->taplight : this->highlight);
+
+		ds->FillRoundedRectangle(x, y, width, height, this->radius, this->radius, highbrush);
+	}
+
+	ds->DrawRoundedRectangle(x, y, width, height, this->radius, this->radius, this->border, 2.0F);
+
+	if (label != nullptr) {
+		Rect box = label->LayoutBounds;
+		float tx = x + (width - box.Width) * 0.5F;
+		float ty = y + (height - box.Height) * 0.5F;
+
+		ds->DrawTextLayout(label, tx, ty, this->foreground);
+	}
+}
+
+/*************************************************************************************************/
 void Keyboard::on_hover(float local_x, float local_y) {
 	if (!this->tapped) {
 		this->current_key = this->find_tapped_key(local_x, local_y);

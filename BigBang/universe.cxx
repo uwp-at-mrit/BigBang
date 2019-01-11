@@ -6,6 +6,7 @@
 #include "syslog.hpp"
 #include "time.hpp"
 #include "path.hpp"
+#include "box.hpp"
 
 #include "paint.hpp"
 #include "colorspace.hpp"

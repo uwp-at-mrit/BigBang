@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "virtualization/arrowpad.hpp"
+#include "virtualization/datepad.hpp"
 
 #include "text.hpp"
 #include "planet.hpp"
@@ -21,22 +21,20 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
 const static KeyboardCell keys[] = {
-	{ VirtualKey::Escape,   0, 0, 2, 2 },
+	{ VirtualKey::Left,     0, 2, 1, 1 },
+	{ VirtualKey::Escape,   1, 2, 1, 1 },
+	{ VirtualKey::Right,    2, 2, 1, 1 },
 
-	{ VirtualKey::PageUp,   2, 0, 1, 2 },
-    { VirtualKey::Left,     3, 0, 1, 2 },
-	{ VirtualKey::Right,    5, 0, 1, 2 },
-    { VirtualKey::PageDown, 6, 0, 1, 2 },
-	{ VirtualKey::Print,    7, 0, 2, 2 },
-
-	{ VirtualKey::Add,      4, 0, 1, 1 },
-	{ VirtualKey::Subtract, 4, 1, 1, 1 },
+	{ VirtualKey::PageUp,   1, 0, 1, 1 },
+    { VirtualKey::Up,       1, 1, 1, 1 },
+	{ VirtualKey::Down,     1, 3, 1, 1 },
+    { VirtualKey::PageDown, 1, 4, 1, 1 },
 };
 
 static std::map<VirtualKey, CanvasTextLayout^> key_labels;
 
 /*************************************************************************************************/
-Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
+Datepad::Datepad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	CanvasTextFormat^ label_font = make_text_format("Consolas", fontsize);
 	
 	this->current_key = VirtualKey::None;
@@ -57,16 +55,13 @@ Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 			VirtualKey key = keys[i].key;
 
 			switch (key) {
-			case VirtualKey::PageUp: label = L"⇤"; break;
+			case VirtualKey::PageUp: label = L"↟"; break;
+			case VirtualKey::Up: label = L"↑"; break;
+			case VirtualKey::Down: label = L"↓"; break;
+			case VirtualKey::PageDown: label = L"↡"; break;
 			case VirtualKey::Left: label = L"←"; break;
 			case VirtualKey::Right: label = L"→"; break;
-			case VirtualKey::PageDown: label = L"⇥"; break;
-
-			case VirtualKey::Add: label = L"+"; break;
-			case VirtualKey::Subtract: label = L"-"; break;
-
 			case VirtualKey::Escape: label = L"↺"; break;
-			case VirtualKey::Print: label = L"📸"; break;
 			}
 
 			key_labels.insert(std::pair<VirtualKey, CanvasTextLayout^>(key, make_text_layout(label, label_font)));
@@ -74,29 +69,7 @@ Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	}
 }
 
-VirtualKey Arrowpad::find_received_key(unsigned int keycode) {
-	VirtualKey key = VirtualKey::None;
-
-	switch (keycode) {
-	case 43: key = VirtualKey::Add; break;
-	case 45: key = VirtualKey::Subtract; break;
-	}
-
-	return key;
-}
-
-CanvasTextLayout^ Arrowpad::key_label(VirtualKey key) {
-	CanvasTextLayout^ label = nullptr;
-	auto maybe_label = key_labels.find(key);
-
-	if (maybe_label != key_labels.end()) {
-		label = maybe_label->second;
-	}
-
-	return label;
-}
-
-void Arrowpad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
+void Datepad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
 	float Width = this->master->actual_width();
 	float Height = this->master->actual_height();
 	float width, height;
@@ -113,4 +86,15 @@ void Arrowpad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnch
 
 		SET_VALUES(x, x0 - width * 0.5F, y, y0);
 	}
+}
+
+CanvasTextLayout^ Datepad::key_label(VirtualKey key) {
+	CanvasTextLayout^ label = nullptr;
+	auto maybe_label = key_labels.find(key);
+
+	if (maybe_label != key_labels.end()) {
+		label = maybe_label->second;
+	}
+
+	return label;
 }

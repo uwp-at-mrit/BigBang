@@ -44,7 +44,6 @@ namespace WarGrey::SCADA {
 		int precision = -1;
 	};
 
-
 	WarGrey::SCADA::DimensionStyle make_plain_dimension_style(float nfontsize, float ufontsize, int precision = -1);
 	WarGrey::SCADA::DimensionStyle make_plain_dimension_style(float nfontsize, unsigned int min_n, int precision = -1);
 

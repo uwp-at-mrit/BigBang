@@ -1,5 +1,6 @@
 #pragma once
 
+#include "forward.hpp"
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {

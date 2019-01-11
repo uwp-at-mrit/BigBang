@@ -15,6 +15,10 @@
 #include "graphlet/primitive.hpp"
 #include "decorator/decorator.hpp"
 
+#include "virtualization/numpad.hpp"
+#include "virtualization/arrowpad.hpp"
+#include "virtualization/datepad.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Concurrency;
@@ -224,6 +228,7 @@ Planet::Planet(Platform::String^ name, unsigned int initial_mode)
 	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
 	this->numpad = new Numpad(this);
 	this->arrowpad = new Arrowpad(this);
+	this->datepad = new Datepad(this);
 
 	this->keyboard = this->numpad;
 }
@@ -237,6 +242,7 @@ Planet::~Planet() {
 
 	delete this->numpad;
 	delete this->arrowpad;
+	delete this->datepad;
 }
 
 void Planet::change_mode(unsigned int mode) {
@@ -1085,6 +1091,7 @@ void Planet::switch_virtual_keyboard(ScreenKeyboard type) {
 	switch (type) {
 	case ScreenKeyboard::Numpad:   this->keyboard = this->numpad; break;
 	case ScreenKeyboard::Arrowpad: this->keyboard = this->arrowpad; break;
+	case ScreenKeyboard::Datepad:  this->keyboard = this->datepad; break;
 	}
 }
 
@@ -1097,13 +1104,13 @@ void Planet::push_decorator(IPlanetDecorator* decorator) {
 }
 
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
-	this->numpad->sprite();
-	this->numpad->construct();
-	this->numpad->sprite_construct();
+	IKeyboard* keyboards[] = { this->numpad, this->arrowpad, this->datepad };
 
-	this->arrowpad->sprite();
-	this->arrowpad->construct();
-	this->arrowpad->sprite_construct();
+	for (unsigned int idx = 0; idx < (sizeof(keyboards) / sizeof(Keyboard*)); idx++) {
+		keyboards[idx]->sprite();
+		keyboards[idx]->construct();
+		keyboards[idx]->sprite_construct();
+	}
 }
 
 void Planet::on_elapse(long long count, long long interval, long long uptime) {

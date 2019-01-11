@@ -230,7 +230,6 @@ public:
 				this->labels[HS::VisorState]->set_text("[" + speak(TankState::UltraLow) + "]");
 			}; break;
 			default: {
-				this->labels[HS::VisorState]->set_color(Colours::Green);
 				this->labels[HS::VisorState]->set_text("");
 			}
 			}
@@ -418,7 +417,7 @@ public:
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.5F, gheight * 4.5F);
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.5F, gheight * 4.5F);
 		this->load_dimension(this->levels, HS::VisorOil, "centimeter");
-		this->load_label(this->labels, speak(HSMTState::Normal), HS::VisorState, Colours::Silver, this->label_font);
+		this->load_label(this->labels, speak(TankState::Normal), HS::VisorState, Colours::Silver, this->label_font);
 
 		this->storage_tank = this->master->insert_one(new FuelTanklet(gwidth * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
 

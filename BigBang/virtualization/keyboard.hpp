@@ -4,8 +4,6 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class ScreenKeyboard { Numpad, Arrowpad };
-
 	private struct KeyboardCell {
 		Windows::System::VirtualKey key;
 		unsigned char col;
@@ -50,6 +48,7 @@ namespace WarGrey::SCADA {
 		void sprite() override;
 
 	public:
+		void construct() override;
 		void update(long long count, long long interval, long long uptime) override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
@@ -66,22 +65,30 @@ namespace WarGrey::SCADA {
 		void on_goodbye(float local_x, float local_y) override;
 
 	protected:
-		virtual void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {}
+		virtual void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height);
 		virtual void draw_after(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {}
-
 		virtual void draw_cell(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			Windows::System::VirtualKey key, bool focused, bool tapped,
-			float x, float y, float width, float height) = 0;
+			float x, float y, float width, float height);
 
 	protected:
+		virtual Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ key_label(Windows::System::VirtualKey key) = 0;
 		virtual Windows::System::VirtualKey find_received_key(unsigned int keycode);
+		Windows::System::VirtualKey find_tapped_key(float mouse_x, float mouse_y);
 
 	protected:
-		Windows::System::VirtualKey find_tapped_key(float mouse_x, float mouse_y);
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ foreground;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ highlight;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ taplight;
+
+	protected:
 		float width;
 		float height;
 		float cellsize;
 		float gapsize;
+		float radius;
 
 	private:
 		const WarGrey::SCADA::KeyboardCell* cells;

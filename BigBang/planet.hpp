@@ -8,9 +8,6 @@
 #include "universe.hxx"
 #include "decorator/decorator.hpp"
 
-#include "virtualization/numpad.hpp"
-#include "virtualization/arrowpad.hpp"
-
 namespace WarGrey::SCADA {
 	private class IPlanetInfo abstract {
 	public:
@@ -320,9 +317,10 @@ namespace WarGrey::SCADA {
 		unsigned int mode;
 
 	private:
-		WarGrey::SCADA::Keyboard* keyboard;
-		WarGrey::SCADA::Numpad* numpad;
-		WarGrey::SCADA::Arrowpad* arrowpad;
+		WarGrey::SCADA::IKeyboard* keyboard;
+		WarGrey::SCADA::IKeyboard* numpad;
+		WarGrey::SCADA::IKeyboard* arrowpad;
+		WarGrey::SCADA::IKeyboard* datepad;
 		float keyboard_x;
 		float keyboard_y;
 

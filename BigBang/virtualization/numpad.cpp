@@ -5,10 +5,6 @@
 #include "forward.hpp"
 #include "text.hpp"
 
-#include "paint.hpp"
-#include "colorspace.hpp"
-#include "brushes.hxx"
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -19,8 +15,6 @@ using namespace Windows::UI::Text;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
-
-private enum NumpadCell { Col = 0, Row, NCol, NRow };
 
 const static KeyboardCell keys[] = {
 	{ VirtualKey::NumberPad9, 2, 0, 1, 1 }, { VirtualKey::NumberPad8, 1, 0, 1, 1 }, { VirtualKey::NumberPad7, 0, 0, 1, 1 },
@@ -77,42 +71,6 @@ Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	}
 }
 
-void Numpad::construct() {
-	Color fg = Colours::Background->Color;
-	Color bg = Colours::Foreground->Color;
-	
-	this->foreground = make_solid_brush(fg, 1.0);
-	this->background = make_solid_brush(rgba(bg, 0.8));
-	this->border = make_solid_brush(rgba(fg, 0.618));
-	this->highlight = make_solid_brush(rgba(fg, 0.382));
-	this->taplight = make_solid_brush(rgba(bg, 0.618));
-}
-
-void Numpad::draw_before(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	ds->FillRoundedRectangle(x, y, this->width, this->height, this->radius, this->radius, this->background);
-}
-
-void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, bool tapped, float x, float y, float width, float height) {
-	auto maybe_label = key_labels.find(key);
-
-	if (focused) {
-		auto highbrush = (tapped ? this->taplight : this->highlight);
-
-		ds->FillRoundedRectangle(x, y, width, height, this->radius, this->radius, highbrush);
-	}
-
-	ds->DrawRoundedRectangle(x, y, width, height, this->radius, this->radius, this->border, 2.0F);
-
-	if (maybe_label != key_labels.end()) {
-		CanvasTextLayout^ label = maybe_label->second;
-		Rect box = label->LayoutBounds;
-		float tx = x + (width - box.Width) * 0.5F;
-		float ty = y + (height - box.Height) * 0.5F;
-
-		ds->DrawTextLayout(label, tx, ty, this->foreground);
-	}
-}
-
 bool Numpad::on_key(VirtualKey key, bool wargrey_keyboard) {
 	if ((VirtualKey::Number0 <= key) && (key <= VirtualKey::Number9)) {
 		key = static_cast<VirtualKey>(static_cast<unsigned int>(key) - num0 + pad0);
@@ -120,7 +78,6 @@ bool Numpad::on_key(VirtualKey key, bool wargrey_keyboard) {
 
 	return Keyboard::on_key(key, wargrey_keyboard);
 }
-
 
 VirtualKey Numpad::find_received_key(unsigned int keycode) {
 	VirtualKey key = VirtualKey::None;
@@ -130,4 +87,15 @@ VirtualKey Numpad::find_received_key(unsigned int keycode) {
 	}
 
 	return key;
+}
+
+CanvasTextLayout^ Numpad::key_label(VirtualKey key) {
+	CanvasTextLayout^ label = nullptr;
+	auto maybe_label = key_labels.find(key);
+
+	if (maybe_label != key_labels.end()) {
+		label = maybe_label->second;
+	}
+
+	return label;
 }

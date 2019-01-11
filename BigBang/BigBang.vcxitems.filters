@@ -170,6 +170,12 @@
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datepicklet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\datepad.cpp">
+      <Filter>virtualization</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -345,6 +351,12 @@
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)timemachine.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datepicklet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\datepad.hpp">
+      <Filter>virtualization</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
