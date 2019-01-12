@@ -59,7 +59,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)navigator\thumbnail.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)test\performance.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.cpp" />
@@ -126,7 +125,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)navigator\thumbnail.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)test\performance.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timemachine.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
@@ -151,17 +149,17 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\performance.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\timemachine.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\unit.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\performance.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\timemachine.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\unit.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>

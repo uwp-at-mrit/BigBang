@@ -70,7 +70,7 @@ namespace WarGrey::SCADA {
 		}
 
 		void set_value(T value0, WarGrey::SCADA::GraphletAnchor anchor, bool force_update = false) {
-			T value = this->adjusted_value(value0);
+			T value = this->guarded_value(value0);
 
 			if ((this->value != value) || force_update) {
 				this->moor(anchor);
@@ -84,7 +84,7 @@ namespace WarGrey::SCADA {
 		virtual void on_value_changed(T value) {}
 
 	protected:
-		virtual T adjusted_value(T value) { return value; }
+		virtual T guarded_value(T value) { return value; }
 
 	private:
 		T value;
@@ -113,7 +113,7 @@ namespace WarGrey::SCADA {
 		}
 
 	protected:
-		T adjusted_value(T v) override {
+		T guarded_value(T v) override {
 			if (v > this->vmax) {
 				v = this->vmax;
 			} else if (v < this->vmin) {

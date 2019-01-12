@@ -27,11 +27,14 @@ using namespace Windows::UI::Xaml::Controls::Primitives;
 
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
+using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class TimeMachineIcon : unsigned int {
-	Quit,
-	_
-};
+private enum class TMIcon : unsigned int { BookMark, Quit, _ };
+
+private enum class TM : unsigned int { Time0, Timen, _ };
+
+static const double time_machine_alpha = 0.64;
+static ICanvasBrush^ fg_color = Colours::make(Colours::GhostWhite, time_machine_alpha);
 
 /*************************************************************************************************/
 private ref class TimeMachineUniverseDisplay sealed : public UniverseDisplay {
@@ -51,8 +54,6 @@ internal:
 
 		this->_void->OpenPaneLength = 256.0;
 		this->_void->DisplayMode = SplitViewDisplayMode::Overlay;
-		
-		this->_void->PointerReleased += ref new PointerEventHandler(this, &TimeMachineUniverseDisplay::on_pointer_released);
 	}
 
 internal:
@@ -125,16 +126,6 @@ protected:
 	}
 
 private:
-	void on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-		auto pt = args->GetCurrentPoint(this->_void);
-		
-		if (pt->Properties->PointerUpdateKind == PointerUpdateKind::LeftButtonReleased) {
-			this->_void->IsPaneOpen = !this->_void->IsPaneOpen;
-			args->Handled = true;
-		}
-	}
-
-private:
 	std::list<ITimeline*> timelines; // never deletes these timelines manually
 	ITimeMachine* machine; // its lifetime is managed by client applications
 	SplitView^ _void;
@@ -151,24 +142,30 @@ private:
 
 private class TimeMachineHeadsUp : public Planet {
 public:
-	TimeMachineHeadsUp(ITimeMachine* master) : Planet(__MODULE__), master(master) {}
+	TimeMachineHeadsUp(ITimeMachine* master) : Planet(__MODULE__), master(master) {
+		this->datetime_style.datetime_color = fg_color;
+		this->datetime_style.label_color = Colours::make(Colours::LightSeaGreen, time_machine_alpha);
+		this->datetime_style.caret_color = Colours::make(Colours::DeepSkyBlue, time_machine_alpha);
+	}
 
 public:
 	void load(CanvasCreateResourcesReason reason, float width, float height) override {
 		auto icon_font = make_text_format("Consolas", statusbar_height());
-		auto icon_color = Colours::make(Colours::GhostWhite, 0.64);
+		auto icon_color = fg_color;
 
-		for (TimeMachineIcon id = _E0(TimeMachineIcon); id < TimeMachineIcon::_; id++) {
+		for (TMIcon id = _E0(TMIcon); id < TMIcon::_; id++) {
 			Platform::String^ caption = nullptr;
 
 			switch (id) {
-			//case TimeMachineIcon::PickStartTimePoint: caption = L"⏳"; break;
-			//case TimeMachineIcon::PickStopTimePoint: caption = L"⌛️"; break;
-			case TimeMachineIcon::Quit: caption = L"🚪"; break;
+			case TMIcon::BookMark: caption = L"🔖"; break;
+			case TMIcon::Quit: caption = L"🚪"; break;
 			}
 
-			this->icons[id] = this->insert_one(new Credit<Labellet, TimeMachineIcon>(caption, icon_font, icon_color), id);
+			this->icons[id] = this->insert_one(new Credit<Labellet, TMIcon>(caption, icon_font, icon_color), id);
 		}
+
+		this->load_date_picker(this->time_pickers, TM::Time0, -this->master->span_seconds());
+		this->load_date_picker(this->time_pickers, TM::Timen, 0LL);
 	}
 
 	void reflow(float width, float height) override {
@@ -177,39 +174,63 @@ public:
 		float icon_rx = width - icon_y;
 		float icon_width;
 
-		for (unsigned int idx = _N(TimeMachineIcon); idx > 0; idx--) {
-			auto icon = this->icons[_E(TimeMachineIcon, idx - 1)];
+		for (unsigned int idx = _N(TMIcon); idx > 0; idx--) {
+			auto icon = this->icons[_E(TMIcon, idx - 1)];
 
-			this->get_logger()->log_message(Log::Info, _E(TimeMachineIcon, idx - 1).ToString());
+			this->get_logger()->log_message(Log::Info, _E(TMIcon, idx - 1).ToString());
 			icon->fill_extent(0.0F, 0.0F, &icon_width);
 			this->move_to(icon, icon_rx, icon_y, GraphletAnchor::RT);
 
 			icon_rx -= (icon_width + gapsize);
 		}
+
+		this->move_to(this->time_pickers[TM::Time0], this->icons[TMIcon::Quit], GraphletAnchor::RC, GraphletAnchor::LC, icon_y * 2.0F - width);
+		this->move_to(this->time_pickers[TM::Timen], this->time_pickers[TM::Time0], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
 	}
 
 public:
 	bool can_select(IGraphlet* g) override {
-		return (dynamic_cast<Labellet*>(g) != nullptr);
+		return ((dynamic_cast<Labellet*>(g) != nullptr)
+			|| (dynamic_cast<DatePickerlet*>(g) != nullptr));
+	}
+
+	void on_focus(IGraphlet* g) override {
+		auto editor = dynamic_cast<DatePickerlet*>(g);
+
+		if (editor != nullptr) {
+			this->show_virtual_keyboard(ScreenKeyboard::Bucketpad, GraphletAnchor::CB);
+		}
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
-		auto icon = dynamic_cast<Credit<Labellet, TimeMachineIcon>*>(g);
+		auto icon = dynamic_cast<Credit<Labellet, TMIcon>*>(g);
 
 		if (icon != nullptr) {
 			switch (icon->id) {
-			case TimeMachineIcon::Quit: this->master->hide(); break;
-			//case TimeMachineIcon::PickStartTimePoint: case TimeMachineIcon::PickStopTimePoint: {
-				
-			//}; break;
+			case TMIcon::Quit: this->master->hide(); break;
+			case TMIcon::BookMark: {
+				auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->info->master);
+
+				if (tmud != nullptr) {
+					tmud->flyout_content()->IsPaneOpen = true;
+				}
+			}; break;
 			}
 		}
 	}
 
+private:
+	void load_date_picker(std::map<TM, Credit<DatePickerlet, TM>*>& tps, TM id, long long time_offset) {
+		tps[id] = this->insert_one(new Credit<DatePickerlet, TM>(DatePickerState::Input, time_offset, _speak(id)), id);
+		tps[id]->set_style(this->datetime_style);
+	}
+
 private: // never delete this graphlets manually
-	std::map<TimeMachineIcon, Credit<Labellet, TimeMachineIcon>*> icons;
-	DatePickerlet* start_time_picker;
-	DatePickerlet* stop_time_picker;
+	std::map<TMIcon, Credit<Labellet, TMIcon>*> icons;
+	std::map<TM, Credit<DatePickerlet, TM>*> time_pickers;
+
+private:
+	DatePickerStyle datetime_style;
 
 private:
 	ITimeMachine* master;

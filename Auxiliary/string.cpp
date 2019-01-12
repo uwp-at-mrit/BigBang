@@ -73,6 +73,12 @@ Platform::String^ WarGrey::SCADA::flstring(double value, int precision) {
 		: value.ToString());
 }
 
+Platform::String^ WarGrey::SCADA::fxstring(long long value, int width) {
+	return ((width > 0)
+		? make_wstring(make_wstring(L"%%0%dld", width)->Data(), value)
+		: value.ToString());
+}
+
 Platform::String^ WarGrey::SCADA::sstring(unsigned long long bytes, int precision) {
 	static Platform::String^ units[] = { L"KB", L"MB", L"GB", L"TB" };
 	static unsigned int max_idx = sizeof(units) / sizeof(Platform::String^) - 1;

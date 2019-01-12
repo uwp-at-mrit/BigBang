@@ -11,7 +11,6 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
-using namespace Windows::System::Diagnostics;
 
 static const long long l00ns_us = 10LL;
 static const long long l00ns_ms = l00ns_us * 1000LL;
@@ -40,16 +39,6 @@ static inline long long current_hectonanoseconds() {
 	l00ns_1970 = ((long long)(l00ns_1601.dwHighDateTime) << 32) | l00ns_1601.dwLowDateTime;
 
 	return l00ns_1970 - l00ns_1601_1970;
-}
-
-static ProcessCpuUsageReport^ process_cpu_usage() {
-    static ProcessDiagnosticInfo^ self = nullptr;
-
-    if (self == nullptr) {
-        self = ProcessDiagnosticInfo::GetForCurrentProcess();
-    }
-
-    return self->CpuUsage->GetReport();
 }
 
 /**************************************************************************************************/
@@ -147,6 +136,59 @@ void WarGrey::SCADA::sleep_us(long long us) {
 }
 
 /*************************************************************************************************/
+void WarGrey::SCADA::split_date(long long s, long long* year, long long* month, long long* day) {
+	struct tm datetime;
+
+	gmtime_s(&datetime, &s);
+
+	SET_BOX(year, datetime.tm_year + 1900);
+	SET_BOX(month, datetime.tm_mon + 1);
+	SET_BOX(day, datetime.tm_mday);
+}
+
+void WarGrey::SCADA::split_time(long long s, long long* hours, long long* minutes, long long* seconds) {
+	long long daytime = s % day_span_s;
+	
+	SET_BOX(hours, daytime / hour_span_s);
+	SET_BOX(minutes, daytime % hour_span_s / minute_span_s);
+	SET_BOX(seconds, daytime % minute_span_s);
+}
+
+long long WarGrey::SCADA::seconds_add_seconds(long long s, long long count) {
+	return s + count;
+}
+
+long long WarGrey::SCADA::seconds_add_minutes(long long s, long long count) {
+	return s + minute_span_s * count;
+}
+
+long long WarGrey::SCADA::seconds_add_hours(long long s, long long count) {
+	return s + hour_span_s * count;
+}
+
+long long WarGrey::SCADA::seconds_add_days(long long s, long long count) {
+	return s + day_span_s * count;
+}
+
+long long WarGrey::SCADA::seconds_add_months(long long s, long long count) {
+	struct tm datetime;
+
+	gmtime_s(&datetime, &s);
+	datetime.tm_mon += int(count);
+
+	return _mkgmtime(&datetime);
+}
+
+long long WarGrey::SCADA::seconds_add_years(long long s, long long count) {
+	struct tm datetime;
+
+	gmtime_s(&datetime, &s);	
+	datetime.tm_year += int(count);
+
+	return _mkgmtime(&datetime);
+}
+
+/*************************************************************************************************/
 Platform::String^ WarGrey::SCADA::make_timestamp_utc(long long utc_s, bool locale) {
 	wchar_t timestamp[32];
 
@@ -186,31 +228,4 @@ Platform::String^ WarGrey::SCADA::update_nowstamp(bool need_us, int* l00ns) {
 	}
 
 	return ts;
-}
-
-/*************************************************************************************************/
-void WarGrey::SCADA::process_usage(long long* kernel, long long* user) {
-    ProcessCpuUsageReport^ now = process_cpu_usage();
-    
-    (*kernel) = now->KernelTime.Duration;
-    (*user) = now->UserTime.Duration;
-}
-
-void WarGrey::SCADA::process_usage_diff(long long* kernel, long long* user) {
-    ProcessCpuUsageReport^ now = process_cpu_usage();
-
-    (*kernel) = now->KernelTime.Duration - (*kernel);
-    (*user) = now->UserTime.Duration - (*user);
-}
-
-Platform::String^ WarGrey::SCADA::timing_string(long long kernel, long long user) {
-    static wchar_t benchmark[32];
-    
-    process_usage_diff(&kernel, &user);
-
-    auto kms = kernel / 10000LL;
-    auto ums = user / 10000LL;
-    swprintf(benchmark, 31, L"time: %lldms(%lldms + %lldms)", kms + ums, kms, ums);
-
-    return ref new Platform::String(benchmark);
 }

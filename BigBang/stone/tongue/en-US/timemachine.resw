@@ -117,16 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Confirm" xml:space="preserve">
-    <value>Confirm</value>
+  <data name="Time0" xml:space="preserve">
+    <value>Start</value>
   </data>
-  <data name="Receive" xml:space="preserve">
-    <value>Receive</value>
-  </data>
-  <data name="Render" xml:space="preserve">
-    <value>Render</value>
-  </data>
-  <data name="Send" xml:space="preserve">
-    <value>Send</value>
+  <data name="Timen" xml:space="preserve">
+    <value>Stop</value>
   </data>
 </root>

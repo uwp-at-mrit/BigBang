@@ -3,9 +3,10 @@
 #include "graphlet/textlet.hpp"
 
 #include "forward.hpp"
-#include "paint.hpp"
-#include "tongue.hpp"
 #include "string.hpp"
+#include "tongue.hpp"
+
+#include "paint.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -22,7 +23,7 @@ static CanvasTextFormat^ default_unit_font = make_bold_text_format("Cambria", 14
 static CanvasTextFormat^ default_math_font = make_bold_text_format("Cambria Math", 16.0F);
 
 static ICanvasBrush^ default_text_color = Colours::Silver;
-static ICanvasBrush^ default_number_color = Colours::Yellow;
+static ICanvasBrush^ default_math_color = Colours::Yellow;
 static ICanvasBrush^ default_unit_color = Colours::make(0x23EBB9U);
 
 static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExtent& unit_box
@@ -32,9 +33,10 @@ static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExt
 	(*bspace) = std::fminf(label_box->bspace, std::fminf(num_box.bspace, unit_box.bspace));
 
 	if (height != nullptr) {
-		float link = label_box->height - label_box->tspace - unit_box.bspace;
-		float nink = num_box.height - num_box.tspace - unit_box.bspace;
-		float uink = unit_box.height - unit_box.tspace - unit_box.bspace;
+		float base_bspace = unit_box.bspace;
+		float link = label_box->height - label_box->tspace - base_bspace;
+		float nink = num_box.height - num_box.tspace - base_bspace;
+		float uink = unit_box.height - unit_box.tspace - base_bspace;
 		float ink_height = std::fmaxf(std::fmaxf(nink, uink), link);
 
 		(*height) = (*tspace) + ink_height + (*bspace);
@@ -279,15 +281,13 @@ Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, unsig
 /*************************************************************************************************/
 IEditorlet::IEditorlet(DimensionState status, DimensionStyle& style, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: IEditorlet(status, unit, label, subscript) {
-	
 	/** TODO: Why does not it work if pass the `style` to IStatelet */
 	this->set_style(style);
 }
 
 IEditorlet::IEditorlet(DimensionState status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: IStatelet(status), unit(unit), maximum(std::nanl("infinity")) {
-	
-	this->set_text(speak(label), speak(subscript));
+	this->set_text(label, subscript);
 
 	/** TODO: Why does not it work if pass the `status` to IStatelet */
 	this->set_state(status);
@@ -333,6 +333,7 @@ void IEditorlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
+	DimensionStyle style = this->get_style();
 	TextExtent label_box;
 	float tspace, bspace;
 
@@ -340,12 +341,10 @@ void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, flo
 	
 	if (this->text_layout == nullptr) {
 		TextExtent nbox = (this->has_caret() ? this->caret_box : this->number_box);
-		DimensionStyle style = this->get_style();
 		float region_width = std::fmaxf(nbox.width, style.minimize_number_width);
 		
 		label_box.lspace = (region_width - nbox.width) * style.number_xfraction + nbox.lspace;
 	} else {
-		DimensionStyle style = this->get_style();
 		float region_width = std::fmaxf(label_box.width, style.minimize_label_width);
 		
 		label_box.lspace += ((region_width - label_box.width) * style.label_xfraction);
@@ -353,14 +352,6 @@ void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, flo
 
 	SET_VALUES(l, label_box.lspace, r, this->unit_box.rspace);
 	SET_VALUES(t, tspace, b, bspace);
-}
-
-void IEditorlet::on_value_changed(double value) {
-	DimensionStyle style = this->get_style();
-
-	this->number = flstring(value, style.precision);
-	this->number_layout = make_text_layout(this->number, style.number_font);
-	this->number_box = get_text_extent(this->number_layout);
 }
 
 void IEditorlet::on_state_changed(DimensionState status) {
@@ -371,37 +362,23 @@ bool IEditorlet::on_key(VirtualKey key, bool wargrey_keyboard) {
 	static unsigned int num0 = static_cast<unsigned int>(VirtualKey::Number0);
 	static unsigned int pad0 = static_cast<unsigned int>(VirtualKey::NumberPad0);
 	unsigned int keycode = static_cast<unsigned int>(key);
-	bool handled = false;
+	bool handled = true;
 
 	switch (key) {
+	case VirtualKey::PageUp: this->input_number = accumulate_number(this->input_number, 0.10, this->maximum); break;
+	case VirtualKey::Up: this->input_number = accumulate_number(this->input_number, 0.01, this->maximum); break;
+	case VirtualKey::PageDown: this->input_number = accumulate_number(this->input_number, -0.10, this->maximum); break;
+	case VirtualKey::Down: this->input_number = accumulate_number(this->input_number, -0.01, this->maximum); break;
 	case VirtualKey::Subtract: {
 		if (this->input_number == nullptr) {
 			this->input_number = "-";
 		}
-		handled = true;
 	}; break;
 	case VirtualKey::Decimal: {
 		if (this->decimal_position < 0) {
 			this->decimal_position = this->input_number->Length() - 1;
 			this->input_number += ".";
 		}
-		handled = true;
-	}; break;
-	case VirtualKey::PageUp: {
-		this->input_number = accumulate_number(this->input_number, 0.10, this->maximum);
-		handled = true;
-	}; break;
-	case VirtualKey::Up: {
-		this->input_number = accumulate_number(this->input_number, 0.01, this->maximum);
-		handled = true;
-	}; break;
-	case VirtualKey::PageDown: {
-		this->input_number = accumulate_number(this->input_number, -0.10, this->maximum);
-		handled = true;
-	}; break;
-	case VirtualKey::Down: {
-		this->input_number = accumulate_number(this->input_number, -0.01, this->maximum);
-		handled = true;
 	}; break;
 	case VirtualKey::Back: {
 		if (this->input_number != nullptr) {
@@ -413,15 +390,14 @@ bool IEditorlet::on_key(VirtualKey key, bool wargrey_keyboard) {
 				this->decimal_position = -1;
 			}
 		}
-		handled = true;
 	}; break;
 	default: {
 		if ((VirtualKey::Number0 <= key) && (key <= VirtualKey::Number9)) {
 			this->input_number += (keycode - num0).ToString();
-			handled = true;
 		} else if ((VirtualKey::NumberPad0 <= key) && (key <= VirtualKey::NumberPad9)) {
 			this->input_number += (keycode - pad0).ToString();
-			handled = true;
+		} else {
+			handled = false;
 		}
 	}
 	}
@@ -476,7 +452,7 @@ long double IEditorlet::get_input_number() {
 }
 
 void IEditorlet::prepare_style(DimensionState status, DimensionStyle& style) {
-	CAS_SLOT(style.number_color, default_number_color);
+	CAS_SLOT(style.number_color, default_math_color);
 	CAS_SLOT(style.unit_color, default_unit_color);
 	CAS_SLOT(style.label_color, style.unit_color);
 
@@ -497,7 +473,7 @@ void IEditorlet::prepare_style(DimensionState status, DimensionStyle& style) {
 		FLCAS_SLOT(style.number_trailing_space, 0.0F);
 		ICAS_SLOT(style.precision, 0);
 	}; break;
-	case DimensionState::Normal: case DimensionState::Highlight: {
+	case DimensionState::Default: case DimensionState::Highlight: {
 		FLCAS_SLOT(style.minimize_number_width, 0.0F);
 		FLCAS_SLOT(style.number_xfraction, 0.5F);
 		FLCAS_SLOT(style.number_trailing_space, 0.0F);
@@ -520,6 +496,14 @@ void IEditorlet::apply_style(DimensionStyle& style) {
 		this->unit_layout = make_text_layout(this->unit, style.unit_font);
 		this->unit_box = get_text_extent(this->unit_layout);
 	}
+}
+
+void IEditorlet::on_value_changed(double value) {
+	DimensionStyle style = this->get_style();
+
+	this->number = flstring(value, style.precision);
+	this->number_layout = make_text_layout(this->number, style.number_font);
+	this->number_box = get_text_extent(this->number_layout);
 }
 
 void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -605,13 +589,13 @@ Dimensionlet::Dimensionlet(DimensionState default_state, DimensionStyle& default
 	: IEditorlet(default_state, default_style, unitspeak(unit), label, subscript) {}
 
 Dimensionlet::Dimensionlet(DimensionStyle& default_style, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
-	: Dimensionlet(DimensionState::Normal, default_style, unit, label, subscript) {}
+	: Dimensionlet(DimensionState::Default, default_style, unit, label, subscript) {}
 
 Dimensionlet::Dimensionlet(DimensionState default_state, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: IEditorlet(default_state, unitspeak(unit), label, subscript) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
-	: Dimensionlet(DimensionState::Normal, unit, label, subscript) {}
+	: Dimensionlet(DimensionState::Default, unit, label, subscript) {}
 
 /*************************************************************************************************/
 Percentagelet::Percentagelet(DimensionState default_state, DimensionStyle& default_style
@@ -619,10 +603,10 @@ Percentagelet::Percentagelet(DimensionState default_state, DimensionStyle& defau
 	: IEditorlet(default_state, default_style, "%", label, subscript) {}
 
 Percentagelet::Percentagelet(DimensionStyle& default_style, Platform::String^ label, Platform::String^ subscript)
-	: Percentagelet(DimensionState::Normal, default_style, label, subscript) {}
+	: Percentagelet(DimensionState::Default, default_style, label, subscript) {}
 
 Percentagelet::Percentagelet(DimensionState default_state, Platform::String^ label, Platform::String^ subscript)
 	: IEditorlet(default_state, "%", label, subscript) {}
 
 Percentagelet::Percentagelet(Platform::String^ label, Platform::String^ subscript)
-	: Percentagelet(DimensionState::Normal, label, subscript) {}
+	: Percentagelet(DimensionState::Default, label, subscript) {}

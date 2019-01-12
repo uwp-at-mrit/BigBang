@@ -153,7 +153,6 @@ public:
 		this->universe->register_virtual_keydown_event_handler(this);
 
 		this->Content = this->universe->canvas;
-		
 		this->timeline = ref new CompositeTimerListener();
 		this->timer = ref new Timer(this->timeline, frame_per_second);
 		this->timeline->push_timer_listener(this->universe);

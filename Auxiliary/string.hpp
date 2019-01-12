@@ -60,6 +60,7 @@ std::string retval; { \
 
 	Platform::String^ substring(Platform::String^ src, int start, int endplus1 = -1);
 	Platform::String^ flstring(double flonum, int precision);
+	Platform::String^ fxstring(long long fixnum, int width);
 	Platform::String^ sstring(unsigned long long bytes, int precision);
 
 	Platform::String^ make_wstring(const wchar_t* fmt, ...);

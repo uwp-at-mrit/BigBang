@@ -684,7 +684,7 @@ private:
 		for (E id = id0; id <= idn; id++) {
 			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, id.ToString()), id);
 
-			ds[id]->set_style(DimensionState::Normal, this->pump_style);
+			ds[id]->set_style(DimensionState::Default, this->pump_style);
 			ds[id]->set_style(DimensionState::Highlight, this->highlight_style);
 		}
 	}

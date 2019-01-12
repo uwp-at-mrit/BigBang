@@ -23,19 +23,22 @@ namespace WarGrey::SCADA {
 	long long current_floor_seconds(long long span_s = day_span_s);
 	long long current_ceiling_seconds(long long span_s = day_span_s);
 
+	void split_date(long long s, long long* year, long long* month, long long* day);
+	void split_time(long long s, long long* hours, long long* minutes, long long* seconds);
+	
+	long long seconds_add_seconds(long long s, long long count);
+	long long seconds_add_minutes(long long s, long long count);
+	long long seconds_add_hours(long long s, long long count);
+	long long seconds_add_days(long long s, long long count);
+	long long seconds_add_months(long long s, long long count);
+	long long seconds_add_years(long long s, long long count);
+
 	void sleep(long long ms);
 	void sleep_us(long long us);
-
+	
 	Platform::String^ make_timestamp_utc(long long utc_s, bool locale);
 	Platform::String^ make_datestamp_utc(long long utc_s, bool locale);
 	Platform::String^ make_daytimestamp_utc(long long utc_s, bool locale);
 
 	Platform::String^ update_nowstamp(bool need_us = true, int* l00ns = nullptr);
-
-	void process_usage(long long* kernel, long long* user);
-	void process_usage_diff(long long* kernel, long long* user);
-	Platform::String^ timing_string(long long kstart, long long ustart);
-
-#define BEGIN_TIMING { long long _k_e_r_n_e_l_, _u_s_e_r_; process_usage(&_k_e_r_n_e_l_, &_u_s_e_r_);
-#define END_TIMING(sendf, log_level) sendf(log_level, timing_string(_k_e_r_n_e_l_, _u_s_e_r_)); }
 }

@@ -145,9 +145,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.cpp">
       <Filter>virtualization</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)test\performance.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.cpp">
       <Filter>graphlet\cylinder</Filter>
     </ClCompile>
@@ -170,11 +167,11 @@
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\datepickerlet.cpp">
-      <Filter>graphlet</Filter>
-    </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\virtualization\bucketpad.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.cpp">
       <Filter>virtualization</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.cpp">
+      <Filter>graphlet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -326,9 +323,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.hpp">
       <Filter>virtualization</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)test\performance.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.hpp">
       <Filter>graphlet\cylinder</Filter>
     </ClInclude>
@@ -351,11 +345,11 @@
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)timemachine.hpp" />
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\datepickerlet.hpp">
-      <Filter>graphlet</Filter>
-    </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\virtualization\bucketpad.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.hpp">
       <Filter>virtualization</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.hpp">
+      <Filter>graphlet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -424,10 +418,10 @@
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\performance.resw">
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\timemachine.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\performance.resw">
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\timemachine.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

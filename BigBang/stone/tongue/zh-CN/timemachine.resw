@@ -117,16 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Confirm" xml:space="preserve">
-    <value>处理</value>
+  <data name="Time0" xml:space="preserve">
+    <value>起始时间</value>
   </data>
-  <data name="Receive" xml:space="preserve">
-    <value>接收</value>
-  </data>
-  <data name="Render" xml:space="preserve">
-    <value>渲染</value>
-  </data>
-  <data name="Send" xml:space="preserve">
-    <value>发送</value>
+  <data name="Timen" xml:space="preserve">
+    <value>结束时间</value>
   </data>
 </root>

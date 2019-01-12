@@ -6,7 +6,7 @@
 #include "text.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class DimensionState { Normal, Input, Highlight, _ };
+	private enum class DimensionState { Default, Input, Highlight, _ };
 
 	private struct DimensionStyle {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;

@@ -665,41 +665,29 @@ void ITimeSerieslet::on_tap(float x, float y) {
 }
 
 bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
-	bool handled = false;
+	bool handled = true;
 
 	switch (key) {
-	case VirtualKey::PageUp: {
-		this->history.start = current_seconds() - this->history_max;
-		handled = true;
-	}; break;
 	case VirtualKey::Left: {
 		this->history.start -= (this->history.span >> 3);
 		this->history.start = std::max(this->history.start, current_seconds() - this->history_max);
-		handled = true;
 	}; break;
 	case VirtualKey::Right: {
 		this->history.start += (this->history.span >> 3);
 		this->history.start = std::min(this->history.start, current_seconds());
-		handled = true;
-	}; break;
-	case VirtualKey::PageDown: {
-		this->history.start = current_seconds();
-		handled = true;
 	}; break;
 	case VirtualKey::Add: {
 		this->history.span = this->history.span >> 1;
 		this->history.span = std::max(this->history.span, minute_span_s);
-		handled = true;
 	}; break;
 	case VirtualKey::Subtract: {
 		this->history.span = this->history.span << 1;
 		this->history.span = std::min(this->history.span, day_span_s);
-		handled = true;
 	}; break;
-	case VirtualKey::Escape: {
-		this->history = this->realtime;
-		handled = true;
-	}; break;
+	case VirtualKey::PageUp: this->history.start = current_seconds() - this->history_max; break;
+	case VirtualKey::PageDown: this->history.start = current_seconds(); break;
+	case VirtualKey::Escape: this->history = this->realtime; break;
+	default: handled = false; break;
 	}
 
 	if (handled) {
