@@ -24,7 +24,7 @@
  #(Racket   #x89E051 #px"[.]rkt$")
  #(SVG      #xC34C26 #px"[.]svg$")
  #(Scribble #x1E4AEC #px"[.](scrbl|css)$")
- #(ResX     #xEDEDED #px"[.]resw$")]
+ #(ResX     #xCFCFFF #px"[.]resw$")]
 
 @handbook-table[]
 
