@@ -95,9 +95,9 @@ private:
 	unsigned int id;
 };
 
-private class NavigationPlanet : public Planet {
+private class NavigationPlanet : public IHeadUpPlanet {
 public:
-	NavigationPlanet(IUniverseNavigator* navigator, Platform::String^ title) : Planet(title), master(navigator) {}
+	NavigationPlanet(IUniverseNavigator* navigator, Platform::String^ title) : IHeadUpPlanet(title), master(navigator) {}
 
 public:
 	bool can_select(IGraphlet* g) override {
@@ -108,7 +108,6 @@ public:
 		// do nothing
 		// The decorator does it.
 	}
-
 
 	bool on_pointer_pressed(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) override {
 		return true;

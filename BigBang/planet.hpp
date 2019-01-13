@@ -202,7 +202,7 @@ namespace WarGrey::SCADA {
 
 	private class Planet : public WarGrey::SCADA::IPlanet {
 	public:
-		~Planet() noexcept;
+		virtual ~Planet() noexcept;
 		Planet(Platform::String^ caption, unsigned int initial_mode = 0);
 
 	public:
@@ -245,6 +245,8 @@ namespace WarGrey::SCADA {
 		void end_update_sequence() override;
 
 	public:
+		using WarGrey::SCADA::IPlanet::on_elapse;
+
 		bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
 		bool on_character(unsigned int keycode) override;
 		void on_swipe(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) override;
@@ -328,4 +330,12 @@ namespace WarGrey::SCADA {
 		int update_sequence_depth;
 		bool needs_update;
     };
+
+	private class IHeadUpPlanet abstract : public WarGrey::SCADA::Planet {
+	public:
+		IHeadUpPlanet(Platform::String^ caption, unsigned int initial_mode = 0);
+
+	public:
+		virtual void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr);
+	};
 }

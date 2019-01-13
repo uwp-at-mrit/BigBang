@@ -47,7 +47,8 @@ private:
 ISatellite::ISatellite(Log level, Platform::String^ caption, unsigned int initial_mode)
 	: ISatellite(make_system_logger(level, caption), caption, initial_mode) {}
 
-ISatellite::ISatellite(Syslog* logger, Platform::String^ caption, unsigned int initial_mode) : Planet(caption, initial_mode), ready(false) {
+ISatellite::ISatellite(Syslog* logger, Platform::String^ caption, unsigned int initial_mode)
+	: IHeadUpPlanet(caption, initial_mode), ready(false) {
 	SatelliteDisplay^ surface = ref new SatelliteDisplay(logger, this);
 
 	this->orbit = ref new Flyout();

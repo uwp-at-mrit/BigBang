@@ -1170,7 +1170,8 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 
 			if (unsafe_graphlet_unmasked(info, this->mode)) {
 				child->fill_extent(info->x, info->y, &width, &height);
-				if ((info->x < dsWidth) && (info->y < dsHeight) && ((info->x + width) > dsX) && ((info->y + height) > dsY)) {
+
+				if (((info->x < dsWidth) || ((info->x + width) > dsX)) && ((info->y < dsHeight) || ((info->y + height) > dsY))) {
 #ifndef _DEBUG
 					if (info->rotation == 0.0F) {
 						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
@@ -1664,4 +1665,14 @@ void IPlanet::move_to(IGraphlet* g, IGraphlet* xtarget, float xfx, IGraphlet* yt
 	graphlet_anchor_fraction(a, &fx, &fy);
 
 	this->move_to(g, xtarget, xfx, ytarget, yfy, fx, fy, dx, dy);
+}
+
+/*************************************************************************************************/
+IHeadUpPlanet::IHeadUpPlanet(Platform::String^ caption, unsigned int initial_mode) : Planet(caption, initial_mode) {}
+
+void IHeadUpPlanet::fill_margin(float* top, float* right, float* bottom, float* left) {
+	SET_BOX(top, 0.0F);
+	SET_BOX(right, 0.0F);
+	SET_BOX(bottom, 0.0F);
+	SET_BOX(left, 0.0F);
 }

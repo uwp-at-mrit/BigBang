@@ -2,6 +2,7 @@
 
 namespace WarGrey::SCADA {
     class IPlanet;
+	class IHeadUpPlanet;
     class IPlanetDecorator;
 
 	class ISprite;

@@ -30,7 +30,7 @@ protected:
 };
 
 /*************************************************************************************************/
-HeadsUpPlanet::HeadsUpPlanet(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
+HeadsUpPlanet::HeadsUpPlanet(PLCMaster* plc) : IHeadUpPlanet(__MODULE__), device(plc) {
 	this->push_decorator(new HeadsUpDecorator());
 }
 
@@ -49,12 +49,19 @@ void HeadsUpPlanet::load(CanvasCreateResourcesReason reason, float width, float 
 	}
 }
 
-void HeadsUpPlanet::on_transfer(IPlanet* from, IPlanet* to) {
-	this->statusbar->set_caption(to->display_name());
-}
-
 void HeadsUpPlanet::reflow(float width, float height) {
 	this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
+}
+
+void HeadsUpPlanet::fill_margin(float* top, float* right, float* bottom, float* left) {
+	float base_size = statusbar_height();
+
+	SET_BOXES(top, bottom, base_size * 2.0F);
+	SET_BOXES(left, right, base_size);
+}
+
+void HeadsUpPlanet::on_transfer(IPlanet* from, IPlanet* to) {
+	this->statusbar->set_caption(to->display_name());
 }
 
 bool HeadsUpPlanet::can_select(IGraphlet* g) {

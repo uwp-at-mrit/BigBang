@@ -53,11 +53,6 @@ namespace WarGrey::SCADA {
         read_write_property(float, max_height);
 
 	public:
-		void apply_source_size(float sketch_width, float sketch_height);
-		float sketch_to_application_width(float sketch_width);
-		float sketch_to_application_height(float sketch_height);
-
-	public:
 		virtual bool surface_ready() = 0;
 		virtual bool ui_thread_ready() = 0;
 		virtual bool shown();
@@ -66,8 +61,17 @@ namespace WarGrey::SCADA {
 		virtual void on_navigate(int from_index, int to_index) = 0;
 
 	public:
+		void apply_source_size(float sketch_width, float sketch_height);
+		float sketch_to_application_width(float sketch_width);
+		float sketch_to_application_height(float sketch_height);
+
+	public:
 		void enter_critical_section();
 		void leave_critical_section();
+
+	internal:
+		virtual Windows::Foundation::Point global_to_local_point(IPlanet* p, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
+		virtual Windows::Foundation::Point local_to_global_point(IPlanet* p, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
 
 	internal:
 		virtual void refresh(WarGrey::SCADA::IPlanet* target) = 0;
@@ -95,14 +99,14 @@ namespace WarGrey::SCADA {
 		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
-			WarGrey::SCADA::IPlanet* heads_up_planet = nullptr);
+			WarGrey::SCADA::IHeadUpPlanet* heads_up_planet = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
 			WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
-			WarGrey::SCADA::IPlanet* heads_up_planet = nullptr);
+			WarGrey::SCADA::IHeadUpPlanet* heads_up_planet = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
@@ -110,7 +114,7 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
-			WarGrey::SCADA::IPlanet* heads_up_planet = nullptr);
+			WarGrey::SCADA::IHeadUpPlanet* heads_up_planet = nullptr);
 		
 	internal:
 		void refresh(WarGrey::SCADA::IPlanet* target) override;
@@ -126,6 +130,8 @@ namespace WarGrey::SCADA {
 		override_read_only_property(float, actual_height);
 		read_write_property(double, global_mask_alpha);
 		read_write_property(double, mask_alpha);
+
+	public:
 		void use_global_mask_setting(bool yes, bool* prev_state = nullptr);
 		bool surface_ready() override;
 		bool ui_thread_ready() override;
@@ -145,6 +151,10 @@ namespace WarGrey::SCADA {
 		void on_elapse(long long count, long long interval, long long uptime) override;
 		void on_elapse(long long count, long long interval, long long uptime, long long elapsed) override;
 		void on_navigate(int from_index, int to_index) override;
+	
+	internal:
+		Windows::Foundation::Point global_to_local_point(IPlanet* p, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F) override;
+		Windows::Foundation::Point local_to_global_point(IPlanet* p, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F) override;
 
 	protected private:
 		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason) {}
@@ -181,9 +191,15 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ display;
 		WarGrey::SCADA::IUniverseNavigator* _navigator;
-		WarGrey::SCADA::IPlanet* headup_planet;
 		WarGrey::SCADA::IPlanet* head_planet;
 		WarGrey::SCADA::IPlanet* recent_planet;
+
+	private:
+		WarGrey::SCADA::IHeadUpPlanet* headup_planet;
+		float hup_top_margin;
+		float hup_bottom_margin;
+		float hup_left_margin;
+		float hup_right_margin;
 
 	private:
 		std::map<unsigned int, Windows::UI::Input::PointerUpdateKind> figures;
@@ -196,6 +212,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IPlanet* from_planet;
 		float transfer_delta;
 		float transferX;
+		float transferY;
 
 	private:
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ mask_color;

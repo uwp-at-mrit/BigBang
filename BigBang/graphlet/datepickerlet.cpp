@@ -140,7 +140,7 @@ bool DatePickerlet::on_key(VirtualKey key, bool wargrey_keyboard) {
 	case VirtualKey::Left: this->caret_index = (this->caret_index + DateTimeIndex::Second) % DateTimeIndex::_; break;
 	case VirtualKey::Right: this->caret_index = (this->caret_index + 1) % DateTimeIndex::_; break;
 	case VirtualKey::Up: case VirtualKey::Down: {
-		int sign = ((key == VirtualKey::Up) ? 1 : -1);
+		int sign = ((key == VirtualKey::Up) ? -1 : 1);
 		long long s = this->get_value();
 		
 		switch (this->caret_index) {
@@ -153,7 +153,7 @@ bool DatePickerlet::on_key(VirtualKey key, bool wargrey_keyboard) {
 		}
 	}; break;
 	case VirtualKey::PageUp: case VirtualKey::PageDown: {
-		int sign = ((key == VirtualKey::PageUp) ? 1 : -1);
+		int sign = ((key == VirtualKey::PageUp) ? -1 : 1);
 		long long s = this->get_value();
 
 		switch (this->caret_index) {
@@ -298,7 +298,7 @@ void DatePickerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 		x += region_width;
 
 		if (separator != nullptr) {
-			ds->DrawTextLayout(separator, x, center_y - box_cc(box), style.separator_color);
+			ds->DrawTextLayout(separator, x, center_y - box->height * 0.5F, style.separator_color);
 			x += box->width;
 		} else {
 			x += this->date_separator_box.width;

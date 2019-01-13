@@ -39,7 +39,7 @@ static ICanvasBrush^ fg_color = Colours::make(Colours::GhostWhite, time_machine_
 /*************************************************************************************************/
 private ref class TimeMachineUniverseDisplay sealed : public UniverseDisplay {
 internal:
-	TimeMachineUniverseDisplay(Syslog* logger, ITimeMachine* entity, int frame_rate, IPlanet* headsup)
+	TimeMachineUniverseDisplay(Syslog* logger, ITimeMachine* entity, int frame_rate, IHeadUpPlanet* headsup)
 		: UniverseDisplay(logger, nullptr, new ListViewNavigator(), headsup)
 		, machine(entity), closed(true), current_timepoint(0LL) {
 	
@@ -140,9 +140,9 @@ private:
 	long long direction;
 };
 
-private class TimeMachineHeadsUp : public Planet {
+private class TimeMachineHeadsUp : public IHeadUpPlanet {
 public:
-	TimeMachineHeadsUp(ITimeMachine* master) : Planet(__MODULE__), master(master) {
+	TimeMachineHeadsUp(ITimeMachine* master) : IHeadUpPlanet(__MODULE__), machine(master) {
 		this->datetime_style.datetime_color = fg_color;
 		this->datetime_style.label_color = Colours::make(Colours::LightSeaGreen, time_machine_alpha);
 		this->datetime_style.caret_color = Colours::make(Colours::DeepSkyBlue, time_machine_alpha);
@@ -164,7 +164,7 @@ public:
 			this->icons[id] = this->insert_one(new Credit<Labellet, TMIcon>(caption, icon_font, icon_color), id);
 		}
 
-		this->load_date_picker(this->time_pickers, TM::Time0, -this->master->span_seconds());
+		this->load_date_picker(this->time_pickers, TM::Time0, -this->machine->span_seconds());
 		this->load_date_picker(this->time_pickers, TM::Timen, 0LL);
 	}
 
@@ -184,8 +184,16 @@ public:
 			icon_rx -= (icon_width + gapsize);
 		}
 
-		this->move_to(this->time_pickers[TM::Time0], this->icons[TMIcon::Quit], GraphletAnchor::RC, GraphletAnchor::LC, icon_y * 2.0F - width);
-		this->move_to(this->time_pickers[TM::Timen], this->time_pickers[TM::Time0], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
+		this->move_to(this->time_pickers[TM::Time0], icon_y, icon_y, GraphletAnchor::LT);
+		this->move_to(this->time_pickers[TM::Timen], this->time_pickers[TM::Time0], GraphletAnchor::LB, GraphletAnchor::LT);
+	}
+
+	void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override {
+		float base_size = statusbar_height();
+
+		SET_BOX(top, base_size * 3.0F);
+		SET_BOX(bottom, base_size);
+		SET_BOXES(left, right, base_size);
 	}
 
 public:
@@ -207,9 +215,9 @@ public:
 
 		if (icon != nullptr) {
 			switch (icon->id) {
-			case TMIcon::Quit: this->master->hide(); break;
+			case TMIcon::Quit: this->machine->hide(); break;
 			case TMIcon::BookMark: {
-				auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->info->master);
+				auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->master());
 
 				if (tmud != nullptr) {
 					tmud->flyout_content()->IsPaneOpen = true;
@@ -233,7 +241,7 @@ private:
 	DatePickerStyle datetime_style;
 
 private:
-	ITimeMachine* master;
+	ITimeMachine* machine;
 };
 
 /*************************************************************************************************/

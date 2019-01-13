@@ -48,7 +48,7 @@ public:
 	}
 
 internal:
-	DredgerUniverse(Platform::String^ name, PLCMaster* device, IUniverseNavigator* navigator, IPlanet* heads_up)
+	DredgerUniverse(Platform::String^ name, PLCMaster* device, IUniverseNavigator* navigator, IHeadUpPlanet* heads_up)
 		: UniverseDisplay(make_system_logger(default_logging_level, name), name, navigator, heads_up), device(device) {}
 
 protected:
@@ -103,7 +103,7 @@ public:
 	}
 
 internal:
-	DashboardUniverse(Platform::String^ name, PLCMaster* device, IUniverseNavigator* navigator, IPlanet* heads_up, unsigned int dbidx)
+	DashboardUniverse(Platform::String^ name, PLCMaster* device, IUniverseNavigator* navigator, IHeadUpPlanet* heads_up, unsigned int dbidx)
 		: DredgerUniverse(name, device, navigator, heads_up) {
 		this->page_turner = new PageEventListener(dbidx);
 		this->device->push_confirmation_receiver(this->page_turner);

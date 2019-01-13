@@ -447,7 +447,7 @@ public:
 	}
 
 public:
-	void reflow_pump_station(float width, float height, float gwidth, float gheight, float vinset) {
+	void reflow_pump_station(float width, float height, float gwidth, float gheight) {
 		float cx = width * 0.5F;
 		float cy = height * 0.5F;
 		float sq1_y;
@@ -479,7 +479,7 @@ public:
 		}
 	}
 	
-	void reflow_devices(float width, float height, float gwidth, float gheight, float vinset) {
+	void reflow_devices(float width, float height, float gwidth, float gheight) {
 		GraphletAnchor lbl_a, cpt_a, bar_a;
 		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy, margin;
 		float pradius = this->pumps[HS::A]->get_radiusX();
@@ -563,13 +563,13 @@ public:
 		}
 	}
 
-	void reflow_metrics(float width, float height, float gwidth, float gheight, float vinset) {
+	void reflow_metrics(float width, float height, float gwidth, float gheight) {
 		this->master->move_to(this->temperatures[HS::Master], this->thermometers[HS::Master], 1.0F, 0.75F, GraphletAnchor::LC, gwidth);
 		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], 1.0F, 0.75F, GraphletAnchor::LB, gwidth);
 		this->master->move_to(this->levels[HS::VisorOil], this->thermometers[HS::Visor], 1.0F, 0.75F, GraphletAnchor::LT, gwidth);
 		
 		{ // reflow alarms
-			float lblgap = vinset * 0.25F;
+			float lblgap = gheight * 0.25F;
 			float vgap = lblgap * 0.5F;
 			
 			this->master->move_to(this->alarms[HS::F01], this->thermometers[HS::Master], 1.0F, 0.25F, GraphletAnchor::LB, gwidth, -vgap);
@@ -834,12 +834,11 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
-		float vinset = statusbar_height();
-		float gwidth = width / 78.0F;
-		float gheight = (height - vinset - vinset) / 38.0F;
+		float gwidth = width / 76.0F;
+		float gheight = height / 36.0F;
 
 		this->grid->set_grid_width(gwidth);
-		this->grid->set_grid_height(gheight, vinset);
+		this->grid->set_grid_height(gheight);
 		
 		dashboard->construct(gwidth, gheight);
 
@@ -853,13 +852,12 @@ void HydraulicsPage::reflow(float width, float height) {
 	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
-		float vinset = statusbar_height();
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		dashboard->reflow_pump_station(width, height, gwidth, gheight, vinset);
-		dashboard->reflow_devices(width, height, gwidth, gheight, vinset);
-		dashboard->reflow_metrics(width, height, gwidth, gheight, vinset);
+		dashboard->reflow_pump_station(width, height, gwidth, gheight);
+		dashboard->reflow_devices(width, height, gwidth, gheight);
+		dashboard->reflow_metrics(width, height, gwidth, gheight);
 	}
 }
 

@@ -6,12 +6,13 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private class HeadsUpPlanet : public WarGrey::SCADA::Planet {
+	private class HeadsUpPlanet : public WarGrey::SCADA::IHeadUpPlanet {
 	public:
 		HeadsUpPlanet(WarGrey::SCADA::PLCMaster* plc = nullptr);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
+		void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void reflow(float width, float height) override;
 
 	public:

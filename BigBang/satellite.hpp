@@ -6,7 +6,7 @@
 #include "hamburger.hpp"
 
 namespace WarGrey::SCADA {
-	private class ISatellite abstract : public WarGrey::SCADA::IHamburger, public WarGrey::SCADA::Planet {
+	private class ISatellite abstract : public WarGrey::SCADA::IHamburger, public WarGrey::SCADA::IHeadUpPlanet {
 	public:
 		ISatellite(WarGrey::SCADA::Syslog* logger, Platform::String^ caption, unsigned int initial_mode = 0U);
 		ISatellite(WarGrey::SCADA::Log level, Platform::String^ caption, unsigned int initial_mode = 0U);

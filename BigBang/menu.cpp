@@ -55,28 +55,24 @@ void WarGrey::SCADA::menu_popup(MenuFlyout^ m, IGraphlet* g, float local_x, floa
 	IPlanet* p = g->master();
 
 	if (p != nullptr) {
-		Point position = p->local_to_global_point(g, local_x, local_y, xoff, yoff);
+		Point pt = p->local_to_global_point(g, local_x, local_y, xoff, yoff);
 
 		the_planet_for_multiple_selected_targets = nullptr;
 		the_specific_target = g;
-		m->ShowAt(p->master()->canvas, position);
+		m->ShowAt(p->master()->canvas, p->master()->local_to_global_point(p, pt.X, pt.Y));
 	}
 }
 
 void WarGrey::SCADA::menu_popup(MenuFlyout^ m, IPlanet* p, float x, float y, float xoff, float yoff) {
 	if (p != nullptr) {
-		Point position(x, y);
-
 		the_planet_for_multiple_selected_targets = p;
 		the_specific_target = nullptr;
-		m->ShowAt(p->master()->canvas, position);
+		m->ShowAt(p->master()->canvas, p->master()->local_to_global_point(p, x, y, xoff, yoff));
 	}
 }
 
 void WarGrey::SCADA::group_menu_popup(MenuFlyout^ m, IPlanet* p, float x, float y, float xoff, float yoff) {
 	if (p != nullptr) {
-		Point position(x, y);
-
-		m->ShowAt(p->master()->canvas, position);
+		m->ShowAt(p->master()->canvas, p->master()->local_to_global_point(p, x, y, xoff, yoff));
 	}
 }
