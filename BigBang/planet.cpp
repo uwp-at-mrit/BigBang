@@ -52,11 +52,13 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 class GraphletInfo : public WarGrey::SCADA::IGraphletInfo {
 public:
-    GraphletInfo(IPlanet* master, unsigned int mode) : IGraphletInfo(master), mode(mode) {};
+    GraphletInfo(IPlanet* master, unsigned int mode)
+		: IGraphletInfo(master), mode(mode), alpha(1.0F) {};
 
 public:
     float x;
     float y;
+	float alpha;
     float rotation;
     bool selected;
 
@@ -508,6 +510,14 @@ void Planet::move(IGraphlet* g, float x, float y) {
     }
 }
 
+void Planet::cellophane(IGraphlet* g, float opacity) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
+
+	if (info != nullptr) {
+		info->alpha = opacity;
+	}
+}
+
 IGraphlet* Planet::find_graphlet(float x, float y) {
     IGraphlet* found = nullptr;
 
@@ -725,19 +735,21 @@ void Planet::set_caret_owner(IGraphlet* g) {
 			if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
 				if (this->focused_graphlet != nullptr) {
 					this->focused_graphlet->own_caret(false);
+					this->on_focus(this->focused_graphlet, false);
 				}
 
 				this->focused_graphlet = g;
 				g->own_caret(true);
 
-				this->on_focus(g);
+				this->on_focus(g, true);
 			}
 		} else if (this->focused_graphlet != nullptr) {
 			this->focused_graphlet->own_caret(false);
+			this->on_focus(this->focused_graphlet, false);
 			this->focused_graphlet = nullptr;
 		}
 	} else if (g != nullptr) {
-		this->on_focus(g);
+		this->on_focus(g, true);
 	}
 }
 
@@ -1174,13 +1186,13 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 				if (((info->x < dsWidth) || ((info->x + width) > dsX)) && ((info->y < dsHeight) || ((info->y + height) > dsY))) {
 #ifndef _DEBUG
 					if (info->rotation == 0.0F) {
-						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+						layer = ds->CreateLayer(info->alpha, Rect(info->x, info->y, width, height));
 					} else {
 						float cx = info->x + width * 0.5F;
 						float cy = info->y + height * 0.5F;
 
 						ds->Transform = make_rotation_matrix(info->rotation, cx, cy, transformX, transformY);
-						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+						layer = ds->CreateLayer(info->alpha, Rect(info->x, info->y, width, height));
 					}
 #endif
 

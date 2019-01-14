@@ -412,17 +412,19 @@ bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
-void DraughtsPage::on_focus(IGraphlet* g) {
-	auto timeseries = dynamic_cast<ITimeSerieslet*>(g);
-	auto editor = dynamic_cast<IEditorlet*>(g);
+void DraughtsPage::on_focus(IGraphlet* g, bool yes) {
+	if (yes) {
+		auto timeseries = dynamic_cast<ITimeSerieslet*>(g);
+		auto editor = dynamic_cast<IEditorlet*>(g);
 
-	if (timeseries != nullptr) {
-		this->show_virtual_keyboard(ScreenKeyboard::Affinepad, g, GraphletAnchor::CB, 0.0F, 4.0F);
-	} else if (editor != nullptr) {
-		if (this->device->authorized()) {
-			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
-		} else {
-			this->set_caret_owner(nullptr);
+		if (timeseries != nullptr) {
+			this->show_virtual_keyboard(ScreenKeyboard::Affinepad, g, GraphletAnchor::CB, 0.0F, 4.0F);
+		} else if (editor != nullptr) {
+			if (this->device->authorized()) {
+				this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+			} else {
+				this->set_caret_owner(nullptr);
+			}
 		}
 	}
 }

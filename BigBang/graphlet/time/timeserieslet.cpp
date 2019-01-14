@@ -424,8 +424,8 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
 		axes->AddLine(xthis, this->height);
 		axes->EndFigure(CanvasFigureLoop::Open);
 
-		hmarks = geometry_union(hmarks, gtimemark, xthis - time_mark_te.width * 0.5F, y - time_mark_te.height);
-		hmarks = geometry_union(hmarks, gdatemark, xthis - date_mark_te.width * 0.5F, y - date_mark_te.height - time_mark_te.height);
+		hmarks = geometry_union(hmarks, gdatemark, xthis - date_mark_te.width * 0.5F, y - date_mark_te.height);
+		hmarks = geometry_union(hmarks, gtimemark, xthis - time_mark_te.width * 0.5F, y - time_mark_te.height - date_mark_te.height);
 	}
 
 	this->hmarks = geometry_freeze(hmarks);

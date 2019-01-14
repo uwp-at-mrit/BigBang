@@ -14,12 +14,6 @@ namespace WarGrey::SCADA {
 		Platform::String^ pare,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
 
-	Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ make_vertical_layout(
-		Platform::String^ pare,
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-		float spacing,
-		Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment align);
-
 	Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ make_text_format(
 		float size = 14.0F,
 		Microsoft::Graphics::Canvas::Text::CanvasWordWrapping wrapping = Microsoft::Graphics::Canvas::Text::CanvasWordWrapping::NoWrap,

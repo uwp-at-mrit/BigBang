@@ -16,22 +16,6 @@ CanvasTextLayout^ WarGrey::SCADA::make_text_layout(Platform::String^ para, Canva
     return ref new CanvasTextLayout(CanvasDevice::GetSharedDevice(), para, font, 0.0F, 0.0F);
 }
 
-CanvasTextLayout^ WarGrey::SCADA::make_vertical_layout(Platform::String^ para, CanvasTextFormat^ font, float spacing, CanvasHorizontalAlignment align) {
-    auto layout = make_text_layout(para, font);
-
-    layout->WordWrapping = CanvasWordWrapping::WholeWord;
-    layout->HorizontalAlignment = align;
-
-    if (spacing > 0.0F) {
-        layout->LineSpacing = spacing;
-    } else if (spacing < 0.0F) {
-        layout->LineSpacing = -spacing;
-        layout->LineSpacingMode = CanvasLineSpacingMode::Proportional;
-    }
-
-    return layout;
-}
-
 CanvasTextFormat^ WarGrey::SCADA::make_text_format(CanvasTextFormat^ src, float size) {
 	CanvasTextFormat^ font = make_text_format(src->FontFamily, size, src->WordWrapping, src->HorizontalAlignment);
 

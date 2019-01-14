@@ -194,11 +194,13 @@ public:
 		}
 	}
 
-	void Settings::on_focus(IGraphlet* g) override {
-		auto editor = dynamic_cast<IEditorlet*>(g);
+	void Settings::on_focus(IGraphlet* g, bool yes) override {
+		if (yes) {
+			auto editor = dynamic_cast<IEditorlet*>(g);
 
-		if (editor != nullptr) {
-			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+			if (editor != nullptr) {
+				this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+			}
 		}
 	}
 

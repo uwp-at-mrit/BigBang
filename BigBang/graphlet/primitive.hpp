@@ -47,9 +47,9 @@ namespace WarGrey::SCADA {
 		void notify_updated();
 
 	private:
+		WarGrey::SCADA::GraphletAnchor anchor;
 		float anchor_x;
 		float anchor_y;
-		WarGrey::SCADA::GraphletAnchor anchor;
 	};
 
 	private class IPipelet abstract : public virtual WarGrey::SCADA::IGraphlet {
@@ -113,16 +113,16 @@ namespace WarGrey::SCADA {
 				bool changed = false;
 
 				if (vmin <= vmax) {
-					if ((this->vmin != vmin) && (this->vmax != vmax)) {
+					if ((this->vmin != vmin) || (this->vmax != vmax)) {
 						this->vmin = vmin;
 						this->vmax = vmax;
-						this->changed = true;
+						changed = true;
 					}
 				} else {
-					if ((this->vmin != vmax) && (this->vmax != vmin)) {
+					if ((this->vmin != vmax) || (this->vmax != vmin)) {
 						this->vmin = vmax;
 						this->vmax = vmin;
-						this->changed = true;
+						changed = true;
 					}
 				}
 
@@ -137,12 +137,16 @@ namespace WarGrey::SCADA {
 		virtual void on_range_changed(T vmin, T vmax) {}
 
 	public:
-		double get_percentage() {
+		double get_percentage(T value) {
 			double flmin = double(this->vmin);
 			double flrange = double(this->vmax) - flmin;
-			double v = double(this->get_value());
+			double v = double(value);
 
 			return (this->vmin == this->vmax) ? 1.0 : ((v - flmin) / flrange);
+		}
+
+		double get_percentage() {
+			return this->get_percentage(this->get_value());
 		}
 
 	protected:

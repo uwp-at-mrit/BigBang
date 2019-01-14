@@ -191,8 +191,6 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
     float width = Width / 8.0F;
 	float context_y = y + (status_height - this->caption->LayoutBounds.Height) * 0.5F;
 	
-	ds->FillRectangle(x, y, Width, Height, Colours::Background);
-
 	statusbar->enter_shared_section();
 	float lastone_xoff = (Width - statusbar->ipv4->LayoutBounds.Width);
 	ds->DrawTextLayout(this->caption, x + width * 0.0F, context_y, Colours::Chocolate);
@@ -289,8 +287,6 @@ void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
 void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	size_t total = this->messages.size();
 	
-	ds->FillRectangle(x, y, Width, Height, Colours::Background);
-
 	if (total > 0) {	
 		this->section.lock_shared();
 		

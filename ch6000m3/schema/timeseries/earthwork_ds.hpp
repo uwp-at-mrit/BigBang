@@ -2,7 +2,7 @@
 
 #include <ppltasks.h>
 
-#include "graphlet/dashboard/timeserieslet.hpp"
+#include "graphlet/time/timeserieslet.hpp"
 
 #include "sqlite3/rotation.hpp"
 

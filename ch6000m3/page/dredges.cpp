@@ -1776,11 +1776,13 @@ bool DredgesPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
-void DredgesPage::on_focus(IGraphlet* g) {
-	auto editor = dynamic_cast<IEditorlet*>(g);
+void DredgesPage::on_focus(IGraphlet* g, bool yes) {
+	if (yes) {
+		auto editor = dynamic_cast<IEditorlet*>(g);
 
-	if (editor != nullptr) {
-		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		if (editor != nullptr) {
+			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		}
 	}
 }
 

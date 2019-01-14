@@ -67,6 +67,9 @@ namespace WarGrey::SCADA {
 		virtual void erase() = 0;
 
 	public:
+		virtual void cellophane(IGraphlet* g, float opacity) = 0;
+
+	public:
 		virtual void notify_graphlet_updated(ISprite* g) = 0;
 		virtual void notify_graphlet_ready(IGraphlet* g) = 0;
 		virtual void on_graphlet_ready(IGraphlet* g) = 0;
@@ -75,7 +78,7 @@ namespace WarGrey::SCADA {
 		virtual void end_update_sequence() = 0;
 
 	public:
-		virtual void on_focus(WarGrey::SCADA::IGraphlet* g) {}
+		virtual void on_focus(WarGrey::SCADA::IGraphlet* g, bool on_off) {}
 		virtual bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) { return false; }
 		virtual bool on_character(unsigned int keycode) { return false; }
 		virtual void on_elapse(long long count, long long interval, long long uptime) {}
@@ -234,6 +237,9 @@ namespace WarGrey::SCADA {
 		void remove(IGraphlet* g) override;
 		void erase() override;
 		void size_cache_invalid();
+
+	public:
+		void cellophane(IGraphlet* g, float opacity) override;
 
 	public:
 		void notify_graphlet_updated(ISprite* g) override;

@@ -34,8 +34,8 @@ private enum class TMIcon : unsigned int { BookMark, Quit, _ };
 
 private enum class TM : unsigned int { Time0, Timen, _ };
 
-static const double time_machine_alpha = 0.64;
-static ICanvasBrush^ fg_color = Colours::make(Colours::GhostWhite, time_machine_alpha);
+static const float time_machine_alpha = 0.64F;
+static ICanvasBrush^ fg_color = Colours::GhostWhite;
 
 /*************************************************************************************************/
 private ref class TimeMachineUniverseDisplay sealed : public UniverseDisplay {
@@ -144,9 +144,9 @@ private:
 private class TimeMachineHeadsUp : public IHeadUpPlanet {
 public:
 	TimeMachineHeadsUp(ITimeMachine* master) : IHeadUpPlanet(__MODULE__), machine(master) {
-		this->datetime_style.datetime_color = fg_color;
-		this->datetime_style.label_color = Colours::make(Colours::LightSeaGreen, time_machine_alpha);
-		this->datetime_style.caret_color = Colours::make(Colours::DeepSkyBlue, time_machine_alpha);
+		//this->datetime_style.datetime_color = fg_color;
+		//this->datetime_style.label_color = Colours::LightSeaGreen;
+		//this->datetime_style.caret_color = Colours::DeepSkyBlue;
 	}
 
 	void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override {
@@ -171,6 +171,7 @@ public:
 			}
 
 			this->icons[id] = this->insert_one(new Credit<Labellet, TMIcon>(caption, icon_font, icon_color), id);
+			this->cellophane(this->icons[id], time_machine_alpha);
 		}
 
 		this->load_date_picker(this->time_pickers, TM::Time0, -this->machine->span_seconds());
@@ -182,6 +183,7 @@ public:
 			float tlwidth = width * 0.618F;
 
 			this->timeline = this->insert_one(new Timelinelet(time0, timen, tlwidth));
+			this->cellophane(this->timeline, time_machine_alpha);
 		}
 	}
 
@@ -194,7 +196,6 @@ public:
 		for (unsigned int idx = _N(TMIcon); idx > 0; idx--) {
 			auto icon = this->icons[_E(TMIcon, idx - 1)];
 
-			this->get_logger()->log_message(Log::Info, _E(TMIcon, idx - 1).ToString());
 			icon->fill_extent(0.0F, 0.0F, &icon_width);
 			this->move_to(icon, icon_rx, icon_y, GraphletAnchor::RT);
 
@@ -203,22 +204,28 @@ public:
 
 		this->move_to(this->time_pickers[TM::Time0], icon_y, icon_y, GraphletAnchor::LT);
 		this->move_to(this->time_pickers[TM::Timen], this->time_pickers[TM::Time0], GraphletAnchor::LB, GraphletAnchor::LT);
-		this->move_to(this->timeline, this->time_pickers[TM::Timen], GraphletAnchor::RT, GraphletAnchor::LT, gapsize);
+		this->move_to(this->timeline, this->time_pickers[TM::Timen], GraphletAnchor::RT, GraphletAnchor::LC, gapsize * 2.0F);
 	}
 
 public:
 	bool can_select(IGraphlet* g) override {
 		return ((dynamic_cast<Labellet*>(g) != nullptr)
-			|| (dynamic_cast<Timelinelet*>(g) != nullptr)
-			|| ((dynamic_cast<DatePickerlet*>(g) != nullptr)
-				&& (this->timeline->can_change_range())));
+			|| (dynamic_cast<DatePickerlet*>(g) != nullptr));
 	}
 
-	void on_focus(IGraphlet* g) override {
+	void on_focus(IGraphlet* g, bool yes) override {
 		auto editor = dynamic_cast<DatePickerlet*>(g);
 
 		if (editor != nullptr) {
-			this->show_virtual_keyboard(ScreenKeyboard::Bucketpad, GraphletAnchor::CB, 0.0F, 4.0F);
+			if (this->timeline->can_change_range()) {
+				if (yes) {
+					this->show_virtual_keyboard(ScreenKeyboard::Bucketpad, GraphletAnchor::CB, 0.0F, 4.0F);
+				} else {
+					this->timeline->set_range(this->time_pickers[TM::Time0]->get_value(), this->time_pickers[TM::Timen]->get_value());
+				}
+			} else {
+				this->set_caret_owner(nullptr);
+			}
 		}
 	}
 
@@ -236,8 +243,6 @@ public:
 				}
 			}; break;
 			}
-		} else if (this->timeline == g) {
-			this->show_virtual_keyboard(ScreenKeyboard::Affinepad, GraphletAnchor::CB, 0.0F, 4.0F);
 		}
 	}
 
@@ -245,6 +250,7 @@ private:
 	void load_date_picker(std::map<TM, Credit<DatePickerlet, TM>*>& tps, TM id, long long time_offset) {
 		tps[id] = this->insert_one(new Credit<DatePickerlet, TM>(DatePickerState::Input, time_offset, _speak(id)), id);
 		tps[id]->set_style(this->datetime_style);
+		this->cellophane(tps[id], time_machine_alpha);
 	}
 
 private: // never delete this graphlets manually
