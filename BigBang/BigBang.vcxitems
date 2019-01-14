@@ -27,10 +27,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timelinelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\datepickerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.cpp" />
@@ -91,10 +91,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timelinelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\datepickerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.hpp" />

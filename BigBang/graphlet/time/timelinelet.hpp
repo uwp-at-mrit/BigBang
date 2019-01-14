@@ -23,7 +23,7 @@ namespace WarGrey::SCADA {
 		: public virtual WarGrey::SCADA::IRangelet<long long>
 		, public virtual WarGrey::SCADA::IStatelet<WarGrey::SCADA::TimelineState, WarGrey::SCADA::TimelineStyle> {
 	public:
-		Timelinelet(long long tmin, long long tmax, float width, float thickness = 3.0F);
+		Timelinelet(long long tmin, long long tmax, float width, float thickness = 2.0F);
 
 	public:
 		void construct() override;
@@ -36,9 +36,12 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimelineState state, WarGrey::SCADA::TimelineStyle& style) override;
-		void on_state_changed(WarGrey::SCADA::TimelineState state) override;
+		void apply_style(TimelineStyle& style) override;
 		void on_value_changed(long long timepoint) override;
-		//void on_range_changed(long long time0, long long timen) override;
+		void on_range_changed(long long time0, long long timen) override;
+
+	private:
+		void update_timepoints(long long time0, long long timen, WarGrey::SCADA::TimelineStyle& style);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vmarks;
@@ -47,7 +50,10 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ haxes;
 
 	private:
-
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ date0_layout;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ time0_layout;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ daten_layout;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ timen_layout;
 
 	private:
 		float width;

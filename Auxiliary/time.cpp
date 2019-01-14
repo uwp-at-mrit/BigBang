@@ -136,18 +136,22 @@ void WarGrey::SCADA::sleep_us(long long us) {
 }
 
 /*************************************************************************************************/
-void WarGrey::SCADA::split_date(long long s, long long* year, long long* month, long long* day) {
+void WarGrey::SCADA::split_date_utc(long long s, bool locale, long long* year, long long* month, long long* day) {
 	struct tm datetime;
 
-	gmtime_s(&datetime, &s);
+	if (locale) {
+		localtime_s(&datetime, &s);
+	} else {
+		gmtime_s(&datetime, &s);
+	}
 
 	SET_BOX(year, datetime.tm_year + 1900);
 	SET_BOX(month, datetime.tm_mon + 1);
 	SET_BOX(day, datetime.tm_mday);
 }
 
-void WarGrey::SCADA::split_time(long long s, long long* hours, long long* minutes, long long* seconds) {
-	long long daytime = s % day_span_s;
+void WarGrey::SCADA::split_time_utc(long long s, bool locale, long long* hours, long long* minutes, long long* seconds) {
+	long long daytime = (locale ? (s - time_zone_utc_bias_seconds()) : s) % day_span_s;
 	
 	SET_BOX(hours, daytime / hour_span_s);
 	SET_BOX(minutes, daytime % hour_span_s / minute_span_s);

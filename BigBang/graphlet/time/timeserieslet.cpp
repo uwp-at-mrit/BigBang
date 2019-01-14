@@ -1,4 +1,4 @@
-﻿#include "graphlet/dashboard/timeserieslet.hpp"
+﻿#include "graphlet/time/timeserieslet.hpp"
 
 #include "string.hpp"
 
@@ -359,9 +359,7 @@ void ITimeSerieslet::prepare_style(TimeSeriesState status, TimeSeriesStyle& styl
 	}
 }
 
-void ITimeSerieslet::on_state_changed(TimeSeriesState status) {
-	TimeSeriesStyle style = this->get_style();
-
+void ITimeSerieslet::apply_style(TimeSeriesStyle& style) {
 	this->update_vertical_axes(style);
 	this->update_horizontal_axes(style);
 

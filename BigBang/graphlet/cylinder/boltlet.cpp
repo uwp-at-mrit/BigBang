@@ -63,7 +63,6 @@ void Boltlet::prepare_style(BoltState status, BoltStyle& style) {
 }
 
 void Boltlet::on_state_changed(BoltState status) {
-	BoltStyle s = this->get_style();
 	CanvasGeometry^ slide = nullptr;
 	
 	switch (status) {

@@ -23,8 +23,8 @@ namespace WarGrey::SCADA {
 	long long current_floor_seconds(long long span_s = day_span_s);
 	long long current_ceiling_seconds(long long span_s = day_span_s);
 
-	void split_date(long long s, long long* year, long long* month, long long* day);
-	void split_time(long long s, long long* hours, long long* minutes, long long* seconds);
+	void split_date_utc(long long s, bool locale, long long* year, long long* month, long long* day);
+	void split_time_utc(long long s, bool locale, long long* hours, long long* minutes, long long* seconds);
 	
 	long long seconds_add_seconds(long long s, long long count);
 	long long seconds_add_minutes(long long s, long long count);

@@ -63,7 +63,6 @@ void HoldHooplet::prepare_style(HoldHoopState status, HoldHoopStyle& style) {
 }
 
 void HoldHooplet::on_state_changed(HoldHoopState status) {
-	HoldHoopStyle s = this->get_style();
 	CanvasGeometry^ hoop = nullptr;
 	float hoop_cx, hoop_cy;
 

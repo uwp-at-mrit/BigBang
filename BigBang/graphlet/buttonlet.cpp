@@ -71,10 +71,8 @@ void Buttonlet::prepare_style(ButtonState status, ButtonStyle& s) {
 	}
 }
 
-void Buttonlet::on_state_changed(ButtonState status) {
-	ButtonStyle s = this->get_style();
-
-	this->label = make_text_layout(this->caption, s.font);
+void Buttonlet::apply_style(ButtonStyle& style) {
+	this->label = make_text_layout(this->caption, style.font);
 }
 
 void Buttonlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

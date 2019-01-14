@@ -1,10 +1,9 @@
 ﻿#include <list>
 
-#include "graphlet/dashboard/timelinelet.hpp"
+#include "graphlet/time/timelinelet.hpp"
 
 #include "string.hpp"
-
-#include "colorspace.hpp"
+#include "time.hpp"
 
 #include "text.hpp"
 #include "shape.hpp"
@@ -51,8 +50,8 @@ void Timelinelet::prepare_style(TimelineState status, TimelineStyle& style) {
 	CAS_SLOT(style.direction_color, style.footprint_color);
 }
 
-void Timelinelet::on_state_changed(TimelineState status) {
-	TimelineStyle style = this->get_style();
+void Timelinelet::apply_style(TimelineStyle& style) {
+	this->update_timepoints(this->vmin, this->vmax, style);
 }
 
 bool Timelinelet::can_change_range() {
@@ -61,6 +60,14 @@ bool Timelinelet::can_change_range() {
 
 void Timelinelet::on_value_changed(long long timepoint) {
 	TimelineStyle style = this->get_style();
+}
+
+void Timelinelet::on_range_changed(long long time0, long long timen) {
+	this->update_timepoints(time0, timen, this->get_style());
+}
+
+void Timelinelet::update_timepoints(long long time0, long long timen, TimelineStyle& style) {
+	this->date0_layout = make_text_layout(make_datestamp_utc(time0, false), style.font);
 }
 
 void Timelinelet::on_tap(float x, float y) {

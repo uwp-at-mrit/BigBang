@@ -7,8 +7,8 @@
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/statuslet.hpp"
-#include "graphlet/datepickerlet.hpp"
-#include "graphlet/dashboard/timelinelet.hpp"
+#include "graphlet/time/datepickerlet.hpp"
+#include "graphlet/time/timelinelet.hpp"
 
 #include "string.hpp"
 #include "timer.hxx"

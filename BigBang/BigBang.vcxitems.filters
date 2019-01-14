@@ -109,9 +109,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.cpp">
       <Filter>graphlet\symbol\pump</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp">
-      <Filter>graphlet\dashboard</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\margin.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
@@ -167,13 +164,18 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.cpp">
       <Filter>virtualization</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.cpp">
-      <Filter>graphlet</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\affinepad.cpp">
+      <Filter>virtualization</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timelinelet.cpp">
-      <Filter>graphlet\dashboard</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\datepickerlet.cpp">
+      <Filter>graphlet\time</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\affinepad.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.cpp">
+      <Filter>graphlet\time</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.cpp">
+      <Filter>graphlet\time</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -288,9 +290,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.hpp">
       <Filter>graphlet\symbol\pump</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp">
-      <Filter>graphlet\dashboard</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\margin.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
@@ -346,13 +345,18 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.hpp">
       <Filter>virtualization</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.hpp">
-      <Filter>graphlet</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\affinepad.hpp">
+      <Filter>virtualization</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timelinelet.hpp">
-      <Filter>graphlet\dashboard</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\datepickerlet.hpp">
+      <Filter>graphlet\time</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\affinepad.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.hpp">
+      <Filter>graphlet\time</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.hpp">
+      <Filter>graphlet\time</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -405,6 +409,9 @@
     </Filter>
     <Filter Include="navigator">
       <UniqueIdentifier>{459de487-c509-4022-838c-b1ec68d04a2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\time">
+      <UniqueIdentifier>{ba44d149-6853-4348-912c-cb7461afcdaf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -30,7 +30,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void prepare_style(WarGrey::SCADA::ButtonState status, WarGrey::SCADA::ButtonStyle& style) override;
-		void on_state_changed(WarGrey::SCADA::ButtonState status) override;
+		void apply_style(WarGrey::SCADA::ButtonStyle& style) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ label;
