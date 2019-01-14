@@ -144,10 +144,8 @@ public:
 
 public:
 	bool can_select(IGraphlet* g) override {
-		auto btn = dynamic_cast<Buttonlet*>(g);
-
-		return (dynamic_cast<Credit<Labellet, Icon>*>(g) != nullptr)
-			|| ((btn != nullptr) && (btn->get_state() != ButtonState::Disabled));
+		return ((dynamic_cast<Credit<Labellet, Icon>*>(g) != nullptr)
+			|| button_enabled(g));
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
@@ -184,15 +182,7 @@ public:
 				this->settings->show();
 			}; break;
 			case Icon::PrintScreen: {
-				IPlanet* target = this->master->current_planet;
-				bool prev_state;
-
-				this->master->use_global_mask_setting(false, &prev_state);
-
-				target->save(target->name() + "-" + file_basename_from_second(current_seconds()) + ".png",
-					target->actual_width(), target->actual_height(), Colours::Background);
-
-				this->master->use_global_mask_setting(prev_state);
+				this->master->save(this->master->current_planet->name() + "-" + file_basename_from_second(current_seconds()) + ".png");
 			}; break;
 			case Icon::FullScreen: {
 				auto self = ApplicationView::GetForCurrentView();
@@ -288,6 +278,7 @@ private: // never delete these graphlets manually.
 /*************************************************************************************************/
 UniverseWidget::UniverseWidget(UniverseDisplay^ master, PLCMaster* plc) : UniverseDisplay(master->get_logger()), master(master), plc(plc) {
 	this->use_global_mask_setting(false);
+	this->disable_predefined_shortcuts(true);
 }
 
 void UniverseWidget::construct(CanvasCreateResourcesReason reason) {

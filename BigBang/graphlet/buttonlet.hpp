@@ -16,6 +16,8 @@ namespace WarGrey::SCADA {
 		float corner_radius = -1.0F;
 	};
 
+	bool button_enabled(IGraphlet* g);
+
 	private class Buttonlet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::ButtonState, WarGrey::SCADA::ButtonStyle> {
 	public:
 		Buttonlet(Platform::String^ caption, float width = 128.0F, float height = 32.0F, Platform::String^ tongue = "menu");

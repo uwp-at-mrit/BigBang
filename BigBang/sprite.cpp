@@ -39,8 +39,10 @@ void ISprite::save(Platform::String^ path, float dpi) {
 	create_task(snapshot->SaveAsync(path, CanvasBitmapFileFormat::Auto, 1.0F)).then([=](task<void> saving) {
 		try {
 			saving.get();
+
+			this->get_logger()->log_message(Log::Notice, L"Sprite has been saved to %s", path->Data());
 		} catch (Platform::Exception^ e) {
-			syslog(Log::Alarm, "failed to save graphlet as bitmap:" + e->Message);
+			syslog(Log::Alarm, L"failed to save sprite as bitmap: %s", e->Message->Data());
 		}
 	});
 }

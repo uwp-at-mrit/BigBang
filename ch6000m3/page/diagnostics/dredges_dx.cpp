@@ -627,10 +627,7 @@ void DredgesDiagnostics::on_id_changed(DredgesPosition pos) {
 }
 
 bool DredgesDiagnostics::can_select(IGraphlet* g) {
-	auto btn = dynamic_cast<Buttonlet*>(g);
-
-	return ((btn != nullptr)
-		&& (btn->get_state() != ButtonState::Disabled));
+	return button_enabled(g);
 }
 
 void DredgesDiagnostics::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

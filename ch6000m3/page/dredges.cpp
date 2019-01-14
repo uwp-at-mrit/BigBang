@@ -890,9 +890,7 @@ public:
 
 public:
 	bool can_select(IGraphlet* g) override {
-		auto maybe_button = dynamic_cast<Buttonlet*>(g);
-
-		return ((maybe_button != nullptr) && (maybe_button->get_state() != ButtonState::Disabled));
+		return button_enabled(g);
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) {
@@ -1344,14 +1342,12 @@ public:
 public:
 	bool can_select(IGraphlet* g) override {
 		auto settings = dynamic_cast<Credit<Rectanglet, DS>*>(g);
-		auto maybe_button = dynamic_cast<Buttonlet*>(g);
-
+		
 		return ((dynamic_cast<Winchlet*>(g) != nullptr) 
 			|| (dynamic_cast<Gantrylet*>(g) != nullptr)
 			|| (dynamic_cast<Compensatorlet*>(g) != nullptr)
 			|| (dynamic_cast<DragHeadlet*>(g) != nullptr)
-			|| ((maybe_button != nullptr)
-				&& (maybe_button->get_state() != ButtonState::Disabled)));
+			|| button_enabled(g));
 	}
 
 	bool can_select_multiple() override {

@@ -3,9 +3,9 @@
 #include "virtualization/keyboard.hpp"
 
 namespace WarGrey::SCADA {
-    private class Arrowpad : public WarGrey::SCADA::Keyboard {
+    private class Affinepad : public WarGrey::SCADA::Keyboard {
     public:
-		Arrowpad(WarGrey::SCADA::IPlanet* master, float fontsize = 32.0F);
+		Affinepad(WarGrey::SCADA::IPlanet* master, float fontsize = 32.0F);
 
 	public:
 		void fill_auto_position(float* x, float* y, WarGrey::SCADA::IGraphlet* g, WarGrey::SCADA::GraphletAnchor a) override;

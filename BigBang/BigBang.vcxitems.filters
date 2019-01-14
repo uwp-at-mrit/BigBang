@@ -142,9 +142,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.cpp">
-      <Filter>virtualization</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.cpp">
       <Filter>graphlet\cylinder</Filter>
     </ClCompile>
@@ -173,6 +170,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timelinelet.cpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\affinepad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -320,9 +321,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.hpp">
-      <Filter>virtualization</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.hpp">
       <Filter>graphlet\cylinder</Filter>
     </ClInclude>
@@ -351,6 +349,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timelinelet.hpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\affinepad.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

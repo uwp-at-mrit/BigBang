@@ -102,13 +102,11 @@ void WarGrey::SCADA::system_try_change_screen_brightness(double brightness, Disp
 }
 
 /*************************************************************************************************/
-unsigned long long WarGrey::SCADA::system_memory_usage(AppMemoryUsageLevel* level) {
-	// WARNING: This API does not give the correct usage.
-	if (level != nullptr) {
-		(*level) = MemoryManager::AppMemoryUsageLevel;
-	}
+unsigned long long WarGrey::SCADA::system_physical_memory_usage(unsigned long long* virtual_usage, AppMemoryUsageLevel* level) {
+	SET_BOX(virtual_usage, MemoryManager::AppMemoryUsage); // same as `GetAppMemoryReport()->TotalCommitUsage`;
+	SET_BOX(level, MemoryManager::AppMemoryUsageLevel);
 
-	return MemoryManager::AppMemoryUsage;
+	return MemoryManager::GetProcessMemoryReport()->PrivateWorkingSetUsage;
 }
 
 float WarGrey::SCADA::system_battery_capacity(float defval_if_no_battery) {

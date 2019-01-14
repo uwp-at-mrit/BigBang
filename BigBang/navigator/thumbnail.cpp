@@ -67,16 +67,16 @@ public:
 	}
 
 	void refresh() {
-		if (this->master != this->entity->info->master) {
-			this->master = dynamic_cast<UniverseDisplay^>(this->entity->info->master);
+		if (this->master != this->entity->master()) {
+			this->master = dynamic_cast<UniverseDisplay^>(this->entity->master());
 		}
 
 		if (this->master != nullptr) {
-			bool prev_state;
+			Point pt = this->master->local_to_global_point(this->entity, 0.0F, 0.0F);
 
-			this->master->use_global_mask_setting(false, &prev_state);
-			this->thumbnail = this->entity->take_snapshot(entity->actual_width(), entity->actual_height(), Colours::Transparent);
-			this->master->use_global_mask_setting(prev_state);
+			this->thumbnail = this->entity->take_snapshot(-pt.X, -pt.Y,
+				this->master->actual_width, this->master->actual_height,
+				Colours::Transparent);
 		}
 	}
 

@@ -8,6 +8,7 @@
 #include "graphlet/textlet.hpp"
 #include "graphlet/statuslet.hpp"
 #include "graphlet/datepickerlet.hpp"
+#include "graphlet/dashboard/timelinelet.hpp"
 
 #include "string.hpp"
 #include "timer.hxx"
@@ -148,6 +149,14 @@ public:
 		this->datetime_style.caret_color = Colours::make(Colours::DeepSkyBlue, time_machine_alpha);
 	}
 
+	void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override {
+		float base_size = statusbar_height();
+
+		SET_BOX(top, base_size * 3.0F);
+		SET_BOX(bottom, base_size);
+		SET_BOXES(left, right, base_size);
+	}
+
 public:
 	void load(CanvasCreateResourcesReason reason, float width, float height) override {
 		auto icon_font = make_text_format("Consolas", statusbar_height());
@@ -166,6 +175,14 @@ public:
 
 		this->load_date_picker(this->time_pickers, TM::Time0, -this->machine->span_seconds());
 		this->load_date_picker(this->time_pickers, TM::Timen, 0LL);
+
+		{ // load the timeline
+			long long time0 = this->time_pickers[TM::Time0]->get_value();
+			long long timen = this->time_pickers[TM::Timen]->get_value();
+			float tlwidth = width * 0.618F;
+
+			this->timeline = this->insert_one(new Timelinelet(time0, timen, tlwidth));
+		}
 	}
 
 	void reflow(float width, float height) override {
@@ -186,27 +203,22 @@ public:
 
 		this->move_to(this->time_pickers[TM::Time0], icon_y, icon_y, GraphletAnchor::LT);
 		this->move_to(this->time_pickers[TM::Timen], this->time_pickers[TM::Time0], GraphletAnchor::LB, GraphletAnchor::LT);
-	}
-
-	void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override {
-		float base_size = statusbar_height();
-
-		SET_BOX(top, base_size * 3.0F);
-		SET_BOX(bottom, base_size);
-		SET_BOXES(left, right, base_size);
+		this->move_to(this->timeline, this->time_pickers[TM::Timen], GraphletAnchor::RT, GraphletAnchor::LT, gapsize);
 	}
 
 public:
 	bool can_select(IGraphlet* g) override {
 		return ((dynamic_cast<Labellet*>(g) != nullptr)
-			|| (dynamic_cast<DatePickerlet*>(g) != nullptr));
+			|| (dynamic_cast<Timelinelet*>(g) != nullptr)
+			|| ((dynamic_cast<DatePickerlet*>(g) != nullptr)
+				&& (this->timeline->can_change_range())));
 	}
 
 	void on_focus(IGraphlet* g) override {
 		auto editor = dynamic_cast<DatePickerlet*>(g);
 
 		if (editor != nullptr) {
-			this->show_virtual_keyboard(ScreenKeyboard::Bucketpad, GraphletAnchor::CB);
+			this->show_virtual_keyboard(ScreenKeyboard::Bucketpad, GraphletAnchor::CB, 0.0F, 4.0F);
 		}
 	}
 
@@ -224,6 +236,8 @@ public:
 				}
 			}; break;
 			}
+		} else if (this->timeline == g) {
+			this->show_virtual_keyboard(ScreenKeyboard::Affinepad, GraphletAnchor::CB, 0.0F, 4.0F);
 		}
 	}
 
@@ -236,6 +250,7 @@ private:
 private: // never delete this graphlets manually
 	std::map<TMIcon, Credit<Labellet, TMIcon>*> icons;
 	std::map<TM, Credit<DatePickerlet, TM>*> time_pickers;
+	Timelinelet* timeline;
 
 private:
 	DatePickerStyle datetime_style;

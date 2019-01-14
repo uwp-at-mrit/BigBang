@@ -104,6 +104,39 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
+		void set_range(T vmin, T vmax, bool force_update = false) {
+			this->set_range(vmin, vmax, WarGrey::SCADA::GraphletAnchor::LT, force_update);
+		}
+
+		void set_range(T vmin, T vmax, WarGrey::SCADA::GraphletAnchor anchor, bool force_update = false) {
+			if (this->can_change_range()) {
+				bool changed = false;
+
+				if (vmin <= vmax) {
+					if ((this->vmin != vmin) && (this->vmax != vmax)) {
+						this->vmin = vmin;
+						this->vmax = vmax;
+						this->changed = true;
+					}
+				} else {
+					if ((this->vmin != vmax) && (this->vmax != vmin)) {
+						this->vmin = vmax;
+						this->vmax = vmin;
+						this->changed = true;
+					}
+				}
+
+				if (force_update || changed) {
+					this->moor(anchor);
+					this->on_range_changed(this->vmin, this->vmax);
+					this->notify_updated();
+				}
+			}
+		}
+
+		virtual void on_range_changed(T vmin, T vmax) {}
+
+	public:
 		double get_percentage() {
 			double flmin = double(this->vmin);
 			double flrange = double(this->vmax) - flmin;
@@ -113,6 +146,8 @@ namespace WarGrey::SCADA {
 		}
 
 	protected:
+		virtual bool can_change_range() { return false; }
+
 		T guarded_value(T v) override {
 			if (v > this->vmax) {
 				v = this->vmax;

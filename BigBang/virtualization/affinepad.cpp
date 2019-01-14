@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "virtualization/arrowpad.hpp"
+#include "virtualization/affinepad.hpp"
 
 #include "text.hpp"
 #include "planet.hpp"
@@ -36,7 +36,7 @@ const static KeyboardCell keys[] = {
 static std::map<VirtualKey, CanvasTextLayout^> key_labels;
 
 /*************************************************************************************************/
-Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
+Affinepad::Affinepad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	CanvasTextFormat^ label_font = make_text_format("Consolas", fontsize);
 	
 	this->current_key = VirtualKey::None;
@@ -74,7 +74,7 @@ Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	}
 }
 
-VirtualKey Arrowpad::find_received_key(unsigned int keycode) {
+VirtualKey Affinepad::find_received_key(unsigned int keycode) {
 	VirtualKey key = VirtualKey::None;
 
 	switch (keycode) {
@@ -85,7 +85,7 @@ VirtualKey Arrowpad::find_received_key(unsigned int keycode) {
 	return key;
 }
 
-CanvasTextLayout^ Arrowpad::key_label(VirtualKey key) {
+CanvasTextLayout^ Affinepad::key_label(VirtualKey key) {
 	CanvasTextLayout^ label = nullptr;
 	auto maybe_label = key_labels.find(key);
 
@@ -96,7 +96,7 @@ CanvasTextLayout^ Arrowpad::key_label(VirtualKey key) {
 	return label;
 }
 
-void Arrowpad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
+void Affinepad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
 	float Width = this->master->actual_width();
 	float Height = this->master->actual_height();
 	float width, height;

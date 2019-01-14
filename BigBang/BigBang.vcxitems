@@ -27,6 +27,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timelinelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.cpp" />
@@ -61,7 +62,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\affinepad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\primitive.cpp" />
@@ -90,6 +91,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timelinelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datepickerlet.hpp" />
@@ -129,7 +131,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\affinepad.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sprite.hpp" />

@@ -362,10 +362,8 @@ void DraughtsPage::reflow(float width, float height) {
 }
 
 bool DraughtsPage::can_select(IGraphlet* g) {
-	auto hdchecker = dynamic_cast<Buttonlet*>(g);
-
 	return ((dynamic_cast<OverflowPipelet*>(g) != nullptr)
-		|| ((hdchecker != nullptr) && (hdchecker->get_state() != ButtonState::Disabled)));
+		|| button_enabled(g));
 }
 
 bool DraughtsPage::can_select_multiple() {
@@ -386,7 +384,7 @@ bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 				this->actual_width(), this->actual_height(), Colours::Background);
 
 			if (wargrey_keyboard) {
-				this->show_virtual_keyboard(ScreenKeyboard::Arrowpad, this->get_focus_graphlet(), GraphletAnchor::CB, 0.0F, 4.0F);
+				this->show_virtual_keyboard(ScreenKeyboard::Affinepad, this->get_focus_graphlet(), GraphletAnchor::CB, 0.0F, 4.0F);
 			}
 
 			handled = true;
@@ -419,7 +417,7 @@ void DraughtsPage::on_focus(IGraphlet* g) {
 	auto editor = dynamic_cast<IEditorlet*>(g);
 
 	if (timeseries != nullptr) {
-		this->show_virtual_keyboard(ScreenKeyboard::Arrowpad, g, GraphletAnchor::CB, 0.0F, 4.0F);
+		this->show_virtual_keyboard(ScreenKeyboard::Affinepad, g, GraphletAnchor::CB, 0.0F, 4.0F);
 	} else if (editor != nullptr) {
 		if (this->device->authorized()) {
 			this->show_virtual_keyboard(ScreenKeyboard::Numpad);

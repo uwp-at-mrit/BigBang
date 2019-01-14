@@ -53,6 +53,10 @@ namespace WarGrey::SCADA {
         read_write_property(float, max_height);
 
 	public:
+		virtual Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0) = 0;
+		virtual void save(Platform::String^ path, float dpi = 96.0);
+
+	public:
 		virtual bool surface_ready() = 0;
 		virtual bool ui_thread_ready() = 0;
 		virtual bool shown();
@@ -72,6 +76,8 @@ namespace WarGrey::SCADA {
 	internal:
 		virtual Windows::Foundation::Point global_to_local_point(IPlanet* p, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
 		virtual Windows::Foundation::Point local_to_global_point(IPlanet* p, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
+		virtual float planet_actual_width(IPlanet* p);
+		virtual float planet_actual_height(IPlanet* p);
 
 	internal:
 		virtual void refresh(WarGrey::SCADA::IPlanet* target) = 0;
@@ -132,6 +138,7 @@ namespace WarGrey::SCADA {
 		read_write_property(double, mask_alpha);
 
 	public:
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0) override;
 		void use_global_mask_setting(bool yes, bool* prev_state = nullptr);
 		bool surface_ready() override;
 		bool ui_thread_ready() override;
@@ -155,6 +162,8 @@ namespace WarGrey::SCADA {
 	internal:
 		Windows::Foundation::Point global_to_local_point(IPlanet* p, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F) override;
 		Windows::Foundation::Point local_to_global_point(IPlanet* p, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F) override;
+		virtual float planet_actual_width(IPlanet* p) override;
+		virtual float planet_actual_height(IPlanet* p) override;
 
 	protected private:
 		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason) {}

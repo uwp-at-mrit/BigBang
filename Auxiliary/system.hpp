@@ -23,7 +23,7 @@ namespace WarGrey::SCADA {
 	void system_try_change_screen_brightness(double brightness, Windows::Graphics::Display::DisplayBrightnessOverrideOptions opt
 		= Windows::Graphics::Display::DisplayBrightnessOverrideOptions::UseDimmedPolicyWhenBatteryIsLow);
 
-	unsigned long long system_memory_usage(Windows::System::AppMemoryUsageLevel* level = nullptr);
+	unsigned long long system_physical_memory_usage(unsigned long long* virtual_usage = nullptr, Windows::System::AppMemoryUsageLevel* level = nullptr);
 	float system_battery_capacity(float defval_if_no_battery = 1.0F);
 	Platform::String^ system_wifi_ssid(char* signal_strength = nullptr);
 	Platform::String^ system_ipv4_address(Platform::String^ defval_if_no_nic = nullptr);

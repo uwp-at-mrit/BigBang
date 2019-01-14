@@ -140,8 +140,7 @@ namespace WarGrey::SCADA {
 		void leave_shared_section();
 
 	public:
-		virtual void save_logo(float logo_width = 0.0F, float logo_height = 0.0F,
-			Platform::String^ path = nullptr, float dpi = 96.0);
+		void save_logo(float logo_width = 0.0F, float logo_height = 0.0F, Platform::String^ path = nullptr, float dpi = 96.0);
 		
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0);

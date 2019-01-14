@@ -16,7 +16,7 @@
 #include "decorator/decorator.hpp"
 
 #include "virtualization/numpad.hpp"
-#include "virtualization/arrowpad.hpp"
+#include "virtualization/affinepad.hpp"
 #include "virtualization/bucketpad.hpp"
 
 using namespace WarGrey::SCADA;
@@ -227,7 +227,7 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 Planet::Planet(Platform::String^ name, unsigned int initial_mode)
 	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
 	this->numpad = new Numpad(this);
-	this->arrowpad = new Arrowpad(this);
+	this->arrowpad = new Affinepad(this);
 	this->bucketpad = new Bucketpad(this);
 
 	this->keyboard = this->numpad;
@@ -1090,7 +1090,7 @@ void Planet::hide_virtual_keyboard() {
 void Planet::switch_virtual_keyboard(ScreenKeyboard type) {
 	switch (type) {
 	case ScreenKeyboard::Numpad:   this->keyboard = this->numpad; break;
-	case ScreenKeyboard::Arrowpad: this->keyboard = this->arrowpad; break;
+	case ScreenKeyboard::Affinepad: this->keyboard = this->arrowpad; break;
 	case ScreenKeyboard::Bucketpad:  this->keyboard = this->bucketpad; break;
 	}
 }
@@ -1328,7 +1328,7 @@ float IPlanet::actual_width() {
 	float width = 0.0F;
 
 	if (this->info != nullptr) {
-		width = this->info->master->actual_width;
+		width = this->info->master->planet_actual_width(this);
 	}
 
 	return width;
@@ -1338,7 +1338,7 @@ float IPlanet::actual_height() {
 	float height = 0.0F;
 
 	if (this->info != nullptr) {
-		height = this->info->master->actual_height;
+		height = this->info->master->planet_actual_height(this);
 	}
 
 	return height;
@@ -1422,16 +1422,16 @@ CanvasRenderTarget^ IPlanet::take_snapshot(float x, float y, float width, float 
 	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
 	CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, width, height, dpi);
 	CanvasDrawingSession^ ds = snapshot->CreateDrawingSession();
-
+	
 	if (bgcolor == nullptr) {
 		ds->Clear(Colours::Background->Color);
 	} else {
 		ds->Clear(bgcolor->Color);
 	}
 
-	if ((x > 0.0F) || (y > 0.0F)) {
+	if ((x != 0.0F) || (y != 0.0F)) {
 		ds->Transform = make_translation_matrix(-x, -y);
-		
+
 		width += x;
 		height += y;
 	}

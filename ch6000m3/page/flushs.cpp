@@ -750,13 +750,11 @@ void FlushsPage::reflow(float width, float height) {
 }
 
 bool FlushsPage::can_select(IGraphlet* g) {
-	auto btn = dynamic_cast<Buttonlet*>(g);
-
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
 		|| (dynamic_cast<WaterPumplet*>(g) != nullptr)
 		|| (dynamic_cast<ArrowHeadlet*>(g) != nullptr)
-		|| ((btn != nullptr) && (btn->get_state() != ButtonState::Disabled)));
+		|| button_enabled(g));
 }
 
 bool FlushsPage::can_select_multiple() {

@@ -16,6 +16,15 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ button_default_font = make_bold_text_format("Consolas", 16.0F);
 
+/*************************************************************************************************/
+bool WarGrey::SCADA::button_enabled(IGraphlet* g) {
+	auto maybe_button = dynamic_cast<Buttonlet*>(g);
+
+	return ((maybe_button != nullptr)
+		&& (maybe_button->get_state() != ButtonState::Disabled));
+}
+
+/*************************************************************************************************/
 Buttonlet::Buttonlet(Platform::String^ caption, float width, float height, Platform::String^ tongue)
 	: Buttonlet(ButtonState::Default, caption, width, height, tongue) {}
 

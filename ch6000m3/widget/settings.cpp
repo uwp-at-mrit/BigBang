@@ -183,9 +183,7 @@ public:
 
 public:
 	bool Settings::can_select(IGraphlet* g) override {
-		auto btn = dynamic_cast<Buttonlet*>(g);
-
-		return ((btn != nullptr) && (btn->get_state() != ButtonState::Disabled));
+		return button_enabled(g);
 	}
 
 	void Settings::on_tap_selected(IGraphlet* g, float local_x, float local_y) override {

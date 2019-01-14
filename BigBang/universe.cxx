@@ -1,3 +1,5 @@
+#include <ppltasks.h>
+
 #include "universe.hxx"
 #include "planet.hpp"
 #include "navigator/null.hpp"
@@ -9,17 +11,23 @@
 #include "box.hpp"
 
 #include "paint.hpp"
+#include "brushes.hxx"
 #include "colorspace.hpp"
 #include "transformation.hpp"
 
 using namespace WarGrey::SCADA;
 
+using namespace Concurrency;
+
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
-using namespace Windows::System;
 using namespace Windows::Storage;
+using namespace Windows::Storage::Streams;
+
+using namespace Windows::System;
 using namespace Windows::Devices::Input;
+using namespace Windows::ApplicationModel;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Core;
@@ -214,6 +222,14 @@ Point IDisplay::local_to_global_point(IPlanet* p, float local_x, float local_y, 
 	return Point(local_x + xoff, local_y + yoff);
 }
 
+float IDisplay::planet_actual_width(IPlanet* p) {
+	return this->actual_width;
+}
+
+float IDisplay::planet_actual_height(IPlanet* p) {
+	return this->actual_height;
+}
+
 void IDisplay::apply_source_size(float src_width, float src_height) {
 	this->width = this->sketch_to_application_width(src_width);
 	this->height = this->sketch_to_application_height(src_height);
@@ -265,6 +281,51 @@ void IDisplay::leave_critical_section() {
 
 Syslog* IDisplay::get_logger() {
 	return this->logger;
+}
+
+void IDisplay::save(Platform::String^ path, float dpi) {
+	CanvasRenderTarget^ snapshot = this->take_snapshot(dpi);
+
+	if (path_only(path) == nullptr) {
+		CreationCollisionOption oie = CreationCollisionOption::OpenIfExists;
+		CreationCollisionOption re = CreationCollisionOption::ReplaceExisting;
+		Platform::String^ root = Package::Current->DisplayName;
+
+		/** WARNING: Stupid Windows 10
+		 * Saving through `IRandomAccessStream` is the only working way,
+		 * and the `CanvasBitmapFileFormat::Auto` option is lost.
+		 */
+
+		create_task(KnownFolders::PicturesLibrary->CreateFolderAsync(root, oie)).then([=](task<StorageFolder^> getting) {
+			return create_task(getting.get()->CreateFileAsync(path, re)).then([=](task<StorageFile^> creating) {
+				return create_task(creating.get()->OpenAsync(FileAccessMode::ReadWrite)).then([=](task<IRandomAccessStream^> opening) {
+					return create_task(snapshot->SaveAsync(opening.get(), CanvasBitmapFileFormat::Png, 1.0F));
+				});
+			});
+		}).then([=](task<void> saving) {
+			try {
+				saving.get();
+
+				this->get_logger()->log_message(Log::Notice, L"universe[%s] has been saved to [My Picture]\\%s\\%s",
+					this->get_logger()->get_name()->Data(), root->Data(), path->Data());
+			} catch (Platform::Exception^ e) {
+				this->get_logger()->log_message(Log::Panic, L"failed to save universe[%s] to [My Pictures]\\%s\\%s: %s",
+					this->get_logger()->get_name()->Data(), root->Data(), path->Data(), e->Message->Data());
+			}
+		});
+	} else {
+		create_task(snapshot->SaveAsync(path, CanvasBitmapFileFormat::Auto, 1.0F)).then([=](task<void> saving) {
+			try {
+				saving.get();
+
+				this->get_logger()->log_message(Log::Notice, L"universe[%s] has been saved to %s",
+					this->get_logger()->get_name()->Data(), path->Data());
+			} catch (Platform::Exception^ e) {
+				this->get_logger()->log_message(Log::Panic, L"failed to save universe[%s] to %s: %s",
+					this->get_logger()->get_name()->Data(), path->Data(), e->Message->Data());
+			}
+		});
+	}
 }
 
 /*************************************************************************************************/
@@ -779,6 +840,20 @@ Point UniverseDisplay::local_to_global_point(IPlanet* p, float local_x, float lo
 	return Point(local_x + xoff, local_y + yoff);
 }
 
+float UniverseDisplay::planet_actual_width(IPlanet* p) {
+	return this->actual_width
+		- ((this->headup_planet != p)
+			? (this->hup_left_margin + this->hup_right_margin)
+			: 0.0F);
+}
+
+float UniverseDisplay::planet_actual_height(IPlanet* p) {
+	return this->actual_height
+		- ((this->headup_planet != p)
+			? (this->hup_top_margin + this->hup_bottom_margin)
+			: 0.0F);
+}
+
 void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	if (this->canvas->CapturePointer(args->Pointer)) {
 		this->enter_critical_section();
@@ -1018,4 +1093,34 @@ void UniverseDisplay::notify_transfer(IPlanet* from, IPlanet* to) {
 			child = info->next;
 		} while (child != this->head_planet);
 	}
+}
+
+/*************************************************************************************************/
+CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
+	Size region = this->display->Size;
+	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
+	CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, region.Width, region.Height, dpi);
+	CanvasDrawingSession^ ds = snapshot->CreateDrawingSession();
+
+	ds->Clear(Colours::Background->Color);
+	
+	this->enter_critical_section();
+
+	if (this->recent_planet != nullptr) {
+		float width = region.Width - this->hup_left_margin - this->hup_right_margin;
+		float height = region.Height - this->hup_top_margin - this->hup_bottom_margin;
+		float3x2 identity = ds->Transform;
+
+		ds->Transform = make_translation_matrix(this->hup_left_margin, this->hup_top_margin);
+		draw_planet(ds, this->recent_planet, width, height, this->get_logger());
+		ds->Transform = identity;
+	}
+
+	if (this->headup_planet != nullptr) {
+		draw_planet(ds, this->headup_planet, region.Width, region.Height, this->get_logger());
+	}
+
+	this->leave_critical_section();
+
+	return snapshot;
 }
