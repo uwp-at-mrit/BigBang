@@ -6,9 +6,10 @@
 #include "graphlet/primitive.hpp"
 
 #include "paint.hpp"
+#include "timer.hxx"
 
 namespace WarGrey::SCADA {
-	private enum class TimelineState { Travel, Pause, Stop, _ };
+	private enum class TimelineState { Travel, Service, Terminated, _ };
 
 	private struct TimelineStyle {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
@@ -31,14 +32,15 @@ namespace WarGrey::SCADA {
 
 	private class ITimelineListener abstract {
 	public:
-		virtual void on_launch(WarGrey::SCADA::Timelinelet* master, WarGrey::SCADA::Syslog* logger) {}
-		virtual void on_pause(WarGrey::SCADA::Timelinelet* master, WarGrey::SCADA::Syslog* logger) {}
-		virtual void on_terminate(WarGrey::SCADA::Timelinelet* master, WarGrey::SCADA::Syslog* logger) {}
+		virtual void on_launch(WarGrey::SCADA::Timelinelet* master) {}
+		virtual void on_step(WarGrey::SCADA::Timelinelet* master) {}
+		virtual void on_service(WarGrey::SCADA::Timelinelet* master) {}
+		virtual void on_terminate(WarGrey::SCADA::Timelinelet* master) {}
 
 	public:
-		virtual void on_startover(WarGrey::SCADA::Timelinelet* master, long long time0, long long timen, WarGrey::SCADA::Syslog* logger) {}
-		virtual void on_speed_changed(WarGrey::SCADA::Timelinelet* master, unsigned int x, WarGrey::SCADA::Syslog* logger) {}
-		virtual void on_time_skipped(WarGrey::SCADA::Timelinelet* master, long long timepoint, WarGrey::SCADA::Syslog* logger) {}
+		virtual void on_startover(WarGrey::SCADA::Timelinelet* master, long long departure_ms, long long destination_ms) {}
+		virtual void on_speed_shifted(WarGrey::SCADA::Timelinelet* master, unsigned int x) {}
+		virtual void on_time_skipped(WarGrey::SCADA::Timelinelet* master, long long timepoint_ms) {}
 	};
 
 	private class Timelinelet
@@ -47,12 +49,13 @@ namespace WarGrey::SCADA {
 	public:
 		~Timelinelet() noexcept;
 
-		Timelinelet(long long tmin, long long tmax, float width, float thickness = 2.0F);
-		Timelinelet(long long tmin, long long tmax, float width, unsigned int* speeds, size_t speeds_count, float thickness = 2.0F);
+		Timelinelet(long long tmin_ms, long long tmax_ms, float width, int frame_rate = 0, float thickness = 2.0F);
+		Timelinelet(long long tmin_ms, long long tmax_ms, float width, unsigned int* speeds, size_t speeds_count,
+			int frame_rate = 0, float thickness = 2.0F);
 
 		template<size_t N>
-		Timelinelet(long long tmin, long long tmax, float width, unsigned int (&speeds)[N], float thickness = 2.0F)
-			: Timelinelet(tmin, tmax, width, speeds, N, thickness) {}
+		Timelinelet(long long tmin, long long tmax, float width, unsigned int (&speeds)[N], int frame_rate = 0, float thickness = 2.0F)
+			: Timelinelet(tmin, tmax, width, speeds, N, frame_rate, thickness) {}
 
 	public:
 		void construct() override;
@@ -67,20 +70,24 @@ namespace WarGrey::SCADA {
 		void push_event_listener(WarGrey::SCADA::ITimelineListener* observer);
 		long long get_departure_timepoint();
 		long long get_destination_timepoint();
+		unsigned int get_speed_shift();
+		void shift_speed();
+		void step(); // this is not designed for client applications
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimelineState state, WarGrey::SCADA::TimelineStyle& style) override;
 		void apply_style(WarGrey::SCADA::TimelineStyle& style) override;
 		void on_state_changed(WarGrey::SCADA::TimelineState state) override;
-		void on_value_changed(long long timepoint) override;
-		void on_range_changed(long long time0, long long timen) override;
+		void on_value_changed(long long timepoint_ms) override;
+		void on_range_changed(long long departure_ms, long long destination_ms) override;
 
 	private:
-		void on_speed_changed();
+		void update_time_range();
+		void update_speed_shift();
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ speedx;
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ step;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ moment;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ timepoints;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ footprint;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ endpoint0;
@@ -105,9 +112,12 @@ namespace WarGrey::SCADA {
 		std::deque<long long> footprints;
 		unsigned int* speeds;
 		size_t speeds_count;
-		size_t speed_index;
+		size_t speed_shift;
 
 	private:
 		std::deque<WarGrey::SCADA::ITimelineListener*> obsevers;
+		WarGrey::SCADA::Timer^ timer;
+		Platform::Object^ stepper;
+		int frame_rate;
 	};
 }

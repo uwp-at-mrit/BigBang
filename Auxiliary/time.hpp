@@ -7,7 +7,7 @@ namespace WarGrey::SCADA {
 
 	Windows::Foundation::TimeSpan make_timespan_from_milliseconds(long long ms);
 	Windows::Foundation::TimeSpan make_timespan_from_seconds(long long s);
-	Windows::Foundation::TimeSpan make_timespan_from_rate(int rate);
+	Windows::Foundation::TimeSpan make_timespan_from_rate(int rate, unsigned int shift = 1U);
 
 	long long floor_seconds(long long the_100ns, long long span_s = day_span_s);
 	long long ceiling_seconds(long long the_100ns, long long span_s = day_span_s);
@@ -36,9 +36,9 @@ namespace WarGrey::SCADA {
 	void sleep(long long ms);
 	void sleep_us(long long us);
 	
-	Platform::String^ make_timestamp_utc(long long utc_s, bool locale);
-	Platform::String^ make_datestamp_utc(long long utc_s, bool locale);
-	Platform::String^ make_daytimestamp_utc(long long utc_s, bool locale);
+	Platform::String^ make_timestamp_utc(long long s, bool locale);
+	Platform::String^ make_datestamp_utc(long long s, bool locale);
+	Platform::String^ make_daytimestamp_utc(long long s, bool locale);
 
 	Platform::String^ update_nowstamp(bool need_us = true, int* l00ns = nullptr);
 }

@@ -17,13 +17,14 @@ namespace WarGrey::SCADA {
 	private ref class Timer sealed {
 	public:
 		virtual ~Timer();
-		Timer(WarGrey::SCADA::ITimerListener^ callback_executor, int rate = 60);
+		Timer(WarGrey::SCADA::ITimerListener^ callback_executor, int rate = 0, unsigned int shift = 1U);
 
 	public:
-		void start();
+		void start(int rate = 0, unsigned int shift = 1U);
 		void stop();
 
 	private:
+		void set_frame_rate(int rate, unsigned int shift);
 		void notify(Platform::Object^ whocares, Platform::Object^ useless);
 
 	private:

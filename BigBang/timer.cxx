@@ -7,19 +7,36 @@ using namespace Windows::Foundation;
 
 using namespace Windows::UI::Xaml;
 
-Timer::Timer(ITimerListener^ callback, int rate) : target(callback) {
+Timer::Timer(ITimerListener^ callback, int rate, unsigned int shift) : target(callback), interval(0LL) {
 	this->timer = ref new DispatcherTimer();
 
-	this->timer->Interval = make_timespan_from_rate(rate);
-	this->interval = this->timer->Interval.Duration;
 	this->timer->Tick += ref new EventHandler<Platform::Object^>(this, &Timer::notify);
 
-	// NOTE: the first notification will occur after the first interval, not occurs immediately.
-	this->start();
+	if (rate != 0) {
+		// NOTE: the first notification will occur after the first interval, not occurs immediately.
+		this->start(rate, shift);
+	}
 }
 
 Timer::~Timer() {
 	this->stop();
+}
+
+void Timer::start(int rate, unsigned int shift) {
+	if (rate != 0) {
+		this->set_frame_rate(rate, shift);
+	} else if (this->interval == 0LL) {
+		this->set_frame_rate(60, shift);
+	}
+
+	this->timer->Start();
+
+	this->count = 1;
+	this->uptime = this->interval;
+}
+
+void Timer::stop() {
+	this->timer->Stop();
 }
 
 void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
@@ -45,16 +62,9 @@ void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 	this->timer->Interval = TimeSpan{ next_tick }; // don't worry, it's Visual Studio's fault
 }
 
-void Timer::start() {
-	this->timer->Start(); // start or restart
-	this->timer->Start(); // ensure restarting
-
-	this->count = 1;
-	this->uptime = this->interval;
-}
-
-void Timer::stop() {
-	this->timer->Stop();
+void Timer::set_frame_rate(int rate, unsigned int shift) {
+	this->timer->Interval = make_timespan_from_rate(rate, shift);
+	this->interval = this->timer->Interval.Duration;
 }
 
 /*************************************************************************************************/

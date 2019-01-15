@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Time0" xml:space="preserve">
+  <data name="Departure" xml:space="preserve">
     <value>起始时间</value>
   </data>
-  <data name="Timen" xml:space="preserve">
+  <data name="Destination" xml:space="preserve">
     <value>结束时间</value>
   </data>
 </root>

@@ -1,12 +1,13 @@
 #pragma once
 
 #include "timemachine.hpp"
+#include "planet.hpp"
 #include "plc.hpp"
 
 #include "decorator/grid.hpp"
 
 namespace WarGrey::SCADA {
-	private class HydraulicsPage : public WarGrey::SCADA::ITimeline {
+	private class HydraulicsPage : public WarGrey::SCADA::Planet, public WarGrey::SCADA::ITimeMachineListener {
 	public:
 		virtual ~HydraulicsPage() noexcept;
 		HydraulicsPage(WarGrey::SCADA::PLCMaster* plc = nullptr);
@@ -16,7 +17,7 @@ namespace WarGrey::SCADA {
 		void reflow(float width, float height) override;
 
 	public:
-		void on_snapshot(long long timepoint_s,
+		void on_timestream(long long timepoint_s,
 			size_t addr0, size_t addrn, const char* data, size_t size,
 			WarGrey::SCADA::Syslog* logger) override;
 

@@ -23,6 +23,7 @@ using namespace Windows::System;
 using namespace Windows::Storage;
 
 using namespace Windows::UI::ViewManagement;
+using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -40,7 +41,8 @@ static Platform::String^ mode_setting_key = "PLC_Master_Mode";
 /*************************************************************************************************/
 private class Widget : public Planet {
 public:
-	Widget(UniverseDisplay^ master, PLCMaster* plc) : Planet(__MODULE__), master(master), device(plc) {
+	Widget(SplitView^ frame, UniverseDisplay^ master, PLCMaster* plc)
+		: Planet(__MODULE__), frame(frame), master(master), device(plc) {
 		Platform::String^ localhost = system_ipv4_address();
 		
 		this->inset = tiny_font_size * 0.5F;
@@ -196,6 +198,8 @@ public:
 
 			}; break;
 			}
+
+			this->frame->IsPaneOpen = false;
 		}
 	}
 
@@ -264,6 +268,7 @@ private:
 	float label_max;
 
 private:
+	SplitView^ frame;
 	UniverseDisplay^ master;
 	ISatellite* settings;
 	PLCMaster* device;
@@ -277,12 +282,13 @@ private: // never delete these graphlets manually.
 };
 
 /*************************************************************************************************/
-UniverseWidget::UniverseWidget(UniverseDisplay^ master, PLCMaster* plc) : UniverseDisplay(master->get_logger()), master(master), plc(plc) {
+UniverseWidget::UniverseWidget(SplitView^ frame, UniverseDisplay^ master, PLCMaster* plc)
+	: UniverseDisplay(master->get_logger()), frame(frame), master(master), plc(plc) {
 	this->use_global_mask_setting(false);
 	this->disable_predefined_shortcuts(true);
 }
 
 void UniverseWidget::construct(CanvasCreateResourcesReason reason) {
-	initialize_the_timemachine(this->plc, timemachine_frame_per_second, timemachine_snapshot_interval);
-	this->push_planet(new Widget(this->master, this->plc));
+	initialize_the_timemachine(this->plc, timemachine_speed, timemachine_frame_per_second);
+	this->push_planet(new Widget(this->frame, this->master, this->plc));
 }

@@ -119,10 +119,10 @@ TimeSpan WarGrey::SCADA::make_timespan_from_seconds(long long s) {
 	return ts;
 }
 
-TimeSpan WarGrey::SCADA::make_timespan_from_rate(int rate) {
+TimeSpan WarGrey::SCADA::make_timespan_from_rate(int rate, unsigned int shift) {
 	TimeSpan ts;
 	
-	ts.Duration = ((rate > 0) ? (l00ns_s / rate) : (-l00ns_s * rate));
+	ts.Duration = ((rate > 0) ? (l00ns_s / rate) : (-l00ns_s * rate)) / max(shift, 1);
 	
 	return ts;
 }

@@ -23,16 +23,46 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasTextFormat^ lines_default_font = make_bold_text_format(10.0F);
 
-static unsigned int default_speeds[] = { 1U, 2U, 4U, 8U, 16U };
+static unsigned int default_speeds[] = { 1U, 2U, 3U, 4U, 5U };
+
+private ref class TimelineStepper sealed : public ITimerListener {
+internal:
+	TimelineStepper(Timelinelet* master) : master(master) {}
+
+internal:
+	Syslog* get_logger() override {
+		return this->master->get_logger();
+	}
+
+public:
+	void on_elapse(long long count, long long interval, long long uptime) override {
+		this->master->step();
+	}
+
+private:
+	Timelinelet* master;
+};
+
+static inline void notify_timeline_state_changed(Timelinelet* self, ITimelineListener* observer) {
+	switch (self->get_state()) {
+	case TimelineState::Travel: observer->on_launch(self); break;
+	case TimelineState::Service: observer->on_service(self); break;
+	case TimelineState::Terminated: observer->on_terminate(self); break;
+	}
+}
 
 /*************************************************************************************************/
-Timelinelet::Timelinelet(long long tmin, long long tmax, float width, float thickness)
-	: Timelinelet(tmin, tmax, width, default_speeds, thickness) {}
+Timelinelet::Timelinelet(long long tmin, long long tmax, float width, int frame_rate, float thickness)
+	: Timelinelet(tmin, tmax, width, default_speeds, frame_rate, thickness) {}
 
-Timelinelet::Timelinelet(long long tmin, long long tmax, float width, unsigned int* speeds, size_t speeds_count, float thickness)
-	: IRangelet(tmin, tmax), IStatelet(TimelineState::Stop), width(width), thickness(thickness), speeds_count(speeds_count), speed_index(0) {
+Timelinelet::Timelinelet(long long tmin, long long tmax, float width, unsigned int* speeds, size_t speeds_count, int frame_rate, float thickness)
+	: IRangelet(tmin, tmax), IStatelet(TimelineState::Terminated), width(width), thickness(thickness)
+	, speeds_count(speeds_count), speed_shift(0), frame_rate(frame_rate) {
+	TimelineStepper^ stepper = ref new TimelineStepper(this);
+
 	this->enable_events(true);
 
+	this->timer = ref new Timer(stepper, 0);
 	this->speeds = new unsigned int[this->speeds_count];
 	for (size_t idx = 0; idx < this->speeds_count; idx++) {
 		this->speeds[idx] = std::max(speeds[idx], 1U);
@@ -46,7 +76,7 @@ Timelinelet::~Timelinelet() {
 void Timelinelet::construct() {
 	float radiusn = this->thickness * 1.618F;
 
-	this->footprint_radius = this->thickness;
+	this->footprint_radius = this->thickness * 0.618F;
 	this->endpoint_radius = radiusn * 1.618F;
 	this->icon_radius = this->endpoint_radius * 2.0F;
 
@@ -68,6 +98,8 @@ void Timelinelet::construct() {
 		this->stop_icon = polar_rectangle(this->icon_radius, 45.0, 0.0);
 		this->speed_icon = geometry_union(half_speed, -speed_diff, 0.0F, half_speed, speed_diff);
 	}
+
+	this->set_value(this->vmin, true);
 }
 
 void Timelinelet::fill_extent(float x, float y, float* w, float* h) {
@@ -90,8 +122,8 @@ void Timelinelet::prepare_style(TimelineState status, TimelineStyle& style) {
 	CAS_SLOT(style.speed_icon_color, Colours::Blue);
 	
 	switch (status) {
-	case TimelineState::Stop: CAS_VALUES(style.line_color, Colours::GrayText, style.cursor_color, Colours::Gray); break;
-	case TimelineState::Pause: CAS_SLOT(style.line_color, style.pause_icon_color); break;
+	case TimelineState::Terminated: CAS_VALUES(style.line_color, Colours::GrayText, style.cursor_color, Colours::Gray); break;
+	case TimelineState::Service: CAS_SLOT(style.line_color, style.pause_icon_color); break;
 	}
 
 	CAS_SLOT(style.line_color, Colours::DeepSkyBlue);
@@ -100,24 +132,23 @@ void Timelinelet::prepare_style(TimelineState status, TimelineStyle& style) {
 }
 
 void Timelinelet::apply_style(TimelineStyle& style) {
-	this->on_range_changed(this->vmin, this->vmax); // implies `set_value`
-	this->on_speed_changed();
+	this->update_time_range();
+	this->update_speed_shift();
 }
 
 void Timelinelet::on_state_changed(TimelineState state) {
-	Syslog* logger = this->get_logger();
-
-	if (state == TimelineState::Stop) {
+	switch (state) {
+	case TimelineState::Travel: this->timer->start(this->frame_rate, this->speeds[this->speed_shift]); break;
+	case TimelineState::Service: this->timer->stop(); break;
+	case TimelineState::Terminated: {
+		this->timer->stop();
 		this->set_value(this->vmin);
 		this->footprints.clear();
+	}; break;
 	}
 
 	for (auto observer : this->obsevers) {
-		switch (state) {
-		case TimelineState::Travel: observer->on_launch(this, logger); break;
-		case TimelineState::Pause: observer->on_pause(this, logger); break;
-		case TimelineState::Stop: observer->on_terminate(this, logger); break;
-		}
+		notify_timeline_state_changed(this, observer);
 	}
 }
 
@@ -125,62 +156,19 @@ void Timelinelet::on_value_changed(long long timepoint) {
 	TimelineStyle style = this->get_style();
 
 	this->footprints.push_back(timepoint);
-	this->step = make_text_layout(make_daytimestamp_utc(timepoint, true), style.font);
-}
-
-void Timelinelet::on_speed_changed() {
-	TimelineStyle style = this->get_style();
-	Syslog* logger = this->get_logger();
-	unsigned int x = this->speeds[this->speed_index];
-	
-	this->speedx = make_text_layout(x.ToString() + "x", style.font);
-
-	for (auto observer : this->obsevers) {
-		observer->on_speed_changed(this, x, logger);
-	}
+	this->moment = make_text_layout(make_daytimestamp_utc(timepoint, true), style.font);
 }
 
 bool Timelinelet::can_change_range() {
-	return (this->get_state() == TimelineState::Stop);
+	return (this->get_state() == TimelineState::Terminated);
 }
 
 void Timelinelet::on_range_changed(long long time0, long long timen) {
-	TextExtent dbox0, tbox0, dboxn, tboxn;
-	TimelineStyle style = this->get_style();
-	auto dp0 = paragraph(make_datestamp_utc(time0, true), style.font, &dbox0);
-	auto tp0 = paragraph(make_daytimestamp_utc(time0, true), style.font, &tbox0);
-	auto dpn = paragraph(make_datestamp_utc(timen, true), style.font, &dboxn);
-	auto tpn = paragraph(make_daytimestamp_utc(timen, true), style.font, &tboxn);
-	float dwhalf0 = dbox0.width * 0.5F;
-	float twhalf0 = tbox0.width * 0.5F;
-	float dwhalfn = dboxn.width * 0.5F;
-	float twhalfn = tboxn.width * 0.5F;
-	float gridsize = (this->icon_radius + this->endpoint_radius) * 2.0F;
-	float rx = this->width - gridsize * 1.0F;
-	float lx = gridsize * 2.0F;
-
-	this->height = std::fmaxf(dbox0.height + tbox0.height, dboxn.height + tboxn.height) + this->endpoint_radius * 1.618F;
-	this->timeline_lx = lx + std::fmaxf(dwhalf0, twhalf0);
-	this->timeline_rx = std::fmaxf(rx - std::fmaxf(dwhalfn, twhalfn), this->timeline_lx + 1.0F);
-
-	{ // merge timepoints
-		auto dt0 = geometry_union(dp0, this->timeline_lx - dwhalf0, this->height - dbox0.height + dbox0.bspace,
-			tp0, this->timeline_lx - twhalf0, -tbox0.tspace);
-
-		auto dtn = geometry_union(dpn, this->timeline_rx - dwhalfn, this->height - dboxn.height + dbox0.bspace,
-			tpn, this->timeline_rx - twhalfn, -tboxn.tspace);
-		
-		this->timepoints = geometry_freeze(geometry_union(dt0, dtn));
-	}
-
+	this->update_time_range();
 	this->set_value(this->vmin);
 	
-	{ // broadcast event
-		Syslog* logger = this->get_logger();
-
-		for (auto observer : this->obsevers) {
-			observer->on_startover(this, this->vmin, this->vmax, logger);
-		}
+	for (auto observer : this->obsevers) {
+		observer->on_startover(this, this->vmin, this->vmax);
 	}
 }
 
@@ -193,24 +181,19 @@ void Timelinelet::on_tap(float x, float y) {
 	bool handled = true;
 
 	if (x <= trx) {
-		this->set_state((TimelineState::Travel == state) ? TimelineState::Pause : TimelineState::Travel);
+		this->set_state((state == TimelineState::Travel) ? TimelineState::Service : TimelineState::Travel);
 	} else if ((x >= slx) && (x <= srx)) {
-		this->set_state(TimelineState::Stop);
+		this->set_state(TimelineState::Terminated);
 	} else if (x >= xlx) {
-		this->speed_index = (this->speed_index + 1) % this->speeds_count;
-		this->on_speed_changed();
-	} else if ((x >= this->timeline_lx) && (x <= this->timeline_rx) && (state != TimelineState::Stop)) {
+		this->shift_speed();
+	} else if ((x >= this->timeline_lx) && (x <= this->timeline_rx) && (state != TimelineState::Terminated)) {
 		float percentage = (x - this->timeline_lx) / (this->timeline_rx - this->timeline_lx);
 		long long this_timepoint = ((long long)(std::roundf(float(this->vmax - this->vmin) * percentage))) + this->vmin;
 
 		this->set_value(this_timepoint);
 		
-		{ // broadcast event
-			Syslog* logger = this->get_logger();
-
-			for (auto observer : this->obsevers) {
-				observer->on_time_skipped(this, this_timepoint, logger);
-			}
+		for (auto observer : this->obsevers) {
+			observer->on_time_skipped(this, this_timepoint);
 		}
 	} else {
 		handled = false;
@@ -229,12 +212,19 @@ void Timelinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	float rx = x + this->timeline_rx;
 	float range = (rx - lx);
 	float cursor_x = lx + range * float(this->get_percentage());
-	
+	float fpdiff = this->footprint_radius * 1.618F;
+	float last_fpx = 0.0F;
+
 	ds->DrawCachedGeometry(this->timepoints, x, y, style.label_color);
 	ds->DrawLine(lx + this->endpoint_radius, cy, rx - this->endpoint_radius, cy, style.line_color, this->thickness);
 
 	for (auto it = this->footprints.begin(); it != this->footprints.end(); it++) {
-		ds->DrawCachedGeometry(this->footprint, lx + range * float(this->get_percentage(*it)), cy, style.footprint_color);
+		float fpx = lx + range * float(this->get_percentage(*it));
+
+		if ((fpx - last_fpx) > fpdiff) {
+			ds->DrawCachedGeometry(this->footprint, fpx, cy, style.footprint_color);
+			last_fpx = fpx;
+		}
 	}
 
 	ds->FillGeometry(this->endpoint0, lx, cy, style.travel_icon_color);
@@ -245,7 +235,10 @@ void Timelinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	ds->FillGeometry(this->cursor, cursor_x, cy, style.cursor_color);
 	ds->DrawGeometry(this->cursor, cursor_x, cy, style.line_color);
 
-	ds->DrawTextLayout(this->step, cursor_x - this->step->LayoutBounds.Width * 0.5F, y - this->step->DrawBounds.Y, style.label_color);
+	ds->DrawTextLayout(this->moment,
+		cursor_x - this->moment->LayoutBounds.Width * 0.5F,
+		y - this->moment->DrawBounds.Y,
+		style.label_color);
 
 	{ // draw icons
 		float tx = x + this->icon_radius;
@@ -260,22 +253,30 @@ void Timelinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 			ds->DrawGeometry(this->travel_icon, tx, cy, style.icon_border_color);
 		}
 
-		if (state == TimelineState::Stop) {
+		if (state == TimelineState::Terminated) {
 			ds->FillGeometry(this->stop_icon, sx, cy, style.icon_disabled_color);
 		} else {
 			ds->FillGeometry(this->stop_icon, sx, cy, style.stop_icon_color);
 			ds->DrawGeometry(this->stop_icon, sx, cy, style.icon_border_color);
 		}
 
-		ds->FillGeometry(this->speed_icon, xx, cy, style.speed_icon_color);
-		ds->DrawGeometry(this->speed_icon, xx, cy, style.icon_border_color);
-		ds->DrawTextLayout(this->speedx, xx - this->speedx->LayoutBounds.Width * 0.5F, cy + this->icon_radius * 0.5F, style.label_color);
+		if (this->speeds_count > 1) {
+			ds->FillGeometry(this->speed_icon, xx, cy, style.speed_icon_color);
+			ds->DrawGeometry(this->speed_icon, xx, cy, style.icon_border_color);
+			ds->DrawTextLayout(this->speedx, xx - this->speedx->LayoutBounds.Width * 0.5F, cy + this->icon_radius * 0.5F, style.label_color);
+		} else {
+			ds->FillGeometry(this->speed_icon, xx, cy, style.icon_disabled_color);
+		}
 	}
 }
 
 void Timelinelet::push_event_listener(ITimelineListener* observer) {
 	if (observer != nullptr) {
 		this->obsevers.push_back(observer);
+		observer->on_startover(this, this->vmin, this->vmax);
+
+		// TODO: is this necessary?
+		notify_timeline_state_changed(this, observer);
 	}
 }
 
@@ -285,4 +286,71 @@ long long Timelinelet::get_departure_timepoint() {
 
 long long Timelinelet::get_destination_timepoint() {
 	return this->vmax;
+}
+
+unsigned int Timelinelet::get_speed_shift() {
+	return this->speeds[this->speed_shift];
+}
+
+void Timelinelet::shift_speed() {
+	if (this->speeds_count > 1) {
+		this->speed_shift = (this->speed_shift + 1) % this->speeds_count;
+		this->update_speed_shift();
+
+		for (auto observer : this->obsevers) {
+			observer->on_speed_shifted(this, this->speeds[this->speed_shift]);
+		}
+
+		if (this->get_state() == TimelineState::Travel) {
+			this->timer->start(this->frame_rate, this->speeds[this->speed_shift]);
+		}
+	}
+}
+
+void Timelinelet::step() {
+	if (this->get_state() == TimelineState::Travel) {
+		for (auto observer : this->obsevers) {
+			observer->on_step(this);
+		}
+	}
+}
+
+/*************************************************************************************************/
+void Timelinelet::update_speed_shift() {
+	TimelineStyle style = this->get_style();
+	unsigned int x = this->speeds[this->speed_shift];
+
+	this->speedx = make_text_layout(x.ToString() + "x", style.font);
+}
+
+void Timelinelet::update_time_range() {
+	TextExtent dbox0, tbox0, dboxn, tboxn;
+	TimelineStyle style = this->get_style();
+	long long departure = this->vmin / 1000LL;
+	long long destination = this->vmax / 1000LL;
+	auto dp0 = paragraph(make_datestamp_utc(departure, true), style.font, &dbox0);
+	auto tp0 = paragraph(make_daytimestamp_utc(departure, true), style.font, &tbox0);
+	auto dpn = paragraph(make_datestamp_utc(destination, true), style.font, &dboxn);
+	auto tpn = paragraph(make_daytimestamp_utc(destination, true), style.font, &tboxn);
+	float dwhalf0 = dbox0.width * 0.5F;
+	float twhalf0 = tbox0.width * 0.5F;
+	float dwhalfn = dboxn.width * 0.5F;
+	float twhalfn = tboxn.width * 0.5F;
+	float gridsize = (this->icon_radius + this->endpoint_radius) * 2.0F;
+	float rx = this->width - gridsize * 1.0F;
+	float lx = gridsize * 2.0F;
+
+	this->height = std::fmaxf(dbox0.height + tbox0.height, dboxn.height + tboxn.height) + this->endpoint_radius * 1.618F;
+	this->timeline_lx = lx + std::fmaxf(dwhalf0, twhalf0);
+	this->timeline_rx = std::fmaxf(rx - std::fmaxf(dwhalfn, twhalfn), this->timeline_lx + 1.0F);
+
+	{ // merge timepoints
+		auto dt0 = geometry_union(dp0, this->timeline_lx - dwhalf0, this->height - dbox0.height + dbox0.bspace,
+			tp0, this->timeline_lx - twhalf0, -tbox0.tspace);
+
+		auto dtn = geometry_union(dpn, this->timeline_rx - dwhalfn, this->height - dboxn.height + dbox0.bspace,
+			tpn, this->timeline_rx - twhalfn, -tboxn.tspace);
+
+		this->timepoints = geometry_freeze(geometry_union(dt0, dtn));
+	}
 }

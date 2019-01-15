@@ -2,6 +2,7 @@
 #include <map>
 
 #include "timemachine.hpp"
+#include "planet.hpp"
 
 #include "navigator/listview.hpp"
 
@@ -10,7 +11,6 @@
 #include "graphlet/time/datepickerlet.hpp"
 #include "graphlet/time/timelinelet.hpp"
 
-#include "timer.hxx"
 #include "path.hpp"
 #include "string.hpp"
 #include "module.hpp"
@@ -32,23 +32,16 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class TMIcon : unsigned int { PrintScreen, BookMark, Quit, _ };
-
-private enum class TM : unsigned int { Time0, Timen, _ };
+private enum class TM : unsigned int { Departure, Destination, _ };
 
 static const float time_machine_alpha = 0.64F;
-static ICanvasBrush^ fg_color = Colours::GhostWhite;
 
 /*************************************************************************************************/
-private ref class TimeMachineUniverseDisplay sealed : public UniverseDisplay {
+private ref class TimeMachineDisplay sealed : public UniverseDisplay {
 internal:
-	TimeMachineUniverseDisplay(Syslog* logger, ITimeMachine* entity, int frame_rate, IHeadUpPlanet* headsup)
-		: UniverseDisplay(logger, nullptr, new ListViewNavigator(), headsup)
-		, machine(entity), closed(true), current_timepoint(0LL) {
-	
+	TimeMachineDisplay(Syslog* logger, ITimeMachine* entity, IHeadUpPlanet* dashboard)
+		: UniverseDisplay(logger, nullptr, new ListViewNavigator(), dashboard), machine(entity), closed(true) {
 		this->use_global_mask_setting(false);
-
-		this->timer = ref new Timer(this, frame_rate);
-		this->timer->stop();
 
 		this->_void = ref new SplitView();
 		this->_void->Content = this->canvas;
@@ -59,9 +52,8 @@ internal:
 	}
 
 internal:
-	void push_timeline(ITimeline* timeline) {
-		this->push_planet(timeline);
-		this->timelines.push_back(timeline);
+	void pickup_planet(IPlanet* planet) {
+		UniverseDisplay::push_planet(planet);
 	}
 
 public:
@@ -80,7 +72,6 @@ public:
 		this->global_mask_alpha = 0.8;
 		this->_void->IsPaneOpen = false;
 		this->machine->on_shown();
-		this->timer->start();
 	}
 
 	void on_closing(FlyoutBase^ target, FlyoutBaseClosingEventArgs^ args) {
@@ -89,32 +80,12 @@ public:
 
 	void on_closed(Platform::Object^ target, Platform::Object^ args) {
 		this->closed = true;
-		this->timer->stop();
 		this->machine->on_hiden();
 		this->global_mask_alpha = this->darkness;
 	}
 
-public:
-	void travel(long long start_timepoint, long long stop_timepoint) {
-		this->timer->stop();
-
-		this->start_timepoint = start_timepoint;
-		this->current_timepoint = start_timepoint;
-		this->stop_timepoint = stop_timepoint;
-		
-		if (this->start_timepoint < this->stop_timepoint) {
-			this->direction = 1LL;
-			this->current_timepoint = this->start_timepoint;
-		} else {
-			this->direction = -1LL;
-			this->current_timepoint = this->stop_timepoint;
-		}
-
-		this->timer->start();
-	}
-
 	void on_elapse(long long count, long long interval, long long uptime) override {
-		
+		this->machine->step();
 	}
 
 public:
@@ -127,24 +98,16 @@ protected:
 		this->machine->construct(reason);
 	}
 
-private:
-	std::list<ITimeline*> timelines; // never deletes these timelines manually
-	ITimeMachine* machine; // its lifetime is managed by client applications
+private: // never delete these objects manually
+	ITimeMachine* machine;
 	SplitView^ _void;
-	Timer^ timer;
 	double darkness;
 	bool closed;
-
-private:
-	long long start_timepoint;
-	long long current_timepoint;
-	long long stop_timepoint;
-	long long direction;
 };
 
-private class TimeMachineHeadsUp : public IHeadUpPlanet, public ITimelineListener {
+private class TimeMachineDashboard : public IHeadUpPlanet, public ITimeMachineListener, public ITimelineListener {
 public:
-	TimeMachineHeadsUp(ITimeMachine* master) : IHeadUpPlanet(__MODULE__), machine(master) {}
+	TimeMachineDashboard(ITimeMachine* master, int frame_rate) : IHeadUpPlanet(__MODULE__), machine(master), frame_rate(frame_rate) {}
 
 	void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override {
 		float base_size = statusbar_height();
@@ -157,7 +120,7 @@ public:
 public:
 	void load(CanvasCreateResourcesReason reason, float width, float height) override {
 		auto icon_font = make_text_format("Consolas", statusbar_height());
-		auto icon_color = fg_color;
+		auto icon_color = Colours::GhostWhite;
 
 		for (TMIcon id = _E0(TMIcon); id < TMIcon::_; id++) {
 			Platform::String^ caption = nullptr;
@@ -172,15 +135,15 @@ public:
 			this->cellophane(this->icons[id], time_machine_alpha);
 		}
 
-		this->load_date_picker(this->time_pickers, TM::Time0, -this->machine->span_seconds());
-		this->load_date_picker(this->time_pickers, TM::Timen, 0LL);
+		this->load_date_picker(this->time_pickers, TM::Departure, -this->machine->span_seconds());
+		this->load_date_picker(this->time_pickers, TM::Destination, 0LL);
 
 		{ // load the timeline
-			long long time0 = this->time_pickers[TM::Time0]->get_value();
-			long long timen = this->time_pickers[TM::Timen]->get_value();
+			long long departure = this->time_pickers[TM::Departure]->get_value() * 1000LL;
+			long long destination = this->time_pickers[TM::Destination]->get_value() * 1000LL;
 			float tlwidth = width * 0.618F;
 
-			this->timeline = this->insert_one(new Timelinelet(time0, timen, tlwidth));
+			this->timeline = this->insert_one(new Timelinelet(departure, destination, tlwidth, this->frame_rate));
 			this->cellophane(this->timeline, time_machine_alpha);
 
 			this->timeline->push_event_listener(this);
@@ -202,9 +165,9 @@ public:
 			icon_rx -= (icon_width + gapsize);
 		}
 
-		this->move_to(this->time_pickers[TM::Time0], icon_y, icon_y, GraphletAnchor::LT);
-		this->move_to(this->time_pickers[TM::Timen], this->time_pickers[TM::Time0], GraphletAnchor::LB, GraphletAnchor::LT);
-		this->move_to(this->timeline, this->time_pickers[TM::Timen], GraphletAnchor::RT, GraphletAnchor::LC, gapsize * 2.0F);
+		this->move_to(this->time_pickers[TM::Departure], icon_y, icon_y, GraphletAnchor::LT);
+		this->move_to(this->time_pickers[TM::Destination], this->time_pickers[TM::Departure], GraphletAnchor::LB, GraphletAnchor::LT);
+		this->move_to(this->timeline, this->time_pickers[TM::Destination], GraphletAnchor::RT, GraphletAnchor::LC, gapsize * 2.0F);
 	}
 
 public:
@@ -221,7 +184,10 @@ public:
 				if (yes) {
 					this->show_virtual_keyboard(ScreenKeyboard::Bucketpad, GraphletAnchor::CB, 0.0F, 4.0F);
 				} else {
-					this->timeline->set_range(this->time_pickers[TM::Time0]->get_value(), this->time_pickers[TM::Timen]->get_value());
+					long long departure = this->time_pickers[TM::Departure]->get_value() * 1000LL;
+					long long destination = this->time_pickers[TM::Destination]->get_value() * 1000LL;
+
+					this->machine->startover(departure, destination);
 				}
 			} else {
 				this->set_caret_owner(nullptr);
@@ -236,48 +202,42 @@ public:
 			switch (icon->id) {
 			case TMIcon::Quit: this->machine->hide(); break;
 			case TMIcon::PrintScreen: {
-				auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->master());
+				auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master());
 
-				if (tmud != nullptr) {
-					tmud->save(this->name() + "-"
-						+ tmud->current_planet->name() + "-"
+				if (tmd != nullptr) {
+					tmd->save(this->name() + "-"
+						+ tmd->current_planet->name() + "-"
 						+ file_basename_from_second(this->timeline->get_value()) + ".png");
 				}
 			}; break;
 			case TMIcon::BookMark: {
-				auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->master());
+				auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master());
 
-				if (tmud != nullptr) {
-					tmud->flyout_content()->IsPaneOpen = true;
+				if (tmd != nullptr) {
+					tmd->flyout_content()->IsPaneOpen = true;
 				}
 			}; break;
 			}
 		}
 	}
 
-	public:
-		void on_startover(Timelinelet* timeline, long long time0, long long timen, Syslog* logger) override {
-		}
+public:
+	void on_step(Timelinelet* timeline) override {
+		this->machine->step();
+	}
 
-		void on_speed_changed(Timelinelet* timeline, unsigned int x, Syslog* logger) override {
+	void on_time_skipped(Timelinelet* timeline, long long timepoint_ms) override {
+		this->machine->timeskip(timepoint_ms);
+	}
 
-		}
+	void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size, Syslog* logger) override {
+		this->timeline->set_value(timepoint_ms);
+	}
 
-		void on_time_skipped(Timelinelet* timeline, long long timepoint, Syslog* logger) override {
-		
-		}
-
-		void on_launch(Timelinelet* master, Syslog* logger) override {
-		
-		}
-
-		void on_pause(Timelinelet* master, Syslog* logger) override {
-		
-		}
-
-		void on_terminate(Timelinelet* master, Syslog* logger) override {
-
-		}
+public:
+	Timelinelet* get_timeline() {
+		return this->timeline;
+	}
 
 private:
 	void load_date_picker(std::map<TM, Credit<DatePickerlet, TM>*>& tps, TM id, long long time_offset) {
@@ -292,41 +252,137 @@ private: // never delete this graphlets manually
 
 private:
 	ITimeMachine* machine;
+	unsigned int frame_rate;
 };
 
 /*************************************************************************************************/
-ITimeMachine::ITimeMachine(Platform::String^ dirname, int frame_rate, Syslog* logger
+ITimeMachine::ITimeMachine(Platform::String^ dirname, long long time_speed_mspf, int frame_rate, Syslog* logger
 	, Platform::String^ prefix, Platform::String^ suffix, RotationPeriod period, unsigned int period_count)
-	: IRotativeDirectory(dirname, prefix, suffix, period, period_count), ready(false) {
-	TimeMachineUniverseDisplay^ _universe = ref new TimeMachineUniverseDisplay(logger, this, frame_rate, new TimeMachineHeadsUp(this));
-
+	: IRotativeDirectory(dirname, prefix, suffix, period, period_count), ms_per_frame(time_speed_mspf), timepoint(0LL) {
+	TimeMachineDisplay^ _universe = ref new TimeMachineDisplay(logger, this, new TimeMachineDashboard(this, frame_rate));
+	
 	this->machine = ref new Flyout();
 	this->machine->Content = _universe->flyout_content();
 	this->machine->Placement = FlyoutPlacementMode::Full;
 	
-	this->machine->Opening += ref new EventHandler<Platform::Object^>(_universe, &TimeMachineUniverseDisplay::on_opening);
-	this->machine->Opened += ref new EventHandler<Platform::Object^>(_universe, &TimeMachineUniverseDisplay::on_opened);
-	this->machine->Closing += ref new TypedEventHandler<FlyoutBase^, FlyoutBaseClosingEventArgs^>(_universe, &TimeMachineUniverseDisplay::on_closing);
-	this->machine->Closed += ref new EventHandler<Platform::Object^>(_universe, &TimeMachineUniverseDisplay::on_closed);
-	
+	this->machine->Opening += ref new EventHandler<Platform::Object^>(_universe, &TimeMachineDisplay::on_opening);
+	this->machine->Opened += ref new EventHandler<Platform::Object^>(_universe, &TimeMachineDisplay::on_opened);
+	this->machine->Closing += ref new TypedEventHandler<FlyoutBase^, FlyoutBaseClosingEventArgs^>(_universe, &TimeMachineDisplay::on_closing);
+	this->machine->Closed += ref new EventHandler<Platform::Object^>(_universe, &TimeMachineDisplay::on_closed);
+
 	this->universe = _universe;
 	FlyoutBase::SetAttachedFlyout(this->universe->canvas, this->machine);
 }
 
-void ITimeMachine::push_timeline(ITimeline* timeline) {
-	auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->universe);
+void ITimeMachine::pickup(ITimeMachineListener* passenger) {
+	auto planet = dynamic_cast<IPlanet*>(passenger);
+	
+	this->passengers.push_back(passenger);
 
-	if (tmud != nullptr) {
-		tmud->push_timeline(timeline);
+	if (planet != nullptr) {
+		auto tmd = dynamic_cast<TimeMachineDisplay^>(this->universe);
+
+		if (tmd != nullptr) {
+			tmd->pickup_planet(planet);
+		}
 	}
 }
 
-void ITimeMachine::travel(long long start_timepoint, long long stop_timepoint) {
-	auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->universe);
+void ITimeMachine::startover(long long departure_ms, long long destination_ms) {
+	auto dashboard = dynamic_cast<TimeMachineDashboard*>(this->universe->heads_up_planet);
 
-	if (tmud != nullptr) {
-		tmud->travel(start_timepoint, stop_timepoint);
+	if (dashboard != nullptr) {
+		this->departure = departure_ms;
+		this->timepoint = departure_ms;
+		this->destination = destination_ms;
+
+		if (this->departure < this->destination) {
+			this->direction = 1LL;
+			this->timepoint = this->departure;
+		} else {
+			this->direction = -1LL;
+			this->timepoint = this->destination;
+		}
+
+		dashboard->get_timeline()->set_range(departure_ms, destination_ms);
 	}
+}
+
+void ITimeMachine::travel() {
+	auto dashboard = dynamic_cast<TimeMachineDashboard*>(this->universe->heads_up_planet);
+
+	if (dashboard != nullptr) {
+		dashboard->get_timeline()->set_state(TimelineState::Travel);
+	}
+}
+
+void ITimeMachine::step() {
+	if (this->timepoint <= this->destination) {
+		this->on_timestream(this->timepoint, 0, 0, nullptr, 0, this->get_logger());
+		this->timepoint += this->ms_per_frame;
+	}
+}
+
+void ITimeMachine::service() {
+	auto dashboard = dynamic_cast<TimeMachineDashboard*>(this->universe->heads_up_planet);
+
+	if (dashboard != nullptr) {
+		dashboard->get_timeline()->set_state(TimelineState::Service);
+	}
+}
+
+void ITimeMachine::terminate() {
+	auto dashboard = dynamic_cast<TimeMachineDashboard*>(this->universe->heads_up_planet);
+
+	if (dashboard != nullptr) {
+		dashboard->get_timeline()->set_state(TimelineState::Terminated);
+	}
+}
+
+void ITimeMachine::shift_speed() {
+	auto dashboard = dynamic_cast<TimeMachineDashboard*>(this->universe->heads_up_planet);
+
+	if (dashboard != nullptr) {
+		dashboard->get_timeline()->shift_speed();
+	}
+}
+
+void ITimeMachine::timeskip(long long timepoint) {
+	auto dashboard = dynamic_cast<TimeMachineDashboard*>(this->universe->heads_up_planet);
+
+	this->timepoint = timepoint;
+
+	if (dashboard != nullptr) {
+		dashboard->get_timeline()->set_value(timepoint);
+	}
+}
+
+/**************************************************************************************************/
+void ITimeMachine::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size, Syslog* logger) {
+	auto dashboard = dynamic_cast<ITimeMachineListener*>(this->universe->heads_up_planet);
+
+	if (dashboard != nullptr) {
+		dashboard->on_timestream(timepoint_ms, addr0, addrn, data, size, logger);
+	}
+
+	for (auto passenger : this->passengers) {
+		passenger->on_timestream(timepoint_ms, addr0, addrn, data, size, logger);
+	}
+}
+
+unsigned int ITimeMachine::get_speed_shift() {
+	auto dashboard = dynamic_cast<TimeMachineDashboard*>(this->universe->heads_up_planet);
+	unsigned int shift = 1U;
+
+	if (dashboard != nullptr) {
+		shift = dashboard->get_timeline()->get_speed_shift();
+	}
+
+	return shift;
+}
+
+long long ITimeMachine::get_time_speed() {
+	return this->ms_per_frame;
 }
 
 Syslog* ITimeMachine::get_logger() {
@@ -338,9 +394,9 @@ Flyout^ ITimeMachine::user_interface() {
 }
 
 /*************************************************************************************************/
-TimeMachine::TimeMachine(Platform::String^ dirname, int frame_rate, Syslog* logger
+TimeMachine::TimeMachine(Platform::String^ dirname, long long time_speed_mspf, int frame_rate, Syslog* logger
 	, Platform::String^ file_prefix, Platform::String^ file_suffix, RotationPeriod period, unsigned int period_count)
-	: ITimeMachine(dirname, frame_rate, logger, file_prefix, file_suffix, period, period_count) {}
+	: ITimeMachine(dirname, time_speed_mspf, frame_rate, logger, file_prefix, file_suffix, period, period_count) {}
 
 void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_file, long long timepoint) {
 	if (prev_file != nullptr) {
@@ -351,10 +407,10 @@ void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_f
 	this->tmstream.open(current_file->Path->Data(), std::ios::out | std::ios::app);
 }
 
-void TimeMachine::save_snapshot(long long timepoint_s, size_t addr0, size_t addrn, const char* data, size_t size) {
+void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size) {
 	// TODO: find the reason if `write` fails.
 	if (this->tmstream.is_open()) {
-		this->tmstream << timepoint_s << " " << addr0 << " " << addrn << std::endl;
+		this->tmstream << timepoint_ms << " " << addr0 << " " << addrn << std::endl;
 		this->tmstream.write(data, size) << std::endl;
 		this->tmstream.flush();
 	}
