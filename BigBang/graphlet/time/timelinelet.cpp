@@ -101,13 +101,23 @@ void Timelinelet::prepare_style(TimelineState status, TimelineStyle& style) {
 
 void Timelinelet::apply_style(TimelineStyle& style) {
 	this->on_range_changed(this->vmin, this->vmax); // implies `set_value`
-	this->on_speed_updated();
+	this->on_speed_changed();
 }
 
 void Timelinelet::on_state_changed(TimelineState state) {
+	Syslog* logger = this->get_logger();
+
 	if (state == TimelineState::Stop) {
 		this->set_value(this->vmin);
 		this->footprints.clear();
+	}
+
+	for (auto observer : this->obsevers) {
+		switch (state) {
+		case TimelineState::Travel: observer->on_launch(this, logger); break;
+		case TimelineState::Pause: observer->on_pause(this, logger); break;
+		case TimelineState::Stop: observer->on_terminate(this, logger); break;
+		}
 	}
 }
 
@@ -118,11 +128,16 @@ void Timelinelet::on_value_changed(long long timepoint) {
 	this->step = make_text_layout(make_daytimestamp_utc(timepoint, true), style.font);
 }
 
-void Timelinelet::on_speed_updated() {
+void Timelinelet::on_speed_changed() {
 	TimelineStyle style = this->get_style();
-	Platform::String^ label = this->speeds[this->speed_index].ToString() + "x";
+	Syslog* logger = this->get_logger();
+	unsigned int x = this->speeds[this->speed_index];
+	
+	this->speedx = make_text_layout(x.ToString() + "x", style.font);
 
-	this->speedx = make_text_layout(label, style.font);
+	for (auto observer : this->obsevers) {
+		observer->on_speed_changed(this, x, logger);
+	}
 }
 
 bool Timelinelet::can_change_range() {
@@ -159,6 +174,14 @@ void Timelinelet::on_range_changed(long long time0, long long timen) {
 	}
 
 	this->set_value(this->vmin);
+	
+	{ // broadcast event
+		Syslog* logger = this->get_logger();
+
+		for (auto observer : this->obsevers) {
+			observer->on_startover(this, this->vmin, this->vmax, logger);
+		}
+	}
 }
 
 void Timelinelet::on_tap(float x, float y) {
@@ -175,12 +198,20 @@ void Timelinelet::on_tap(float x, float y) {
 		this->set_state(TimelineState::Stop);
 	} else if (x >= xlx) {
 		this->speed_index = (this->speed_index + 1) % this->speeds_count;
-		this->on_speed_updated();
+		this->on_speed_changed();
 	} else if ((x >= this->timeline_lx) && (x <= this->timeline_rx) && (state != TimelineState::Stop)) {
 		float percentage = (x - this->timeline_lx) / (this->timeline_rx - this->timeline_lx);
 		long long this_timepoint = ((long long)(std::roundf(float(this->vmax - this->vmin) * percentage))) + this->vmin;
 
 		this->set_value(this_timepoint);
+		
+		{ // broadcast event
+			Syslog* logger = this->get_logger();
+
+			for (auto observer : this->obsevers) {
+				observer->on_time_skipped(this, this_timepoint, logger);
+			}
+		}
 	} else {
 		handled = false;
 	}
@@ -246,4 +277,12 @@ void Timelinelet::push_event_listener(ITimelineListener* observer) {
 	if (observer != nullptr) {
 		this->obsevers.push_back(observer);
 	}
+}
+
+long long Timelinelet::get_departure_timepoint() {
+	return this->vmin;
+}
+
+long long Timelinelet::get_destination_timepoint() {
+	return this->vmax;
 }

@@ -10,8 +10,9 @@
 #include "graphlet/time/datepickerlet.hpp"
 #include "graphlet/time/timelinelet.hpp"
 
-#include "string.hpp"
 #include "timer.hxx"
+#include "path.hpp"
+#include "string.hpp"
 #include "module.hpp"
 
 using namespace WarGrey::SCADA;
@@ -30,7 +31,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class TMIcon : unsigned int { BookMark, Quit, _ };
+private enum class TMIcon : unsigned int { PrintScreen, BookMark, Quit, _ };
 
 private enum class TM : unsigned int { Time0, Timen, _ };
 
@@ -141,13 +142,9 @@ private:
 	long long direction;
 };
 
-private class TimeMachineHeadsUp : public IHeadUpPlanet {
+private class TimeMachineHeadsUp : public IHeadUpPlanet, public ITimelineListener {
 public:
-	TimeMachineHeadsUp(ITimeMachine* master) : IHeadUpPlanet(__MODULE__), machine(master) {
-		//this->datetime_style.datetime_color = fg_color;
-		//this->datetime_style.label_color = Colours::LightSeaGreen;
-		//this->datetime_style.caret_color = Colours::DeepSkyBlue;
-	}
+	TimeMachineHeadsUp(ITimeMachine* master) : IHeadUpPlanet(__MODULE__), machine(master) {}
 
 	void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override {
 		float base_size = statusbar_height();
@@ -166,6 +163,7 @@ public:
 			Platform::String^ caption = nullptr;
 
 			switch (id) {
+			case TMIcon::PrintScreen: caption = L"📸"; break;
 			case TMIcon::BookMark: caption = L"🔖"; break;
 			case TMIcon::Quit: caption = L"🚪"; break;
 			}
@@ -184,6 +182,8 @@ public:
 
 			this->timeline = this->insert_one(new Timelinelet(time0, timen, tlwidth));
 			this->cellophane(this->timeline, time_machine_alpha);
+
+			this->timeline->push_event_listener(this);
 		}
 	}
 
@@ -235,6 +235,15 @@ public:
 		if (icon != nullptr) {
 			switch (icon->id) {
 			case TMIcon::Quit: this->machine->hide(); break;
+			case TMIcon::PrintScreen: {
+				auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->master());
+
+				if (tmud != nullptr) {
+					tmud->save(this->name() + "-"
+						+ tmud->current_planet->name() + "-"
+						+ file_basename_from_second(this->timeline->get_value()) + ".png");
+				}
+			}; break;
 			case TMIcon::BookMark: {
 				auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->master());
 
@@ -246,10 +255,33 @@ public:
 		}
 	}
 
+	public:
+		void on_startover(Timelinelet* timeline, long long time0, long long timen, Syslog* logger) override {
+		}
+
+		void on_speed_changed(Timelinelet* timeline, unsigned int x, Syslog* logger) override {
+
+		}
+
+		void on_time_skipped(Timelinelet* timeline, long long timepoint, Syslog* logger) override {
+		
+		}
+
+		void on_launch(Timelinelet* master, Syslog* logger) override {
+		
+		}
+
+		void on_pause(Timelinelet* master, Syslog* logger) override {
+		
+		}
+
+		void on_terminate(Timelinelet* master, Syslog* logger) override {
+
+		}
+
 private:
 	void load_date_picker(std::map<TM, Credit<DatePickerlet, TM>*>& tps, TM id, long long time_offset) {
 		tps[id] = this->insert_one(new Credit<DatePickerlet, TM>(DatePickerState::Input, time_offset, _speak(id)), id);
-		tps[id]->set_style(this->datetime_style);
 		this->cellophane(tps[id], time_machine_alpha);
 	}
 
@@ -257,9 +289,6 @@ private: // never delete this graphlets manually
 	std::map<TMIcon, Credit<Labellet, TMIcon>*> icons;
 	std::map<TM, Credit<DatePickerlet, TM>*> time_pickers;
 	Timelinelet* timeline;
-
-private:
-	DatePickerStyle datetime_style;
 
 private:
 	ITimeMachine* machine;

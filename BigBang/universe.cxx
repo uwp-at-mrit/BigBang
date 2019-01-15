@@ -1102,9 +1102,13 @@ CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
 	CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, region.Width, region.Height, dpi);
 	CanvasDrawingSession^ ds = snapshot->CreateDrawingSession();
 
+	/** NOTE
+	 * Here is not a necessary critical section since planets have their own critical sections.
+	 *
+	 * Therefore, Does `IDisplay` really have to define so many critical sections in this file?
+	 */
+
 	ds->Clear(Colours::Background->Color);
-	
-	this->enter_critical_section();
 
 	if (this->recent_planet != nullptr) {
 		float width = region.Width - this->hup_left_margin - this->hup_right_margin;
@@ -1119,8 +1123,6 @@ CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
 	if (this->headup_planet != nullptr) {
 		draw_planet(ds, this->headup_planet, region.Width, region.Height, this->get_logger());
 	}
-
-	this->leave_critical_section();
 
 	return snapshot;
 }

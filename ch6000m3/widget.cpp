@@ -182,7 +182,8 @@ public:
 				this->settings->show();
 			}; break;
 			case Icon::PrintScreen: {
-				this->master->save(this->master->current_planet->name() + "-" + file_basename_from_second(current_seconds()) + ".png");
+				this->master->save(this->master->current_planet->name() + "-"
+					+ file_basename_from_second(current_seconds()) + ".png");
 			}; break;
 			case Icon::FullScreen: {
 				auto self = ApplicationView::GetForCurrentView();

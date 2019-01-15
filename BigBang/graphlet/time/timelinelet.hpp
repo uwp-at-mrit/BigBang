@@ -31,11 +31,14 @@ namespace WarGrey::SCADA {
 
 	private class ITimelineListener abstract {
 	public:
-		virtual void on_startover(WarGrey::SCADA::Timelinelet* master, long long time0, long long timen) = 0;
-		virtual void on_pause(WarGrey::SCADA::Timelinelet* master) = 0;
-		virtual void on_terminate(WarGrey::SCADA::Timelinelet* master) = 0;
-		virtual void on_speed_changed(WarGrey::SCADA::Timelinelet* master, unsigned int x) = 0;
-		virtual void on_time_skipped(WarGrey::SCADA::Timelinelet* master, long long timepoint) = 0;
+		virtual void on_launch(WarGrey::SCADA::Timelinelet* master, WarGrey::SCADA::Syslog* logger) {}
+		virtual void on_pause(WarGrey::SCADA::Timelinelet* master, WarGrey::SCADA::Syslog* logger) {}
+		virtual void on_terminate(WarGrey::SCADA::Timelinelet* master, WarGrey::SCADA::Syslog* logger) {}
+
+	public:
+		virtual void on_startover(WarGrey::SCADA::Timelinelet* master, long long time0, long long timen, WarGrey::SCADA::Syslog* logger) {}
+		virtual void on_speed_changed(WarGrey::SCADA::Timelinelet* master, unsigned int x, WarGrey::SCADA::Syslog* logger) {}
+		virtual void on_time_skipped(WarGrey::SCADA::Timelinelet* master, long long timepoint, WarGrey::SCADA::Syslog* logger) {}
 	};
 
 	private class Timelinelet
@@ -62,6 +65,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		void push_event_listener(WarGrey::SCADA::ITimelineListener* observer);
+		long long get_departure_timepoint();
+		long long get_destination_timepoint();
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimelineState state, WarGrey::SCADA::TimelineStyle& style) override;
@@ -71,7 +76,7 @@ namespace WarGrey::SCADA {
 		void on_range_changed(long long time0, long long timen) override;
 
 	private:
-		void on_speed_updated();
+		void on_speed_changed();
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ speedx;
