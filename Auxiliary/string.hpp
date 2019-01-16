@@ -77,4 +77,10 @@ std::string retval; { \
 
 	Platform::String^ string_first_line(Platform::String^ src);
 	std::list<Platform::String^> string_lines(Platform::String^ src, bool skip_empty_line = false);
+
+	/************************************************************************************************/
+	long long scan_integer(const unsigned char* src, size_t* pos, size_t total, bool skip_trailing_space = true);
+	size_t scan_skip_space(const unsigned char* src, size_t* pos, size_t total);
+	size_t scan_skip_newline(const unsigned char* src, size_t* pos, size_t total);
+	size_t scan_skip_this_line(const unsigned char* src, size_t* pos, size_t total);
 }

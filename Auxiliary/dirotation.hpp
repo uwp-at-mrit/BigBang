@@ -20,9 +20,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool root_ready();
-		Platform::String^ resolve_pathname(long long time_s = current_seconds());
 		Windows::Storage::StorageFolder^ rootdir();
-		long long timepoint(long long time_s);
+		Platform::String^ resolve_pathname(long long time_s = current_seconds());
+		long long resolve_timepoint(long long time_s = current_seconds());
 		long long span_seconds();
 
 	public:

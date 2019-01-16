@@ -18,7 +18,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void on_timestream(long long timepoint_s,
-			size_t addr0, size_t addrn, const char* data, size_t size,
+			size_t addr0, size_t addrn, uint8* data, size_t size,
 			WarGrey::SCADA::Syslog* logger) override;
 
 	public:

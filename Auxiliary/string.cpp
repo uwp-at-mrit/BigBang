@@ -4,8 +4,17 @@
 
 using namespace WarGrey::SCADA;
 
-static const wchar_t linefeed = (wchar_t)(0x0A);
-static const wchar_t carriage_return = (wchar_t)(0x0D);
+static const char linefeed = 0x0A;
+static const char carriage_return = 0x0D;
+static const char space = 0x20;
+static const char zero = 0x30;
+static const char nine = 0x39;
+
+static const wchar_t wlinefeed = (wchar_t)(linefeed);
+static const wchar_t wcarriage_return = (wchar_t)(carriage_return);
+static const wchar_t wspace = (wchar_t)(space);
+static const wchar_t wzero = (wchar_t)(zero);
+static const wchar_t wnine = (wchar_t)(nine);
 
 static inline size_t integer_length(unsigned int n) {
 	return (size_t)(std::floor(log(n) / log(2)) + 1.0);
@@ -16,11 +25,11 @@ static unsigned int newline_position(const wchar_t* src, unsigned int idx0, unsi
 	unsigned int eol_size = 0;
 
 	for (unsigned int idx = idx0; idx < idxn; idx ++) {
-		if (src[idx] == linefeed) {
-			eol_size = (((idx + 1) < idxn) && (src[idx + 1] == carriage_return)) ? 2 : 1;
+		if (src[idx] == wlinefeed) {
+			eol_size = (((idx + 1) < idxn) && (src[idx + 1] == wcarriage_return)) ? 2 : 1;
 			break;
-		} else if (src[idx] == carriage_return) {
-			eol_size = (((idx + 1) < idxn) && (src[idx + 1] == linefeed)) ? 2 : 1;
+		} else if (src[idx] == wcarriage_return) {
+			eol_size = (((idx + 1) < idxn) && (src[idx + 1] == wlinefeed)) ? 2 : 1;
 			break;
 		}
 
@@ -172,4 +181,75 @@ std::list<Platform::String^> WarGrey::SCADA::string_lines(Platform::String^ src,
 	}
 
 	return lines;
+}
+
+/************************************************************************************************/
+long long WarGrey::SCADA::scan_integer(const unsigned char* src, size_t* pos, size_t total, bool skip_trailing_space) {
+	long long value = 0;
+
+	while ((*pos) < total) {
+		char c = src[(*pos)];
+
+		if ((c < zero) || (c > nine)) {
+			break;
+		}
+
+		value = value * 10 + (c - zero);
+		(*pos) += 1;
+	}
+
+	if (skip_trailing_space) {
+		scan_skip_space(src, pos, total);
+	}
+
+	return value;
+}
+
+size_t WarGrey::SCADA::scan_skip_space(const unsigned char* src, size_t* pos, size_t total) {
+	size_t idx = (*pos);
+
+	while ((*pos) < total) {
+		char c = src[(*pos)];
+
+		if (c != space) {
+			break;
+		}
+
+		(*pos) += 1;
+	}
+
+	return (*pos) - idx;
+}
+
+size_t WarGrey::SCADA::scan_skip_newline(const unsigned char* src, size_t* pos, size_t total) {
+	size_t idx = (*pos);
+
+	while ((*pos) < total) {
+		char c = src[(*pos)];
+
+		if ((c != linefeed) && (c != carriage_return)) {
+			break;
+		}
+
+		(*pos) += 1;
+	}
+
+	return (*pos) - idx;
+}
+
+size_t WarGrey::SCADA::scan_skip_this_line(const unsigned char* src, size_t* pos, size_t total) {
+	size_t idx = (*pos);
+
+	while ((*pos) < total) {
+		char c = src[(*pos)];
+
+		if ((c == linefeed) || (c == carriage_return)) {
+			scan_skip_newline(src, pos, total);
+			break;
+		}
+
+		(*pos) += 1;
+	}
+
+	return (*pos) - idx;
 }

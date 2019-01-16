@@ -76,12 +76,11 @@ Timelinelet::~Timelinelet() {
 void Timelinelet::construct() {
 	float radiusn = this->thickness * 1.618F;
 
-	this->footprint_radius = this->thickness * 0.618F;
+	this->footprint_thickness = this->thickness * 1.2F;
 	this->endpoint_radius = radiusn * 1.618F;
 	this->icon_radius = this->endpoint_radius * 2.0F;
 
 	this->cursor = polar_arrowhead(this->endpoint_radius * 1.2F, 0.0);
-	this->footprint = geometry_freeze(circle(this->footprint_radius));
 	this->endpoint0 = circle(this->endpoint_radius);
 	this->endpointn = circle(radiusn);
 
@@ -152,11 +151,11 @@ void Timelinelet::on_state_changed(TimelineState state) {
 	}
 }
 
-void Timelinelet::on_value_changed(long long timepoint) {
+void Timelinelet::on_value_changed(long long timepoint_ms) {
 	TimelineStyle style = this->get_style();
 
-	this->footprints.push_back(timepoint);
-	this->moment = make_text_layout(make_daytimestamp_utc(timepoint, true), style.font);
+	this->footprints.push_back(timepoint_ms);
+	this->moment = make_text_layout(make_daytimestamp_utc(timepoint_ms / 1000LL, true), style.font);
 }
 
 bool Timelinelet::can_change_range() {
@@ -210,20 +209,30 @@ void Timelinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	float cy = y + this->height * 0.5F;
 	float lx = x + this->timeline_lx;
 	float rx = x + this->timeline_rx;
-	float range = (rx - lx);
-	float cursor_x = lx + range * float(this->get_percentage());
-	float fpdiff = this->footprint_radius * 1.618F;
-	float last_fpx = 0.0F;
-
+	float length = (rx - lx);
+	float cursor_x = lx + length * float(this->get_percentage());
+	
 	ds->DrawCachedGeometry(this->timepoints, x, y, style.label_color);
 	ds->DrawLine(lx + this->endpoint_radius, cy, rx - this->endpoint_radius, cy, style.line_color, this->thickness);
 
-	for (auto it = this->footprints.begin(); it != this->footprints.end(); it++) {
-		float fpx = lx + range * float(this->get_percentage(*it));
+	{ // draw footprints
+		float fpdiff = this->footprint_thickness;
+		float fpx0 = lx;
+		float last_fpx = lx;
+		
+		for (auto it = this->footprints.begin(); it != this->footprints.end(); it++) {
+			float fpx = lx + length * float(this->get_percentage(*it));
 
-		if ((fpx - last_fpx) > fpdiff) {
-			ds->DrawCachedGeometry(this->footprint, fpx, cy, style.footprint_color);
+			if ((fpx < last_fpx) || ((fpx - last_fpx) > fpdiff)) {
+				ds->DrawLine(fpx0, cy, last_fpx, cy, style.footprint_color, this->footprint_thickness);
+				fpx0 = fpx;
+			}
+
 			last_fpx = fpx;
+		}
+
+		if (fpx0 != last_fpx) {
+			ds->DrawLine(fpx0, cy, last_fpx, cy, style.footprint_color, this->footprint_thickness);
 		}
 	}
 

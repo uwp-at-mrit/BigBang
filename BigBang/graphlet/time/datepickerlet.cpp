@@ -57,7 +57,7 @@ DatePickerlet::DatePickerlet(DatePickerState status, DatePickerStyle& style, lon
 DatePickerlet::DatePickerlet(DatePickerState status, long long timepoint, Platform::String^ label, Platform::String^ subscript)
 	: IStatelet(status), caret_index(2 /* the day */) {
 	this->set_text(label, subscript);
-	this->timepoint0 = this->guarded_value(timepoint);
+	this->timepoint0 = timepoint;
 
 	/** TODO: Why does not it work if pass the `status` to IStatelet */
 	this->set_state(status);

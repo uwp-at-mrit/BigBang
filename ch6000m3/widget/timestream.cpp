@@ -31,11 +31,11 @@ public:
 
 public:
 	void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override {
-		long long timestamp = current_milliseconds();
+		long long timepoint = current_milliseconds();
 
-		if ((timestamp - last_timepoint) >= this->get_time_speed()) {
-			this->save_snapshot(timestamp, addr0, addrn, (const char*)(data), size);
-			this->last_timepoint = timestamp;
+		if ((timepoint - last_timepoint) >= this->get_time_speed()) {
+			this->save_snapshot(timepoint, addr0, addrn, data, size);
+			this->last_timepoint = timepoint;
 		}
 	}
 

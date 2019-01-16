@@ -1,5 +1,4 @@
-﻿#include <list>
-#include <map>
+﻿#include <map>
 
 #include "timemachine.hpp"
 #include "planet.hpp"
@@ -172,8 +171,7 @@ public:
 
 public:
 	bool can_select(IGraphlet* g) override {
-		return ((dynamic_cast<Labellet*>(g) != nullptr)
-			|| (dynamic_cast<DatePickerlet*>(g) != nullptr));
+		return (dynamic_cast<Labellet*>(g) != nullptr);
 	}
 
 	void on_focus(IGraphlet* g, bool yes) override {
@@ -186,10 +184,10 @@ public:
 				} else {
 					long long departure = this->time_pickers[TM::Departure]->get_value() * 1000LL;
 					long long destination = this->time_pickers[TM::Destination]->get_value() * 1000LL;
-
-					this->machine->startover(departure, destination);
+ 
+					this->timeline->set_range(departure, destination);
 				}
-			} else {
+			} else if (yes) {
 				this->set_caret_owner(nullptr);
 			}
 		}
@@ -207,7 +205,7 @@ public:
 				if (tmd != nullptr) {
 					tmd->save(this->name() + "-"
 						+ tmd->current_planet->name() + "-"
-						+ file_basename_from_second(this->timeline->get_value()) + ".png");
+						+ file_basename_from_second(this->timeline->get_value() / 1000L) + ".png");
 				}
 			}; break;
 			case TMIcon::BookMark: {
@@ -222,15 +220,23 @@ public:
 	}
 
 public:
+	void on_startover(Timelinelet* timeline, long long departure_ms, long long destination_ms) override {
+		this->machine->startover(departure_ms, destination_ms);
+	}
+
 	void on_step(Timelinelet* timeline) override {
 		this->machine->step();
+	}
+
+	void on_terminate(Timelinelet* timeline) override {
+		this->machine->terminate();
 	}
 
 	void on_time_skipped(Timelinelet* timeline, long long timepoint_ms) override {
 		this->machine->timeskip(timepoint_ms);
 	}
 
-	void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size, Syslog* logger) override {
+	void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) override {
 		this->timeline->set_value(timepoint_ms);
 	}
 
@@ -293,18 +299,16 @@ void ITimeMachine::startover(long long departure_ms, long long destination_ms) {
 
 	if (dashboard != nullptr) {
 		this->departure = departure_ms;
-		this->timepoint = departure_ms;
 		this->destination = destination_ms;
 
-		if (this->departure < this->destination) {
-			this->direction = 1LL;
-			this->timepoint = this->departure;
-		} else {
-			this->direction = -1LL;
-			this->timepoint = this->destination;
+		if (this->departure > this->destination) {
+			this->departure = destination_ms;
+			this->destination = departure_ms;
 		}
 
-		dashboard->get_timeline()->set_range(departure_ms, destination_ms);
+		this->timepoint = this->departure;
+
+		dashboard->get_timeline()->set_range(this->departure, this->destination);
 	}
 }
 
@@ -317,9 +321,21 @@ void ITimeMachine::travel() {
 }
 
 void ITimeMachine::step() {
-	if (this->timepoint <= this->destination) {
-		this->on_timestream(this->timepoint, 0, 0, nullptr, 0, this->get_logger());
-		this->timepoint += this->ms_per_frame;
+	unsigned int shift = this->get_speed_shift();
+	size_t size, addr0;
+
+	for (unsigned int step = 0; step < shift; step++) {
+		uint8* data = this->single_step(&this->timepoint, &size, &addr0);
+		bool key_stream = (step == (shift / 2));
+
+		if ((data != nullptr) && (this->timepoint <= this->destination)) {
+			this->on_timestream(this->timepoint, addr0, addr0 + size - 1, data, size, key_stream);
+			this->timepoint += min(1000LL, this->ms_per_frame); // do stepping.
+		} else {
+			this->on_timestream(this->destination, 0, 0, nullptr, 0, false);
+			this->service();
+			break;
+		}
 	}
 }
 
@@ -327,12 +343,16 @@ void ITimeMachine::service() {
 	auto dashboard = dynamic_cast<TimeMachineDashboard*>(this->universe->heads_up_planet);
 
 	if (dashboard != nullptr) {
-		dashboard->get_timeline()->set_state(TimelineState::Service);
+		Timelinelet* timeline = dashboard->get_timeline();
+
+		timeline->set_state((timeline->get_state() == TimelineState::Travel), TimelineState::Service);
 	}
 }
 
 void ITimeMachine::terminate() {
 	auto dashboard = dynamic_cast<TimeMachineDashboard*>(this->universe->heads_up_planet);
+
+	this->timepoint = this->departure;
 
 	if (dashboard != nullptr) {
 		dashboard->get_timeline()->set_state(TimelineState::Terminated);
@@ -358,15 +378,33 @@ void ITimeMachine::timeskip(long long timepoint) {
 }
 
 /**************************************************************************************************/
-void ITimeMachine::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size, Syslog* logger) {
+uint8* ITimeMachine::single_step(long long* timepoint_ms, size_t* size, size_t* addr0) {
+	long long current_file_timepoint = this->resolve_timepoint((*timepoint_ms) / 1000LL);
+	uint8* data = this->seek_snapshot(timepoint_ms, size, addr0);
+	
+	if (data == nullptr) { // no such snapshot in the current file (or no such file)
+		(*timepoint_ms) = (current_file_timepoint + this->span_seconds()) * 1000LL;
+
+		if ((*timepoint_ms) <= this->destination) {
+			data = this->single_step(timepoint_ms, size, addr0);
+		}
+	}
+
+	return data;
+}
+
+void ITimeMachine::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, bool keystream) {
 	auto dashboard = dynamic_cast<ITimeMachineListener*>(this->universe->heads_up_planet);
+	Syslog* logger = this->get_logger();
 
 	if (dashboard != nullptr) {
 		dashboard->on_timestream(timepoint_ms, addr0, addrn, data, size, logger);
 	}
 
-	for (auto passenger : this->passengers) {
-		passenger->on_timestream(timepoint_ms, addr0, addrn, data, size, logger);
+	if (keystream) {
+		for (auto passenger : this->passengers) {
+			passenger->on_timestream(timepoint_ms, addr0, addrn, data, size, logger);
+		}
 	}
 }
 
@@ -396,7 +434,18 @@ Flyout^ ITimeMachine::user_interface() {
 /*************************************************************************************************/
 TimeMachine::TimeMachine(Platform::String^ dirname, long long time_speed_mspf, int frame_rate, Syslog* logger
 	, Platform::String^ file_prefix, Platform::String^ file_suffix, RotationPeriod period, unsigned int period_count)
-	: ITimeMachine(dirname, time_speed_mspf, frame_rate, logger, file_prefix, file_suffix, period, period_count) {}
+	: ITimeMachine(dirname, time_speed_mspf, frame_rate, logger, file_prefix, file_suffix, period, period_count)
+	, ifpool(nullptr), ifsize(0), ifeof(0), ifutc(0LL) {}
+
+TimeMachine::~TimeMachine() {
+	if (this->ifpool != nullptr) {
+		delete[] this->ifpool;
+	}
+}
+
+void TimeMachine::on_hiden() {
+	this->service();
+}
 
 void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_file, long long timepoint) {
 	if (prev_file != nullptr) {
@@ -404,18 +453,76 @@ void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_f
 	}
 	
 	// TODO: find the reason if `open` fails.
-	this->tmstream.open(current_file->Path->Data(), std::ios::out | std::ios::app);
+	this->tmstream.open(current_file->Path->Data(), std::ios::out | std::ios::app | std::ios::binary);
 }
 
-void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size) {
+void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* datablock, size_t size) {
 	// TODO: find the reason if `write` fails.
 	if (this->tmstream.is_open()) {
-		this->tmstream << timepoint_ms << " " << addr0 << " " << addrn << std::endl;
-		this->tmstream.write(data, size) << std::endl;
+		// NOTE: `std::endl` does not work for `std::ios::binary` 
+		this->tmstream << timepoint_ms << " " << addr0 << " " << addrn << "\n\r" << std::endl;
+		this->tmstream.write((char*)datablock, size) << "\n\r" << std::endl;
 		this->tmstream.flush();
 	}
 }
 
-const char* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* addr0, size_t* addrn) {
-	return nullptr;
+uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0) {
+	long long src = this->resolve_timepoint((*timepoint_ms) / 1000LL);
+	uint8* datablock = nullptr;
+
+	if (this->ifsrc != src) {
+		Platform::String^ ifpathname = this->resolve_pathname(src);
+		std::ifstream tmstream;
+		
+		this->ifpos = 0;
+		this->ifeof = 0;
+		this->ifsrc = src;
+
+		tmstream.open(ifpathname->Data(), std::ios::ate | std::ios::binary);
+
+		// TODO: find the reason if `open` fails.
+
+		if (tmstream.is_open()) {
+			this->ifeof = tmstream.tellg();
+
+			if (this->ifsize < this->ifeof) {
+				if (this->ifpool != nullptr) {
+					delete[] this->ifpool;
+				}
+
+				this->ifsize = this->ifeof;
+				this->ifpool = new uint8[this->ifsize];
+			}
+
+			this->get_logger()->log_message(Log::Info, L"loading snapshot from %s[%s]",
+				ifpathname->Data(), sstring(this->ifeof, 3)->Data());
+
+			tmstream.seekg(0);
+			tmstream.read((char*)this->ifpool, this->ifeof);
+		}
+	}
+
+	if (this->ifpool != nullptr) {
+		if ((*timepoint_ms) < this->ifutc) {
+			this->ifpos = 0;
+		}
+
+		while ((datablock == nullptr) && (this->ifpos < this->ifeof)) {
+			this->ifutc = scan_integer(this->ifpool, &this->ifpos, this->ifeof, true);
+			(*addr0) = size_t(scan_integer(this->ifpool, &this->ifpos, this->ifeof, true));
+			(*size) = size_t(scan_integer(this->ifpool, &this->ifpos, this->ifeof, false) - (*addr0) + 1);
+
+			scan_skip_newline(this->ifpool, &this->ifpos, this->ifeof);
+
+			if (this->ifutc >= (*timepoint_ms)) {
+				(*timepoint_ms) = this->ifutc;
+				datablock = &this->ifpool[this->ifpos];
+			}
+
+			this->ifpos += (*size);
+			scan_skip_this_line(this->ifpool, &this->ifpos, this->ifeof);
+		}
+	}
+
+	return datablock;
 }

@@ -49,6 +49,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	private:
-		std::list<ITimerListener^> listeners;
+		std::list<WarGrey::SCADA::ITimerListener^> listeners;
 	};
 }

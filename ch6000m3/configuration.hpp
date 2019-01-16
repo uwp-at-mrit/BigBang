@@ -23,7 +23,7 @@ static Platform::String^ root_machines[] = {
 
 /*************************************************************************************************/
 static const unsigned int frame_per_second = 5U;
-static const unsigned int timemachine_frame_per_second = frame_per_second;
+static const unsigned int timemachine_frame_per_second = 4U;
 static const long long timemachine_speed = 2; // second per step
 static const long long plc_master_suicide_timeout = 4000;
 

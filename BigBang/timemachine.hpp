@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fstream>
-#include <list>
+#include <deque>
 
 #include "universe.hxx"
 
@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
 	private class ITimeMachineListener abstract {
 	public:
 		virtual void on_timestream(long long timepoint_ms,
-			size_t addr0, size_t addrn, const char* data, size_t size,
+			size_t addr0, size_t addrn, uint8* data, size_t size,
 			WarGrey::SCADA::Syslog* logger) = 0;
 	};
 
@@ -25,14 +25,14 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason) = 0;
-		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size) = 0;
-		virtual const char* seek_snapshot(long long* timepoint_ms, size_t* addr0, size_t* addrn) = 0;
+		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size) = 0;
+		virtual uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0) = 0;
+		virtual void step();
 	
 	public:
 		void pickup(WarGrey::SCADA::ITimeMachineListener* passenger);
 		void startover(long long departure_ms, long long destination_ms);
 		void travel();
-		void step();
 		void service();
 		void terminate();
 		void shift_speed();
@@ -44,12 +44,13 @@ namespace WarGrey::SCADA {
 		unsigned int get_speed_shift();
 
 	protected:
+		virtual uint8* single_step(long long* timepoint_ms, size_t* size, size_t* addr0);
+
+	protected:
 		Windows::UI::Xaml::Controls::Flyout^ user_interface() override;
 
 	private:
-		void on_timestream(long long timepoint_ms,
-			size_t addr0, size_t addrn, const char* data, size_t size,
-			WarGrey::SCADA::Syslog* logger);
+		void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, bool keystream);
 
 	private:
 		Windows::UI::Xaml::Controls::Flyout^ machine;
@@ -57,15 +58,16 @@ namespace WarGrey::SCADA {
 		long long ms_per_frame;
 
 	private: // never delete these listeners manually
-		std::list<WarGrey::SCADA::ITimeMachineListener*> passengers;
+		std::deque<WarGrey::SCADA::ITimeMachineListener*> passengers;
 		long long departure;
 		long long timepoint;
 		long long destination;
-		long long direction;
 	};
 
 	private class TimeMachine : public WarGrey::SCADA::ITimeMachine {
 	public:
+		virtual ~TimeMachine() noexcept;
+
 		TimeMachine(Platform::String^ dirname, long long time_speed, int frame_rate, WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ file_prefix = nullptr, Platform::String^ file_suffix = ".plc",
 			WarGrey::SCADA::RotationPeriod period = WarGrey::SCADA::RotationPeriod::Hourly,
@@ -73,13 +75,22 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason) override {}
-		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size) override;
-		const char* seek_snapshot(long long* timepoint_ms, size_t* addr0, size_t* addrn) override;
+		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size) override;
+		uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0) override;
+
+	public:
+		void on_hiden() override;
 
 	protected:
 		void on_file_rotated(Windows::Storage::StorageFile^ prev_file, Windows::Storage::StorageFile^ current_file, long long timepoint) override;
 
 	private:
 		std::ofstream tmstream;
+		long long ifsrc;
+		long long ifutc;
+		uint8* ifpool;
+		size_t ifsize;
+		size_t ifpos;
+		size_t ifeof;
 	};
 }

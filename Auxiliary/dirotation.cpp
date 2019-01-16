@@ -106,7 +106,7 @@ void IRotativeDirectory::mission_start() {
 		create_task(this->root->CreateFileAsync(current_file, cco), watcher).then([=](task<StorageFile^> creating) {
 			try {
 				this->current_file = creating.get();
-				this->on_file_reused(this->current_file, this->timepoint(now));
+				this->on_file_reused(this->current_file, this->resolve_timepoint(now));
 
 				this->timer->Interval = this->resolve_interval();
 				this->timer->Start();
@@ -137,7 +137,7 @@ void IRotativeDirectory::do_rotating_with_this_bad_named_function_which_not_desi
 				StorageFile^ prev_file = this->current_file;
 
 				this->current_file = creating.get();
-				this->on_file_rotated(prev_file, this->current_file, this->timepoint(now));
+				this->on_file_rotated(prev_file, this->current_file, this->resolve_timepoint(now));
 
 				this->timer->Interval = this->resolve_interval();
 			} catch (Platform::Exception^ e) {
@@ -152,7 +152,7 @@ void IRotativeDirectory::on_exception(Platform::Exception^ exn) {
 }
 
 Platform::String^ IRotativeDirectory::resolve_filename(long long time_s) {
-	long long ts = this->timepoint(time_s);
+	long long ts = this->resolve_timepoint(time_s);
 
 	// Stupid Windows Machine, ":" cannot be included in filename
 	return this->file_prefix
@@ -183,7 +183,7 @@ StorageFolder^ IRotativeDirectory::rootdir() {
 	return this->root;
 }
 
-long long IRotativeDirectory::timepoint(long long time_s) {
+long long IRotativeDirectory::resolve_timepoint(long long time_s) {
 	return floor_seconds(time_s * 1000LL * 1000LL * 10LL, this->span);
 }
 

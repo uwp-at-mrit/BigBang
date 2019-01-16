@@ -861,11 +861,11 @@ void HydraulicsPage::reflow(float width, float height) {
 	}
 }
 
-void HydraulicsPage::on_timestream(long long timepoint_s, size_t addr0, size_t addrn, const char* data, size_t size, Syslog* logger) {
+void HydraulicsPage::on_timestream(long long timepoint_s, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
 	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
 
 	if (dashboard != nullptr) {
-		dashboard->on_all_signals(addr0, addrn, (uint8*)(data), size, logger);
+		dashboard->on_all_signals(addr0, addrn, data, size, logger);
 	}
 }
 

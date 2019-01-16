@@ -89,7 +89,6 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ speedx;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ moment;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ timepoints;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ footprint;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ endpoint0;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ endpointn;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ cursor;
@@ -102,8 +101,8 @@ namespace WarGrey::SCADA {
 		float width;
 		float height;
 		float thickness;
+		float footprint_thickness;
 		float icon_radius;
-		float footprint_radius;
 		float endpoint_radius;
 		float timeline_lx;
 		float timeline_rx;

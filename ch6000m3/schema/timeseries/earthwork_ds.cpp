@@ -105,8 +105,8 @@ void EarthWorkDataSource::on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc,
 
 void EarthWorkDataSource::load(ITimeSeriesDataReceiver* receiver, long long open_s, long long close_s) {
 	if (!this->loading()) {
-		long long start = this->timepoint(open_s);
-		long long end = this->timepoint(close_s);
+		long long start = this->resolve_timepoint(open_s);
+		long long end = this->resolve_timepoint(close_s);
 		long long interval = this->span_seconds() * ((open_s < close_s) ? 1LL : -1LL);
 		
 		this->get_logger()->log_message(Log::Debug, L"start loading from %s to %s",
@@ -174,7 +174,7 @@ void EarthWorkDataSource::do_loading_async(ITimeSeriesDataReceiver* receiver
 				this->dbc = nullptr;
 
 				ms = current_inexact_milliseconds() - ms;
-				this->get_logger()->log_message(Log::Info, L"loaded %d record(s) from[%s] within %lfms",
+				this->get_logger()->log_message(Log::Debug, L"loaded %d record(s) from[%s] within %lfms",
 					ecursor.count, dbsource->Data(), ms);
 
 				this->do_loading_async(receiver, next_timepoint, end, interval,

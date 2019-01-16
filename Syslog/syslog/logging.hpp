@@ -1,6 +1,6 @@
 #pragma once
 
-#include <list>
+#include <deque>
 
 #include "object.hpp"
 
@@ -63,6 +63,6 @@ namespace WarGrey::SCADA {
 		Syslog* parent;
 
 	private:
-		std::list<WarGrey::SCADA::ISyslogReceiver*> receivers;
+		std::deque<WarGrey::SCADA::ISyslogReceiver*> receivers;
 	};
 }
