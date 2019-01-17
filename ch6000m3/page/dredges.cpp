@@ -470,7 +470,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
 		this->lengths[DS::Overflow]->set_value(this->overflowpipe->get_value(), GraphletAnchor::CC);
@@ -519,7 +519,7 @@ public:
 		this->set_drag_metrics(DS::SB, DS::SBVisor, DB2, DB203, this->drag_configs[1], this->sb_address);
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		DI_hopper_pumps(this->hpumps[DS::PSHP], this->hpumps[DS::PSHP], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
 		DI_hopper_pumps(this->hpumps[DS::SBHP], this->hpumps[DS::SBHP], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
@@ -569,7 +569,7 @@ public:
 		this->set_hopper_type(DS::SB, DB4, sb_hopper_pump_feedback);
 	}
 
-	void on_forat(const uint8* DB20, size_t count, Syslog* logger) override {
+	void on_forat(long long timepoint_ms, const uint8* DB20, size_t count, Syslog* logger) override {
 		float overflow_target_height = DBD(DB20, overflow_pipe_target_height);
 
 		this->overflowpipe->set_target_height(overflow_target_height, (overflow_target_height == 0.0F));
@@ -660,7 +660,7 @@ public:
 		shwidth += (xstep * 2.0F);
 		shheight += ystep;
 		shvmargin = (width - shwidth) * 0.5F;
-		shhmargin = (height - vinset * 2.0F - shheight) * 0.5F;
+		shhmargin = (height - shheight) * 0.5F;
 
 		{ // load dimensions
 			float dfmeter_height = shhmargin * 0.72F;
@@ -690,8 +690,8 @@ public:
 		}
 
 		{ // load drags
-			float side_drag_width = width * 0.25F - vinset;
-			float over_drag_height = height * 0.42F - vinset;
+			float side_drag_width = width * 0.25F;
+			float over_drag_height = height * 0.42F;
 			float draghead_radius = side_drag_width * 0.2718F;
 
 			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
@@ -775,8 +775,8 @@ public:
 			this->master->move_to(this->dfmeters[DS::SB], this->hpumps[DS::SBHP], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vinset);
 			this->master->move_to(this->compensators[DS::PSWC], this->cylinders[DS::PSHPVP], GraphletAnchor::LB, GraphletAnchor::RB, -wc_offset);
 
-			this->master->move_to(this->dragheads[DS::PSVisor], cx, height * 0.81F, GraphletAnchor::RC, -vinset);
-			this->master->move_to(this->dragheads[DS::SBVisor], cx, height * 0.81F, GraphletAnchor::LC, +vinset);
+			this->master->move_to(this->dragheads[DS::PSVisor], cx, height * 0.85F, GraphletAnchor::RC, -vinset);
+			this->master->move_to(this->dragheads[DS::SBVisor], cx, height * 0.85F, GraphletAnchor::LC, +vinset);
 			this->master->move_to(this->compensators[DS::SBWC], this->cylinders[DS::SBHPVP], GraphletAnchor::RB, GraphletAnchor::LB, +wc_offset);
 		}
 
@@ -788,10 +788,10 @@ public:
 			this->master->fill_graphlet_location(this->dragheads[DS::PSVisor], &dhx, nullptr, GraphletAnchor::LC);
 
 			this->master->move_to(this->dragxys[DS::PS], std::fminf(dflx, wclx), cy, GraphletAnchor::RB, -vinset, vinset * 2.0F);
-			this->master->move_to(this->dragxzes[DS::PS], dhx - vinset, height - vinset * 2.0F, GraphletAnchor::RB);
+			this->master->move_to(this->dragxzes[DS::PS], dhx - vinset, height, GraphletAnchor::RB);
 
 			{ // reflow gantries
-				float lx = vinset;
+				float lx = 0.0F;
 
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &trunnion_y, GraphletAnchor::CT);
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &intermediate_y, GraphletAnchor::CC);
@@ -811,10 +811,10 @@ public:
 			this->master->fill_graphlet_location(this->dragheads[DS::SBVisor], &dhrx, nullptr, GraphletAnchor::RC);
 
 			this->master->move_to(this->dragxys[DS::SB], std::fmaxf(dfrx, wcrx), cy, GraphletAnchor::LB, vinset, vinset * 2.0F);
-			this->master->move_to(this->dragxzes[DS::SB], dhrx + vinset, height - vinset * 2.0F, GraphletAnchor::LB);
+			this->master->move_to(this->dragxzes[DS::SB], dhrx + vinset, height, GraphletAnchor::LB);
 
 			{ // reflow winches
-				float rx = width - vinset;
+				float rx = width;
 
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &trunnion_y, GraphletAnchor::CT);
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &intermediate_y, GraphletAnchor::CC);
@@ -873,11 +873,14 @@ public:
 		}
 
 		{ // reflow buttons
-			this->master->move_to(this->ps_suctions[SuctionCommand::Inflate], vinset, vinset * 1.2F);
+			float bx = 0.0F;
+			float by = vinset * 0.2F;
+
+			this->master->move_to(this->ps_suctions[SuctionCommand::Inflate], bx, by);
 			this->master->move_to(this->ps_suctions[SuctionCommand::Deflate], this->ps_suctions[SuctionCommand::Inflate], GraphletAnchor::RC, GraphletAnchor::LC);
 			this->master->move_to(this->pressures[DS::PSSIP], this->ps_suctions[SuctionCommand::Deflate], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
 
-			this->master->move_to(this->sb_suctions[SuctionCommand::Deflate], width - vinset, vinset * 1.2F, GraphletAnchor::RT);
+			this->master->move_to(this->sb_suctions[SuctionCommand::Deflate], width - bx, by, GraphletAnchor::RT);
 			this->master->move_to(this->sb_suctions[SuctionCommand::Inflate], this->sb_suctions[SuctionCommand::Deflate], GraphletAnchor::LC, GraphletAnchor::RC);
 			this->master->move_to(this->pressures[DS::SBSIP], this->sb_suctions[SuctionCommand::Inflate], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
 
@@ -997,6 +1000,8 @@ private class Drags final : public IDredgingSystem {
 public:
 	Drags(DredgesPage* master, DS side, unsigned int drag_color, unsigned int config_idx)
 		: IDredgingSystem(master), DS_side(side), drag_color(drag_color), drag_idx(config_idx) {
+		PLCMaster* plc = master->get_plc_device();
+
 		this->pump_style = make_highlight_dimension_style(small_metrics_font_size, 6U, 0, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(small_metrics_font_size, 6U, 0, Colours::Green);
 		this->setting_style = make_highlight_dimension_style(normal_metrics_font_size, 6U, 1);
@@ -1006,24 +1011,32 @@ public:
 		this->button_style.foreground_color = Colours::CornflowerBlue;
 		this->button_style.font = make_bold_text_format(tiny_font_size);
 
-		this->winch_op = make_dredging_winch_menu(dredges_diagnostics, master->get_plc_device());
-		this->gantry_op = make_gantry_menu(dredges_diagnostics, master->get_plc_device());
-		this->compensator_op = make_wave_compensator_menu(master->get_plc_device());
-		this->visor_op = make_drag_visor_menu(master->get_plc_device());
+		if (plc != nullptr) {
+			this->winch_op = make_dredging_winch_menu(dredges_diagnostics, plc);
+			this->gantry_op = make_gantry_menu(dredges_diagnostics, plc);
+			this->compensator_op = make_wave_compensator_menu(plc);
+			this->visor_op = make_drag_visor_menu(plc);
+		}
 
 		if (this->DS_side == DS::PS) {
 			this->address = make_ps_dredging_system_schema();
-			this->ggantries_op = make_gantry_group_menu(DredgesGroup::PSGantries, master->get_plc_device());
 			this->sign = -1.0F;
+
+			if (plc != nullptr) {
+				this->ggantries_op = make_gantry_group_menu(DredgesGroup::PSGantries, plc);
+			}
 		} else {
 			this->address = make_sb_dredging_system_schema();
-			this->ggantries_op = make_gantry_group_menu(DredgesGroup::SBGantries, master->get_plc_device());
 			this->sign = +1.0F;
+
+			if (plc != nullptr) {
+				this->ggantries_op = make_gantry_group_menu(DredgesGroup::SBGantries, plc);
+			}
 		}
 	}
 
 public:
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->lengths[DS::TildeMark]->set_value(DBD(DB2, tilde_mark));
 		this->speeds[DS::Speed]->set_value(DBD(DB2, gps_speed));
 
@@ -1091,7 +1104,7 @@ public:
 		}
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		if (this->DS_side == DS::PS) {
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::psTrunnion], DB4, pump_C_feedback);
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::psIntermediate], DB4, pump_B_feedback);
@@ -1148,7 +1161,7 @@ public:
 		}
 	}
 
-	void on_forat(const uint8* DB20, size_t count, Syslog* logger) override {
+	void on_forat(long long timepoint_ms, const uint8* DB20, size_t count, Syslog* logger) override {
 		this->settings[DS::DivingDepth]->set_value(DBD(DB20, draghead_diving_depth));
 		this->settings[DS::DivingCompensation]->set_value(DBD(DB20, compensator_diving_progress));
 		this->settings[DS::LandingDepth]->set_value(DBD(DB20, draghead_landing_depth));
@@ -1212,7 +1225,7 @@ public:
 		float vgapsize;
 
 		if (this->DS_side == DS::PS) {
-			this->master->move_to(this->dragxys[DS::PS], cx, cy, GraphletAnchor::CC, vinset);
+			this->master->move_to(this->dragxys[DS::PS], cx, cy, GraphletAnchor::CC);
 			this->master->move_to(this->dragxzes[DS::PS], this->dragxys[DS::PS], GraphletAnchor::LT, GraphletAnchor::RT, -vinset, vinset);
 			this->master->move_to(this->dragheads[DS::PSVisor], this->dragxys[DS::PS], GraphletAnchor::LB, GraphletAnchor::RC, -vinset, vinset * 1.5F);
 
@@ -1247,7 +1260,7 @@ public:
 				this->master->move_to(this->winch_speeds[id], this->winch_lengths[id], GraphletAnchor::CB, GraphletAnchor::CT);
 			}
 		} else {
-			this->master->move_to(this->dragxys[DS::SB], cx, cy, GraphletAnchor::CC, -vinset);
+			this->master->move_to(this->dragxys[DS::SB], cx, cy, GraphletAnchor::CC);
 			this->master->move_to(this->dragxzes[DS::SB], this->dragxys[DS::SB], GraphletAnchor::RT, GraphletAnchor::LT, vinset, vinset);
 			this->master->move_to(this->dragheads[DS::SBVisor], this->dragxys[DS::SB], GraphletAnchor::RB, GraphletAnchor::LC, vinset, vinset * 1.5F);
 
@@ -1302,6 +1315,7 @@ public:
 
 			if (this->DS_side == DS::PS) {	
 				this->reflow_draghead_metrics(DS::PSVisor, DS::PSDP);
+				this->master->move_to(this->labels[DS::PSWC], this->compensators[DS::PSWC], GraphletAnchor::CT, GraphletAnchor::CB);
 				this->master->move_to(this->forces[DS::PSPF1], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB, +pf_xoff);
 				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::RT, GraphletAnchor::RB, -pf_xoff);
 
@@ -1309,6 +1323,7 @@ public:
 				this->master->move_to(this->settings[asetting], this->labels[asetting], GraphletAnchor::RC, GraphletAnchor::LC, +vinset);
 			} else {
 				this->reflow_draghead_metrics(DS::SBVisor, DS::SBDP); 
+				this->master->move_to(this->labels[DS::SBWC], this->compensators[DS::SBWC], GraphletAnchor::CT, GraphletAnchor::CB);
 				this->master->move_to(this->forces[DS::SBPF1], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB, -pf_xoff);
 				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LB, +pf_xoff);
 
@@ -1469,7 +1484,7 @@ private:
 		this->compensators[wc]->fill_extent(0.0F, 0.0F, &compensator_width, &compensator_height);
 		
 		{ // align gantries and winches
-			float gc_gap = gapsize * 1.5F;
+			float gc_gap = gapsize * 2.0F;
 			float gw_gap = gc_gap * 2.0F + compensator_width * ((gapsize > 0.0F) ? 1.0F : -1.0F);
 			float gantry_joint_dy = 0.0F;
 
@@ -1614,12 +1629,12 @@ public:
 	}
 
 public:
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
 		this->set_drag_metrics(DS::PS, DS::PSVisor, DB2, DB203, this->drag_configs[0], this->ps_address);
 		this->set_drag_metrics(DS::SB, DS::SBVisor, DB2, DB203, this->drag_configs[1], this->sb_address);
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		DI_winch(this->winches[DredgesPosition::psTrunnion], DB4, winch_ps_trunnion_feedback, winch_ps_trunnion_limits, DB205, winch_ps_trunnion_details);
 		DI_winch(this->winches[DredgesPosition::psIntermediate], DB4, winch_ps_intermediate_feedback, winch_ps_intermediate_limits, DB205, winch_ps_intermediate_details);
 		DI_winch(this->winches[DredgesPosition::psDragHead], DB4, winch_ps_draghead_feedback, winch_ps_draghead_limits, DB205, winch_ps_draghead_details);
@@ -1640,7 +1655,7 @@ public:
 
 		{ // load drags
 			float back_drag_height = height * 0.64F;
-			float side_drag_width = width * 0.25F - vinset;
+			float side_drag_width = width * 0.25F;
 			float draghead_radius = side_drag_width * 0.2718F;
 
 			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
@@ -1656,11 +1671,11 @@ public:
 
 	void reflow(float width, float height, float vinset) override {
 		float cx = width * 0.5F;
-		float inset = vinset * 2.0F;
+		float inset = vinset;
 
 		{ // reflow centeral components
-			this->master->move_to(this->dragheads[DS::PSVisor], cx, height * 0.81F, GraphletAnchor::RC, -vinset);
-			this->master->move_to(this->dragheads[DS::SBVisor], cx, height * 0.81F, GraphletAnchor::LC, +vinset);
+			this->master->move_to(this->dragheads[DS::PSVisor], cx, height * 0.85F, GraphletAnchor::RC, -vinset);
+			this->master->move_to(this->dragheads[DS::SBVisor], cx, height * 0.85F, GraphletAnchor::LC, +vinset);
 		}
 
 		{ // reflow left dredging system
@@ -1668,7 +1683,7 @@ public:
 
 			this->master->fill_graphlet_location(this->dragheads[DS::PSVisor], &dhx, nullptr, GraphletAnchor::LC);
 
-			this->master->move_to(this->dragyzes[DS::PS], vinset, height * 0.5F, GraphletAnchor::LC);
+			this->master->move_to(this->dragyzes[DS::PS], 0.0F, height * 0.5F, GraphletAnchor::LC);
 			this->master->move_to(this->dragxzes[DS::PS], this->dragyzes[DS::PS], GraphletAnchor::RT, GraphletAnchor::LT, +vinset);
 
 			this->master->move_to(this->winches[DredgesPosition::psTrunnion], this->dragxzes[DS::PS], GraphletAnchor::RT, GraphletAnchor::RB, -inset);
@@ -1681,7 +1696,7 @@ public:
 
 			this->master->fill_graphlet_location(this->dragheads[DS::SBVisor], &dhrx, nullptr, GraphletAnchor::RC);
 
-			this->master->move_to(this->dragyzes[DS::SB], width - vinset, height * 0.5F, GraphletAnchor::RC);
+			this->master->move_to(this->dragyzes[DS::SB], width, height * 0.5F, GraphletAnchor::RC);
 			this->master->move_to(this->dragxzes[DS::SB], this->dragyzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::RT, -vinset);
 
 			this->master->move_to(this->winches[DredgesPosition::sbTrunnion], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LB, +inset);
@@ -1704,9 +1719,8 @@ private: // never delete these global objects
 
 
 /*************************************************************************************************/
-DredgesPage::DredgesPage(PLCMaster* plc, DragView type)
-	: Planet(__MODULE__ + ((type == DragView::_) ? "" : "_" + type.ToString()))
-	, device(plc) {
+DredgesPage::DredgesPage(DragView type, PLCMaster* plc)
+	: Planet(__MODULE__ + ((type == DragView::_) ? "" : "_" + type.ToString())), device(plc) {
 	IDredgingSystem* dashboard = nullptr;
 	
 	switch (type) {
@@ -1717,7 +1731,10 @@ DredgesPage::DredgesPage(PLCMaster* plc, DragView type)
 	}
 
 	this->dashboard = dashboard;
-	this->device->push_confirmation_receiver(dashboard);
+
+	if (this->device != nullptr) {
+		this->device->push_confirmation_receiver(dashboard);
+	}
 
 	this->push_decorator(new DragCableDecorator(dashboard));
 }
@@ -1744,6 +1761,14 @@ void DredgesPage::reflow(float width, float height) {
 	}
 }
 
+void DredgesPage::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
+
+	if (db != nullptr) {
+		db->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
+	}
+}
+
 PLCMaster* DredgesPage::get_plc_device() {
 	return this->device;
 }
@@ -1751,19 +1776,19 @@ PLCMaster* DredgesPage::get_plc_device() {
 bool DredgesPage::can_select(IGraphlet* g) {
 	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 
-	return ((db != nullptr) && (db->can_select(g)));
+	return ((this->device != nullptr) && (db != nullptr) && (db->can_select(g)));
 }
 
 bool DredgesPage::can_select_multiple() {
 	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 
-	return ((db != nullptr) && (db->can_select_multiple()));
+	return ((this->device != nullptr) && (db != nullptr) && (db->can_select_multiple()));
 }
 
 bool DredgesPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = Planet::on_key(key, wargrey_keyboard);
 
-	if (!handled) {
+	if ((this->device != nullptr) && (!handled)) {
 		auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 
 		if (db != nullptr) {
@@ -1781,7 +1806,11 @@ void DredgesPage::on_focus(IGraphlet* g, bool yes) {
 		auto editor = dynamic_cast<IEditorlet*>(g);
 
 		if (editor != nullptr) {
-			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+			if (this->device != nullptr) {
+				this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+			} else {
+				this->set_caret_owner(nullptr);
+			}
 		}
 	}
 }

@@ -323,6 +323,9 @@
     <ClInclude Include="decorator\headsup.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
+    <ClInclude Include="decorator\vessel.hpp">
+      <Filter>decorator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

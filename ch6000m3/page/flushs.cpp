@@ -107,7 +107,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->pressures[FS::D]->set_value(RealData(DB203, pump_D_pressure), GraphletAnchor::CC);
 		this->pressures[FS::E]->set_value(RealData(DB203, pump_E_pressure), GraphletAnchor::CC);
 
@@ -138,7 +138,7 @@ public:
 		this->set_door_progress(Door::SB7, RealData(DB203, upper_door_SB7_progress));
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
 		DI_water_pump(this->pumps[FS::PSPump], DB4, ps_water_pump_feedback, DB205, ps_water_pump_details);
 		DI_water_pump(this->pumps[FS::SBPump], DB4, sb_water_pump_feedback, DB205, sb_water_pump_details);
 
@@ -253,21 +253,21 @@ public:
 		pTurtle->move_right(2, FS::h10);
 		
 		pTurtle->turn_right_up()->move_up(2.5F, FS::HBV08)->move_up(2.5F)->turn_up_right(FS::h5);
-		pTurtle->turn_left_up()->move_up(2.5F, FS::SBV4)->move_up(2.5F)->turn_up_left();
+		pTurtle->turn_left_up()->move_up(3, FS::SBV4)->move_up(3)->turn_up_left();
 		pTurtle->move_left(10, FS::HBV07)->move_left(10, FS::Port)->jump_back(FS::h10);
 
 		pTurtle->turn_right_down()->move_down(5, FS::HBV09)->move_down(5)->turn_down_right(FS::h4);
-		pTurtle->turn_left_down()->move_down(2.5F, FS::SBV3)->move_down(2.5F)->turn_down_left();
+		pTurtle->turn_left_down()->move_down(3, FS::SBV3)->move_down(3)->turn_down_left();
 		pTurtle->move_left(10, FS::HBV06)->move_left(10, FS::Starboard)->jump_back(FS::h5);
 
 		pTurtle->move_right(4, FS::HBV05)->move_right(8)->jump_right()->move_right(6)->turn_right_down(FS::h5ps)->move_down(6);
 		pTurtle->turn_down_left(FS::h3ps)->move_left(6)->turn_left_up(FS::PSPump);
-		pTurtle->move_up(4, FS::HBV02)->move_up(2.5F, FS::nic)->move_up(3.5F, FS::SBV2)->move_up(2, FS::PSSea)->jump_back(FS::h3ps);
+		pTurtle->move_up(4, FS::HBV02)->move_up(2.5F, FS::nic)->move_up(4, FS::SBV2)->move_up(2.5F, FS::PSSea)->jump_back(FS::h3ps);
 
 		pTurtle->turn_right_down()->move_down(2.5F, FS::HBV03)->move_down(2.5F);
 		pTurtle->turn_down_left(FS::h3sb)->move_left(6, FS::SBPump)->jump_back();
 		pTurtle->turn_right_down()->move_down(3, FS::h1sb)->turn_down_left()->move_left(6)->turn_left_down();
-		pTurtle->move_down(FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
+		pTurtle->move_down(1.5F, FS::HBV01)->move_down(2.5F, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
 
 		pTurtle->move_right(4, FS::HBV04)->move_right(5, FS::h4sb)->turn_right_up()->move_up(2.5F)->turn_up_right()->move_right(2);
 		
@@ -369,7 +369,7 @@ public:
 	}
 
 public:
-	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
+	void reflow(float width, float height, float gwidth, float gheight) {
 		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->hopper_room, FS::room, GraphletAnchor::LC);
 		this->station->map_graphlet_at_anchor(this->hopper_water, FS::water, GraphletAnchor::LC);
@@ -673,34 +673,37 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Flush* dashboard = new Flush(this);
 
 	this->dashboard = dashboard;
-	this->diagnostics = new WaterPumpDiagnostics(plc);
-	
-	this->gate_valve_op = make_butterfly_valve_menu(DO_butterfly_valve_action, plc);
-	this->upper_door_op = make_upper_door_menu(plc);
-	this->ps_pump_op = make_ps_water_pump_menu(plc);
-	this->sb_pump_op = make_sb_water_pump_menu(plc);
 
-	this->ps_ps_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_PS, plc);
-	this->ps_sb_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_SB, plc);
-	this->ps_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_2, plc);
-	this->sb_ps_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_PS, plc);
-	this->sb_sb_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_SB, plc);
-	this->sb_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_2, plc);
-	this->s2_ps_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_PS, plc);
-	this->s2_sb_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_SB, plc);
-	this->s2_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_2, plc);
-	this->p2_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::P2_2, plc);
-	this->i2_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::I2_2, plc);
-	this->ps_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_H, plc);
-	this->sb_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_H, plc);
-	this->s2_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_H, plc);
-	this->p2_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::P2_H, plc);
+	if (this->device != nullptr) {
+		this->diagnostics = new WaterPumpDiagnostics(plc);
 
-	this->grid = new GridDecorator();
+		this->gate_valve_op = make_butterfly_valve_menu(DO_butterfly_valve_action, plc);
+		this->upper_door_op = make_upper_door_menu(plc);
+		this->ps_pump_op = make_ps_water_pump_menu(plc);
+		this->sb_pump_op = make_sb_water_pump_menu(plc);
 
-	this->device->push_confirmation_receiver(dashboard);
+		this->ps_ps_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_PS, plc);
+		this->ps_sb_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_SB, plc);
+		this->ps_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_2, plc);
+		this->sb_ps_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_PS, plc);
+		this->sb_sb_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_SB, plc);
+		this->sb_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_2, plc);
+		this->s2_ps_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_PS, plc);
+		this->s2_sb_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_SB, plc);
+		this->s2_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_2, plc);
+		this->p2_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::P2_2, plc);
+		this->i2_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::I2_2, plc);
+		this->ps_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_H, plc);
+		this->sb_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_H, plc);
+		this->s2_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_H, plc);
+		this->p2_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::P2_H, plc);
+
+		this->device->push_confirmation_receiver(dashboard);
+	}
 
 	{ // load decorators
+		this->grid = new GridDecorator();
+
 #ifdef _DEBUG
 		this->push_decorator(this->grid);
 #else
@@ -725,12 +728,11 @@ void FlushsPage::load(CanvasCreateResourcesReason reason, float width, float hei
 	auto dashboard = dynamic_cast<Flush*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
-		float vinset = statusbar_height();
 		float gwidth = width / 64.0F;
-		float gheight = (height - vinset - vinset) / 36.0F;
+		float gheight = height / 36.0F;
 
 		this->grid->set_grid_width(gwidth);
-		this->grid->set_grid_height(gheight, vinset);
+		this->grid->set_grid_height(gheight);
 		
 		dashboard->construct(gwidth, gheight);
 		dashboard->load(width, height, gwidth, gheight);
@@ -741,24 +743,32 @@ void FlushsPage::reflow(float width, float height) {
 	auto dashboard = dynamic_cast<Flush*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
-		float vinset = statusbar_height();
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		dashboard->reflow(width, height, gwidth, gheight, vinset);
+		dashboard->reflow(width, height, gwidth, gheight);
+	}
+}
+
+void FlushsPage::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+	auto dashboard = dynamic_cast<Flush*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		dashboard->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
 	}
 }
 
 bool FlushsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
-		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
-		|| (dynamic_cast<WaterPumplet*>(g) != nullptr)
-		|| (dynamic_cast<ArrowHeadlet*>(g) != nullptr)
-		|| button_enabled(g));
+	return ((this->device != nullptr)
+		&& ((dynamic_cast<GateValvelet*>(g) != nullptr)
+			|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
+			|| (dynamic_cast<WaterPumplet*>(g) != nullptr)
+			|| (dynamic_cast<ArrowHeadlet*>(g) != nullptr)
+			|| button_enabled(g)));
 }
 
 bool FlushsPage::can_select_multiple() {
-	return true;
+	return (this->device != nullptr);
 }
 
 void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

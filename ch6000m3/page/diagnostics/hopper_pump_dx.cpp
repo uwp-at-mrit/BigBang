@@ -62,7 +62,7 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		unsigned int feedback = (this->ps ? ps_hopper_pump_feedback : sb_hopper_pump_feedback);
 		unsigned int lunit = (this->ps ? ps_hopper_lubricating_unit_feedback : sb_hopper_lubricating_unit_feedback);
 		unsigned int hpgmaster = (this->ps ? ps_hopper_master_gland_pump_feedback : sb_hopper_master_gland_pump_feedback);

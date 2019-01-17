@@ -68,7 +68,7 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->set_cylinder(HD::HopperHeight, DBD(DB2, average_hopper_height));
 		this->set_cylinder(HD::Displacement, DBD(DB2, displacement_value));
 		this->set_cylinder(HD::Loading, DBD(DB2, loading_value));
@@ -107,7 +107,7 @@ public:
 		}
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
 		DI_hydraulic_pump_dimension(this->dimensions[HD::A], DB4, pump_A_feedback);
 		DI_hydraulic_pump_dimension(this->dimensions[HD::D], DB4, pump_D_feedback);
 		DI_hydraulic_pump_dimension(this->dimensions[HD::E], DB4, pump_E_feedback);
@@ -342,13 +342,12 @@ private:
 
 		for (E id = id0; id <= idn; id++) {
 			ls[id]->fill_extent(0.0F, 0.0F, nullptr, &gapsize);
-			gapsize *= 0.5F;
 
 			this->decorator->fill_descent_anchor(float(_I(id) - _I(id0)) / flcount, 0.0F, &x, nullptr);
 
-			this->master->move_to(is[id], x + xoff, y, GraphletAnchor::CT);
-			this->master->move_to(ls[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
-			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, +gapsize);
+			this->master->move_to(is[id], x, y, GraphletAnchor::CT, xoff, -gapsize);
+			this->master->move_to(ls[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize * 0.5F);
+			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, +gapsize * 0.5F);
 		}
 	}
 
@@ -395,15 +394,17 @@ HopperDoorsPage::HopperDoorsPage(PLCMaster* plc) : Planet(__MODULE__), device(pl
 	Doors* dashboard = new Doors(this, decorator);
 
 	this->dashboard = dashboard;
-	this->door_op = make_bottom_door_menu(plc);
-	this->gdoors12_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor12, plc);
-	this->gdoors35_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor35, plc);
-	this->gdoors67_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor67, plc);
-	this->gdoors17_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor17, plc);
-
-	this->device->push_confirmation_receiver(dashboard);
-
 	this->push_decorator(decorator);
+
+	if (this->device != nullptr) {
+		this->door_op = make_bottom_door_menu(plc);
+		this->gdoors12_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor12, plc);
+		this->gdoors35_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor35, plc);
+		this->gdoors67_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor67, plc);
+		this->gdoors17_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor17, plc);
+
+		this->device->push_confirmation_receiver(dashboard);
+	}
 }
 
 HopperDoorsPage::~HopperDoorsPage() {
@@ -428,13 +429,22 @@ void HopperDoorsPage::reflow(float width, float height) {
 	}
 }
 
+void HopperDoorsPage::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+	auto db = dynamic_cast<Doors*>(this->dashboard);
+
+	if (db != nullptr) {
+		db->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
+	}
+}
+
 bool HopperDoorsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<HopperDoorlet*>(g) != nullptr)
-		|| (dynamic_cast<Alarmlet*>(g) != nullptr));
+	return ((this->device != nullptr)
+		&& ((dynamic_cast<HopperDoorlet*>(g) != nullptr)
+			|| (dynamic_cast<Alarmlet*>(g) != nullptr)));
 }
 
 bool HopperDoorsPage::can_select_multiple() {
-	return true;
+	return (this->device != nullptr);
 }
 
 void HopperDoorsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

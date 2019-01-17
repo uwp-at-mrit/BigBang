@@ -372,6 +372,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\headsup.hpp" />
     <ClInclude Include="decorator\ship.hpp" />
+    <ClInclude Include="decorator\vessel.hpp" />
     <ClInclude Include="iotables\ai_winches.hpp" />
     <ClInclude Include="iotables\ao_devices.hpp" />
     <ClInclude Include="iotables\ao_settings.hpp" />

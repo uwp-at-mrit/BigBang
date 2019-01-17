@@ -31,6 +31,8 @@
 #include "iotables/do_valves.hpp"
 #include "iotables/do_hopper_pumps.hpp"
 
+#include "decorator/vessel.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -109,7 +111,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->pump_pressures[CS::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LC);
 		this->pump_pressures[CS::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LC);
 		this->pump_pressures[CS::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LC);
@@ -162,7 +164,7 @@ public:
 		*/
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
 		DI_hopper_pumps(this->hoppers[CS::PSHPump], this->hoppers[CS::PSUWPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
 		DI_hopper_pumps(this->hoppers[CS::SBHPump], this->hoppers[CS::SBUWPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
@@ -430,7 +432,7 @@ public:
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox, 0.0F);
 			}
 
-			ox = std::max(std::fabsf(ox), std::fabsf(oy));
+			ox = max(std::fabsf(ox), std::fabsf(oy));
 			switch (it->first) {
 			case CS::PSHPump: {
 				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, ox);
@@ -596,7 +598,7 @@ public:
 	}
 
 public:
-	void draw_valves_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
+	void draw_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
 		float ox, oy, gx, gy, mx, my;
 
 		for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
@@ -822,115 +824,58 @@ private:
 	ChargesPage* master;
 };
 
-private class ShipDecorator : public IPlanetDecorator {
+private class VesselDecorator : public TVesselDecorator<Vessel, CS> {
 public:
-	ShipDecorator(Vessel* master) : master(master) {
-		float height = 1.0F;
-		float xradius = height * 0.10F;
-		float yradius = height * 0.50F;
-
-		this->ship_width = 1.0F - xradius;
-		this->ship = geometry_union(rectangle(this->ship_width, height),
-			segment(this->ship_width, yradius, -90.0, 90.0, xradius, yradius));
-
-		this->ship_style = make_dash_stroke(CanvasDashStyle::Dash);
-	}
+	VesselDecorator(Vessel* master) : TVesselDecorator<Vessel, CS>(master) {}
 
 public:
-	void draw_before(CanvasDrawingSession^ ds, float Width, float Height) override {
-		this->master->draw_valves_relationships(ds, Width, Height);
+	void draw_non_important_lines(Tracklet<CS>* station, CanvasDrawingSession^ ds, float x, float y, CanvasStrokeStyle^ style) override {
+		float d0525_x, d05_y, d25_y;
+
+		station->fill_anchor_location(CS::D005, &d0525_x, &d05_y, false);
+		station->fill_anchor_location(CS::D025, nullptr, &d25_y, false);
+
+		ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
+			Colours::DimGray, default_pipe_thickness, style);
 	}
-
-	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {
-		auto station = dynamic_cast<Tracklet<CS>*>(g);
-
-		if (station != nullptr) {
-			float ps_y, sb_y;
-			float deck_lx, deck_ty, deck_rx, deck_by;
-			
-			station->fill_anchor_location(CS::ps, nullptr, &ps_y, false);
-			station->fill_anchor_location(CS::sb, nullptr, &sb_y, false);
-
-			station->fill_anchor_location(CS::deck_lx, &deck_lx, nullptr, false);
-			station->fill_anchor_location(CS::deck_rx, &deck_rx, nullptr, false);
-			station->fill_anchor_location(CS::deck_ty, nullptr, &deck_ty, false);
-			station->fill_anchor_location(CS::deck_by, nullptr, &deck_by, false);
-
-			{ // draw ship
-				float ship_width = this->actual_width();
-				float ship_height = std::fabsf(sb_y - ps_y);
-				auto real_ship = geometry_scale(this->ship, ship_width, ship_height);
-				Rect ship_box = real_ship->ComputeBounds();
-				float sx = 0.0F;
-				float sy = y + std::fminf(sb_y, ps_y);
-
-				ds->DrawGeometry(real_ship, sx, sy, Colours::SeaGreen, 1.0F, this->ship_style);
-			}
-
-			{ // draw deck region
-				float dx = x + std::fminf(deck_lx, deck_rx);
-				float dy = y + std::fminf(deck_ty, deck_by);
-				float dw = std::fabsf((deck_rx - deck_lx));
-				float dh = std::fabsf((deck_by - deck_ty));
-
-				ds->DrawGeometry(rectangle(dx, dy, dw, dh), Colours::SeaGreen, 1.0F, this->ship_style);
-			}
-
-			{ // draw non-important lines
-				float d0525_x, d05_y, d25_y;
-
-				station->fill_anchor_location(CS::D005, &d0525_x, &d05_y, false);
-				station->fill_anchor_location(CS::D025, nullptr, &d25_y, false);
-
-				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
-					Colours::DimGray, default_pipe_thickness, this->ship_style);
-			}
-		}
-	}
-
-private:
-	CanvasGeometry^ ship;
-	CanvasStrokeStyle^ ship_style;
-
-private:
-	float ship_width;
-
-private:
-	Vessel* master;
 };
 
+/*************************************************************************************************/
 ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Vessel* dashboard = new Vessel(this);
 
 	this->dashboard = dashboard;
-	this->diagnostics = new HopperPumpDiagnostics(plc);
+	
+	if (this->device != nullptr) {
+		this->diagnostics = new HopperPumpDiagnostics(plc);
 
-	this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
-	this->ghopper_op = make_charge_condition_menu(GroupChargeAction::BothHopper, plc);
-	this->gunderwater_op = make_charge_condition_menu(GroupChargeAction::BothUnderWater, plc);
-	this->ghbarge_op = make_charge_condition_menu(GroupChargeAction::HPBarge, plc);
-	this->guwbarge_op = make_charge_condition_menu(GroupChargeAction::UWPBarge, plc);
-	this->ghps_op = make_charge_condition_menu(GroupChargeAction::PSHopper, plc);
-	this->guwps_op = make_charge_condition_menu(GroupChargeAction::PSUnderWater, plc);
-	this->ghsb_op = make_charge_condition_menu(GroupChargeAction::SBHopper, plc);
-	this->guwsb_op = make_charge_condition_menu(GroupChargeAction::SBUnderWater, plc);
-	this->ps_hopper_op = make_ps_hopper_pump_charge_menu(plc);
-	this->sb_hopper_op = make_sb_hopper_pump_charge_menu(plc);
-	this->ps_underwater_op = make_ps_underwater_pump_charge_menu(plc);
-	this->sb_underwater_op = make_sb_underwater_pump_charge_menu(plc);
+		this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
+		this->ghopper_op = make_charge_condition_menu(GroupChargeAction::BothHopper, plc);
+		this->gunderwater_op = make_charge_condition_menu(GroupChargeAction::BothUnderWater, plc);
+		this->ghbarge_op = make_charge_condition_menu(GroupChargeAction::HPBarge, plc);
+		this->guwbarge_op = make_charge_condition_menu(GroupChargeAction::UWPBarge, plc);
+		this->ghps_op = make_charge_condition_menu(GroupChargeAction::PSHopper, plc);
+		this->guwps_op = make_charge_condition_menu(GroupChargeAction::PSUnderWater, plc);
+		this->ghsb_op = make_charge_condition_menu(GroupChargeAction::SBHopper, plc);
+		this->guwsb_op = make_charge_condition_menu(GroupChargeAction::SBUnderWater, plc);
+		this->ps_hopper_op = make_ps_hopper_pump_charge_menu(plc);
+		this->sb_hopper_op = make_sb_hopper_pump_charge_menu(plc);
+		this->ps_underwater_op = make_ps_underwater_pump_charge_menu(plc);
+		this->sb_underwater_op = make_sb_underwater_pump_charge_menu(plc);
 
-	this->grid = new GridDecorator();
-
-	this->device->push_confirmation_receiver(dashboard);
+		this->device->push_confirmation_receiver(dashboard);
+	}
 
 	{ // load decorators
-		this->push_decorator(new ShipDecorator(dashboard));
+		this->grid = new GridDecorator();
 
 #ifdef _DEBUG
 		this->push_decorator(this->grid);
 #else
 		this->grid->set_active_planet(this);
 #endif
+
+		this->push_decorator(new VesselDecorator(dashboard));
 	}
 }
 
@@ -950,7 +895,7 @@ void ChargesPage::load(CanvasCreateResourcesReason reason, float width, float he
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
 		float gwidth = width / 64.0F;
-		float gheight = (height - vinset - vinset) / 36.0F;
+		float gheight = height / 36.0F;
 
 		this->grid->set_grid_width(gwidth);
 		this->grid->set_grid_height(gheight, vinset);
@@ -972,14 +917,23 @@ void ChargesPage::reflow(float width, float height) {
 	}
 }
 
+void ChargesPage::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+	auto dashboard = dynamic_cast<Vessel*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		dashboard->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
+	}
+}
+
 bool ChargesPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<Credit<Buttonlet, CSFunction>*>(g)
-		|| (dynamic_cast<GateValvelet*>(g) != nullptr)
-		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
+	return ((this->device != nullptr)
+		&& (dynamic_cast<Credit<Buttonlet, CSFunction>*>(g)
+			|| (dynamic_cast<GateValvelet*>(g) != nullptr)
+			|| (dynamic_cast<HopperPumplet*>(g) != nullptr)));
 }
 
 bool ChargesPage::can_select_multiple() {
-	return true;
+	return (this->device != nullptr);
 }
 
 void ChargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

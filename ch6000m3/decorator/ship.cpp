@@ -21,12 +21,12 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
 ShipDecorator::ShipDecorator() {
-	float height = 0.618F * 0.618F;
+	float height = 0.618F * 0.72F;
 	float radius = height * 0.5F;
 
 	this->ship_width = 0.618F;
 	this->ship_height = height;
-	this->x = (1.0F - this->ship_width - radius) * 0.5F;
+	this->x = (1.0F - this->ship_width - radius) * 0.70F;
 	this->y = 0.5F;
 	this->ship = geometry_union(rectangle(this->ship_width, height),
 		segment(this->ship_width, radius, -90.0, 90.0, radius, radius));
@@ -83,7 +83,7 @@ void ShipDecorator::fill_descent_anchor(float fx, float fy, float* x, float *y) 
 
 /*************************************************************************************************/
 BottomDoorDecorator::BottomDoorDecorator() {
-	this->y = (0.618F - this->ship_height) * 0.618F;
+	this->y = (0.618F - this->ship_height) * 0.5F;
 	
 	{ // initializing sequence labels
 		CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);

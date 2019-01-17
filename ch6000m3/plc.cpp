@@ -126,7 +126,7 @@ void PLCMaster::send_command(uint16 index_p1) {
 }
 
 /*************************************************************************************************/
-void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+void PLCConfirmation::on_all_signals(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
 	size_t count, subaddr0, subaddrn;
 	size_t adbs[] = { MRDB::REALTIME, MRDB::ANALOG_INPUT, MRDB::FORAT };
 	size_t ddbs[] = { MRDB::DIGITAL_INPUT_RAW, MRDB::DIGITAL_INPUT };
@@ -152,7 +152,7 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 	}
 
 	if ((digital_data[0] != nullptr) && (digital_data[1] != nullptr)) {
-		this->on_digital_input(digital_data[0], digital_counts[0], digital_data[1], digital_counts[1], logger);
+		this->on_digital_input(timepoint_ms, digital_data[0], digital_counts[0], digital_data[1], digital_counts[1], logger);
 	}
 
 	for (size_t i = 0; i < sizeof(adbs) / sizeof(size_t); i++) {
@@ -173,11 +173,11 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 	}
 
 	if ((analog_data[0] != nullptr) && (analog_data[1] != nullptr)) {
-		this->on_analog_input(analog_data[0], analog_counts[0], analog_data[1], analog_counts[1], logger);
+		this->on_analog_input(timepoint_ms, analog_data[0], analog_counts[0], analog_data[1], analog_counts[1], logger);
 	}
 
 	if (analog_data[2] != nullptr) {
-		this->on_forat(analog_data[2] - dqcount, analog_counts[2] + dqcount, logger);
+		this->on_forat(timepoint_ms, analog_data[2] - dqcount, analog_counts[2] + dqcount, logger);
 	}
 
 	this->post_read_data(logger);

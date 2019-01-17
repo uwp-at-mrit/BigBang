@@ -144,9 +144,6 @@
   <data name="offline" xml:space="preserve">
     <value>Offline</value>
   </data>
-  <data name="nodatum" xml:space="preserve">
-    <value>No Datum</value>
-  </data>
   <data name="brightness" xml:space="preserve">
     <value>Brightness:</value>
   </data>

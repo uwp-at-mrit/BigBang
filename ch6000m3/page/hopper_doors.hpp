@@ -1,20 +1,21 @@
 #pragma once
 
+#include "timemachine.hpp"
 #include "planet.hpp"
 #include "plc.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
-
 namespace WarGrey::SCADA {
-	private class HopperDoorsPage : public WarGrey::SCADA::Planet {
+	private class HopperDoorsPage : public WarGrey::SCADA::Planet, public WarGrey::SCADA::ITimeMachineListener {
 	public:
 		virtual ~HopperDoorsPage() noexcept;
-		HopperDoorsPage(WarGrey::SCADA::PLCMaster* plc);
+		HopperDoorsPage(WarGrey::SCADA::PLCMaster* plc = nullptr);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
+
+	public:
+		void on_timestream(long long time_ms, size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override;
 
 	public:
 		bool can_select(IGraphlet* g) override;

@@ -115,7 +115,7 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		bool ps = (this->side == DX::PS);
 		unsigned int draghead_lift = (ps ? console_ps_draghead_winch_lift_button : console_sb_draghead_winch_lift_button) - 1U;
 		unsigned int intermediate_lift = (ps ? console_ps_intermediate_winch_lift_button : console_sb_intermediate_winch_lift_button) - 1U;
@@ -202,7 +202,7 @@ public:
 		}
 	}
 
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->metrics[WG::CurrentPulse]->set_text(flstring(DBD(DB2, this->pulses + 16U), 0));
 		this->metrics[WG::UpperPulse]->set_text(flstring(DBD(DB2, this->pulses + 0U), 0));
 		this->metrics[WG::LowerPulse]->set_text(flstring(DBD(DB2, this->pulses + 4U), 0));

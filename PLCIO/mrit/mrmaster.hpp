@@ -18,7 +18,7 @@ namespace WarGrey::SCADA {
 		virtual bool available() { return true; }
 
 	public:
-		virtual void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_all_signals(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) = 0;
 	};
 
 	private class IMRMaster abstract : public WarGrey::SCADA::IPLCMaster, public WarGrey::SCADA::ISocketAcceptable {
@@ -101,6 +101,6 @@ namespace WarGrey::SCADA {
 
 	private class MRConfirmation : public WarGrey::SCADA::IMRConfirmation {
 	public:
-		void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override {}
+		void on_all_signals(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override {}
 	};
 }

@@ -58,16 +58,16 @@ protected:
 		
 		this->push_planet(new HydraulicsPage(this->device)); // 0
 		this->push_planet(new ChargesPage(this->device)); // 1
-		this->push_planet(new DredgesPage(this->device)); // 2
+		this->push_planet(new DredgesPage(DragView::_, this->device)); // 2
 		this->push_planet(new DischargesPage(this->device)); // 3
 		this->push_planet(new GlandsPage(this->device)); // 4
 		this->push_planet(new FlushsPage(this->device)); // 5
-		this->push_planet(new DredgesPage(this->device, DragView::PortSide)); // 6
+		this->push_planet(new DredgesPage(DragView::PortSide, this->device)); // 6
 		this->push_planet(new HopperDoorsPage(this->device)); // 7
 		this->push_planet(new LubricatingsPage(this->device)); // 8
 		this->push_planet(new DraughtsPage(this->device)); // 9
-		this->push_planet(new DredgesPage(this->device, DragView::Starboard)); // 10
-		this->push_planet(new DredgesPage(this->device, DragView::Suctions)); // 11
+		this->push_planet(new DredgesPage(DragView::Starboard, this->device)); // 10
+		this->push_planet(new DredgesPage(DragView::Suctions, this->device)); // 11
 	}
 
 protected private:
@@ -80,7 +80,7 @@ public:
 	PageEventListener(unsigned int idx) : dbidx(idx), page(2 /* the dredging page */) {}
 
 public:
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->page = int(DBD(DB2, this->dbidx));
 	}
 

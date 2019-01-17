@@ -89,7 +89,7 @@ public:
 		this->begin_update_sequence();
 	}
 
-	void on_forat(const uint8* DB20, size_t count, Syslog* logger) override {
+	void on_forat(long long timepoint_ms, const uint8* DB20, size_t count, Syslog* logger) override {
 		this->AI_settings(DB20, this->pst_metrics, AO_gantry_winch_trunnion_settings, true);
 		this->AI_settings(DB20, this->psi_metrics, AO_gantry_winch_intermediate_settings, true);
 		this->AI_settings(DB20, this->psh_metrics, AO_gantry_winch_draghead_settings, true);

@@ -39,14 +39,15 @@ static const float time_machine_alpha = 0.64F;
 private ref class TimeMachineDisplay sealed : public UniverseDisplay {
 internal:
 	TimeMachineDisplay(Syslog* logger, ITimeMachine* entity, IHeadUpPlanet* dashboard)
-		: UniverseDisplay(logger, nullptr, new ListViewNavigator(), dashboard), machine(entity), closed(true) {
+		: UniverseDisplay(logger, logger->get_name(), new ListViewNavigator(), dashboard), machine(entity), closed(true) {
 		this->use_global_mask_setting(false);
 
 		this->_void = ref new SplitView();
 		this->_void->Content = this->canvas;
 		this->_void->Pane = this->navigator->user_interface();
-
+		
 		this->_void->OpenPaneLength = 256.0;
+		this->_void->PanePlacement = SplitViewPanePlacement::Right;
 		this->_void->DisplayMode = SplitViewDisplayMode::Overlay;
 	}
 
@@ -288,6 +289,8 @@ void ITimeMachine::pickup(ITimeMachineListener* passenger) {
 	if (planet != nullptr) {
 		auto tmd = dynamic_cast<TimeMachineDisplay^>(this->universe);
 
+		planet->set_background(Colours::Background, 8.0F);
+
 		if (tmd != nullptr) {
 			tmd->pickup_planet(planet);
 		}
@@ -309,6 +312,10 @@ void ITimeMachine::startover(long long departure_ms, long long destination_ms) {
 		this->timepoint = this->departure;
 
 		dashboard->get_timeline()->set_range(this->departure, this->destination);
+
+		for (auto passenger : this->passengers) {
+			passenger->on_startover(this->departure, this->destination);
+		}
 	}
 }
 
@@ -373,7 +380,11 @@ void ITimeMachine::timeskip(long long timepoint) {
 	this->timepoint = timepoint;
 
 	if (dashboard != nullptr) {
-		dashboard->get_timeline()->set_value(timepoint);
+		auto timeline = dashboard->get_timeline();
+
+		if (timeline->get_state() == TimelineState::Service) {
+			this->step();
+		}
 	}
 }
 
@@ -402,9 +413,18 @@ void ITimeMachine::on_timestream(long long timepoint_ms, size_t addr0, size_t ad
 	}
 
 	if (keystream) {
+		long long interval = this->get_time_speed() / this->get_speed_shift();
+		long long uptime = this->timepoint - this->departure;
+		long long count = uptime / interval;
+
+		this->universe->current_planet->begin_update_sequence();
+		this->universe->current_planet->on_elapse(count, interval, uptime);
+
 		for (auto passenger : this->passengers) {
 			passenger->on_timestream(timepoint_ms, addr0, addrn, data, size, logger);
 		}
+
+		this->universe->current_planet->end_update_sequence();
 	}
 }
 
@@ -459,7 +479,7 @@ void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_f
 void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* datablock, size_t size) {
 	// TODO: find the reason if `write` fails.
 	if (this->tmstream.is_open()) {
-		// NOTE: `std::endl` does not work for `std::ios::binary` 
+		// NOTE: `std::endl` does not put newline for `std::ios::binary` 
 		this->tmstream << timepoint_ms << " " << addr0 << " " << addrn << "\n\r" << std::endl;
 		this->tmstream.write((char*)datablock, size) << "\n\r" << std::endl;
 		this->tmstream.flush();

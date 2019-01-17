@@ -185,7 +185,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->set_temperature(HS::Visor, RealData(DB203, visor_tank_temperature));
 		this->set_temperature(HS::Master, RealData(DB203, master_tank_temperature));
 		this->set_visor_tank_level(RealData(DB203, visor_tank_level));
@@ -798,7 +798,6 @@ HydraulicsPage::HydraulicsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	Hydraulics* dashboard = new Hydraulics(this);
 
 	this->dashboard = dashboard;
-	this->grid = new GridDecorator();
 	
 	if (this->device != nullptr) {
 		this->gbs_op = make_hydraulics_group_menu(HydraulicsGroup::BothPumps, plc);
@@ -812,6 +811,8 @@ HydraulicsPage::HydraulicsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	}
 
 	{ // load decorators
+		this->grid = new GridDecorator();
+
 #ifdef _DEBUG
 		this->push_decorator(this->grid);
 #else
@@ -835,7 +836,7 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 	
 	if (dashboard != nullptr) {
 		float gwidth = width / 76.0F;
-		float gheight = height / 36.0F;
+		float gheight = height / 38.0F;
 
 		this->grid->set_grid_width(gwidth);
 		this->grid->set_grid_height(gheight);
@@ -861,11 +862,11 @@ void HydraulicsPage::reflow(float width, float height) {
 	}
 }
 
-void HydraulicsPage::on_timestream(long long timepoint_s, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+void HydraulicsPage::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
 	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
 
 	if (dashboard != nullptr) {
-		dashboard->on_all_signals(addr0, addrn, data, size, logger);
+		dashboard->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
 	}
 }
 

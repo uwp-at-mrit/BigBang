@@ -12,6 +12,7 @@
 namespace WarGrey::SCADA {
 	private class ITimeMachineListener abstract {
 	public:
+		virtual void on_startover(long long departure_ms, long long destination_ms) {}
 		virtual void on_timestream(long long timepoint_ms,
 			size_t addr0, size_t addrn, uint8* data, size_t size,
 			WarGrey::SCADA::Syslog* logger) = 0;

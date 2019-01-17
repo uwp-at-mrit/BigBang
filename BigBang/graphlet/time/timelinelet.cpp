@@ -189,8 +189,6 @@ void Timelinelet::on_tap(float x, float y) {
 		float percentage = (x - this->timeline_lx) / (this->timeline_rx - this->timeline_lx);
 		long long this_timepoint = ((long long)(std::roundf(float(this->vmax - this->vmin) * percentage))) + this->vmin;
 
-		this->set_value(this_timepoint);
-		
 		for (auto observer : this->obsevers) {
 			observer->on_time_skipped(this, this_timepoint);
 		}
@@ -217,6 +215,7 @@ void Timelinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 
 	{ // draw footprints
 		float fpdiff = this->footprint_thickness;
+		float dot_r = this->footprint_thickness * 0.618F;
 		float fpx0 = lx;
 		float last_fpx = lx;
 		
@@ -224,7 +223,12 @@ void Timelinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 			float fpx = lx + length * float(this->get_percentage(*it));
 
 			if ((fpx < last_fpx) || ((fpx - last_fpx) > fpdiff)) {
-				ds->DrawLine(fpx0, cy, last_fpx, cy, style.footprint_color, this->footprint_thickness);
+				if (fpx0 != last_fpx) {
+					ds->DrawLine(fpx0, cy, last_fpx, cy, style.footprint_color, this->footprint_thickness);
+				} else {
+					ds->FillCircle(fpx0, cy, dot_r, style.footprint_color);
+				}
+
 				fpx0 = fpx;
 			}
 
@@ -233,6 +237,8 @@ void Timelinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 
 		if (fpx0 != last_fpx) {
 			ds->DrawLine(fpx0, cy, last_fpx, cy, style.footprint_color, this->footprint_thickness);
+		} else {
+			ds->FillCircle(fpx0, cy, dot_r, style.footprint_color);
 		}
 	}
 

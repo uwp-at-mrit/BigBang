@@ -105,8 +105,8 @@ namespace WarGrey::SCADA {
 		void on_maniplation_complete(long long open_s, long long close_s) override;
 
 	protected:
-		void set_value(unsigned int idx, double value);
-		void set_values(double* values, bool persistent = true);
+		void set_value(unsigned int idx, double value, long long timepoint_ms = 0LL);
+		void set_values(double* values, bool persistent = true, long long timepoint_ms = 0LL);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimeSeriesState state, WarGrey::SCADA::TimeSeriesStyle& style) override;
@@ -143,7 +143,8 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::TimeSeries history;
 		unsigned int vertical_step;
 		unsigned int precision;
-		long long history_max;
+		long long history_span;
+		long long history_destination;
 		float selected_x;
 
 	private:
@@ -203,12 +204,12 @@ namespace WarGrey::SCADA {
 		using ITimeSerieslet::set_value;
 		using ITimeSerieslet::set_values;
 
-		void set_value(Name slot, double value) {
-			ITimeSerieslet::set_value(_I(slot), value);
+		void set_value(Name slot, double value, long long timepoint_ms = 0LL) {
+			ITimeSerieslet::set_value(_I(slot), value, timepoint_ms);
 		}
 
-		void set_values(double* values, bool persistent = true) {
-			ITimeSerieslet::set_values(values, persistent);
+		void set_values(double* values, bool persistent = true, long long timepoint_ms = 0LL) {
+			ITimeSerieslet::set_values(values, persistent, timepoint_ms);
 		}
 
 		void close_line(Name slot, double alpha) {

@@ -136,7 +136,7 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		this->diagnoses[P::NoConsolePSStop]->set_state(DBX(DB4, console_ps_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);
 		this->diagnoses[P::NoConsoleSBStop]->set_state(DBX(DB4, console_sb_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);
 		this->diagnoses[P::NoSailingStop]->set_state(DBX(DB4, sailing_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);

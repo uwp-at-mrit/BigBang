@@ -131,7 +131,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->pressures[GP::PSFP]->set_value(RealData(DB203, ps_flushing_pump_pressure), GraphletAnchor::LB);
 
 		this->pressures[GP::PSHP]->set_value(RealData(DB203, ps_hopper_gland_pump_pressure), GraphletAnchor::LB);
@@ -161,7 +161,7 @@ public:
 		this->pressures[GP::SBUWP2]->set_value(RealData(DB203, sb_underwater_gland_pump2_pressure), GraphletAnchor::LB);
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count25, WarGrey::SCADA::Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count25, WarGrey::SCADA::Syslog* logger) override {
 		DI_hopper_pumps(this->hoppers[GP::PSHP], this->hoppers[GP::PSUWP], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
 		DI_hopper_pumps(this->hoppers[GP::SBHP], this->hoppers[GP::SBUWP], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
@@ -305,7 +305,7 @@ public:
 	}
 
 public:
-	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
+	void reflow(float width, float height, float gwidth, float gheight) {
 		float toff = default_pipe_thickness * 2.0F;
 		
 		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC, -gwidth * 2.0F);
@@ -503,12 +503,16 @@ GlandsPage::GlandsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	GlandPumps* dashboard = new GlandPumps(this);
 
 	this->dashboard = dashboard;
-	this->pump_op = make_gland_pump_menu(DO_glands_action, gland_pump_diagnostics, plc);
-	this->grid = new GridDecorator();
-
-	this->device->push_confirmation_receiver(dashboard);
+	
+	if (this->device != nullptr) {
+		this->pump_op = make_gland_pump_menu(DO_glands_action, gland_pump_diagnostics, plc);
+	
+		this->device->push_confirmation_receiver(dashboard);
+	}
 
 	{ // load decorators
+		this->grid = new GridDecorator();
+
 #ifdef _DEBUG
 		this->push_decorator(this->grid);
 #else
@@ -531,12 +535,11 @@ void GlandsPage::load(CanvasCreateResourcesReason reason, float width, float hei
 	auto dashboard = dynamic_cast<GlandPumps*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
-		float vinset = statusbar_height();
 		float gwidth = width / 64.0F;
-		float gheight = (height - vinset - vinset) / 44.0F;
+		float gheight = height / 44.0F;
 
 		this->grid->set_grid_width(gwidth);
-		this->grid->set_grid_height(gheight, vinset);
+		this->grid->set_grid_height(gheight);
 
 		dashboard->load(width, height, gwidth, gheight);
 	}
@@ -546,11 +549,10 @@ void GlandsPage::reflow(float width, float height) {
 	auto dashboard = dynamic_cast<GlandPumps*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
-		float vinset = statusbar_height();
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		dashboard->reflow(width, height, gwidth, gheight, vinset);
+		dashboard->reflow(width, height, gwidth, gheight);
 	}
 }
 
@@ -562,15 +564,23 @@ void GlandsPage::update(long long count, long long interval, long long uptime) {
 	}
 }
 
+void GlandsPage::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+	auto dashboard = dynamic_cast<GlandPumps*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		dashboard->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
+	}
+}
 
 bool GlandsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<HydraulicPumplet*>(g) != nullptr);
+	return ((this->device != nullptr)
+		&& (dynamic_cast<HydraulicPumplet*>(g) != nullptr));
 }
 
 bool GlandsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = Planet::on_key(key, wargrey_keyboard);
 
-	if ((!handled) && (this->device->get_mode() != PLCMasterMode::User)) {
+	if ((!handled) && (this->device != nullptr) && (this->device->authorized())) {
 		auto db = dynamic_cast<GlandPumps*>(this->dashboard);
 
 		if (db != nullptr) {
@@ -586,7 +596,7 @@ void GlandsPage::on_focus(IGraphlet* g, bool yes) {
 		auto editor = dynamic_cast<IEditorlet*>(g);
 
 		if (editor != nullptr) {
-			if (this->device->authorized()) {
+			if ((this->device != nullptr) && (this->device->authorized())) {
 				this->show_virtual_keyboard(ScreenKeyboard::Numpad);
 			} else {
 				this->set_caret_owner(nullptr);

@@ -41,6 +41,8 @@
 #include "iotables/do_winches.hpp"
 #include "iotables/do_hopper_pumps.hpp"
 
+#include "decorator/vessel.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -116,7 +118,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->pump_pressures[RS::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LB);
 		this->pump_pressures[RS::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LT);
 
@@ -160,7 +162,7 @@ public:
 		}
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
 		DI_hopper_pump(this->hoppers[RS::PSHPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details);
 		DI_hopper_pump(this->hoppers[RS::SBHPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details);
 
@@ -416,7 +418,7 @@ public:
 	}
 
 public:
-	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
+	void reflow(float width, float height, float gwidth, float gheight) {
 		GraphletAnchor anchor;
 		float dx, dy, margin, label_height, ox, oy;
 		float gridsize = resolve_gridsize(gwidth, gheight);
@@ -822,123 +824,64 @@ private:
 	DischargesPage* master;
 };
 
-private class RainbowsDecorator : public IPlanetDecorator {
+private class RainbowsDecorator : public TVesselDecorator<Rainbows, RS> {
 public:
-	RainbowsDecorator(Rainbows* master) : master(master) {
-		float height = 1.0F;
-		float xradius = height * 0.10F;
-		float yradius = height * 0.50F;
-
-		this->ship_width = 1.0F - xradius;
-		this->ship = geometry_union(rectangle(this->ship_width, height),
-			segment(this->ship_width, yradius, -90.0, 90.0, xradius, yradius));
-
-		this->ship_style = make_dash_stroke(CanvasDashStyle::Dash);
-	}
+	RainbowsDecorator(Rainbows* master) : TVesselDecorator<Rainbows, RS>(master) {}
 
 public:
-	void draw_before(CanvasDrawingSession^ ds, float Width, float Height) override {
-		this->master->draw_relationships(ds, Width, Height);
+	void draw_non_important_lines(Tracklet<RS>* station, CanvasDrawingSession^ ds, float x, float y, CanvasStrokeStyle^ style) override {
+		float d0525_x, d05_y, d25_y;
+		float d07_x, d07_y;
+		float d10_x, d10_y;
+
+		station->fill_anchor_location(RS::D005, &d0525_x, &d05_y, false);
+		station->fill_anchor_location(RS::D025, nullptr, &d25_y, false);
+		station->fill_anchor_location(RS::d007, &d07_x, &d07_y, false);
+		station->fill_anchor_location(RS::D010, &d10_x, &d10_y, false);
+
+		ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
+			Colours::DimGray, default_pipe_thickness, style);
+
+		ds->DrawLine(x + d0525_x, y + d07_y, x + d07_x, y + d07_y,
+			Colours::DimGray, default_pipe_thickness, style);
+
+		ds->DrawLine(d10_x, y + d10_y, x + d10_x, y + d10_y,
+			Colours::DimGray, default_pipe_thickness, style);
 	}
-
-	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {
-		auto station = dynamic_cast<Tracklet<RS>*>(g);
-
-		if (station != nullptr) {
-			float ps_y, sb_y;
-			float deck_lx, deck_ty, deck_rx, deck_by;
-
-			station->fill_anchor_location(RS::ps, nullptr, &ps_y, false);
-			station->fill_anchor_location(RS::sb, nullptr, &sb_y, false);
-
-			station->fill_anchor_location(RS::deck_lx, &deck_lx, nullptr, false);
-			station->fill_anchor_location(RS::deck_rx, &deck_rx, nullptr, false);
-			station->fill_anchor_location(RS::deck_ty, nullptr, &deck_ty, false);
-			station->fill_anchor_location(RS::deck_by, nullptr, &deck_by, false);
-
-			{ // draw ship
-				float ship_width = this->actual_width();
-				float ship_height = std::fabsf(sb_y - ps_y);
-				auto real_ship = geometry_scale(this->ship, ship_width, ship_height);
-				Rect ship_box = real_ship->ComputeBounds();
-				float sx = 0.0F;
-				float sy = y + std::fminf(sb_y, ps_y);
-
-				ds->DrawGeometry(real_ship, sx, sy, Colours::SeaGreen, 1.0F, this->ship_style);
-			}
-
-			{ // draw deck region
-				float dx = x + std::fminf(deck_lx, deck_rx);
-				float dy = y + std::fminf(deck_ty, deck_by);
-				float dw = std::fabsf((deck_rx - deck_lx));
-				float dh = std::fabsf((deck_by - deck_ty));
-
-				ds->DrawGeometry(rectangle(dx, dy, dw, dh), Colours::SeaGreen, 1.0F, this->ship_style);
-			}
-
-
-			{ // draw non-important lines
-				float d0525_x, d05_y, d25_y;
-				float d07_x, d07_y;
-				float d10_x, d10_y;
-
-				station->fill_anchor_location(RS::D005, &d0525_x, &d05_y, false);
-				station->fill_anchor_location(RS::D025, nullptr, &d25_y, false);
-				station->fill_anchor_location(RS::d007, &d07_x, &d07_y, false);
-				station->fill_anchor_location(RS::D010, &d10_x, &d10_y, false);
-				
-				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
-					Colours::DimGray, default_pipe_thickness, this->ship_style);
-
-				ds->DrawLine(x + d0525_x, y + d07_y, x + d07_x, y + d07_y,
-					Colours::DimGray, default_pipe_thickness, this->ship_style);
-
-				ds->DrawLine(d10_x, y + d10_y, x + d10_x, y + d10_y,
-					Colours::DimGray, default_pipe_thickness, this->ship_style);
-			}
-		}
-	}
-
-private:
-	CanvasGeometry^ ship;
-	CanvasStrokeStyle^ ship_style;
-
-private:
-	float ship_width;
-
-private:
-	Rainbows* master;
 };
 
+/*************************************************************************************************/
 DischargesPage::DischargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Rainbows* dashboard = new Rainbows(this);
 
 	this->dashboard = dashboard;
 	
-	this->anchor_winch_op = make_anchor_winch_menu(plc);
-	this->barge_winch_op = make_barge_winch_menu(plc);
-	this->barge_cylinder_op = make_barge_cylinder_menu(plc);
-	this->shore_winch_op = make_shore_winch_menu(plc);
-	this->shore_cylinder_op = make_shore_cylinder_menu(plc);
+	if (this->device != nullptr) {
+		this->anchor_winch_op = make_anchor_winch_menu(plc);
+		this->barge_winch_op = make_barge_winch_menu(plc);
+		this->barge_cylinder_op = make_barge_cylinder_menu(plc);
+		this->shore_winch_op = make_shore_winch_menu(plc);
+		this->shore_cylinder_op = make_shore_cylinder_menu(plc);
 
-	this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
-	this->upper_door_op = make_upper_door_menu(plc);
-	this->ps_hopper_op = make_ps_hopper_pump_discharge_menu(plc);
-	this->sb_hopper_op = make_sb_hopper_pump_discharge_menu(plc);
-	this->gdischarge_op = make_discharge_condition_menu(plc);
-	
-	this->grid = new GridDecorator();
+		this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
+		this->upper_door_op = make_upper_door_menu(plc);
+		this->ps_hopper_op = make_ps_hopper_pump_discharge_menu(plc);
+		this->sb_hopper_op = make_sb_hopper_pump_discharge_menu(plc);
+		this->gdischarge_op = make_discharge_condition_menu(plc);
 
-	this->device->push_confirmation_receiver(dashboard);
+		this->device->push_confirmation_receiver(dashboard);
+	}
 
 	{ // load decorators
-		this->push_decorator(new RainbowsDecorator(dashboard));
+		this->grid = new GridDecorator();
 
 #ifdef _DEBUG
 		this->push_decorator(this->grid);
 #else
 		this->grid->set_active_planet(this);
 #endif
+
+		this->push_decorator(new RainbowsDecorator(dashboard));
 	}
 }
 
@@ -958,7 +901,7 @@ void DischargesPage::load(CanvasCreateResourcesReason reason, float width, float
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
 		float gwidth = width / 64.0F;
-		float gheight = (height - vinset - vinset) / 36.0F;
+		float gheight = height / 36.0F;
 
 		this->grid->set_grid_width(gwidth);
 		this->grid->set_grid_height(gheight, vinset);
@@ -976,21 +919,30 @@ void DischargesPage::reflow(float width, float height) {
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		dashboard->reflow(width, height, gwidth, gheight, vinset);
+		dashboard->reflow(width, height, gwidth, gheight);
+	}
+}
+
+void DischargesPage::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+	auto dashboard = dynamic_cast<Rainbows*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		dashboard->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
 	}
 }
 
 bool DischargesPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
-		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
-		|| (dynamic_cast<HopperPumplet*>(g) != nullptr)
-		|| (dynamic_cast<Winchlet*>(g) != nullptr)
-		|| (dynamic_cast<Boltlet*>(g) != nullptr)
-		|| (dynamic_cast<HoldHooplet*>(g) != nullptr));
+	return ((this->device != nullptr)
+		&& ((dynamic_cast<GateValvelet*>(g) != nullptr)
+			|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
+			|| (dynamic_cast<HopperPumplet*>(g) != nullptr)
+			|| (dynamic_cast<Winchlet*>(g) != nullptr)
+			|| (dynamic_cast<Boltlet*>(g) != nullptr)
+			|| (dynamic_cast<HoldHooplet*>(g) != nullptr)));
 }
 
 bool DischargesPage::can_select_multiple() {
-	return true;
+	return (this->device != nullptr);
 }
 
 void DischargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

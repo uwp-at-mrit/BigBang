@@ -36,15 +36,15 @@ public:
 		return ((this->legend_value == nullptr) && (this->timestamps[this->slot_count - 1] == nullptr));
 	}
 
-	void update_legend(unsigned int precision, WarGrey::SCADA::TimeSeriesStyle& style, CanvasSolidColorBrush^ color = nullptr) {
-		Platform::String^ legend = this->name + ": ";
-		
-		legend += (this->legend_value == nullptr) ? speak("nodatum", "status") : flstring((*this->legend_value), precision);		
-		this->legend = make_text_layout(legend, style.legend_font);
+	void update_legend(unsigned int precision, WarGrey::SCADA::TimeSeriesStyle& style) {
+		Platform::String^ legend = this->name;
 
-		if (color != nullptr) {
-			this->color = color;
+		if (this->legend_value != nullptr) {
+			legend += ": ";
+			legend += flstring((*this->legend_value), precision);
 		}
+
+		this->legend = make_text_layout(legend, style.legend_font);
 	}
 
 public:
@@ -189,17 +189,15 @@ public:
 	}
 
 public:
-	long long virtual_iterator_slot;
-	long long iterator_index;
-	double selected_value;
-	float y_axis_selected;
-
-public:
 	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color;
 	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ close_color;
 	Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ legend;
 	Platform::String^ name;
 	bool hiden;
+
+public:
+	double selected_value;
+	float y_axis_selected;
 
 private:
 	long long** timestamps = nullptr;
@@ -211,6 +209,10 @@ private:
 	long long current_index;
 	long long virtual_history_slot;
 	long long history_last_index;
+
+private:
+	long long virtual_iterator_slot;
+	long long iterator_index;
 };
 
 /*************************************************************************************************/
@@ -255,10 +257,10 @@ CanvasSolidColorBrush^ WarGrey::SCADA::lookup_default_dark_color(unsigned int id
 /*************************************************************************************************/
 ITimeSerieslet::ITimeSerieslet(ITimeSeriesDataSource* datasrc
 	, double vmin, double vmax, TimeSeries& ts, unsigned int n, float width, float height
-	, unsigned int step, unsigned int precision, long long history_max)
+	, unsigned int step, unsigned int precision, long long history_span)
 	: IStatelet(TimeSeriesState::Realtime), width(std::fabsf(width)), height(height), precision(precision)
 	, data_source(datasrc), vmin(vmin), vmax(vmax), count(n), vertical_step((step == 0) ? 5U : step)
-	, realtime(ts), history(ts), history_max(history_max), selected_x(std::nanf("not exists")) {
+	, realtime(ts), history(ts), history_span(history_span), history_destination(0), selected_x(std::nanf("not exists")) {
 
 	if (this->height == 0.0F) {
 		this->height = this->width * 0.2718F;
@@ -300,8 +302,8 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 	{ // load exists data
 		TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
 		long long exists_earliest_s = this->next_loading_timepoint;
-		long long request_earliest_s = std::min(ts->start, now - this->history_max);
-		long long request_interval = this->history_max / this->realtime.step;
+		long long request_earliest_s = std::min(ts->start, now - this->history_span);
+		long long request_interval = this->history_span / this->realtime.step;
 		
 		if (exists_earliest_s > request_earliest_s) {
 			if ((this->data_source != nullptr) && this->data_source->ready() && (!this->data_source->loading())) {
@@ -320,11 +322,11 @@ void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
 		this->lines = new TimeSeriesLine[this->count];
 	}
 
-	if (slot_size > this->history_max * count) {
-		slot_size = this->history_max;
+	if (slot_size > this->history_span * count) {
+		slot_size = this->history_span;
 	}
 
-	this->lines[idx].reset_pool(this->history_max, count, DEFAULT_SLOT_SIZE);
+	this->lines[idx].reset_pool(this->history_span, count, DEFAULT_SLOT_SIZE);
 	this->lines[idx].name = name;
 	this->lines[idx].close_color = nullptr;
 	this->lines[idx].hiden = false;
@@ -364,7 +366,8 @@ void ITimeSerieslet::apply_style(TimeSeriesStyle& style) {
 	this->update_horizontal_axes(style);
 
 	for (unsigned int idx = 0; idx < this->count; idx++) {
-		this->lines[idx].update_legend(this->precision + 1U, style, style.lookup_color(idx));
+		this->lines[idx].color = style.lookup_color(idx);
+		this->lines[idx].update_legend(this->precision + 1U, style);
 	}
 }
 
@@ -447,7 +450,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	 * thus, it is error-prone to close the line with x-axis.
 	 * just in case, `style.lines_thickness * 2.0F` is the adjustment.
 	 */
-	float y_axis_0 = y_axis_max + haxes_box.Height + style.lines_thickness * 2.0F;
+	float y_axis_0 = y_axis_max + haxes_box.Height + style.lines_thickness;
 	
 	ds->FillRectangle(x, y, this->width, this->height, Colours::Background);
 	ds->DrawCachedGeometry(this->vaxes, x, y, style.vaxes_color);
@@ -513,7 +516,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 				} else {
 					if (((last_x - this_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_max == last_x)) {
 						if (line->close_color == nullptr) {
-							ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color, style.lines_thickness, style.lines_style);
+							ds->DrawLine(last_x, last_y, this_x, this_y, line->color, style.lines_thickness, style.lines_style);
 						} else {
 							if (area == nullptr) {
 								area = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
@@ -615,32 +618,38 @@ void ITimeSerieslet::hide_line(unsigned int idx, bool yes_no) {
 	this->lines[idx].hiden = yes_no;
 }
 
-void ITimeSerieslet::set_value(unsigned int idx, double v) {
-	long long now = current_milliseconds();
+void ITimeSerieslet::set_value(unsigned int idx, double v, long long timepoint_ms) {
+	long long timepoint = ((timepoint_ms <= 0) ? current_milliseconds() : timepoint_ms);
+	long long boundary = ((this->history_destination <= 0) ? timepoint : (this->history_destination * 1000LL));
 	TimeSeriesStyle style = this->get_style();
 	
-	this->lines[idx].push_back_value(now, v);
-	this->lines[idx].update_legend(this->precision + 1U, style);
-	
-	this->notify_updated();
+	if ((timepoint <= boundary) && (timepoint >= (boundary - this->history_span * 1000LL))) {
+		this->lines[idx].push_back_value(timepoint, v);
+		this->lines[idx].update_legend(this->precision + 1U, style);
+
+		this->notify_updated();
+	}
 }
 
-void ITimeSerieslet::set_values(double* values, bool persistent) {
-	long long now = current_milliseconds();
+void ITimeSerieslet::set_values(double* values, bool persistent, long long timepoint_ms) {
+	long long timepoint = ((timepoint_ms <= 0) ? current_milliseconds() : timepoint_ms);
+	long long boundary = ((this->history_destination <= 0) ? timepoint : (this->history_destination * 1000LL));
 	TimeSeriesStyle style = this->get_style();
 
-	for (unsigned int idx = 0; idx < this->count; idx++) {
-		this->lines[idx].push_back_value(now, values[idx]);
-		this->lines[idx].update_legend(this->precision + 1U, style);
-	}
-
-	if (persistent) {
-		if ((this->data_source != nullptr) && this->data_source->ready()) {
-			this->data_source->save(now, values, this->count);
+	if ((timepoint <= boundary) && (timepoint >= (boundary - this->history_span * 1000LL))) {
+		for (unsigned int idx = 0; idx < this->count; idx++) {
+			this->lines[idx].push_back_value(timepoint, values[idx]);
+			this->lines[idx].update_legend(this->precision + 1U, style);
 		}
+
+		if (persistent) {
+			if ((this->data_source != nullptr) && this->data_source->ready()) {
+				this->data_source->save(timepoint, values, this->count);
+			}
+		}
+
+		this->notify_updated();
 	}
-	
-	this->notify_updated();
 }
 
 void ITimeSerieslet::on_datum_values(long long timepoint, double* values, unsigned int n) {
@@ -663,16 +672,17 @@ void ITimeSerieslet::on_tap(float x, float y) {
 }
 
 bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
+	long long boundary = ((this->history_destination <= 0) ? current_seconds() : this->history_destination);
 	bool handled = true;
 
 	switch (key) {
 	case VirtualKey::Left: {
 		this->history.start -= (this->history.span >> 3);
-		this->history.start = std::max(this->history.start, current_seconds() - this->history_max);
+		this->history.start = std::max(this->history.start, boundary - this->history_span);
 	}; break;
 	case VirtualKey::Right: {
 		this->history.start += (this->history.span >> 3);
-		this->history.start = std::min(this->history.start, current_seconds());
+		this->history.start = std::min(this->history.start, boundary);
 	}; break;
 	case VirtualKey::Add: {
 		this->history.span = this->history.span >> 1;
@@ -682,8 +692,8 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 		this->history.span = this->history.span << 1;
 		this->history.span = std::min(this->history.span, day_span_s);
 	}; break;
-	case VirtualKey::PageUp: this->history.start = current_seconds() - this->history_max; break;
-	case VirtualKey::PageDown: this->history.start = current_seconds(); break;
+	case VirtualKey::PageUp: this->history.start = boundary - this->history_span; break;
+	case VirtualKey::PageDown: this->history.start = boundary; break;
 	case VirtualKey::Escape: this->history = this->realtime; break;
 	default: handled = false; break;
 	}

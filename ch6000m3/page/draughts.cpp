@@ -47,7 +47,7 @@ private enum class DL : unsigned int {
 /*************************************************************************************************/
 private class Draughts final : public PLCConfirmation {
 public:
-	Draughts(DraughtsPage* master, ShipDecorator* ship) : master(master), decorator(ship) {
+	Draughts(DraughtsPage* master, ShipDecorator* ship, bool timemachine) : master(master), decorator(ship), timemachine(timemachine) {
 		Syslog* logger = make_system_logger(default_logging_level, "EarthWorkHistory");
 
 		this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Daily);
@@ -65,14 +65,15 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		DI_hopper_doors_checks_button(this->hdchecks[BottomDoorCommand::OpenDoorCheck], BottomDoorCommand::OpenDoorCheck, DB205);
 		DI_hopper_doors_checks_button(this->hdchecks[BottomDoorCommand::CloseDoorCheck], BottomDoorCommand::CloseDoorCheck, DB205);
 	}
 
-	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
+
 		this->dimensions[DL::Overflow]->set_value(this->overflowpipe->get_value(), GraphletAnchor::CC);
 		this->dimensions[DL::NetWeight]->set_value(DBD(DB2, vessal_netweight), GraphletAnchor::RC);
 		this->dimensions[DL::AverageDraft]->set_value(DBD(DB2, average_draught), GraphletAnchor::LC);
@@ -94,7 +95,7 @@ public:
 		this->dimensions[DL::psSternHeight]->set_value(DBD(DB2, ps_stern_hopper_height));
 		this->dimensions[DL::sbSternHeight]->set_value(DBD(DB2, sb_stern_hopper_height));
 
-		{ // set timeseries in batch
+		{ // set timeserieslet in batch 
 			double values[_N(EWTS)];
 
 			this->set_cylinder(EWTS::HopperHeight, values, DBD(DB2, average_hopper_height));
@@ -103,11 +104,11 @@ public:
 			this->set_cylinder(EWTS::EarthWork, values, DBD(DB2, earthwork_value));
 			this->set_cylinder(EWTS::Capacity, values, DBD(DB2, vessel_value));
 
-			this->timeseries->set_values(values);
+			this->timeseries->set_values(values, true, timepoint_ms);
 		}
 	}
 
-	void on_forat(const uint8* DB20, size_t count, Syslog* logger) override {
+	void on_forat(long long timepoint_ms, const uint8* DB20, size_t count, Syslog* logger) override {
 		float target_height = DBD(DB20, overflow_pipe_target_height);
 
 		this->overflowpipe->set_target_height(target_height, (target_height == 0.0F));
@@ -142,7 +143,7 @@ public:
 		this->load_buttons(this->hdchecks, BottomDoorCommand::OpenDoorCheck, BottomDoorCommand::CloseDoorCheck);
 
 		{ // load timeseries
-			float lines_height = ship_y * 0.618F;
+			float lines_height = ship_y * 0.72F;
 			TimeSeriesStyle style;
 
 			style.lookup_color = earthwork_line_color_dictionary;
@@ -168,7 +169,7 @@ public:
 		tsy *= 0.5F;
 
 		this->reflow_cylinders(this->cylinders, EWTS::EarthWork, EWTS::Displacement, gapsize);
-		this->master->move_to(this->timeseries, tsx, tsy, GraphletAnchor::CC);
+		this->master->move_to(this->timeseries, tsx, tsy, GraphletAnchor::CC, 0.0F, -vinset);
 		this->master->move_to(this->overflowpipe, ofpx, ofpy, GraphletAnchor::CC, 0.0F, -gapsize);
 		this->master->move_to(this->dimensions[DL::Overflow], this->overflowpipe, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 		
@@ -197,25 +198,30 @@ public:
 			this->reflow_dimension(this->dimensions, DL::sbSternHeight, 0.0F, 1.0F, GraphletAnchor::LB, yoff, -yoff);
 
 			this->reflow_dimension(this->dimensions, DL::SternDraft, 0.0F, 0.5F, GraphletAnchor::RC, -xoff);
-
-			this->master->move_to(this->dimensions[DL::AverageDraft],
-				this->cylabels[EWTS::HopperHeight], GraphletAnchor::CT,
-				GraphletAnchor::LB, vinset, -vinset);
 		}
 
 		{ // reflow buttons and relevant dimensions
-			this->master->move_to(this->hdchecks[BottomDoorCommand::OpenDoorCheck],
-				this->cydimensions[EWTS::HopperHeight], GraphletAnchor::CB,
-				GraphletAnchor::RT, -vinset, vinset);
+			float shty, shby, lblty, dimby, tcx;
 
+			this->decorator->fill_ship_anchor(0.0F, 0.0F, nullptr, &shty, true);
+			this->decorator->fill_ship_anchor(0.0F, 1.0F, nullptr, &shby, true);
+
+			this->master->fill_graphlet_location(this->cylabels[EWTS::HopperHeight], &tcx, &lblty, GraphletAnchor::CB);
+			this->master->move_to(this->dimensions[DL::NetWeight], tcx, (shty + lblty) * 0.5F, GraphletAnchor::RC, -vinset);
+			this->master->move_to(this->dimensions[DL::AverageDraft],
+				this->dimensions[DL::NetWeight], GraphletAnchor::RC,
+				GraphletAnchor::LC, vinset * 2.0F);
+
+			this->master->fill_graphlet_location(this->cydimensions[EWTS::HopperHeight], &tcx, &dimby, GraphletAnchor::CB);
+			this->master->move_to(this->hdchecks[BottomDoorCommand::OpenDoorCheck], tcx, (dimby + shby) * 0.5F, GraphletAnchor::RC, -vinset);
 			this->master->move_to(this->hdchecks[BottomDoorCommand::CloseDoorCheck],
-				this->cydimensions[EWTS::HopperHeight], GraphletAnchor::CB,
-				GraphletAnchor::LT, +vinset, vinset);
-			
-			this->master->move_to(this->dimensions[DL::NetWeight],
-				this->cylabels[EWTS::HopperHeight], GraphletAnchor::CT,
-				GraphletAnchor::RB, -vinset, -vinset);
+				this->hdchecks[BottomDoorCommand::OpenDoorCheck], GraphletAnchor::RC,
+				GraphletAnchor::LC, vinset * 2.0F);
 		}
+	}
+
+	void on_timemachine_startover(long long departure_ms, long long destination_ms) {
+
 	}
 
 private:
@@ -324,19 +330,22 @@ private:
 	DraughtsPage* master;
 	ShipDecorator* decorator;
 	EarthWorkDataSource* datasource; // managed by the ITimeSerieslet
+	bool timemachine;
 };
 
 /*************************************************************************************************/
 DraughtsPage::DraughtsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	ShipDecorator* decorator = new ShipDecorator();
-	Draughts* dashboard = new Draughts(this, decorator);
+	Draughts* dashboard = new Draughts(this, decorator, this->device == nullptr);
 
 	this->dashboard = dashboard;
-	this->overflow_op = make_overflow_menu(plc);
-
-	this->device->push_confirmation_receiver(dashboard);
-
 	this->push_decorator(decorator);
+
+	if (this->device != nullptr) {
+		this->overflow_op = make_overflow_menu(plc);
+
+		this->device->push_confirmation_receiver(dashboard);
+	}
 }
 
 DraughtsPage::~DraughtsPage() {
@@ -361,13 +370,30 @@ void DraughtsPage::reflow(float width, float height) {
 	}
 }
 
+void DraughtsPage::on_startover(long long departure_ms, long long destination_ms) {
+	auto dashboard = dynamic_cast<Draughts*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		dashboard->on_timemachine_startover(departure_ms, destination_ms);
+	}
+}
+
+void DraughtsPage::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+	auto dashboard = dynamic_cast<Draughts*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		dashboard->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
+	}
+}
+
 bool DraughtsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<OverflowPipelet*>(g) != nullptr)
-		|| button_enabled(g));
+	return ((this->device != nullptr)
+		&& ((dynamic_cast<OverflowPipelet*>(g) != nullptr)
+			|| button_enabled(g)));
 }
 
 bool DraughtsPage::can_select_multiple() {
-	return true;
+	return true; // Timeseries is available on timemachine.
 }
 
 bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
@@ -390,20 +416,22 @@ bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 			handled = true;
 		}; break;
 		case VirtualKey::Enter: {
-			auto editor = dynamic_cast<Credit<Dimensionlet, DL>*>(this->get_focus_graphlet());
+			if (this->device != nullptr) {
+				auto editor = dynamic_cast<Credit<Dimensionlet, DL>*>(this->get_focus_graphlet());
 
-			if (editor != nullptr) {
-				float ofp_height = float(editor->get_input_number());
+				if (editor != nullptr) {
+					float ofp_height = float(editor->get_input_number());
 
-				if (ofp_height >= 0.0F) {
-					this->device->send_setting(overflow_pipe_target_height, ofp_height);
-					this->device->send_command(overflow_pipe_move_to_target_height);
+					if (ofp_height >= 0.0F) {
+						this->device->send_setting(overflow_pipe_target_height, ofp_height);
+						this->device->send_command(overflow_pipe_move_to_target_height);
+					}
+
+					this->hide_virtual_keyboard();
+					this->set_caret_owner(nullptr);
+
+					handled = true;
 				}
-
-				this->hide_virtual_keyboard();
-				this->set_caret_owner(nullptr);
-
-				handled = true;
 			}
 		}; break;
 		}
@@ -420,7 +448,7 @@ void DraughtsPage::on_focus(IGraphlet* g, bool yes) {
 		if (timeseries != nullptr) {
 			this->show_virtual_keyboard(ScreenKeyboard::Affinepad, g, GraphletAnchor::CB, 0.0F, 4.0F);
 		} else if (editor != nullptr) {
-			if (this->device->authorized()) {
+			if ((this->device != nullptr) && this->device->authorized()) {
 				this->show_virtual_keyboard(ScreenKeyboard::Numpad);
 			} else {
 				this->set_caret_owner(nullptr);

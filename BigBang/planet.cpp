@@ -227,7 +227,7 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 
 /*************************************************************************************************/
 Planet::Planet(Platform::String^ name, unsigned int initial_mode)
-	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
+	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0), background(nullptr) {
 	this->numpad = new Numpad(this);
 	this->arrowpad = new Affinepad(this);
 	this->bucketpad = new Bucketpad(this);
@@ -508,6 +508,11 @@ void Planet::move(IGraphlet* g, float x, float y) {
 
 		this->notify_graphlet_updated(nullptr);
     }
+}
+
+void Planet::set_background(ICanvasBrush^ background, float corner_radius) {
+	this->background = background;
+	this->background_corner_radius = corner_radius;
 }
 
 void Planet::cellophane(IGraphlet* g, float opacity) {
@@ -1160,6 +1165,12 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 	float dsY = abs(min(0.0F, transformY));
 	float dsWidth = Width - max(transformX, 0.0F);
 	float dsHeight = Height - max(transformY, 0.0F);
+
+	if (this->background != nullptr) {
+		ds->FillRoundedRectangle(0.0F, 0.0F, Width, Height,
+			this->background_corner_radius, this->background_corner_radius,
+			this->background);
+	}
 
 	for (IPlanetDecorator* decorator : this->decorators) {
 #ifdef _DEBUG

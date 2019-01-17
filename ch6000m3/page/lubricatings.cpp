@@ -67,7 +67,7 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
 		unsigned int unit_feedback = (this->ps ? ps_hopper_lubricating_unit_feedback : sb_hopper_lubricating_unit_feedback);
 		unsigned int master_feedback = (this->ps ? ps_hopper_gearbox_master_feedback : sb_hopper_gearbox_master_feedback);
 		unsigned int spare_feedback = (this->ps ? ps_hopper_gearbox_spare_feedback : sb_hopper_gearbox_spare_feedback);
@@ -101,7 +101,7 @@ public:
 	void load(float x, float width, float height, float vinset) {
 		Turtle<GearboxLubricator>* turtle = new Turtle<GearboxLubricator>(vinset, vinset);
 		float region_width = width * 0.618F;
-		float region_height = (height - vinset * 5.0F) * 0.5F;
+		float region_height = (height - vinset * 3.0F) * 0.5F;
 		float corner_radius = 8.0F;
 		float pump_radius = vinset * 1.618F;
 		
@@ -139,10 +139,10 @@ public:
 		float cx = x + width * 0.5F;
 		float gapsize = vinset * 0.5F;
 
-		this->master->move_to(this->unit, cx, vinset * 2.0F, GraphletAnchor::CT);
-		this->master->move_to(this->gearbox, cx, height - vinset * 2.0F, GraphletAnchor::CB);
+		this->master->move_to(this->unit, cx, vinset, GraphletAnchor::CT);
+		this->master->move_to(this->gearbox, cx, height - vinset, GraphletAnchor::CB);
 		this->master->move_to(this->units[this->ps], this->unit, 0.5F, 0.24F, GraphletAnchor::CC);
-		this->master->move_to(this->station, this->gearbox, 0.5F, 0.42F, GraphletAnchor::CC);
+		this->master->move_to(this->station, this->gearbox, 0.5F, 0.46F, GraphletAnchor::CC);
 
 		this->station->map_credit_graphlet(this->pumps[GearboxLubricator::Master], GraphletAnchor::CC);
 		this->station->map_credit_graphlet(this->pumps[GearboxLubricator::Spare], GraphletAnchor::CC);
@@ -238,11 +238,13 @@ LubricatingsPage::LubricatingsPage(PLCMaster* plc) : Planet(__MODULE__), device(
 	this->ps_dashboard = ps_dashboard;
 	this->sb_dashboard = sb_dashboard;
 
-	this->unit_op = make_lubrication_unit_menu(plc);
-	this->gearbox_op = make_gearbox_lubricator_menu(plc);
-	
-	this->device->push_confirmation_receiver(ps_dashboard);
-	this->device->push_confirmation_receiver(sb_dashboard);
+	if (this->device != nullptr) {
+		this->unit_op = make_lubrication_unit_menu(plc);
+		this->gearbox_op = make_gearbox_lubricator_menu(plc);
+
+		this->device->push_confirmation_receiver(ps_dashboard);
+		this->device->push_confirmation_receiver(sb_dashboard);
+	}
 }
 
 LubricatingsPage::~LubricatingsPage() {
@@ -278,14 +280,19 @@ void LubricatingsPage::reflow(float width, float height) {
 	}
 }
 
-bool LubricatingsPage::can_select(IGraphlet* g) {
-	bool okay = false;
+void LubricatingsPage::on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
+	auto ps_dashboard = dynamic_cast<Lubricatings*>(this->ps_dashboard);
+	auto sb_dashboard = dynamic_cast<Lubricatings*>(this->sb_dashboard);
 
-	if (this->device->get_mode() != PLCMasterMode::User) {
-		okay = ((dynamic_cast<HydraulicPumplet*>(g) != nullptr));
+	if ((ps_dashboard != nullptr) && (sb_dashboard != nullptr)) {
+		ps_dashboard->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
+		sb_dashboard->on_all_signals(timepoint_ms, addr0, addrn, data, size, logger);
 	}
+}
 
-	return okay;
+bool LubricatingsPage::can_select(IGraphlet* g) {
+	return (((this->device != nullptr) && (this->device->authorized())
+		&& (dynamic_cast<HydraulicPumplet*>(g) != nullptr)));
 }
 
 void LubricatingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

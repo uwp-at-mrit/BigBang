@@ -66,7 +66,8 @@ namespace WarGrey::SCADA {
 		virtual void remove(IGraphlet* g) = 0;
 		virtual void erase() = 0;
 
-	public:
+	public: // TODO: find a way to get the real background of the underneath controller such as the `Flyout` instance.
+		virtual void set_background(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color, float corner_radius = 0.0F) = 0;
 		virtual void cellophane(IGraphlet* g, float opacity) = 0;
 
 	public:
@@ -239,6 +240,7 @@ namespace WarGrey::SCADA {
 		void size_cache_invalid();
 
 	public:
+		virtual void set_background(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color, float corner_radius = 0.0F) override;
 		void cellophane(IGraphlet* g, float opacity) override;
 
 	public:
@@ -315,6 +317,10 @@ namespace WarGrey::SCADA {
         float graphlets_bottom;
         float preferred_min_width;
         float preferred_min_height;
+
+	private:
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background;
+		float background_corner_radius;
 
     private:
         std::list<WarGrey::SCADA::IPlanetDecorator*> decorators;

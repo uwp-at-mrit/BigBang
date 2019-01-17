@@ -1,17 +1,22 @@
 #pragma once
 
+#include "timemachine.hpp"
 #include "planet.hpp"
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	private class DraughtsPage : public WarGrey::SCADA::Planet {
+	private class DraughtsPage : public WarGrey::SCADA::Planet, public WarGrey::SCADA::ITimeMachineListener {
 	public:
 		virtual ~DraughtsPage() noexcept;
-		DraughtsPage(WarGrey::SCADA::PLCMaster* plc);
+		DraughtsPage(WarGrey::SCADA::PLCMaster* plc = nullptr);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
+
+	public:
+		void on_startover(long long departure_ms, long long destination_ms) override;
+		void on_timestream(long long time_ms, size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override;
 		
 	public:
 		bool can_select(IGraphlet* g) override;
