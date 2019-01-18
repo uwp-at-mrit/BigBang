@@ -108,6 +108,7 @@ namespace WarGrey::SCADA {
 	public:
 		void set_history_interval(long long open_s, long long close_s, bool force = false);
 		void scroll_to_timepoint(long long timepoint_ms, float visual_boundary_proportion_of_series_interval = 1.5F);
+		void no_selected();
 
 	protected:
 		void set_value(unsigned int idx, double value, long long timepoint_ms = 0LL);
@@ -116,6 +117,7 @@ namespace WarGrey::SCADA {
 	protected:
 		void prepare_style(WarGrey::SCADA::TimeSeriesState state, WarGrey::SCADA::TimeSeriesStyle& style) override;
 		void apply_style(WarGrey::SCADA::TimeSeriesStyle& style) override;
+		void on_state_changed(WarGrey::SCADA::TimeSeriesState state) override;
 
 	protected:
 		void construct_line(unsigned int idx, Platform::String^ name);

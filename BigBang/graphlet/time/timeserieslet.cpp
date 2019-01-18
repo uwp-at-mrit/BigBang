@@ -373,12 +373,17 @@ void ITimeSerieslet::apply_style(TimeSeriesStyle& style) {
 	}
 }
 
+void ITimeSerieslet::on_state_changed(TimeSeriesState state) {
+	this->no_selected();
+}
+
 void ITimeSerieslet::update_time_series(long long next_start) {
 	if (this->history.start == this->realtime.start) {
 		this->history.start = next_start;
 	}
 
 	this->realtime.start = next_start;
+	this->no_selected();
 	this->update_horizontal_axes(this->get_style());
 }
 
@@ -562,7 +567,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	ds->DrawCachedGeometry(this->vmarks, x, y, style.vaxes_color);
 	ds->DrawCachedGeometry(this->hmarks, x, y, style.haxes_color);
 
-	if ((history) && (x_axis_selected > x)) {
+	if (x_axis_selected > x) {
 		float last_xoff = 0.0F;
 		float last_y = y + this->height;
 		
@@ -705,6 +710,14 @@ void ITimeSerieslet::scroll_to_timepoint(long long timepoint_ms, float proportio
 		this->update_time_series(timepoint + inset + axes_interval - this->realtime.span);
 		this->notify_updated();
 	}
+
+	if (this->get_state() == TimeSeriesState::Realtime) {
+		this->selected_x = float(timepoint - this->realtime.start) / float(this->realtime.span) * this->width;
+	}
+}
+
+void ITimeSerieslet::no_selected() {
+	this->selected_x = std::nanf("reset");
 }
 
 void ITimeSerieslet::check_visual_window(long long timepoint) {
@@ -757,7 +770,7 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 	}
 
 	if (handled) {
-		this->selected_x = std::nanf("reset");
+		this->no_selected();
 		this->update_horizontal_axes(this->get_style());
 	}
 
