@@ -31,7 +31,7 @@ CanvasSolidColorBrush^ WarGrey::SCADA::earthwork_line_color_dictionary(unsigned 
 
 private class EarthWorkCursor : public IEarthWorkCursor {
 public:
-	EarthWorkCursor(ITimeSeriesDataReceiver* receiver, long long open_s, long long close_s) : receiver(receiver) {
+	EarthWorkCursor(ITimeSeriesDataReceiver* receiver, long long open_s, long long close_s) : receiver(receiver), open_s(open_s) {
 		if (open_s < close_s) {
 			this->open_timepoint = open_s * 1000LL;
 			this->close_timepoint = close_s * 1000LL;
@@ -53,12 +53,12 @@ public:
 			this->tempdata[_I(EWTS::Loading)] = ework.loading;
 			this->tempdata[_I(EWTS::Displacement)] = ework.displacement;
 
-			this->receiver->on_datum_values(ts, tempdata, _N(EWTS));
+			this->receiver->on_datum_values(this->open_s, ts, tempdata, _N(EWTS));
 
 			this->count++;
 		}
 
-		return (asc ? (ts <= close_timepoint) : (ts >= open_timepoint));
+		return (asc ? (ts <= this->close_timepoint) : (ts >= this->open_timepoint));
 	}
 
 public:
@@ -69,6 +69,7 @@ private:
 	ITimeSeriesDataReceiver* receiver;
 	long long open_timepoint;
 	long long close_timepoint;
+	long long open_s;
 };
 
 static int earthwork_busy_handler(void* args, int count) {
@@ -81,7 +82,7 @@ EarthWorkDataSource::EarthWorkDataSource(Syslog* logger, RotationPeriod period, 
 	: RotativeSQLite3("earthwork", logger, period, period_count), open_timepoint(0LL) {}
 
 EarthWorkDataSource::~EarthWorkDataSource() {
-	this->watcher.cancel();
+	this->cancel();
 
 	if (this->dbc != nullptr) {
 		delete this->dbc;
@@ -94,6 +95,12 @@ bool EarthWorkDataSource::ready() {
 
 bool EarthWorkDataSource::loading() {
 	return (this->open_timepoint > 0LL);
+}
+
+void EarthWorkDataSource::cancel() {
+	if (this->loading()) {
+		this->watcher.cancel();
+	}
 }
 
 void EarthWorkDataSource::on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc, WarGrey::SCADA::SQLite3* dbc, long long timepoint) {

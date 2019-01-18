@@ -7,10 +7,7 @@
 #include "sqlite3/rotation.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class EWTS {
-		EarthWork, Capacity, HopperHeight, Loading, Displacement,
-		_ 
-	};
+	private enum class EWTS { EarthWork, Capacity, HopperHeight, Loading, Displacement, _ };
 
 	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ earthwork_line_color_dictionary(unsigned int index);
 
@@ -25,6 +22,9 @@ namespace WarGrey::SCADA {
 	public:
 		bool ready() override;
 		bool loading() override;
+		void cancel() override;
+
+	public:
 		void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long close_s) override;
 		void save(long long timepoint, double* values, unsigned int n) override;
 

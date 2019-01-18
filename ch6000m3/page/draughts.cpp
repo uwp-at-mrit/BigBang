@@ -47,7 +47,8 @@ private enum class DL : unsigned int {
 /*************************************************************************************************/
 private class Draughts final : public PLCConfirmation {
 public:
-	Draughts(DraughtsPage* master, ShipDecorator* ship, bool timemachine) : master(master), decorator(ship), timemachine(timemachine) {
+	Draughts(DraughtsPage* master, ShipDecorator* ship, bool timemachine) : master(master), decorator(ship)
+		, timemachine(timemachine), departure(0LL), destination(0LL) {
 		Syslog* logger = make_system_logger(default_logging_level, "EarthWorkHistory");
 
 		this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Daily);
@@ -95,7 +96,7 @@ public:
 		this->dimensions[DL::psSternHeight]->set_value(DBD(DB2, ps_stern_hopper_height));
 		this->dimensions[DL::sbSternHeight]->set_value(DBD(DB2, sb_stern_hopper_height));
 
-		{ // set timeserieslet in batch 
+		if (!this->timemachine) {
 			double values[_N(EWTS)];
 
 			this->set_cylinder(EWTS::HopperHeight, values, DBD(DB2, average_hopper_height));
@@ -105,6 +106,8 @@ public:
 			this->set_cylinder(EWTS::Capacity, values, DBD(DB2, vessel_value));
 
 			this->timeseries->set_values(values, true, timepoint_ms);
+		} else {
+			this->timeseries->scroll_to_timepoint(timepoint_ms);
 		}
 	}
 
@@ -120,6 +123,17 @@ public:
 	}
 
 public:
+	void on_timemachine_startover(long long departure_ms, long long destination_ms) {
+		if (this->timeseries != nullptr) {
+			this->timeseries->set_history_interval(departure_ms / 1000LL, destination_ms / 1000LL + 1LL);
+			this->departure = 0LL;
+			this->destination = 0LL;
+		} else {
+			this->departure = departure_ms;
+			this->destination = destination_ms;
+		}
+	}
+
 	void load(float width, float height, float vinset) {
 		float ship_y, ship_height, cylinder_height, lines_width;
 		
@@ -145,11 +159,20 @@ public:
 		{ // load timeseries
 			float lines_height = ship_y * 0.72F;
 			TimeSeriesStyle style;
+			TimeSeries ts = make_hour_series(8U, 8U);
 
 			style.lookup_color = earthwork_line_color_dictionary;
 
+			if (this->timemachine) {
+				ts = make_hour_series(4U, 8U);
+			}
+
 			this->timeseries = this->master->insert_one(new TimeSerieslet<EWTS>(__MODULE__, this->datasource,
-				timeseries_range, make_hour_series(8U, 8U), lines_width, lines_height, 5U, 1U));
+				timeseries_range, ts, lines_width, lines_height, 5U, 1U));
+
+			if (this->timemachine && (this->departure != 0LL)) {
+				this->on_timemachine_startover(this->departure, this->destination);
+			}
 
 			this->timeseries->set_style(style);
 			this->timeseries->close_line(EWTS::EarthWork, 0.75);
@@ -218,10 +241,6 @@ public:
 				this->hdchecks[BottomDoorCommand::OpenDoorCheck], GraphletAnchor::RC,
 				GraphletAnchor::LC, vinset * 2.0F);
 		}
-	}
-
-	void on_timemachine_startover(long long departure_ms, long long destination_ms) {
-
 	}
 
 private:
@@ -330,6 +349,10 @@ private:
 	DraughtsPage* master;
 	ShipDecorator* decorator;
 	EarthWorkDataSource* datasource; // managed by the ITimeSerieslet
+
+private:
+	long long departure;
+	long long destination;
 	bool timemachine;
 };
 

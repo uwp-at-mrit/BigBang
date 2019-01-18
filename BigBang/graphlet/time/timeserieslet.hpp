@@ -59,7 +59,7 @@ namespace WarGrey::SCADA {
 	private class ITimeSeriesDataReceiver abstract {
 	public:
 		virtual void begin_maniplation_sequence() {}
-		virtual void on_datum_values(long long timepoint, double* values, unsigned int n) = 0;
+		virtual void on_datum_values(long long open_s, long long timepoint_ms, double* values, unsigned int n) = 0;
 		virtual void end_maniplation_sequence() {}
 
 	public:
@@ -70,6 +70,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual bool ready() = 0;
 		virtual bool loading() = 0;
+		virtual void cancel() = 0;
 
 	public:
 		virtual void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long close_s) = 0;
@@ -101,8 +102,12 @@ namespace WarGrey::SCADA {
 		void own_caret(bool yes) override;
 
 	public:
-		void on_datum_values(long long timepoint, double* values, unsigned int n) override;
+		void on_datum_values(long long open_s, long long timepoint_ms, double* values, unsigned int n) override;
 		void on_maniplation_complete(long long open_s, long long close_s) override;
+
+	public:
+		void set_history_interval(long long open_s, long long close_s, bool force = false);
+		void scroll_to_timepoint(long long timepoint_ms, float visual_boundary_proportion_of_series_interval = 1.5F);
 
 	protected:
 		void set_value(unsigned int idx, double value, long long timepoint_ms = 0LL);
@@ -118,6 +123,7 @@ namespace WarGrey::SCADA {
 		void hide_line(unsigned int idx, bool yes_no);
 
 	private:
+		void check_visual_window(long long timepoint);
 		void update_time_series(long long next_start);
 		void update_vertical_axes(WarGrey::SCADA::TimeSeriesStyle& style);
 		void update_horizontal_axes(WarGrey::SCADA::TimeSeriesStyle& style);
@@ -149,7 +155,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::ITimeSeriesDataSource* data_source;
-		long long next_loading_timepoint;
+		long long loading_timepoint;
 	};
 
 	template<typename Name>

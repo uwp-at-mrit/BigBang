@@ -19,12 +19,18 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static const long long DEFAULT_SLOT_SIZE = 4096LL;
+static const unsigned int DEFAULT_COUNT_RATE = 5;
 
 static CanvasSolidColorBrush^ lines_default_border_color = Colours::make(0xBBBBBB);
 static CanvasTextFormat^ lines_default_font = make_bold_text_format(12.0F);
 static CanvasTextFormat^ lines_default_legend_font = make_bold_text_format(14.0F);
 
 /*************************************************************************************************/
+private struct tsdouble {
+	long long timepoint;
+	double value;
+};
+
 private class WarGrey::SCADA::TimeSeriesLine {
 public:
 	~TimeSeriesLine() noexcept {
@@ -33,15 +39,15 @@ public:
 
 public:
 	bool empty() {
-		return ((this->legend_value == nullptr) && (this->timestamps[this->slot_count - 1] == nullptr));
+		return ((this->legend_flonum == nullptr) && (this->flonums[this->slot_count - 1] == nullptr));
 	}
 
 	void update_legend(unsigned int precision, WarGrey::SCADA::TimeSeriesStyle& style) {
 		Platform::String^ legend = this->name;
 
-		if (this->legend_value != nullptr) {
+		if (this->legend_flonum != nullptr) {
 			legend += ": ";
-			legend += flstring((*this->legend_value), precision);
+			legend += flstring(this->legend_flonum->value, precision);
 		}
 
 		this->legend = make_text_layout(legend, style.legend_font);
@@ -65,7 +71,7 @@ public:
 		}
 	}
 
-	bool cursor_step_backward(long long* timestamp, double* value) {
+	bool cursor_step_backward(tsdouble* flonum) {
 		bool has_value = false;
 
 		if ((this->virtual_iterator_slot > this->virtual_history_slot)
@@ -73,8 +79,7 @@ public:
 				&& (this->iterator_index >= this->history_last_index))) {
 			long long iterator_slot = this->virtual_iterator_slot % this->slot_count;
 		
-			(*timestamp) = this->timestamps[iterator_slot][this->iterator_index];
-			(*value) = this->values[iterator_slot][this->iterator_index];
+			(*flonum) = this->flonums[iterator_slot][this->iterator_index];
 
 			if (this->iterator_index > 0) {
 				this->iterator_index -= 1;
@@ -94,13 +99,13 @@ public:
 
 		if (this->history_last_index > 0) {
 			if (this->history_last_index == this->slot_size) {
-				if (this->timestamps[current_slot] == nullptr) {
+				if (this->flonums[current_slot] == nullptr) {
 					this->bzero_slot(current_slot);
 				}
 			}
 
-			this->timestamps[current_slot][this->history_last_index - 1] = timestamp;
-			this->values[current_slot][this->history_last_index - 1] = value;
+			this->flonums[current_slot][this->history_last_index - 1].timepoint = timestamp;
+			this->flonums[current_slot][this->history_last_index - 1].value = value;
 
 			this->history_last_index -= 1;
 
@@ -115,15 +120,15 @@ public:
 		long long current_slot = this->virtual_current_slot % this->slot_count;
 
 		if (this->current_index == 0) {
-			if (this->timestamps[current_slot] == nullptr) {
+			if (this->flonums[current_slot] == nullptr) {
 				this->bzero_slot(current_slot);
 			}
 		}
 
-		this->timestamps[current_slot][this->current_index] = timestamp;
-		this->values[current_slot][this->current_index] = value;
+		this->flonums[current_slot][this->current_index].timepoint = timestamp;
+		this->flonums[current_slot][this->current_index].value = value;
 
-		this->legend_value = &this->values[current_slot][this->current_index];
+		this->legend_flonum = &this->flonums[current_slot][this->current_index];
 
 		if (this->current_index < (this->slot_size - 1)) {
 			this->current_index += 1;
@@ -139,11 +144,11 @@ public:
 	}
 
 public:
-	void reset_pool(long long history_s, long long count_per_second, long long slot_size) {
-		long long total = history_s * count_per_second;
+	void reset_pool(long long history_s, long long count_rate, long long slot_size) {
+		long long total = history_s * count_rate;
 		long long slot_count = total / slot_size;
 		
-		this->legend_value = nullptr;
+		this->legend_flonum = nullptr;
 		this->clear_pool();
 
 		/** NOTE
@@ -155,8 +160,7 @@ public:
 		this->slot_count = slot_count + 1;
 		this->slot_size = slot_size;
 
-		this->timestamps = new long long*[this->slot_count];
-		this->values = new double*[this->slot_count];
+		this->flonums = new tsdouble*[this->slot_count];
 
 		this->virtual_current_slot = 0;
 		this->current_index = 0;
@@ -165,27 +169,27 @@ public:
 		this->history_last_index = this->slot_size;
 
 		for (unsigned int idx = 0; idx < this->slot_count; idx++) {
-			this->timestamps[idx] = nullptr;
+			this->flonums[idx] = nullptr;
 		}
 	}
 
 	void clear_pool() {
-		if (this->timestamps != nullptr) {
+		this->legend_flonum = nullptr;
+
+		if (this->flonums != nullptr) {
 			for (int idx = 0; idx < this->slot_count; idx++) {
-				delete[] this->timestamps[idx];
-				delete[] this->values[idx];
+				if (this->flonums[idx] != nullptr) {
+					delete[] this->flonums[idx];
+				}
 			}
 
-			delete[] this->timestamps;
-			delete[] this->values;
+			delete[] this->flonums;
 		}
 	}
 
 	void bzero_slot(long long slot) {
 		// `bzero()` is not necessary;
-
-		this->timestamps[slot] = new long long[this->slot_size];
-		this->values[slot] = new double[this->slot_size];
+		this->flonums[slot] = new tsdouble[this->slot_size];
 	}
 
 public:
@@ -200,9 +204,8 @@ public:
 	float y_axis_selected;
 
 private:
-	long long** timestamps = nullptr;
-	double** values = nullptr;
-	double* legend_value = nullptr;
+	tsdouble** flonums = nullptr;
+	tsdouble* legend_flonum = nullptr;
 	long long slot_count = 0;
 	long long slot_size = 0;
 	long long virtual_current_slot;
@@ -276,38 +279,34 @@ ITimeSerieslet::ITimeSerieslet(ITimeSeriesDataSource* datasrc
 	}
 
 	this->enable_events(true);
-	this->next_loading_timepoint = current_seconds();
+	this->loading_timepoint = current_seconds();
 }
 
 ITimeSerieslet::~ITimeSerieslet() {
-	if (this->lines != nullptr) {
-		delete[] this->lines;
-	}
-
 	if (this->data_source != nullptr) {
 		this->data_source->destroy();
+	}
+	
+	if (this->lines != nullptr) {
+		delete[] this->lines;
 	}
 }
 
 void ITimeSerieslet::update(long long count, long long interval, long long uptime) {
-	long long axes_interval = this->realtime.span / this->realtime.step;
-	long long boundary = this->realtime.start + this->realtime.span - (axes_interval * 3 / 2);
-	long long now = current_seconds();
+	long long limit = this->history_destination;
 
-	if (now > boundary) {
-		this->update_time_series(this->realtime.start + axes_interval);
-		this->notify_updated();
+	if (this->history_destination <= 0) {
+		limit = current_seconds();
+		this->check_visual_window(limit);
 	}
 
 	{ // load exists data
-		TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
-		long long exists_earliest_s = this->next_loading_timepoint;
-		long long request_earliest_s = std::min(ts->start, now - this->history_span);
 		long long request_interval = this->history_span / this->realtime.step;
-		
-		if (exists_earliest_s > request_earliest_s) {
+		long long request_earliest_s = std::min(this->realtime.start, limit - this->history_span);
+
+		if (this->loading_timepoint > request_earliest_s) {
 			if ((this->data_source != nullptr) && this->data_source->ready() && (!this->data_source->loading())) {
-				this->data_source->load(this, exists_earliest_s, (exists_earliest_s - request_interval));
+				this->data_source->load(this, this->loading_timepoint, (this->loading_timepoint - request_interval));
 			}
 		}
 	}
@@ -316,20 +315,23 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
 	TimeSeriesStyle style = this->get_style();
 	long long slot_size = DEFAULT_SLOT_SIZE;
-	long long count = 5;
+	long long count_rate = DEFAULT_COUNT_RATE;
 
 	if (this->lines == nullptr) {
 		this->lines = new TimeSeriesLine[this->count];
 	}
 
-	if (slot_size > this->history_span * count) {
+	if (slot_size > this->history_span * count_rate) {
 		slot_size = this->history_span;
 	}
 
-	this->lines[idx].reset_pool(this->history_span, count, DEFAULT_SLOT_SIZE);
-	this->lines[idx].name = name;
-	this->lines[idx].close_color = nullptr;
-	this->lines[idx].hiden = false;
+	this->lines[idx].reset_pool(this->history_span, count_rate, slot_size);
+	
+	if (!name->Equals(this->lines[idx].name)) {
+		this->lines[idx].name = name;
+		this->lines[idx].close_color = nullptr;
+		this->lines[idx].hiden = false;
+	}
 }
 
 void ITimeSerieslet::fill_extent(float x, float y, float* w, float* h) {
@@ -372,7 +374,7 @@ void ITimeSerieslet::apply_style(TimeSeriesStyle& style) {
 }
 
 void ITimeSerieslet::update_time_series(long long next_start) {
-	if (this->history.start >= this->realtime.start) {
+	if (this->history.start == this->realtime.start) {
 		this->history.start = next_start;
 	}
 
@@ -481,8 +483,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 	for (unsigned idx = 0; idx < this->count; idx++) {
 		TimeSeriesLine* line = &this->lines[idx];
-		long long cursor_timestamp;
-		double cursor_value;
+		tsdouble cursor_flonum;
 
 		line->selected_value = std::nanf("not resolved");
 
@@ -496,9 +497,9 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 			line->cursor_end();
 
-			while (line->cursor_step_backward(&cursor_timestamp, &cursor_value)) {
-				double fx = (double(cursor_timestamp) - double(ts->start * 1000)) / double(ts->span * 1000);
-				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - cursor_value) / (this->vmax - this->vmin);
+			while (line->cursor_step_backward(&cursor_flonum)) {
+				double fx = (double(cursor_flonum.timepoint) - double(ts->start * 1000)) / double(ts->span * 1000);
+				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - cursor_flonum.value) / (this->vmax - this->vmin);
 				float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
 				float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
 				float this_diff = std::fabsf(this_x - x_axis_selected);
@@ -506,7 +507,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 				if (this_diff < minimum_diff) {
 					minimum_diff = this_diff;
 					line->y_axis_selected = this_y;
-					line->selected_value = cursor_value;
+					line->selected_value = cursor_flonum.value;
 				}
 
 				if (std::isnan(last_x) || (this_x > rx)) {
@@ -620,10 +621,10 @@ void ITimeSerieslet::hide_line(unsigned int idx, bool yes_no) {
 
 void ITimeSerieslet::set_value(unsigned int idx, double v, long long timepoint_ms) {
 	long long timepoint = ((timepoint_ms <= 0) ? current_milliseconds() : timepoint_ms);
-	long long boundary = ((this->history_destination <= 0) ? timepoint : (this->history_destination * 1000LL));
+	long long limit = ((this->history_destination <= 0) ? timepoint : (this->history_destination * 1000LL));
 	TimeSeriesStyle style = this->get_style();
 	
-	if ((timepoint <= boundary) && (timepoint >= (boundary - this->history_span * 1000LL))) {
+	if ((timepoint <= limit) && (timepoint >= (limit - this->history_span * 1000LL))) {
 		this->lines[idx].push_back_value(timepoint, v);
 		this->lines[idx].update_legend(this->precision + 1U, style);
 
@@ -633,10 +634,10 @@ void ITimeSerieslet::set_value(unsigned int idx, double v, long long timepoint_m
 
 void ITimeSerieslet::set_values(double* values, bool persistent, long long timepoint_ms) {
 	long long timepoint = ((timepoint_ms <= 0) ? current_milliseconds() : timepoint_ms);
-	long long boundary = ((this->history_destination <= 0) ? timepoint : (this->history_destination * 1000LL));
+	long long limit = ((this->history_destination <= 0) ? timepoint : (this->history_destination * 1000LL));
 	TimeSeriesStyle style = this->get_style();
 
-	if ((timepoint <= boundary) && (timepoint >= (boundary - this->history_span * 1000LL))) {
+	if ((timepoint <= limit) && (timepoint >= (limit - this->history_span * 1000LL))) {
 		for (unsigned int idx = 0; idx < this->count; idx++) {
 			this->lines[idx].push_back_value(timepoint, values[idx]);
 			this->lines[idx].update_legend(this->precision + 1U, style);
@@ -652,14 +653,68 @@ void ITimeSerieslet::set_values(double* values, bool persistent, long long timep
 	}
 }
 
-void ITimeSerieslet::on_datum_values(long long timepoint, double* values, unsigned int n) {
-	for (unsigned int idx = 0; idx < this->count; idx++) {
-		this->lines[idx].push_front_value(timepoint, values[idx]);
+void ITimeSerieslet::on_datum_values(long long open_s, long long timepoint_ms, double* values, unsigned int n) {
+	if (this->loading_timepoint == open_s) {
+		for (unsigned int idx = 0; idx < this->count; idx++) {
+			this->lines[idx].push_front_value(timepoint_ms, values[idx]);
+		}
 	}
 }
 
 void ITimeSerieslet::on_maniplation_complete(long long open_s, long long close_s) {
-	this->next_loading_timepoint = close_s;
+	if (this->loading_timepoint == open_s) {
+		this->loading_timepoint = close_s;
+	}
+}
+
+void ITimeSerieslet::set_history_interval(long long open_s, long long close_s, bool force) {
+	long long span = std::max(std::abs(open_s - close_s), this->realtime.span);
+	long long destination = std::max(open_s, close_s);
+
+	if (force || (this->history_destination != destination) || (this->history_span != span)) {
+		if (this->data_source != nullptr) {
+			this->data_source->cancel();
+		}
+
+		this->history_span = span;
+		this->history_destination = destination;
+
+		this->realtime.start = this->history_destination - this->realtime.span;
+		this->loading_timepoint = this->history_destination;
+		this->history = this->realtime;
+
+		this->update_horizontal_axes(this->get_style());
+
+		for (unsigned int idx = 0; idx < this->count; idx++) {
+			this->construct_line(idx, this->lines[idx].name);
+		}
+
+		this->notify_updated();
+	}
+}
+
+void ITimeSerieslet::scroll_to_timepoint(long long timepoint_ms, float proportion) {
+	long long axes_interval = this->realtime.span / this->realtime.step;
+	long long inset = (long long)(std::roundf(float(axes_interval) * proportion));
+	long long timepoint = timepoint_ms / 1000LL;
+
+	if (timepoint < this->realtime.start + inset) {
+		this->update_time_series(timepoint - inset);
+		this->notify_updated();
+	} else if (timepoint > (this->realtime.start + this->realtime.span - inset)) {
+		this->update_time_series(timepoint + inset + axes_interval - this->realtime.span);
+		this->notify_updated();
+	}
+}
+
+void ITimeSerieslet::check_visual_window(long long timepoint) {
+	long long axes_interval = this->realtime.span / this->realtime.step;
+	long long visual_boundary = this->realtime.start + this->realtime.span - (axes_interval * 3 / 2);
+
+	if (timepoint > visual_boundary) {
+		this->update_time_series(this->realtime.start + axes_interval);
+		this->notify_updated();
+	}
 }
 
 void ITimeSerieslet::own_caret(bool yes) {
@@ -672,17 +727,20 @@ void ITimeSerieslet::on_tap(float x, float y) {
 }
 
 bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
-	long long boundary = ((this->history_destination <= 0) ? current_seconds() : this->history_destination);
+	long long limit = ((this->history_destination <= 0) ? current_seconds() : this->history_destination);
+	long long interval = (this->history.span >> 3);
+	long long start_left_limit = limit - this->history_span;
+	long long start_right_limit = limit - interval;
 	bool handled = true;
 
 	switch (key) {
 	case VirtualKey::Left: {
-		this->history.start -= (this->history.span >> 3);
-		this->history.start = std::max(this->history.start, boundary - this->history_span);
+		this->history.start -= interval;
+		this->history.start = std::max(this->history.start, start_left_limit);
 	}; break;
 	case VirtualKey::Right: {
-		this->history.start += (this->history.span >> 3);
-		this->history.start = std::min(this->history.start, boundary);
+		this->history.start += interval;
+		this->history.start = std::min(this->history.start, start_right_limit);
 	}; break;
 	case VirtualKey::Add: {
 		this->history.span = this->history.span >> 1;
@@ -692,8 +750,8 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 		this->history.span = this->history.span << 1;
 		this->history.span = std::min(this->history.span, day_span_s);
 	}; break;
-	case VirtualKey::PageUp: this->history.start = boundary - this->history_span; break;
-	case VirtualKey::PageDown: this->history.start = boundary; break;
+	case VirtualKey::PageUp: this->history.start = start_left_limit; break;
+	case VirtualKey::PageDown: this->history.start = start_right_limit; break;
 	case VirtualKey::Escape: this->history = this->realtime; break;
 	default: handled = false; break;
 	}

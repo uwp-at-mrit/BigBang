@@ -24,7 +24,7 @@ using namespace Windows::Storage::Streams;
 
 /*************************************************************************************************/
 IMRMaster::IMRMaster(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
-	this->logger = ((sl == nullptr) ? make_silent_logger("Silent MRIT Client") : sl);
+	this->logger = ((sl == nullptr) ? make_silent_logger("Silent MRIT Master") : sl);
 	this->logger->reference();
 
 	this->push_confirmation_receiver(cf);

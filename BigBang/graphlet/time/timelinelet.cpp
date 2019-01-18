@@ -45,7 +45,7 @@ private:
 
 static inline void notify_timeline_state_changed(Timelinelet* self, ITimelineListener* observer) {
 	switch (self->get_state()) {
-	case TimelineState::Travel: observer->on_launch(self); break;
+	case TimelineState::Travel: observer->on_travel(self); break;
 	case TimelineState::Service: observer->on_service(self); break;
 	case TimelineState::Terminated: observer->on_terminate(self); break;
 	}

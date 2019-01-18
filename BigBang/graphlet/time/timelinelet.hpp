@@ -32,7 +32,7 @@ namespace WarGrey::SCADA {
 
 	private class ITimelineListener abstract {
 	public:
-		virtual void on_launch(WarGrey::SCADA::Timelinelet* master) {}
+		virtual void on_travel(WarGrey::SCADA::Timelinelet* master) {}
 		virtual void on_step(WarGrey::SCADA::Timelinelet* master) {}
 		virtual void on_service(WarGrey::SCADA::Timelinelet* master) {}
 		virtual void on_terminate(WarGrey::SCADA::Timelinelet* master) {}
