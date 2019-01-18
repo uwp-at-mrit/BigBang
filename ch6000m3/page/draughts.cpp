@@ -96,7 +96,7 @@ public:
 		this->dimensions[DL::psSternHeight]->set_value(DBD(DB2, ps_stern_hopper_height));
 		this->dimensions[DL::sbSternHeight]->set_value(DBD(DB2, sb_stern_hopper_height));
 
-		if (!this->timemachine) {
+		{ // set timeseries and cylinders
 			double values[_N(EWTS)];
 
 			this->set_cylinder(EWTS::HopperHeight, values, DBD(DB2, average_hopper_height));
@@ -105,9 +105,11 @@ public:
 			this->set_cylinder(EWTS::EarthWork, values, DBD(DB2, earthwork_value));
 			this->set_cylinder(EWTS::Capacity, values, DBD(DB2, vessel_value));
 
-			this->timeseries->set_values(values, true, timepoint_ms);
-		} else {
-			this->timeseries->scroll_to_timepoint(timepoint_ms);
+			if (!this->timemachine) {
+				this->timeseries->set_values(values, true, timepoint_ms);
+			} else {
+				this->timeseries->scroll_to_timepoint(timepoint_ms);
+			}
 		}
 	}
 

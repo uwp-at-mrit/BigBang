@@ -87,7 +87,8 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ speedx;
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ moment;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ moment_date;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ moment_time;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ timepoints;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ endpoint0;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ endpointn;

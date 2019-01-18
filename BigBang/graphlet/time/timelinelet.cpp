@@ -153,9 +153,11 @@ void Timelinelet::on_state_changed(TimelineState state) {
 
 void Timelinelet::on_value_changed(long long timepoint_ms) {
 	TimelineStyle style = this->get_style();
+	long long utc = timepoint_ms / 1000LL;
 
 	this->footprints.push_back(timepoint_ms);
-	this->moment = make_text_layout(make_daytimestamp_utc(timepoint_ms / 1000LL, true), style.font);
+	this->moment_date = make_text_layout(make_datestamp_utc(utc, true), style.font);
+	this->moment_time = make_text_layout(make_daytimestamp_utc(utc, true), style.font);
 }
 
 bool Timelinelet::can_change_range() {
@@ -247,13 +249,18 @@ void Timelinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	ds->FillGeometry(this->endpointn, rx, cy, style.stop_icon_color);
 	ds->DrawGeometry(this->endpoint0 /* it's not a typo */, rx, cy, style.line_color);
 
-	ds->FillGeometry(this->cursor, cursor_x, cy, style.cursor_color);
-	ds->DrawGeometry(this->cursor, cursor_x, cy, style.line_color);
+	{ // draw cursor
+		Rect tlbox = this->moment_time->LayoutBounds;
+		Rect dlbox = this->moment_date->LayoutBounds;
+		Rect tdbox = this->moment_time->DrawBounds;
+		Rect ddbox = this->moment_date->DrawBounds;
 
-	ds->DrawTextLayout(this->moment,
-		cursor_x - this->moment->LayoutBounds.Width * 0.5F,
-		y - this->moment->DrawBounds.Y,
-		style.label_color);
+		ds->FillGeometry(this->cursor, cursor_x, cy, style.cursor_color);
+		ds->DrawGeometry(this->cursor, cursor_x, cy, style.line_color);
+
+		ds->DrawTextLayout(this->moment_time, cursor_x - tlbox.Width * 0.5F, y - tdbox.Y, style.label_color);
+		ds->DrawTextLayout(this->moment_date, cursor_x - dlbox.Width * 0.5F, y + this->height - (ddbox.Y + ddbox.Height), style.label_color);
+	}
 
 	{ // draw icons
 		float tx = x + this->icon_radius;
