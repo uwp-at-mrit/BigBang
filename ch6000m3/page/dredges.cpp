@@ -55,7 +55,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 private enum class DS : unsigned int {
 	// pipeline
 	D003, D004, D011, D012, D013, D014, D015, D016,
-	LMOD, PS, SB, PSHP, SBHP,
+	LMOD, PS, SB, SBL, PSHP, SBHP,
 	
 	_,
 
@@ -115,6 +115,7 @@ public:
 		this->drag_lines_style = drag_default_lines_style();
 		this->drag_styles[0] = drag_default_style(default_ps_color);
 		this->drag_styles[1] = drag_default_style(default_sb_color);
+		this->drag_styles[2] = drag_default_style(default_sb_color);
 
 		this->drag_configs[0].trunnion_gapsize = ps_drag_trunnion_gapsize;
 		this->drag_configs[0].trunnion_length = ps_drag_trunnion_length;
@@ -139,6 +140,9 @@ public:
 		this->drag_configs[1].visor_degrees_max = drag_visor_degrees_max;
 		this->drag_configs[1].arm_degrees_min = drag_arm_degrees_min;
 		this->drag_configs[1].arm_degrees_max = drag_arm_degrees_max;
+
+		this->drag_configs[2] = this->drag_configs[1];
+		this->drag_configs[2].pipe_lengths[1] += sb_drag_pipe2_enlength;
 	}
 
 public:
@@ -424,6 +428,27 @@ protected:
 		}
 	}
 
+	void select_sb_drag(const uint8* db205) {
+		float sbs_alpha = (DI_long_sb_drag(db205) ? 0.0F : 1.0F);
+		float sbl_alpha = 1.0F - sbs_alpha;
+		
+
+		if (this->dragxys.find(DS::SB) != this->dragxys.end()) {
+			this->master->cellophane(this->dragxys[DS::SB], sbs_alpha);
+			this->master->cellophane(this->dragxys[DS::SBL], sbl_alpha);
+		}
+
+		if (this->dragxzes.find(DS::SB) != this->dragxzes.end()) {
+			this->master->cellophane(this->dragxzes[DS::SB], sbs_alpha);
+			this->master->cellophane(this->dragxzes[DS::SBL], sbl_alpha);
+		}
+
+		if (this->dragyzes.find(DS::SB) != this->dragyzes.end()) {
+			this->master->cellophane(this->dragyzes[DS::SB], sbs_alpha);
+			this->master->cellophane(this->dragyzes[DS::SBL], sbl_alpha);
+		}
+	}
+
 protected: // never delete these graphlets manually.
 	std::map<DS, Credit<Labellet, DS>*> labels;
 	std::map<DS, Credit<Compensatorlet, bool>*> compensators;
@@ -459,8 +484,8 @@ protected:
 
 protected:
 	DragLinesStyle drag_lines_style;
-	DragInfo drag_configs[2];
-	DragStyle drag_styles[2];
+	DragInfo drag_configs[3];
+	DragStyle drag_styles[3];
 
 protected:
 	DredgesPage* master;
@@ -481,7 +506,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
 		this->lengths[DS::Overflow]->set_value(this->overflowpipe->get_value(), GraphletAnchor::CC);
@@ -528,9 +553,12 @@ public:
 
 		this->set_drag_metrics(DS::PS, DS::PSVisor, DB2, DB203, this->drag_configs[0], this->ps_address);
 		this->set_drag_metrics(DS::SB, DS::SBVisor, DB2, DB203, this->drag_configs[1], this->sb_address);
+		this->set_drag_metrics(DS::SBL, DS::SBVisor, DB2, DB203, this->drag_configs[2], this->sb_address);
 	}
 
 	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+		select_sb_drag(DB205);
+		
 		DI_hopper_pumps(this->hpumps[DS::PSHP], this->hpumps[DS::PSHP], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
 		DI_hopper_pumps(this->hpumps[DS::SBHP], this->hpumps[DS::SBHP], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
@@ -712,9 +740,11 @@ public:
 		
 			this->load_overview_drag(this->dragxys, DS::PS, -over_drag_height, 0);
 			this->load_overview_drag(this->dragxys, DS::SB, +over_drag_height, 1);
+			this->load_overview_drag(this->dragxys, DS::SBL, +over_drag_height, 2);
 
 			this->load_sideview_drag(this->dragxzes, DS::PS, -side_drag_width, drag_depth_degrees_max, 0);
 			this->load_sideview_drag(this->dragxzes, DS::SB, +side_drag_width, drag_depth_degrees_max, 1);
+			this->load_sideview_drag(this->dragxzes, DS::SBL, +side_drag_width, drag_depth_degrees_max, 2);
 		}
 
 		{ // load buttons
@@ -751,7 +781,7 @@ public:
 			}
 
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
-			//this->station->map_credit_graphlet(this->labels[it->first], anchor, dx, dy);
+			this->station->map_credit_graphlet(this->labels[it->first], anchor, dx, dy);
 		}
 
 		this->station->map_credit_graphlet(this->progresses[DS::D003], GraphletAnchor::CT, 0.0F, ystep);
@@ -825,6 +855,9 @@ public:
 
 			this->master->move_to(this->dragxys[DS::SB], std::fmaxf(dfrx, wcrx), cy, GraphletAnchor::LB, vinset, vinset * 2.0F);
 			this->master->move_to(this->dragxzes[DS::SB], dhrx + vinset, height, GraphletAnchor::LB);
+
+			this->master->move_to(this->dragxys[DS::SBL], this->dragxys[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
+			this->master->move_to(this->dragxzes[DS::SBL], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
 
 			{ // reflow winches
 				float rx = width;
@@ -930,7 +963,7 @@ private:
 	template<class G, typename E>
 	void load_valves(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius, double degrees) {
 		for (E id = id0; id <= idn; id++) {
-			//this->load_label(ls, id.ToString(), id, Colours::Silver, this->station_font);
+			this->load_label(ls, id.ToString(), id, Colours::Silver, this->station_font);
 			gs[id] = this->master->insert_one(new G(radius, degrees), id);
 		}
 	}
@@ -1114,6 +1147,7 @@ public:
 			this->set_drag_metrics(DS::PS, DS::PSVisor, DB2, DB203, this->drag_configs[0], this->address);
 		} else {
 			this->set_drag_metrics(DS::SB, DS::SBVisor, DB2, DB203, this->drag_configs[1], this->address);
+			this->set_drag_metrics(DS::SBL, DS::SBVisor, DB2, DB203, this->drag_configs[2], this->address);
 		}
 	}
 
@@ -1143,6 +1177,8 @@ public:
 			DI_boolean_button(this->h_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_draghead_virtual_up_limited);
 			DI_boolean_button(this->h_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_draghead_virtual_out_limited);
 		} else {
+			select_sb_drag(DB205);
+
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbTrunnion], DB4, pump_F_feedback);
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbIntermediate], DB4, pump_G_feedback);
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbDragHead], DB4, pump_H_feedback);
@@ -1180,7 +1216,12 @@ public:
 
 		this->settings[DS::DesignDepth]->set_value(target_depth);
 		this->settings[DS::TolerantDepth]->set_value(tolerant_depth);
+
 		this->dragxzes[this->DS_side]->set_design_depth(target_depth, tolerant_depth);
+
+		if (this->DS_side == DS::SB) {
+			this->dragxzes[DS::SBL]->set_design_depth(target_depth, tolerant_depth);
+		}
 
 		this->settings[DS::DivingDepth]->set_value(DBD(DB20, draghead_diving_depth));
 		this->settings[DS::DivingCompensation]->set_value(DBD(DB20, compensator_diving_progress));
@@ -1199,6 +1240,11 @@ public:
 		
 		this->load_sideview_drag(this->dragxzes, this->DS_side, side_drag_width * this->sign, drag_depth_degrees_max, this->drag_idx);
 		this->load_overview_drag(this->dragxys, this->DS_side, over_drag_height * this->sign, this->drag_idx);
+
+		if (this->DS_side == DS::SB) {
+			this->load_sideview_drag(this->dragxzes, DS::SBL, side_drag_width * this->sign, drag_depth_degrees_max, this->drag_idx + 1);
+			this->load_overview_drag(this->dragxys, DS::SBL, over_drag_height * this->sign, this->drag_idx + 1);
+		}
 
 		this->load_label(this->labels, this->DS_side, this->caption_color, this->caption_font);
 		this->load_label(this->labels, DS::Overlook, this->caption_color, this->label_font);
@@ -1285,6 +1331,9 @@ public:
 			this->master->move_to(this->dragxys[DS::SB], cx, cy, GraphletAnchor::CC);
 			this->master->move_to(this->dragxzes[DS::SB], this->dragxys[DS::SB], GraphletAnchor::RT, GraphletAnchor::LT, vinset, vinset);
 			this->master->move_to(this->dragheads[DS::SBVisor], this->dragxys[DS::SB], GraphletAnchor::RB, GraphletAnchor::LC, vinset, vinset * 2.0F);
+
+			this->master->move_to(this->dragxys[DS::SBL], this->dragxys[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
+			this->master->move_to(this->dragxzes[DS::SBL], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
 
 			{ // reflow gantries and winches
 				auto gantry = this->gantries[DredgesPosition::sbIntermediate];
@@ -1666,12 +1715,15 @@ public:
 	}
 
 public:
-	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
+	void on_analog_input(long long timepoint_ms, const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->set_drag_metrics(DS::PS, DS::PSVisor, DB2, DB203, this->drag_configs[0], this->ps_address);
 		this->set_drag_metrics(DS::SB, DS::SBVisor, DB2, DB203, this->drag_configs[1], this->sb_address);
+		this->set_drag_metrics(DS::SBL, DS::SBVisor, DB2, DB203, this->drag_configs[2], this->sb_address);
 	}
 
 	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+		select_sb_drag(DB205);
+
 		DI_winch(this->winches[DredgesPosition::psTrunnion], DB4, winch_ps_trunnion_feedback, winch_ps_trunnion_limits, DB205, winch_ps_trunnion_details);
 		DI_winch(this->winches[DredgesPosition::psIntermediate], DB4, winch_ps_intermediate_feedback, winch_ps_intermediate_limits, DB205, winch_ps_intermediate_details);
 		DI_winch(this->winches[DredgesPosition::psDragHead], DB4, winch_ps_draghead_feedback, winch_ps_draghead_limits, DB205, winch_ps_draghead_details);
@@ -1684,6 +1736,7 @@ public:
 	void on_forat(long long timepoint_ms, const uint8* DB20, size_t count, Syslog* logger) override {
 		this->set_design_depth(DS::PS, DB20, dredging_target_depth, dredging_tolerant_depth);
 		this->set_design_depth(DS::SB, DB20, dredging_target_depth, dredging_tolerant_depth);
+		this->set_design_depth(DS::SBL, DB20, dredging_target_depth, dredging_tolerant_depth);
 	}
 
 public:
@@ -1705,9 +1758,11 @@ public:
 
 			this->load_backview_drag(this->dragyzes, DS::PS, -back_drag_height, drag_depth_degrees_max, 0);
 			this->load_backview_drag(this->dragyzes, DS::SB, +back_drag_height, drag_depth_degrees_max, 1);
+			this->load_backview_drag(this->dragyzes, DS::SBL, +back_drag_height, drag_depth_degrees_max, 2);
 
 			this->load_sideview_drag(this->dragxzes, DS::PS, -side_drag_width, drag_depth_degrees_max, 0);
 			this->load_sideview_drag(this->dragxzes, DS::SB, +side_drag_width, drag_depth_degrees_max, 1);
+			this->load_sideview_drag(this->dragxzes, DS::SBL, +side_drag_width, drag_depth_degrees_max, 2);
 		}
 	}
 
@@ -1740,6 +1795,9 @@ public:
 
 			this->master->move_to(this->dragyzes[DS::SB], width, height * 0.5F, GraphletAnchor::RC);
 			this->master->move_to(this->dragxzes[DS::SB], this->dragyzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::RT, -vinset);
+
+			this->master->move_to(this->dragyzes[DS::SBL], this->dragyzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
+			this->master->move_to(this->dragxzes[DS::SBL], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
 
 			this->master->move_to(this->winches[DredgesPosition::sbTrunnion], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LB, +inset);
 			this->master->move_to(this->winches[DredgesPosition::sbIntermediate], this->dragxzes[DS::SB], GraphletAnchor::CT, GraphletAnchor::CB);
