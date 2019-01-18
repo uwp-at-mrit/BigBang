@@ -246,4 +246,7 @@
   <data name="LandingDepth" xml:space="preserve">
     <value>Draghead Depth When Landing</value>
   </data>
+  <data name="DesignDepth" xml:space="preserve">
+    <value>Design Depth</value>
+  </data>
 </root>

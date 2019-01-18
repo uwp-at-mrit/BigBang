@@ -246,4 +246,7 @@
   <data name="LandingDepth" xml:space="preserve">
     <value>一键离地耙头深度设置</value>
   </data>
+  <data name="DesignDepth" xml:space="preserve">
+    <value>设计挖深设置</value>
+  </data>
 </root>

@@ -79,7 +79,7 @@ private enum class DS : unsigned int {
 	PSHPDP, SBHPDP, PSHPVP, SBHPVP,
 
 	// settings
-	DivingDepth, DivingCompensation, LandingDepth
+	DesignDepth, TolerantDepth, DivingDepth, DivingCompensation, LandingDepth
 };
 
 static ICanvasBrush^ winch_status_color = Colours::Background;
@@ -262,7 +262,6 @@ protected:
 		auto drag = new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], this->drag_lines_style, ws_width, max_depth_degrees);
 		
 		ds[id] = this->master->insert_one(drag, id);
-		drag->set_design_depth(dredging_target_depth, dredging_tolerance_depth);
 	}
 
 	template<class D, typename E>
@@ -270,7 +269,6 @@ protected:
 		auto drag = new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], this->drag_lines_style, length, max_depth_degrees);
 
 		ds[id] = this->master->insert_one(drag, id);
-		drag->set_design_depth(dredging_target_depth, dredging_tolerance_depth);
 	}
 
 	template<class B, typename E, typename L>
@@ -410,6 +408,19 @@ protected:
 			this->dragheads[vid]->set_depths(suction_depth, draghead.z);
 			this->dragheads[vid]->set_angles(visor_angle, this->dragxzes[id]->get_arm_degrees());
 			this->degrees[vid]->set_value(visor_angle, GraphletAnchor::LC);
+		}
+	}
+
+	void set_design_depth(DS id, const uint8* db20, unsigned int target_depth, unsigned int tolerant_depth) {
+		float target = DBD(db20, dredging_target_depth);
+		float tolerance = DBD(db20, dredging_tolerant_depth);
+
+		if (this->dragxzes.find(id) != this->dragxzes.end()) {
+			this->dragxzes[id]->set_design_depth(target, tolerance);
+		}
+
+		if (this->dragyzes.find(id) != this->dragyzes.end()) {
+			this->dragyzes[id]->set_design_depth(target, tolerance);
 		}
 	}
 
@@ -571,8 +582,10 @@ public:
 
 	void on_forat(long long timepoint_ms, const uint8* DB20, size_t count, Syslog* logger) override {
 		float overflow_target_height = DBD(DB20, overflow_pipe_target_height);
-
+		
 		this->overflowpipe->set_target_height(overflow_target_height, (overflow_target_height == 0.0F));
+		this->set_design_depth(DS::PS, DB20, dredging_target_depth, dredging_tolerant_depth);
+		this->set_design_depth(DS::SB, DB20, dredging_target_depth, dredging_tolerant_depth);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -1162,6 +1175,13 @@ public:
 	}
 
 	void on_forat(long long timepoint_ms, const uint8* DB20, size_t count, Syslog* logger) override {
+		float target_depth = DBD(DB20, dredging_target_depth);
+		float tolerant_depth = DBD(DB20, dredging_tolerant_depth);
+
+		this->settings[DS::DesignDepth]->set_value(target_depth);
+		this->settings[DS::TolerantDepth]->set_value(tolerant_depth);
+		this->dragxzes[this->DS_side]->set_design_depth(target_depth, tolerant_depth);
+
 		this->settings[DS::DivingDepth]->set_value(DBD(DB20, draghead_diving_depth));
 		this->settings[DS::DivingCompensation]->set_value(DBD(DB20, compensator_diving_progress));
 		this->settings[DS::LandingDepth]->set_value(DBD(DB20, draghead_landing_depth));
@@ -1187,6 +1207,8 @@ public:
 		this->load_dimension(this->lengths, DS::TildeMark, "meter");
 		this->load_dimension(this->speeds, DS::Speed, "knot");
 
+		this->load_setting(this->settings, this->labels, DS::DesignDepth, "meter", 50.0);
+		this->load_setting(this->settings, DS::TolerantDepth, "meter", 50.0);
 		this->load_setting(this->settings, this->labels, DS::DivingDepth, "meter", 50.0);
 		this->load_setting(this->settings, this->labels, DS::DivingCompensation, "centimeter", compensator_range * 100.0);
 		this->load_setting(this->settings, this->labels, DS::LandingDepth, "meter", 50.0);
@@ -1227,7 +1249,7 @@ public:
 		if (this->DS_side == DS::PS) {
 			this->master->move_to(this->dragxys[DS::PS], cx, cy, GraphletAnchor::CC);
 			this->master->move_to(this->dragxzes[DS::PS], this->dragxys[DS::PS], GraphletAnchor::LT, GraphletAnchor::RT, -vinset, vinset);
-			this->master->move_to(this->dragheads[DS::PSVisor], this->dragxys[DS::PS], GraphletAnchor::LB, GraphletAnchor::RC, -vinset, vinset * 1.5F);
+			this->master->move_to(this->dragheads[DS::PSVisor], this->dragxys[DS::PS], GraphletAnchor::LB, GraphletAnchor::RC, -vinset, vinset * 2.0F);
 
 			{ // reflow gantries and winches
 				auto gantry = this->gantries[DredgesPosition::psIntermediate];
@@ -1262,7 +1284,7 @@ public:
 		} else {
 			this->master->move_to(this->dragxys[DS::SB], cx, cy, GraphletAnchor::CC);
 			this->master->move_to(this->dragxzes[DS::SB], this->dragxys[DS::SB], GraphletAnchor::RT, GraphletAnchor::LT, vinset, vinset);
-			this->master->move_to(this->dragheads[DS::SBVisor], this->dragxys[DS::SB], GraphletAnchor::RB, GraphletAnchor::LC, vinset, vinset * 1.5F);
+			this->master->move_to(this->dragheads[DS::SBVisor], this->dragxys[DS::SB], GraphletAnchor::RB, GraphletAnchor::LC, vinset, vinset * 2.0F);
 
 			{ // reflow gantries and winches
 				auto gantry = this->gantries[DredgesPosition::sbIntermediate];
@@ -1306,7 +1328,7 @@ public:
 			DS asetting = DS::DivingCompensation;
 			float pf_xoff = vinset * 2.0F;
 
-			this->master->move_to(this->labels[this->DS_side], cx, vinset * 2.0F, GraphletAnchor::CC);
+			this->master->move_to(this->labels[this->DS_side], cx, vinset, GraphletAnchor::CC);
 			this->master->move_to(this->labels[DS::Overlook], this->dragxys[this->DS_side], GraphletAnchor::CT, GraphletAnchor::CB, 0.0, -vinset);
 			this->master->move_to(this->labels[DS::Sidelook], this->dragxzes[this->DS_side], 0.5F, this->labels[DS::Overlook], 0.5F, GraphletAnchor::CC);
 
@@ -1319,13 +1341,21 @@ public:
 				this->master->move_to(this->forces[DS::PSPF1], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB, +pf_xoff);
 				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::RT, GraphletAnchor::RB, -pf_xoff);
 
-				this->master->move_to(this->labels[asetting], this->dragxzes[DS::PS], 0.0F, this->dragheads[DS::PSVisor], 0.36F, GraphletAnchor::LC);
+				this->master->move_to(this->labels[DS::DesignDepth], this->dragxzes[DS::PS], GraphletAnchor::LB, GraphletAnchor::LT, vinset, vinset);
+				this->master->move_to(this->settings[DS::DesignDepth], this->labels[DS::DesignDepth], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+				this->master->move_to(this->settings[DS::TolerantDepth], this->settings[DS::DesignDepth], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+
+				this->master->move_to(this->labels[asetting], this->dragxzes[DS::PS], 0.0F, this->dragheads[DS::PSVisor], 0.42F, GraphletAnchor::LC);
 				this->master->move_to(this->settings[asetting], this->labels[asetting], GraphletAnchor::RC, GraphletAnchor::LC, +vinset);
 			} else {
 				this->reflow_draghead_metrics(DS::SBVisor, DS::SBDP); 
 				this->master->move_to(this->labels[DS::SBWC], this->compensators[DS::SBWC], GraphletAnchor::CT, GraphletAnchor::CB);
 				this->master->move_to(this->forces[DS::SBPF1], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB, -pf_xoff);
 				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LB, +pf_xoff);
+
+				this->master->move_to(this->settings[DS::TolerantDepth], this->dragxzes[DS::SB], GraphletAnchor::RB, GraphletAnchor::RT, -vinset, vinset);
+				this->master->move_to(this->settings[DS::DesignDepth], this->settings[DS::TolerantDepth], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
+				this->master->move_to(this->labels[DS::DesignDepth], this->settings[DS::DesignDepth], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
 
 				this->master->move_to(this->settings[asetting], this->dragxzes[DS::SB], 1.0F, this->dragheads[DS::SBVisor], 0.36F, GraphletAnchor::RC);
 				this->master->move_to(this->labels[asetting], this->settings[asetting], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
@@ -1412,6 +1442,9 @@ public:
 			float length = float(editor->get_input_number());
 
 			switch (editor->id) {
+			case DS::DesignDepth: plc->send_setting(dredging_target_depth, length); break;
+			case DS::TolerantDepth: plc->send_setting(dredging_tolerant_depth, length); break;
+
 			case DS::DivingDepth: plc->send_setting(draghead_diving_depth, length); break;
 			case DS::DivingCompensation: plc->send_setting(compensator_diving_progress, length); break;
 			case DS::LandingDepth: plc->send_setting(draghead_landing_depth, length); break;
@@ -1468,11 +1501,15 @@ private:
 	}
 
 	template<typename E>
-	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls
-		, E id, Platform::String^ unit, double maximum) {
+	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, double maximum) {
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionState::Input, this->setting_style, unit), id);
 		ds[id]->set_maximum(maximum);
+	}
 
+	template<typename E>
+	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls
+		, E id, Platform::String^ unit, double maximum) {
+		this->load_setting(ds, id, unit, maximum);
 		this->load_label(ls, id, Colours::Silver, this->label_font);
 	}
 
@@ -1642,6 +1679,11 @@ public:
 		DI_winch(this->winches[DredgesPosition::sbTrunnion], DB4, winch_sb_trunnion_feedback, winch_sb_trunnion_limits, DB205, winch_sb_trunnion_details);
 		DI_winch(this->winches[DredgesPosition::sbIntermediate], DB4, winch_sb_intermediate_feedback, winch_sb_intermediate_limits, DB205, winch_sb_intermediate_details);
 		DI_winch(this->winches[DredgesPosition::sbDragHead], DB4, winch_sb_draghead_feedback, winch_sb_draghead_limits, DB205, winch_sb_draghead_details);
+	}
+
+	void on_forat(long long timepoint_ms, const uint8* DB20, size_t count, Syslog* logger) override {
+		this->set_design_depth(DS::PS, DB20, dredging_target_depth, dredging_tolerant_depth);
+		this->set_design_depth(DS::SB, DB20, dredging_target_depth, dredging_tolerant_depth);
 	}
 
 public:

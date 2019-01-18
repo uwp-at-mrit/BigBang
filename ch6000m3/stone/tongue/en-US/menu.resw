@@ -250,13 +250,13 @@
     <value>SB Gantries</value>
   </data>
   <data name="HDoor12" xml:space="preserve">
-    <value>Hopper Door 1-2#</value>
+    <value>Hopper Door #1-#4</value>
   </data>
   <data name="HDoor35" xml:space="preserve">
-    <value>Hopper Door 3-5#</value>
+    <value>Hopper Door #5-#10</value>
   </data>
   <data name="HDoor67" xml:space="preserve">
-    <value>Hopper Door 6-7#</value>
+    <value>Hopper Door #11-#14</value>
   </data>
   <data name="HDoor17" xml:space="preserve">
     <value>All Hopper Doors</value>

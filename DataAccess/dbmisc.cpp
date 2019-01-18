@@ -1,7 +1,6 @@
 #include "dbmisc.hpp"
 #include "time.hpp"
 
-#include <cstdlib>
 #include <mutex>
 
 using namespace WarGrey::SCADA;
@@ -26,7 +25,7 @@ static inline uint32 urnd32() {
  */
 
 int64 WarGrey::SCADA::pk64_timestamp() {
-	static std::mutex lock;
+	static std::mutex clock;
 	static uint16 clock_seq = 0;
 
 	int64 version = 0b001;
@@ -34,10 +33,10 @@ int64 WarGrey::SCADA::pk64_timestamp() {
 	int64 ts32 = (now_us / 1000000) & 0xFFFFU;
 	int64 us20 = (now_us % 1000000);
 
-	lock.lock();
+	clock.lock();
 	int64 clock_seq8 = clock_seq;
 	clock_seq = (clock_seq + 1) & 0xFFU;
-	lock.unlock();
+	clock.unlock();
 
 	return (version << 60U) | (ts32 << 28U) | (us20 << 8U) | clock_seq8;
 }

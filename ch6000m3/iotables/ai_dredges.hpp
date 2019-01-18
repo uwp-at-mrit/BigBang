@@ -52,6 +52,9 @@ namespace WarGrey::SCADA {
 	static unsigned int sb_draghead_differential_pressure = 125U;
 
 	// DB20, DBD
+	static unsigned int dredging_target_depth = 166U;
+	static unsigned int dredging_tolerant_depth = 170U;
+
 	static unsigned int draghead_diving_depth = 190U;
 	static unsigned int draghead_landing_depth = 186U;
 	static unsigned int compensator_diving_progress = 198U;
