@@ -101,14 +101,14 @@ public:
 	void load(float x, float width, float height, float vinset) {
 		Turtle<GearboxLubricator>* turtle = new Turtle<GearboxLubricator>(vinset, vinset);
 		float region_width = width * 0.618F;
-		float region_height = (height - vinset * 3.0F) * 0.5F;
+		float region_height = (height - vinset * 6.0F /* 3x for the titlebar of the main window */) * 0.5F;
 		float corner_radius = 8.0F;
 		float pump_radius = vinset * 1.618F;
 		
-		turtle->move_down()->move_left(4);
-		turtle->move_down(4, GearboxLubricator::Master)->move_down(4);
-		turtle->move_right(4)->move_down()->jump_up()->move_right(4);
-		turtle->move_up(4, GearboxLubricator::Spare)->move_up(4)->move_left(4);
+		turtle->move_down()->move_left(3);
+		turtle->move_down(3, GearboxLubricator::Master)->move_down(3);
+		turtle->move_right(3)->move_down()->jump_up()->move_right(3);
+		turtle->move_up(3, GearboxLubricator::Spare)->move_up(3)->move_left(3);
 
 		this->unit = this->master->insert_one(new RoundedRectanglet(region_width, region_height, corner_radius, region_background));
 		this->gearbox = this->master->insert_one(new RoundedRectanglet(region_width, region_height, corner_radius, region_background));
@@ -143,6 +143,9 @@ public:
 		this->master->move_to(this->gearbox, cx, height - vinset, GraphletAnchor::CB);
 		this->master->move_to(this->units[this->ps], this->unit, 0.5F, 0.24F, GraphletAnchor::CC);
 		this->master->move_to(this->station, this->gearbox, 0.5F, 0.46F, GraphletAnchor::CC);
+
+		this->master->move_to(this->captions[LU::Unit], this->units[this->ps], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
+		this->master->move_to(this->captions[LU::Gearbox], this->station, GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 
 		this->station->map_credit_graphlet(this->pumps[GearboxLubricator::Master], GraphletAnchor::CC);
 		this->station->map_credit_graphlet(this->pumps[GearboxLubricator::Spare], GraphletAnchor::CC);
@@ -182,9 +185,6 @@ public:
 			this->master->move_to(this->alarms[id], this->boxes[id], GraphletAnchor::LC, GraphletAnchor::LC, vinset);
 			this->master->move_to(this->captions[id], this->alarms[id], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
 		}
-
-		this->master->move_to(this->captions[LU::Unit], this->units[this->ps], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -vinset);
-		this->master->move_to(this->captions[LU::Gearbox], this->station, GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -vinset);
 	}
 
 private:
