@@ -259,6 +259,10 @@ protected:
 	template<class D, typename E>
 	void load_overview_drag(std::map<E, Credit<D, E>*>& ds, E id, float length, unsigned int idx) {
 		ds[id] = this->master->insert_one(new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], length), id);
+
+		if (id == DS::SBL) {
+			this->master->cellophane(ds[id], 0.0F);
+		}
 	}
 
 	template<class D, typename E>
@@ -266,6 +270,10 @@ protected:
 		auto drag = new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], this->drag_lines_style, ws_width, max_depth_degrees);
 		
 		ds[id] = this->master->insert_one(drag, id);
+
+		if (id == DS::SBL) {
+			this->master->cellophane(ds[id], 0.0F);
+		}
 	}
 
 	template<class D, typename E>
@@ -273,6 +281,10 @@ protected:
 		auto drag = new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], this->drag_lines_style, length, max_depth_degrees);
 
 		ds[id] = this->master->insert_one(drag, id);
+
+		if (id == DS::SBL) {
+			this->master->cellophane(ds[id], 0.0F);
+		}
 	}
 
 	template<class B, typename E, typename L>
@@ -614,6 +626,7 @@ public:
 		this->overflowpipe->set_target_height(overflow_target_height, (overflow_target_height == 0.0F));
 		this->set_design_depth(DS::PS, DB20, dredging_target_depth, dredging_tolerant_depth);
 		this->set_design_depth(DS::SB, DB20, dredging_target_depth, dredging_tolerant_depth);
+		this->set_design_depth(DS::SBL, DB20, dredging_target_depth, dredging_tolerant_depth);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -856,8 +869,8 @@ public:
 			this->master->move_to(this->dragxys[DS::SB], std::fmaxf(dfrx, wcrx), cy, GraphletAnchor::LB, vinset, vinset * 2.0F);
 			this->master->move_to(this->dragxzes[DS::SB], dhrx + vinset, height, GraphletAnchor::LB);
 
-			this->master->move_to(this->dragxys[DS::SBL], this->dragxys[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
-			this->master->move_to(this->dragxzes[DS::SBL], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
+			this->master->move_to(this->dragxys[DS::SBL], this->dragxys[DS::SB], GraphletAnchor::CC, GraphletAnchor::CC);
+			this->master->move_to(this->dragxzes[DS::SBL], this->dragxzes[DS::SB], GraphletAnchor::CC, GraphletAnchor::CC);
 
 			{ // reflow winches
 				float rx = width;
@@ -1197,8 +1210,10 @@ public:
 
 			if (DI_long_sb_drag(DB205)) {
 				DI_gantry(this->gantries[DredgesPosition::sbDragHead], DB4, gantry_sb_long_draghead_limited, DB205, gantry_sb_draghead_details);
+				this->drag_use_buttons[DragUseCommand::LongDrag]->set_state(ButtonState::Executing);
 			} else {
 				DI_gantry(this->gantries[DredgesPosition::sbDragHead], DB4, gantry_sb_short_draghead_limited, DB205, gantry_sb_draghead_details);
+				this->drag_use_buttons[DragUseCommand::LongDrag]->set_state(ButtonState::Default);
 			}
 
 			DI_boolean_button(this->t_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_trunnion_virtual_up_limited);
@@ -1283,6 +1298,8 @@ public:
 			this->load_buttons(this->t_gantry_buttons, DredgesPosition::sbTrunnion, this->button_style, gvabtn_size, gvabtn_size);
 			this->load_buttons(this->i_gantry_buttons, DredgesPosition::sbIntermediate, this->button_style, gvabtn_size, gvabtn_size);
 			this->load_buttons(this->h_gantry_buttons, DredgesPosition::sbDragHead, this->button_style, gvabtn_size, gvabtn_size);
+			
+			this->load_button(this->drag_use_buttons, DragUseCommand::LongDrag, DragUseCommand::LongDrag);
 		}
 	}
 
@@ -1294,7 +1311,7 @@ public:
 
 		if (this->DS_side == DS::PS) {
 			this->master->move_to(this->dragxys[DS::PS], cx, cy, GraphletAnchor::CC);
-			this->master->move_to(this->dragxzes[DS::PS], this->dragxys[DS::PS], GraphletAnchor::LT, GraphletAnchor::RT, -vinset, vinset);
+			this->master->move_to(this->dragxzes[DS::PS], this->dragxys[DS::PS], GraphletAnchor::LT, GraphletAnchor::RT, -vinset);
 			this->master->move_to(this->dragheads[DS::PSVisor], this->dragxys[DS::PS], GraphletAnchor::LB, GraphletAnchor::RC, -vinset, vinset * 2.0F);
 
 			{ // reflow gantries and winches
@@ -1329,11 +1346,12 @@ public:
 			}
 		} else {
 			this->master->move_to(this->dragxys[DS::SB], cx, cy, GraphletAnchor::CC);
-			this->master->move_to(this->dragxzes[DS::SB], this->dragxys[DS::SB], GraphletAnchor::RT, GraphletAnchor::LT, vinset, vinset);
+			this->master->move_to(this->dragxzes[DS::SB], this->dragxys[DS::SB], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
 			this->master->move_to(this->dragheads[DS::SBVisor], this->dragxys[DS::SB], GraphletAnchor::RB, GraphletAnchor::LC, vinset, vinset * 2.0F);
 
-			this->master->move_to(this->dragxys[DS::SBL], this->dragxys[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
-			this->master->move_to(this->dragxzes[DS::SBL], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
+			this->master->move_to(this->dragxys[DS::SBL], this->dragxys[DS::SB], GraphletAnchor::CC, GraphletAnchor::CC);
+			this->master->move_to(this->dragxzes[DS::SBL], this->dragxzes[DS::SB], GraphletAnchor::CC, GraphletAnchor::CC);
+			this->master->move_to(this->drag_use_buttons[DragUseCommand::LongDrag], this->dragxys[DS::SB], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
 
 			{ // reflow gantries and winches
 				auto gantry = this->gantries[DredgesPosition::sbIntermediate];
@@ -1378,7 +1396,7 @@ public:
 			float pf_xoff = vinset * 2.0F;
 
 			this->master->move_to(this->labels[this->DS_side], cx, vinset, GraphletAnchor::CC);
-			this->master->move_to(this->labels[DS::Overlook], this->dragxys[this->DS_side], GraphletAnchor::CT, GraphletAnchor::CB, 0.0, -vinset);
+			this->master->move_to(this->labels[DS::Overlook], this->dragxys[this->DS_side], GraphletAnchor::CT, GraphletAnchor::CB, 0.0, -vinset * 2.0F);
 			this->master->move_to(this->labels[DS::Sidelook], this->dragxzes[this->DS_side], 0.5F, this->labels[DS::Overlook], 0.5F, GraphletAnchor::CC);
 
 			this->master->move_to(this->lengths[DS::TildeMark], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::RB, -vinset, -vinset);
@@ -1455,6 +1473,7 @@ public:
 		auto visor = dynamic_cast<DragHeadlet*>(g);
 		auto override_btn = dynamic_cast<Credit<Buttonlet, DredgesPosition>*>(g);
 		auto virtual_btn = dynamic_cast<GroupCredit<Buttonlet, DredgesPosition, GantryCommand>*>(g);
+		auto long_btn = dynamic_cast<Credit<Buttonlet, DragUseCommand>*>(g);
 
 		if (winch != nullptr) {
 			menu_popup(this->winch_op, g, local_x, local_y);
@@ -1468,6 +1487,8 @@ public:
 			this->master->get_plc_device()->send_command(DO_winch_override_command(override_btn->id));
 		} else if (virtual_btn != nullptr) {
 			this->master->get_plc_device()->send_command(DO_gantry_virtual_action_command(virtual_btn->gid, virtual_btn->id));
+		} else if (long_btn != nullptr) {
+			this->master->get_plc_device()->send_command(DO_use_long_sb_drag_command(long_btn->get_state() == ButtonState::Default));
 		}
 	}
 
@@ -1667,6 +1688,7 @@ private: // never delete these graphlets manually.
 	std::map<DredgesPosition, Credit<Dimensionlet, DredgesPosition>*> Blets;
 	std::map<DredgesPosition, Credit<Percentagelet, DredgesPosition>*> rc_speeds;
 	std::map<DredgesPosition, Credit<Buttonlet, DredgesPosition>*> buttons;
+	std::map<DragUseCommand, Credit<Buttonlet, DragUseCommand>*> drag_use_buttons;
 	std::map<GantryCommand, GroupCredit<Buttonlet, DredgesPosition, GantryCommand>*> t_gantry_buttons;
 	std::map<GantryCommand, GroupCredit<Buttonlet, DredgesPosition, GantryCommand>*> i_gantry_buttons;
 	std::map<GantryCommand, GroupCredit<Buttonlet, DredgesPosition, GantryCommand>*> h_gantry_buttons;
@@ -1796,8 +1818,8 @@ public:
 			this->master->move_to(this->dragyzes[DS::SB], width, height * 0.5F, GraphletAnchor::RC);
 			this->master->move_to(this->dragxzes[DS::SB], this->dragyzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::RT, -vinset);
 
-			this->master->move_to(this->dragyzes[DS::SBL], this->dragyzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
-			this->master->move_to(this->dragxzes[DS::SBL], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LT);
+			this->master->move_to(this->dragyzes[DS::SBL], this->dragyzes[DS::SB], GraphletAnchor::CC, GraphletAnchor::CC);
+			this->master->move_to(this->dragxzes[DS::SBL], this->dragxzes[DS::SB], GraphletAnchor::CC, GraphletAnchor::CC);
 
 			this->master->move_to(this->winches[DredgesPosition::sbTrunnion], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LB, +inset);
 			this->master->move_to(this->winches[DredgesPosition::sbIntermediate], this->dragxzes[DS::SB], GraphletAnchor::CT, GraphletAnchor::CB);

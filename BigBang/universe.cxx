@@ -74,7 +74,7 @@ static inline PlanetInfo* bind_planet_owership(IDisplay^ master, IPlanet* planet
 	return info;
 }
 
-static void construct_planet(IPlanet* planet, Syslog* logger, CanvasCreateResourcesReason reason, float width, float height) {
+static void construct_planet(IPlanet* planet, Platform::String^ type, Syslog* logger, CanvasCreateResourcesReason reason, float width, float height) {
 	planet->begin_update_sequence();
 
 	try {
@@ -83,7 +83,7 @@ static void construct_planet(IPlanet* planet, Syslog* logger, CanvasCreateResour
 		planet->reflow(width, height);
 		planet->notify_surface_ready();
 
-		logger->log_message(Log::Debug, L"planet[%s] is constructed in region[%f, %f]", planet->name()->Data(), width, height);
+		logger->log_message(Log::Debug, L"%s[%s] is constructed in region[%f, %f]", type->Data(), planet->name()->Data(), width, height);
 	} catch (Platform::Exception^ e) {
 		logger->log_message(Log::Critical, L"%s: constructing: %s", planet->name()->Data(), e->Message->Data());
 	}
@@ -99,13 +99,13 @@ static inline void reflow_planet(IPlanet* planet, float width, float height) {
 	}
 }
 
-static void draw_planet(CanvasDrawingSession^ ds, IPlanet* planet, float width, float height, Syslog* logger) {
+static void draw_planet(CanvasDrawingSession^ ds, Platform::String^ type, IPlanet* planet, float width, float height, Syslog* logger) {
 	planet->enter_shared_section();
 	
 	try {
 		planet->draw(ds, width, height);
 	} catch (Platform::Exception^ wte) {
-		logger->log_message(Log::Warning, L"%s: rendering: %s", planet->name()->Data(), wte->Message->Data());
+		logger->log_message(Log::Warning, L"%s[%s]: rendering: %s", type->Data(), planet->name()->Data(), wte->Message->Data());
 	}
 
 	planet->leave_shared_section();
@@ -704,11 +704,13 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 
 			if (this->head_planet != nullptr) {
 				IPlanet* child = this->head_planet;
+				float width = nwidth - this->hup_left_margin - this->hup_right_margin;
+				float height = nheight - this->hup_top_margin - this->hup_bottom_margin;
 
 				do {
 					PlanetInfo* info = PLANET_INFO(child);
 
-					reflow_planet(child, nwidth, nheight);
+					reflow_planet(child, width, height);
 					child = info->next;
 				} while (child != this->head_planet);
 			}
@@ -720,12 +722,12 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 	Size region = this->display->Size;
 	
 	this->get_logger()->log_message(Log::Debug, L"construct planets because of %s", args->Reason.ToString()->Data());
-	
-	this->construct(args->Reason);
 
 	if (this->headup_planet != nullptr) {
-		construct_planet(this->headup_planet, this->get_logger(), args->Reason, region.Width, region.Height);
+		construct_planet(this->headup_planet, "heads-up", this->get_logger(), args->Reason, region.Width, region.Height);
 	}
+
+	this->construct(args->Reason);
 
 	if (this->head_planet != nullptr) {
 		IPlanet* child = this->head_planet;
@@ -736,24 +738,25 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 		do {
 			PlanetInfo* info = PLANET_INFO(child);
 
-			construct_planet(child, this->get_logger(), args->Reason, width, height);
+			construct_planet(child, "planet", this->get_logger(), args->Reason, width, height);
 			child = info->next;
 		} while (child != this->head_planet);
-	}
 
-	if (this->universe_settings != nullptr) {
-		this->transfer_to(this->universe_settings->Values->Lookup(page_setting_key)->ToString());
-	}
 
-	if ((this->recent_planet == this->head_planet) && (this->recent_planet != nullptr)) {
-		this->notify_transfer(nullptr, this->recent_planet);
+		if (this->universe_settings != nullptr) {
+			this->transfer_to(this->universe_settings->Values->Lookup(page_setting_key)->ToString());
+		}
+
+		if ((this->recent_planet == this->head_planet) && (this->recent_planet != nullptr)) {
+			this->notify_transfer(nullptr, this->recent_planet);
+		}
 	}
 }
 
 void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args) {
 	CanvasDrawingSession^ ds = args->DrawingSession;
 	Size region = this->display->Size;
-	
+
 	// NOTE: only the heads-up planet, current planet and the one transferred from need to be drawn
 
 	this->enter_critical_section();
@@ -764,12 +767,12 @@ void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args)
 
 		if (this->from_planet == nullptr) {
 			if ((width == region.Width) && (height == region.Height)) {
-				draw_planet(ds, this->recent_planet, width, height, this->get_logger());
+				draw_planet(ds, "planet", this->recent_planet, width, height, this->get_logger());
 			} else {
 				float3x2 identity = ds->Transform;
 
 				ds->Transform = make_translation_matrix(this->hup_left_margin, this->hup_top_margin);
-				draw_planet(ds, this->recent_planet, width, height, this->get_logger());
+				draw_planet(ds, "planet", this->recent_planet, width, height, this->get_logger());
 				ds->Transform = identity;
 			}
 		} else {
@@ -779,17 +782,17 @@ void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args)
 			float3x2 identity = ds->Transform;
 
 			ds->Transform = make_translation_matrix(tx, ty);
-			draw_planet(ds, this->from_planet, width, height, this->get_logger());
+			draw_planet(ds, "planet", this->from_planet, width, height, this->get_logger());
 
 			ds->Transform = make_translation_matrix(tx + deltaX, ty);
-			draw_planet(ds, this->recent_planet, width, height, this->get_logger());
+			draw_planet(ds, "planet", this->recent_planet, width, height, this->get_logger());
 
 			ds->Transform = identity;
 		}
 	}
 
 	if (this->headup_planet != nullptr) {
-		draw_planet(ds, this->headup_planet, region.Width, region.Height, this->get_logger());
+		draw_planet(ds, "heads-up", this->headup_planet, region.Width, region.Height, this->get_logger());
 	}
 
 	this->leave_critical_section();
@@ -952,7 +955,7 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 
 				args->Handled = handled;
 			} else {
-				if ((this->figures.size() == 2) || MENUED(args->KeyModifiers)) {
+				if ((this->figures.size() == 3) || MENUED(args->KeyModifiers)) {
 					this->on_translating_x();
 					this->figure_x0 = std::nanf("swipe");
 				}
@@ -1116,12 +1119,12 @@ CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
 		float3x2 identity = ds->Transform;
 
 		ds->Transform = make_translation_matrix(this->hup_left_margin, this->hup_top_margin);
-		draw_planet(ds, this->recent_planet, width, height, this->get_logger());
+		draw_planet(ds, "planet", this->recent_planet, width, height, this->get_logger());
 		ds->Transform = identity;
 	}
 
 	if (this->headup_planet != nullptr) {
-		draw_planet(ds, this->headup_planet, region.Width, region.Height, this->get_logger());
+		draw_planet(ds, "heads-up", this->headup_planet, region.Width, region.Height, this->get_logger());
 	}
 
 	return snapshot;

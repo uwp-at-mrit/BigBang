@@ -137,7 +137,7 @@ public:
 public:
 	void construct(Platform::String^ name, Size region) {
 		Platform::String^ localhost = system_ipv4_address();
-		PLCMaster* device = new PLCMaster(make_system_logger(default_logging_level, name + ": PLC"), plc_master_suicide_timeout);
+		PLCMaster* device = new PLCMaster(make_system_logger(default_plc_master_logging_level, name + ": PLC"), plc_master_suicide_timeout);
 		IUniverseNavigator* navigator = new ThumbnailNavigator(default_logging_level, name, region.Width / region.Height, 160.0F);
 		HeadsUpPlanet* heads_up = new HeadsUpPlanet(device);
 

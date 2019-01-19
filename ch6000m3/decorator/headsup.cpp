@@ -30,7 +30,7 @@ protected:
 };
 
 /*************************************************************************************************/
-HeadsUpPlanet::HeadsUpPlanet(PLCMaster* plc) : IHeadUpPlanet(__MODULE__), device(plc) {
+HeadsUpPlanet::HeadsUpPlanet(PLCMaster* plc) : IHeadUpPlanet(__MODULE__), device(plc), statusbar(nullptr) {
 	this->push_decorator(new HeadsUpDecorator());
 }
 

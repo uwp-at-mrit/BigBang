@@ -438,4 +438,7 @@
   <data name="FlushCondition" xml:space="preserve">
     <value>冲水工况</value>
   </data>
+  <data name="LongDrag" xml:space="preserve">
+    <value>使用长耙</value>
+  </data>
 </root>

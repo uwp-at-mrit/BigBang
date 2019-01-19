@@ -175,3 +175,7 @@ uint16 WarGrey::SCADA::DO_gantry_virtual_action_command(DredgesPosition gid, Gan
 
 	return index;
 }
+
+uint16 WarGrey::SCADA::DO_use_long_sb_drag_command(bool yes) {
+	return (yes ? 599U : 600U);
+}

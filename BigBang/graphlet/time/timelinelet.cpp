@@ -175,20 +175,22 @@ void Timelinelet::on_range_changed(long long time0, long long timen) {
 
 void Timelinelet::on_tap(float x, float y) {
 	TimelineState state = this->get_state();
-	float trx = this->icon_radius * 2.0F;
-	float slx = trx + this->endpoint_radius * 2.0F;
-	float srx = slx + trx;
-	float xlx = this->width - trx;
+	float travle_rx = this->icon_radius * 2.0F;
+	float terminate_lx = travle_rx + this->endpoint_radius * 2.0F;
+	float terminate_rx = terminate_lx + travle_rx;
+	float speedx_lx = this->width - travle_rx;
+	float tl_lx = this->timeline_lx - this->endpoint_radius;
+	float tl_rx = this->timeline_rx + this->endpoint_radius;
 	bool handled = true;
 
-	if (x <= trx) {
+	if (x <= travle_rx) {
 		this->set_state((state == TimelineState::Travel) ? TimelineState::Service : TimelineState::Travel);
-	} else if ((x >= slx) && (x <= srx)) {
+	} else if ((x >= terminate_lx) && (x <= terminate_rx)) {
 		this->set_state(TimelineState::Terminated);
-	} else if (x >= xlx) {
+	} else if (x >= speedx_lx) {
 		this->shift_speed();
-	} else if ((x >= this->timeline_lx) && (x <= this->timeline_rx) && (state != TimelineState::Terminated)) {
-		float percentage = (x - this->timeline_lx) / (this->timeline_rx - this->timeline_lx);
+	} else if ((x >= tl_lx) && (x <= tl_rx) && (state != TimelineState::Terminated)) {
+		float percentage = std::max(std::min((x - this->timeline_lx) / (this->timeline_rx - this->timeline_lx), 1.0F), 0.0F);
 		long long this_timepoint = ((long long)(std::roundf(float(this->vmax - this->vmin) * percentage))) + this->vmin;
 
 		for (auto observer : this->obsevers) {

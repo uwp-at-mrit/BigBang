@@ -12,6 +12,7 @@ namespace WarGrey::SCADA {
 	private enum class WaveCompensatorAction { Charge, Discharge, Stop, _ };
 	private enum class DragVisorAction { Up, Down, Stop, _ };
 
+	private enum class DragUseCommand { LongDrag, _ };
 	private enum class SuctionCommand { Inflate, Deflate, _ };
 	private enum class DragVisorCommand { CResistance, _ };
 	private enum class GantryCommand { VirtualUp, VirtualOut, _ };
@@ -29,4 +30,5 @@ namespace WarGrey::SCADA {
 	uint16 DO_suction_command(WarGrey::SCADA::SuctionCommand cmd, bool ps);
 	uint16 DO_LMOD_command(WarGrey::SCADA::LMODCommand cmd);
 	uint16 DO_gantry_virtual_action_command(WarGrey::SCADA::DredgesPosition gid, WarGrey::SCADA::GantryCommand cmd);
+	uint16 DO_use_long_sb_drag_command(bool cmd);
 }
