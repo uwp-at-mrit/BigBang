@@ -763,8 +763,8 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 		this->history.span = this->history.span << 1;
 		this->history.span = std::min(this->history.span, day_span_s);
 	}; break;
-	case VirtualKey::PageUp: this->history.start = start_left_limit; break;
-	case VirtualKey::PageDown: this->history.start = start_right_limit; break;
+	case VirtualKey::Home: this->history.start = start_left_limit; break;
+	case VirtualKey::End: this->history.start = start_right_limit; break;
 	case VirtualKey::Escape: this->history = this->realtime; break;
 	default: handled = false; break;
 	}

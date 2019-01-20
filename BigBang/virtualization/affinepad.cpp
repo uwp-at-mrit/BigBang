@@ -23,10 +23,10 @@ using namespace Microsoft::Graphics::Canvas::Text;
 const static KeyboardCell keys[] = {
 	{ VirtualKey::Escape,   0, 0, 2, 2 },
 
-	{ VirtualKey::PageUp,   2, 0, 1, 2 },
+	{ VirtualKey::Home,     2, 0, 1, 2 },
     { VirtualKey::Left,     3, 0, 1, 2 },
 	{ VirtualKey::Right,    5, 0, 1, 2 },
-    { VirtualKey::PageDown, 6, 0, 1, 2 },
+    { VirtualKey::End,      6, 0, 1, 2 },
 	{ VirtualKey::Print,    7, 0, 2, 2 },
 
 	{ VirtualKey::Add,      4, 0, 1, 1 },
@@ -57,10 +57,10 @@ Affinepad::Affinepad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 			VirtualKey key = keys[i].key;
 
 			switch (key) {
-			case VirtualKey::PageUp: label = L"⇤"; break;
+			case VirtualKey::Home: label = L"⇤"; break;
 			case VirtualKey::Left: label = L"←"; break;
 			case VirtualKey::Right: label = L"→"; break;
-			case VirtualKey::PageDown: label = L"⇥"; break;
+			case VirtualKey::End: label = L"⇥"; break;
 
 			case VirtualKey::Add: label = L"+"; break;
 			case VirtualKey::Subtract: label = L"-"; break;

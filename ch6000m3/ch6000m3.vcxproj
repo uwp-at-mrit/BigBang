@@ -211,6 +211,7 @@
     <None Include="packages.config" />
     <None Include="ch6000m3.scrbl" />
     <None Include="schema\earthwork.dao.rkt" />
+    <None Include="stone\tongue\alarm.resw.rkt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LargeTile.scale-100.png" />
@@ -261,6 +262,8 @@
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="stone\tongue\en-US\alarm.resw" />
+    <PRIResource Include="stone\tongue\en-US\alarms.resw" />
     <PRIResource Include="stone\tongue\en-US\diagnostics\dredges_dx.resw" />
     <PRIResource Include="stone\tongue\en-US\diagnostics\gland_pump_dx.resw" />
     <PRIResource Include="stone\tongue\en-US\diagnostics\hopper_pump_dx.resw" />
@@ -291,6 +294,8 @@
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\alarm.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\alarms.resw" />
     <PRIResource Include="stone\tongue\zh-CN\diagnostics\dredges_dx.resw" />
     <PRIResource Include="stone\tongue\zh-CN\diagnostics\gland_pump_dx.resw" />
     <PRIResource Include="stone\tongue\zh-CN\diagnostics\hopper_pump_dx.resw" />
@@ -360,6 +365,7 @@
     <ClCompile Include="page\draughts.cpp" />
     <ClCompile Include="page\discharges.cpp" />
     <ClCompile Include="page\hopper_doors.cpp" />
+    <ClCompile Include="widget\alarms.cpp" />
     <ClCompile Include="widget\gallery.cpp" />
     <ClCompile Include="page\hydraulics.cpp" />
     <ClCompile Include="page\glands.cpp" />
@@ -416,6 +422,8 @@
     <ClInclude Include="page\draughts.hpp" />
     <ClInclude Include="page\discharges.hpp" />
     <ClInclude Include="page\hopper_doors.hpp" />
+    <ClInclude Include="stone\tongue\alarm.hpp" />
+    <ClInclude Include="widget\alarms.hpp" />
     <ClInclude Include="widget\gallery.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />
     <ClInclude Include="page\glands.hpp" />
@@ -423,6 +431,9 @@
     <ClInclude Include="widget.hxx" />
     <ClInclude Include="widget\settings.hpp" />
     <ClInclude Include="widget\timestream.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="stone\tongue\alarm.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

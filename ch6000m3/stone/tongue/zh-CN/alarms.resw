@@ -117,55 +117,178 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Alarm" xml:space="preserve">
-    <value>🛎</value>
+  <data name="Ready" xml:space="preserve">
+    <value>准备就绪</value>
   </data>
-  <data name="Brightness" xml:space="preserve">
-    <value>🔆 Brightness</value>
+  <data name="Remote" xml:space="preserve">
+    <value>遥控</value>
   </data>
-  <data name="Brightness100" xml:space="preserve">
-    <value>100%</value>
+  <data name="Running" xml:space="preserve">
+    <value>运行</value>
   </data>
-  <data name="Brightness20" xml:space="preserve">
-    <value>20%</value>
+  <data name="Starting" xml:space="preserve">
+    <value>正在启动</value>
   </data>
-  <data name="Brightness30" xml:space="preserve">
-    <value>30%</value>
+  <data name="Stopped" xml:space="preserve">
+    <value>停止</value>
   </data>
-  <data name="Brightness40" xml:space="preserve">
-    <value>40%</value>
+  <data name="Stopping" xml:space="preserve">
+    <value>正在停止</value>
   </data>
-  <data name="Brightness60" xml:space="preserve">
-    <value>60%</value>
+  <data name="Unstartable" xml:space="preserve">
+    <value>启动失败</value>
   </data>
-  <data name="Brightness80" xml:space="preserve">
-    <value>80%</value>
+  <data name="Unstoppable" xml:space="preserve">
+    <value>停止失败</value>
   </data>
-  <data name="Debug" xml:space="preserve">
-    <value>Debug</value>
+  <data name="hydraulic_pump" xml:space="preserve">
+    <value>液压泵</value>
   </data>
-  <data name="FullScreen" xml:space="preserve">
-    <value>💻</value>
+  <data name="gate_valve" xml:space="preserve">
+    <value>闸阀</value>
   </data>
-  <data name="Gallery" xml:space="preserve">
-    <value>🔮</value>
+  <data name="OpenReady" xml:space="preserve">
+    <value>可以打开</value>
   </data>
-  <data name="Permission" xml:space="preserve">
-    <value>🕹 Permission</value>
+  <data name="Open" xml:space="preserve">
+    <value>完全打开</value>
   </data>
-  <data name="PrintScreen" xml:space="preserve">
-    <value>📸</value>
+  <data name="Opening" xml:space="preserve">
+    <value>正在打开</value>
   </data>
-  <data name="Root" xml:space="preserve">
-    <value>Root</value>
+  <data name="Unclosable" xml:space="preserve">
+    <value>关闭失败</value>
   </data>
-  <data name="Settings" xml:space="preserve">
-    <value>⚙️</value>
+  <data name="Unopenable" xml:space="preserve">
+    <value>打开失败</value>
   </data>
-  <data name="TimeMachine" xml:space="preserve">
-    <value>⏳</value>
+  <data name="upperdoor" xml:space="preserve">
+    <value>小泥门</value>
   </data>
-  <data name="User" xml:space="preserve">
-    <value>User</value>
+  <data name="hopperdoor" xml:space="preserve">
+    <value>大泥门</value>
+  </data>
+  <data name="winch_1" xml:space="preserve">
+    <value>绞车</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>完全关闭</value>
+  </data>
+  <data name="CloseReady" xml:space="preserve">
+    <value>可以关闭</value>
+  </data>
+  <data name="Closing" xml:space="preserve">
+    <value>正在关闭</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>禁用</value>
+  </data>
+  <data name="VirtualClose" xml:space="preserve">
+    <value>假关</value>
+  </data>
+  <data name="VirtualOpen" xml:space="preserve">
+    <value>假开</value>
+  </data>
+  <data name="motor_valve" xml:space="preserve">
+    <value>电动阀</value>
+  </data>
+  <data name="hopper_pump" xml:space="preserve">
+    <value>泥泵</value>
+  </data>
+  <data name="water_pump" xml:space="preserve">
+    <value>高压水泵</value>
+  </data>
+  <data name="FastWindingOut" xml:space="preserve">
+    <value>高速放缆</value>
+  </data>
+  <data name="FastWindingUp" xml:space="preserve">
+    <value>高速收缆</value>
+  </data>
+  <data name="WindingOut" xml:space="preserve">
+    <value>正在放缆</value>
+  </data>
+  <data name="WindingUp" xml:space="preserve">
+    <value>正在收缆</value>
+  </data>
+  <data name="Unlettable" xml:space="preserve">
+    <value>放缆失败</value>
+  </data>
+  <data name="Unpullable" xml:space="preserve">
+    <value>收缆失败</value>
+  </data>
+  <data name="FastWindOutReady" xml:space="preserve">
+    <value>可以高速放缆</value>
+  </data>
+  <data name="FastWindUpReady" xml:space="preserve">
+    <value>可以高速收缆</value>
+  </data>
+  <data name="LowerLimited" xml:space="preserve">
+    <value>钢丝绳下限</value>
+  </data>
+  <data name="SoftLowerLimited" xml:space="preserve">
+    <value>编码器下限</value>
+  </data>
+  <data name="SoftUpperLimited" xml:space="preserve">
+    <value>编码器上限</value>
+  </data>
+  <data name="UpperLimited" xml:space="preserve">
+    <value>钢丝绳上限</value>
+  </data>
+  <data name="WindOutReady" xml:space="preserve">
+    <value>可以放缆</value>
+  </data>
+  <data name="WindUpReady" xml:space="preserve">
+    <value>可以收缆</value>
+  </data>
+  <data name="winch_2" xml:space="preserve">
+    <value>绞车</value>
+  </data>
+  <data name="Slack" xml:space="preserve">
+    <value>钢丝绳松弛</value>
+  </data>
+  <data name="SaddleLimited" xml:space="preserve">
+    <value>搁墩限位</value>
+  </data>
+  <data name="SuctionLimited" xml:space="preserve">
+    <value>吸口限位</value>
+  </data>
+  <data name="Broken" xml:space="preserve">
+    <value>故障</value>
+  </data>
+  <data name="StartReady" xml:space="preserve">
+    <value>可以启动</value>
+  </data>
+  <data name="StopReady" xml:space="preserve">
+    <value>可以停止</value>
+  </data>
+  <data name="Alert" xml:space="preserve">
+    <value>报警</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>维修</value>
+  </data>
+  <data name="SuctionSlack" xml:space="preserve">
+    <value>吸口限位 + 松弛</value>
+  </data>
+  <data name="SaddleSlack" xml:space="preserve">
+    <value>搁墩限位 + 松弛</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>默认</value>
+  </data>
+  <data name="FastWindReady" xml:space="preserve">
+    <value>可以高速放/收缆</value>
+  </data>
+  <data name="WindReady" xml:space="preserve">
+    <value>可以放/收缆</value>
+  </data>
+  <data name="Heater" xml:space="preserve">
+    <value>加热器</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>自动</value>
+  </data>
+  <data name="Limited" xml:space="preserve">
+    <value>功率限制</value>
   </data>
 </root>

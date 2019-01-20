@@ -3,12 +3,10 @@
 #include "tongue.hpp"
 
 namespace WarGrey::SCADA {
-    private class Alarm : public WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm> {
-        friend class WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm>;
+    private class Alarm final : public WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm> {
+		friend class WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm>;
     public:
         static Platform::String^ type() { return "alarm"; }
-        static unsigned int min_index() { return 39U; }
-        static unsigned int max_index() { return 3927U; }
 
     public:
         static WarGrey::SCADA::Alarm* PSHopperMaintenance() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm>::UnsafeTongue(39U); } // PS Hopper/Underwater Converter Mainenance
@@ -128,8 +126,28 @@ namespace WarGrey::SCADA {
         static WarGrey::SCADA::Alarm* SBFBAngleExceed() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm>::UnsafeTongue(3926U); } // SB Fore-Back Angle Exceed
         static WarGrey::SCADA::Alarm* SBDTCableExceed() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm>::UnsafeTongue(3927U); } // SB Drag Trunnion Cable Exceed
 
-    private:
-        Alarm(unsigned int idx) : Tongue(idx) {}
+    protected:
+		static size_t indices_size() { return 115U; }
+
+		static const unsigned int* indices() {
+			static const unsigned int indices[] = {
+				39, 43, 47, 51, 52, 54, 55, 63, 67, 71, 75, 76, 79, 82, 86, 90,
+				94, 98, 102, 106, 110, 114, 118, 122, 126, 130, 134, 138, 142, 150,
+				162, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 195,
+				207, 215, 223, 231, 239, 247, 255, 517, 518, 519, 520, 521, 522, 523,
+				533, 534, 535, 536, 537, 538, 539, 547, 551, 554, 557, 558, 559, 563,
+				567, 570, 573, 574, 575, 700,
+
+				3050, 3051, 3441, 3688, 3689, 3690, 3691, 3692, 3693, 3694, 3695, 3696, 3697, 3698, 3699, 3700,
+				3701, 3702, 3703, 3704, 3705, 3706, 3707, 3708, 3709, 3710, 3711, 3713, 3714, 3715, 3920, 3921,
+				3922, 3923, 3924, 3925, 3926, 3927
+			};
+
+			return indices;
+		}
+
+	protected:
+		Alarm(unsigned int idx) : Tongue(idx) {}
     };
 }
 

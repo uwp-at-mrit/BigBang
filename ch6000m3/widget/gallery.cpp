@@ -17,6 +17,7 @@
 
 #include "decorator/margin.hpp"
 
+#include "satellite.hpp"
 #include "system.hpp"
 #include "module.hpp"
 

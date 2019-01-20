@@ -4,6 +4,7 @@
 #include "planet.hpp"
 #include "configuration.hpp"
 
+#include "widget/alarms.hpp"
 #include "widget/gallery.hpp"
 #include "widget/settings.hpp"
 #include "widget/timestream.hpp"
@@ -34,7 +35,7 @@ private enum class Brightness { Brightness100, Brightness80, Brightness60, Brigh
 
 // WARNING: order matters
 private enum class SS : unsigned int { Brightness, Permission, _ };
-private enum class Icon : unsigned int { Gallery , Settings, TimeMachine, PrintScreen, FullScreen, _ };
+private enum class Icon : unsigned int { Gallery , Settings, TimeMachine, Alarm, PrintScreen, FullScreen, _ };
 
 static Platform::String^ mode_setting_key = "PLC_Master_Mode";
 
@@ -176,6 +177,7 @@ public:
 			switch (icon->id) {
 			case Icon::Gallery: display_the_gallery(); break;
 			case Icon::TimeMachine: launch_the_timemachine(); break;
+			case Icon::Alarm: display_the_alarm(); break;
 			case Icon::Settings: {
 				if (this->settings == nullptr) {
 					this->settings = make_settings(this->device);
@@ -289,6 +291,7 @@ UniverseWidget::UniverseWidget(SplitView^ frame, UniverseDisplay^ master, PLCMas
 }
 
 void UniverseWidget::construct(CanvasCreateResourcesReason reason) {
+	initialize_the_alarm(this->plc);
 	initialize_the_timemachine(this->plc, timemachine_speed, timemachine_frame_per_second);
 	this->push_planet(new Widget(this->frame, this->master, this->plc));
 }

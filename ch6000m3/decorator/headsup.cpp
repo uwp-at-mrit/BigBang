@@ -1,6 +1,8 @@
 ﻿#include "decorator/headsup.hpp"
 #include "configuration.hpp"
 
+#include "widget/alarms.hpp"
+
 #include "module.hpp"
 
 #include "brushes.hxx"
@@ -64,8 +66,12 @@ void HeadsUpPlanet::on_transfer(IPlanet* from, IPlanet* to) {
 	this->statusbar->set_caption(to->display_name());
 }
 
+void HeadsUpPlanet::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
+	display_the_alarm();
+}
+
 bool HeadsUpPlanet::can_select(IGraphlet* g) {
-	return false;
+	return (this->statusline == g);
 }
 
 bool HeadsUpPlanet::can_select_multiple() {

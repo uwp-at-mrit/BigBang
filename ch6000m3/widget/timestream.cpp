@@ -38,7 +38,7 @@ public:
 	}
 
 public:
-	void on_all_signals(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override {
+	void on_all_signals(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) override {
 		if ((timepoint_ms - last_timepoint) >= this->get_time_speed()) {
 			this->save_snapshot(timepoint_ms, addr0, addrn, data, size);
 			this->last_timepoint = timepoint_ms;

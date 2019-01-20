@@ -170,6 +170,9 @@
     <ClCompile Include="decorator\headsup.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
+    <ClCompile Include="widget\alarms.cpp">
+      <Filter>widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -326,6 +329,12 @@
     <ClInclude Include="decorator\vessel.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
+    <ClInclude Include="widget\alarms.hpp">
+      <Filter>widget</Filter>
+    </ClInclude>
+    <ClInclude Include="stone\tongue\alarm.hpp">
+      <Filter>stone\tongue</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -480,6 +489,9 @@
     <None Include="schema\earthwork.dao.rkt">
       <Filter>schema</Filter>
     </None>
+    <None Include="stone\tongue\alarm.resw.rkt">
+      <Filter>stone\tongue</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
@@ -596,5 +608,22 @@
     <PRIResource Include="stone\tongue\zh-CN\settings.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\alarm.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\alarm.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\alarms.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\alarms.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="stone\tongue\alarm.txt">
+      <Filter>stone\tongue</Filter>
+    </Text>
   </ItemGroup>
 </Project>

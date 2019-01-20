@@ -29,11 +29,11 @@ namespace WarGrey::SCADA {
 		Platform::String^ ToLocalString();
 
 	protected:
-		static bool exists(Platform::String^ name, int index);
-		static int sibling_index(Platform::String^ name, unsigned int current, int delta, unsigned int boundary);
+		static int existed_slot(unsigned int current, const unsigned int* indices, size_t size);
+		static int sibling_index(unsigned int current, int delta, const unsigned int* indices, size_t size);
 
 	protected:
-		ITongue(Platform::String^ name, unsigned int index);
+		ITongue(Platform::String^ type, unsigned int index);
 
 	protected:
 		int unsafe_compare(ITongue* instance);
@@ -46,13 +46,16 @@ namespace WarGrey::SCADA {
 	template<typename E>
 	private class Tongue abstract : public WarGrey::SCADA::ITongue {
 	public:
-		static E* first() { return Tongue<E>::SafeSiblingTongue(E::min_index() - 1, 1, E::max_index()); }
+		static E* first() { return Tongue<E>::fromIndex(E::min_index()); }
 		static E* fromIndex(unsigned int idx) { return Tongue<E>::SafeTongue(idx); }
-		static E* last() { return Tongue<E>::SafeSiblingTongue(E::max_index() + 1, -1, E::min_index()); }
+		static E* last() { return Tongue<E>::fromIndex(E::max_index()); }
+
+		static unsigned int min_index() { return E::indices()[0]; };
+		static unsigned int max_index() { return E::indices()[E::indices_size() - 1]; };
 
 	public:
-		E* foreward() { return Tongue<E>::SafeSiblingTongue(this->ToIndex(), 1, E::max_index()); }
-		E* backward() { return Tongue<E>::SafeSiblingTongue(this->ToIndex(), -1, E::min_index()); }
+		E* foreward() { return Tongue<E>::SafeSiblingTongue(this->ToIndex(), +1); }
+		E* backward() { return Tongue<E>::SafeSiblingTongue(this->ToIndex(), -1); }
 
 	public:
 		bool eq(E* instance) { return (this->unsafe_compare(instance) == 0); }
@@ -81,12 +84,12 @@ namespace WarGrey::SCADA {
 		}
 
 		static E* SafeTongue(unsigned int index) {
-			return (ITongue::exists(E::type(), index) ? Tongue<E>::UnsafeTongue(index) : nullptr);
+			return ((ITongue::existed_slot(index, E::indices(), E::indices_size()) >= 0) ? Tongue<E>::UnsafeTongue(index) : nullptr);
 		}
 
 	private:
-		static E* SafeSiblingTongue(unsigned int index, int delta, int boundary) {
-			int sibling_index = ITongue::sibling_index(E::type(), index, delta, boundary);
+		static E* SafeSiblingTongue(unsigned int index, int delta) {
+			int sibling_index = ITongue::sibling_index(index, delta, E::indices(), E::indices_size());
 
 			return ((sibling_index >= 0) ? Tongue<E>::UnsafeTongue(sibling_index) : nullptr);
 		}

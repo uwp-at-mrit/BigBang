@@ -107,7 +107,7 @@ public:
 		}
 	}
 
-	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		DI_hydraulic_pump_dimension(this->dimensions[HD::A], DB4, pump_A_feedback);
 		DI_hydraulic_pump_dimension(this->dimensions[HD::D], DB4, pump_D_feedback);
 		DI_hydraulic_pump_dimension(this->dimensions[HD::E], DB4, pump_E_feedback);

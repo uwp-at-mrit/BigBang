@@ -1,4 +1,5 @@
 #include <map>
+#include <algorithm>
 
 #include "tongue.hpp"
 #include "path.hpp"
@@ -99,31 +100,35 @@ int ITongue::unsafe_compare(ITongue* instance) {
 	return sign;
 }
 
-bool ITongue::exists(Platform::String^ scope, int index) {
-	return do_check(scope, index);
+int ITongue::existed_slot(unsigned int current, const unsigned int* indices, size_t size) {
+	size_t open = 0U;
+	size_t close = size - 1;
+	size_t slot = close / 2;
+
+	while (open <= close) {
+		if (indices[slot] == current) {
+			break;
+		} else if (indices[slot] < current) {
+			open = slot + 1;
+		} else {
+			close = slot - 1;
+		}
+
+		slot = open + (close - open) / 2;
+	}
+
+	return (open > close) ? -1 : int(slot);
 }
 
-int ITongue::sibling_index(Platform::String^ scope, unsigned int self, int delta, unsigned int boundary) {
-	ResourceLoader^ tongue = lookup_tongue(scope);
+int ITongue::sibling_index(unsigned int self, int delta, const unsigned int* indices, size_t size) {
+	int slot = ITongue::existed_slot(self, indices, size);
 	int sibling = -1;
-	
-	if (delta < 0) {
-		while ((self + delta) >= boundary) {
-			self += delta;
 
-			if (tongue->GetString(self.ToString()) != nullptr) {
-				sibling = self;
-				break;
-			}
-		}
-	} else if (delta > 0) {
-		while ((self + delta) <= boundary) {
-			self += delta;
+	if (slot >= 0) {
+		size_t sibling_slot = std::max(std::min(slot + delta, int(size - 1)), 0);
 
-			if (tongue->GetString(self.ToString()) != nullptr) {
-				sibling = self;
-				break;
-			}
+		if (sibling_slot != slot) {
+			sibling = indices[sibling_slot];
 		}
 	}
 
