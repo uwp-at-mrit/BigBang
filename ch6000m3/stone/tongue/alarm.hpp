@@ -3,8 +3,8 @@
 #include "tongue.hpp"
 
 namespace WarGrey::SCADA {
-    private class Alarm final : public WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm> {
-		friend class WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm>;
+    private class Alarm : public WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm> {
+        friend class WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm>;
     public:
         static Platform::String^ type() { return "alarm"; }
 
@@ -126,28 +126,25 @@ namespace WarGrey::SCADA {
         static WarGrey::SCADA::Alarm* SBFBAngleExceed() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm>::UnsafeTongue(3926U); } // SB Fore-Back Angle Exceed
         static WarGrey::SCADA::Alarm* SBDTCableExceed() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Alarm>::UnsafeTongue(3927U); } // SB Drag Trunnion Cable Exceed
 
-    protected:
-		static size_t indices_size() { return 115U; }
+    private:
+        static size_t indices_size() { return 116U; }
+        static const unsigned int* indices() {
+            static const unsigned int indexes[] = {
+                39U, 43U, 47U, 51U, 52U, 54U, 55U, 63U, 67U, 71U, 75U, 76U, 79U, 82U, 86U, 90U,
+                94U, 98U, 102U, 106U, 110U, 114U, 118U, 122U, 126U, 130U, 134U, 138U, 142U, 150U, 162U, 176U,
+                177U, 178U, 179U, 180U, 181U, 182U, 183U, 184U, 185U, 186U, 187U, 195U, 207U, 215U, 223U, 231U,
+                239U, 247U, 255U, 517U, 518U, 519U, 520U, 521U, 522U, 523U, 533U, 534U, 535U, 536U, 537U, 538U,
+                539U, 547U, 551U, 554U, 557U, 558U, 559U, 563U, 567U, 570U, 573U, 574U, 575U, 700U, 3050U, 3051U,
+                3441U, 3688U, 3689U, 3690U, 3691U, 3692U, 3693U, 3694U, 3695U, 3696U, 3697U, 3698U, 3699U, 3700U, 3701U, 3702U,
+                3703U, 3704U, 3705U, 3706U, 3707U, 3708U, 3709U, 3710U, 3711U, 3713U, 3714U, 3715U, 3920U, 3921U, 3922U, 3923U,
+                3924U, 3925U, 3926U, 3927U
+            };
 
-		static const unsigned int* indices() {
-			static const unsigned int indices[] = {
-				39, 43, 47, 51, 52, 54, 55, 63, 67, 71, 75, 76, 79, 82, 86, 90,
-				94, 98, 102, 106, 110, 114, 118, 122, 126, 130, 134, 138, 142, 150,
-				162, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 195,
-				207, 215, 223, 231, 239, 247, 255, 517, 518, 519, 520, 521, 522, 523,
-				533, 534, 535, 536, 537, 538, 539, 547, 551, 554, 557, 558, 559, 563,
-				567, 570, 573, 574, 575, 700,
+            return indexes;
+        }
 
-				3050, 3051, 3441, 3688, 3689, 3690, 3691, 3692, 3693, 3694, 3695, 3696, 3697, 3698, 3699, 3700,
-				3701, 3702, 3703, 3704, 3705, 3706, 3707, 3708, 3709, 3710, 3711, 3713, 3714, 3715, 3920, 3921,
-				3922, 3923, 3924, 3925, 3926, 3927
-			};
-
-			return indices;
-		}
-
-	protected:
-		Alarm(unsigned int idx) : Tongue(idx) {}
+    private:
+        Alarm(unsigned int idx) : Tongue(idx) {}
     };
 }
 

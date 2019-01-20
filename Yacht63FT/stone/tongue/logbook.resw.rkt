@@ -557,8 +557,6 @@
     (define src.csv (build-path (path-only (quote-source-file)) "catalogue.csv"))
     (define metrics (read-csv src.csv))
     (values 'Logbook
-            (filter-map (λ [row] (identify (list-ref row 4))) metrics)
-            1
-            (length metrics))))
+            (filter-map (λ [row] (identify (list-ref row 4))) metrics))))
 
 (module+ main (main))

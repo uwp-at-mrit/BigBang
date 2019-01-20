@@ -158,12 +158,7 @@
                     (λ [] (let* ([/dev/txtin (open-input-file (build-path (path-only (quote-source-file)) "alarm.txt"))]
                                  [/dev/stdin (reencode-input-port /dev/txtin "GB18030")])
                             (define alarms (filter-map line-splite (port->lines /dev/stdin)))
-                            (define tongues (filter-map (λ [line] (identify line)) alarms))
-                            (define indexes (map tongue-index tongues))
-                            (values 'Alarm
-                                    (filter-map (λ [line] (identify line)) alarms)
-                                    (apply min indexes)
-                                    (apply max indexes))))
+                            (values 'Alarm (filter-map (λ [line] (identify line)) alarms))))
                     (λ [] (custodian-shutdown-all (current-custodian)))))))
 
 (module+ main (main))

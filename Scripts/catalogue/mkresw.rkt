@@ -37,7 +37,7 @@
     (when (or (> rkt.mtime hpp.mtime) (> rkt.mtime en.mtime) (> rkt.mtime zh.mtime))
       (define main (dynamic-require tongue.resw.rkt 'main void))
       (when (procedure? main)
-        (define-values (classname data min-index max-index) (main))
+        (define-values (classname data) (main))
         (define identities (make-hasheq))
 
         (for ([datum (in-list data)])
@@ -49,7 +49,7 @@
                   (for ([id (in-list duplicates)])
                     (printf "  '~a: ~a~n" (car id) (cdr id))))
             (void (when (> rkt.mtime hpp.mtime)
-                    (do-make-resw (λ [/dev/stdout] (make-tongue-class classname tongue data min-index max-index tongue-en-US #:/dev/stdout /dev/stdout)) tongue.hpp))
+                    (do-make-resw (λ [/dev/stdout] (make-tongue-class classname tongue data tongue-en-US #:/dev/stdout /dev/stdout)) tongue.hpp))
         
                   (newline)
                   (newline)
