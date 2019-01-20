@@ -32,17 +32,17 @@
     <data name="MasterTankLS2" xml:space="preserve"> <value>液压主系统油箱液位低低LS.2</value> </data>
     <data name="VisorTankLS2" xml:space="preserve"> <value>耙唇液压系统油箱液位低低LS.12</value> </data>
     <data name="PumpA2C" xml:space="preserve"> <value>A替代C</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>C替代A</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>B替代C</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>C替代B</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>F替代C</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>C替代F</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>H替代F</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>F替代H</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>G替代F</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>F替代G</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>I替代J</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>J替代I</value> </data>
+    <data name="PumpC2A" xml:space="preserve"> <value>C替代A</value> </data>
+    <data name="PumpB2C" xml:space="preserve"> <value>B替代C</value> </data>
+    <data name="PumpC2B" xml:space="preserve"> <value>C替代B</value> </data>
+    <data name="PumpF2C" xml:space="preserve"> <value>F替代C</value> </data>
+    <data name="PumpC2F" xml:space="preserve"> <value>C替代F</value> </data>
+    <data name="PumpH2F" xml:space="preserve"> <value>H替代F</value> </data>
+    <data name="PumpF2H" xml:space="preserve"> <value>F替代H</value> </data>
+    <data name="PumpG2F" xml:space="preserve"> <value>G替代F</value> </data>
+    <data name="PumpF2G" xml:space="preserve"> <value>F替代G</value> </data>
+    <data name="PumpI2J" xml:space="preserve"> <value>I替代J</value> </data>
+    <data name="PumpJ2I" xml:space="preserve"> <value>J替代I</value> </data>
     <data name="ShoreWinchEmergence" xml:space="preserve"> <value>艏吹绞车紧急停止</value> </data>
     <data name="PSDTEmergence" xml:space="preserve"> <value>左舷弯管紧急停止</value> </data>
     <data name="PSDIEmergence" xml:space="preserve"> <value>左舷耙中紧急停止</value> </data>
