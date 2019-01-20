@@ -47,7 +47,7 @@
         [("右舷弯管液压泵F故障反馈") (cons 'SBDTPumpFBroken "SB Drag Trunnion Pump F Broken")] ;;; 106[DB4.DBX9.2]
         [("左舷耙唇液压泵J故障反馈") (cons 'SBDVPumpJBroken "SB Drag Visor Pump J Broken")] ;;; 110[DB4.DBX9.6]
         [("泥泵锁紧/蝶阀控制泵D故障反馈") (cons 'DLBVPumpDBroken "Door Locker/Butterfly Valve Pump D Broken")] ;;; 114[DB4.DBX10.2]
-        [("泥泵锁紧/蝶阀控制泵E故障反馈") (cons 'DLBVPumpDBroken "Door Locker/Butterfly Valve Pump E Broken")] ;;; 118[DB4.DBX10.6]
+        [("泥泵锁紧/蝶阀控制泵E故障反馈") (cons 'DLBVPumpEBroken "Door Locker/Butterfly Valve Pump E Broken")] ;;; 118[DB4.DBX10.6]
         [("液压冷却泵K故障反馈") (cons 'CoolanPumpKBroken "Coolant Pump K Broken")] ;;; 122[DB4.DBX11.2]
         [("马达冲洗液压泵L故障反馈") (cons 'MotorFlushingPumpLBroken "Motor Flushing Pump L Broken")] ;;; 126[DB4.DBX11.6]
         [("冷却/马达冲洗备用泵M故障反馈") (cons 'SparePumpMBroken "Spare Pump M Broken")] ;;; 130[DB4.DBX12.2]
@@ -73,7 +73,7 @@
         [("左舷耙中紧急停止") (cons 'PSDIEmergence "PS Drag Intermediate Emergence")] ;;; 215[DB4.DBX22.7]
         [("左舷耙头紧急停止") (cons 'PSDHEmergence "PS Drag Head Emergence")] ;;; 223[DB4.DBX23.7]
         [("右舷弯管紧急停止") (cons 'SBDTEmergence "SB Drag Trunnion Emergence")] ;;; 231[DB4.DBX24.7]
-        [("右舷耙中紧急停止") (cons 'SBDTEmergence "SB Drag Intermediate Emergence")] ;;; 239[DB4.DBX25.7]
+        [("右舷耙中紧急停止") (cons 'SBDIEmergence "SB Drag Intermediate Emergence")] ;;; 239[DB4.DBX25.7]
         [("右舷耙头紧急停止") (cons 'SBDHEmergence "SB Drag Head Emergence")] ;;; 247[DB4.DBX26.7]
         [("装驳绞车紧急停止") (cons 'BargeWinchEmergence "Barge Winch Emergence")] ;;; 255[DB4.DBX27.7]
         [("左舷泥泵轴承润滑单元压力低报警") (cons 'PSHopperUnitPressureLow "PS Hopper Lubricating Unit Pressure Low")] ;;; 517[DB4.DBX60.5]
@@ -87,9 +87,9 @@
         [("右舷泥泵轴承润滑单元液位低报警") (cons 'SBHopperUnitLevelLow "SB Hopper Lubricating Unit Level Low")] ;;; 534[DB4.DBX62.6]
         [("右舷泥泵轴承润滑单元油温高报警") (cons 'SBHopperUnitOilTemperatureHigh "SB Hopper Lubricating Unit Oil Temperature High")] ;;; 535[DB4.DBX62.7]
         [("右舷泥泵轴承润滑单元水温高报警") (cons 'SBHopperUnitWaterTemperatureHigh "SB Hopper Lubricating Unit Water Temperature High")] ;;; 536[DB4.DBX63.0]
-        [("右舷泥泵轴承润滑单元轴承温度高1#报警") (cons 'PSHopperUnitBearingTemperatureHigh1 "SB Hopper Lubricating Unit Bearing Temperature 1# High")] ;;; 537[DB4.DBX63.1]
-        [("右舷泥泵轴承润滑单元轴承温度高2#报警") (cons 'PSHopperUnitBearingTemperatureHigh2 "SB Hopper Lubricating Unit Bearing Temperature 2# High")] ;;; 538[DB4.DBX63.2]
-        [("右舷泥泵轴承润滑单元轴承温度高3#报警") (cons 'PSHopperUnitBearingTemperatureHigh3 "SB Hopper Lubricating Unit Bearing Temperature 3# High")] ;;; 539[DB4.DBX63.3]
+        [("右舷泥泵轴承润滑单元轴承温度高1#报警") (cons 'SBHopperUnitBearingTemperatureHigh1 "SB Hopper Lubricating Unit Bearing Temperature 1# High")] ;;; 537[DB4.DBX63.1]
+        [("右舷泥泵轴承润滑单元轴承温度高2#报警") (cons 'SBHopperUnitBearingTemperatureHigh2 "SB Hopper Lubricating Unit Bearing Temperature 2# High")] ;;; 538[DB4.DBX63.2]
+        [("右舷泥泵轴承润滑单元轴承温度高3#报警") (cons 'SBHopperUnitBearingTemperatureHigh3 "SB Hopper Lubricating Unit Bearing Temperature 3# High")] ;;; 539[DB4.DBX63.3]
         [("左舷水下泵1#封水泵故障反馈") (cons 'PSUnderWaterGlandPump1Broken "PS Underwater Master Gland Pump 1# Broken")] ;;; 547[DB4.DBX64.3]
         [("左舷水下泵2#封水泵故障反馈") (cons 'PSUnderWaterGlandPump2Broken "PS Underwater Master Gland Pump 2# Broken")] ;;; 551[DB4.DBX64.7]
         [("左舷泥泵齿轮箱电动滑油泵故障反馈") (cons 'PSHopperGearboxMasterPumpBroken "PS Hopper Gearbox Master Pump Broken")] ;;; 554[DB4.DBX65.2]
@@ -97,7 +97,7 @@
         [("左舷泥泵齿轮箱滑油温度高报警") (cons 'PSHopperGearboxTemperatureHigh "PS Hopper Gearbox Temperature High")] ;;; 558[DB4.DBX65.6]
         [("左舷泥泵齿轮箱滑油压力低低报警") (cons 'PSHopperGearboxPressureLow "PS Hopper Gearbox Pressure Low")] ;;; 559[DB4.DBX65.7]
         [("右舷水下泵1#封水泵故障反馈") (cons 'SBUnderWaterGlandPump1Broken "SB Underwater Master Gland Pump 1# Broken")] ;;; 563[DB4.DBX66.3]
-        [("右舷水下泵2#封水泵故障反馈") (cons 'SBUnderWaterGlandPump1Broken "SB Underwater Master Gland Pump 2# Broken")] ;;; 567[DB4.DBX66.7]
+        [("右舷水下泵2#封水泵故障反馈") (cons 'SBUnderWaterGlandPump2Broken "SB Underwater Master Gland Pump 2# Broken")] ;;; 567[DB4.DBX66.7]
         [("右舷泥泵齿轮箱电动滑油泵故障反馈") (cons 'SBHopperGearboxMasterPumpBroken "SB Hopper Gearbox Master Pump Broken")] ;;; 570[DB4.DBX67.2]
         [("右舷泥泵齿轮箱备用电动滑油泵故障反馈") (cons 'SBHopperGearboxSparePumpBroken "SB Hopper Gearbox Spare Pump Broken")] ;;; 573[DB4.DBX67.5]
         [("右舷泥泵齿轮箱滑油温度高报警") (cons 'SBHopperGearboxTemperatureHigh "SB Hopper Gearbox Temperature High")] ;;; 574[DB4.DBX67.6]
@@ -160,7 +160,7 @@
                             (define alarms (filter-map line-splite (port->lines /dev/stdin)))
                             (define tongues (filter-map (λ [line] (identify line)) alarms))
                             (define indexes (map tongue-index tongues))
-                            (values 'alarm
+                            (values 'Alarm
                                     (filter-map (λ [line] (identify line)) alarms)
                                     (apply min indexes)
                                     (apply max indexes))))

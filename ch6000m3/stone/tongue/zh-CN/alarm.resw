@@ -22,7 +22,7 @@
     <data name="SBDTPumpFBroken" xml:space="preserve"> <value>右舷弯管液压泵F故障反馈</value> </data>
     <data name="SBDVPumpJBroken" xml:space="preserve"> <value>左舷耙唇液压泵J故障反馈</value> </data>
     <data name="DLBVPumpDBroken" xml:space="preserve"> <value>泥泵锁紧/蝶阀控制泵D故障反馈</value> </data>
-    <data name="DLBVPumpDBroken" xml:space="preserve"> <value>泥泵锁紧/蝶阀控制泵E故障反馈</value> </data>
+    <data name="DLBVPumpEBroken" xml:space="preserve"> <value>泥泵锁紧/蝶阀控制泵E故障反馈</value> </data>
     <data name="CoolanPumpKBroken" xml:space="preserve"> <value>液压冷却泵K故障反馈</value> </data>
     <data name="MotorFlushingPumpLBroken" xml:space="preserve"> <value>马达冲洗液压泵L故障反馈</value> </data>
     <data name="SparePumpMBroken" xml:space="preserve"> <value>冷却/马达冲洗备用泵M故障反馈</value> </data>
@@ -48,7 +48,7 @@
     <data name="PSDIEmergence" xml:space="preserve"> <value>左舷耙中紧急停止</value> </data>
     <data name="PSDHEmergence" xml:space="preserve"> <value>左舷耙头紧急停止</value> </data>
     <data name="SBDTEmergence" xml:space="preserve"> <value>右舷弯管紧急停止</value> </data>
-    <data name="SBDTEmergence" xml:space="preserve"> <value>右舷耙中紧急停止</value> </data>
+    <data name="SBDIEmergence" xml:space="preserve"> <value>右舷耙中紧急停止</value> </data>
     <data name="SBDHEmergence" xml:space="preserve"> <value>右舷耙头紧急停止</value> </data>
     <data name="BargeWinchEmergence" xml:space="preserve"> <value>装驳绞车紧急停止</value> </data>
     <data name="PSHopperUnitPressureLow" xml:space="preserve"> <value>左舷泥泵轴承润滑单元压力低报警</value> </data>
@@ -62,9 +62,9 @@
     <data name="SBHopperUnitLevelLow" xml:space="preserve"> <value>右舷泥泵轴承润滑单元液位低报警</value> </data>
     <data name="SBHopperUnitOilTemperatureHigh" xml:space="preserve"> <value>右舷泥泵轴承润滑单元油温高报警</value> </data>
     <data name="SBHopperUnitWaterTemperatureHigh" xml:space="preserve"> <value>右舷泥泵轴承润滑单元水温高报警</value> </data>
-    <data name="PSHopperUnitBearingTemperatureHigh1" xml:space="preserve"> <value>右舷泥泵轴承润滑单元轴承温度高1#报警</value> </data>
-    <data name="PSHopperUnitBearingTemperatureHigh2" xml:space="preserve"> <value>右舷泥泵轴承润滑单元轴承温度高2#报警</value> </data>
-    <data name="PSHopperUnitBearingTemperatureHigh3" xml:space="preserve"> <value>右舷泥泵轴承润滑单元轴承温度高3#报警</value> </data>
+    <data name="SBHopperUnitBearingTemperatureHigh1" xml:space="preserve"> <value>右舷泥泵轴承润滑单元轴承温度高1#报警</value> </data>
+    <data name="SBHopperUnitBearingTemperatureHigh2" xml:space="preserve"> <value>右舷泥泵轴承润滑单元轴承温度高2#报警</value> </data>
+    <data name="SBHopperUnitBearingTemperatureHigh3" xml:space="preserve"> <value>右舷泥泵轴承润滑单元轴承温度高3#报警</value> </data>
     <data name="PSUnderWaterGlandPump1Broken" xml:space="preserve"> <value>左舷水下泵1#封水泵故障反馈</value> </data>
     <data name="PSUnderWaterGlandPump2Broken" xml:space="preserve"> <value>左舷水下泵2#封水泵故障反馈</value> </data>
     <data name="PSHopperGearboxMasterPumpBroken" xml:space="preserve"> <value>左舷泥泵齿轮箱电动滑油泵故障反馈</value> </data>
@@ -72,7 +72,7 @@
     <data name="PSHopperGearboxTemperatureHigh" xml:space="preserve"> <value>左舷泥泵齿轮箱滑油温度高报警</value> </data>
     <data name="PSHopperGearboxPressureLow" xml:space="preserve"> <value>左舷泥泵齿轮箱滑油压力低低报警</value> </data>
     <data name="SBUnderWaterGlandPump1Broken" xml:space="preserve"> <value>右舷水下泵1#封水泵故障反馈</value> </data>
-    <data name="SBUnderWaterGlandPump1Broken" xml:space="preserve"> <value>右舷水下泵2#封水泵故障反馈</value> </data>
+    <data name="SBUnderWaterGlandPump2Broken" xml:space="preserve"> <value>右舷水下泵2#封水泵故障反馈</value> </data>
     <data name="SBHopperGearboxMasterPumpBroken" xml:space="preserve"> <value>右舷泥泵齿轮箱电动滑油泵故障反馈</value> </data>
     <data name="SBHopperGearboxSparePumpBroken" xml:space="preserve"> <value>右舷泥泵齿轮箱备用电动滑油泵故障反馈</value> </data>
     <data name="SBHopperGearboxTemperatureHigh" xml:space="preserve"> <value>右舷泥泵齿轮箱滑油温度高报警</value> </data>

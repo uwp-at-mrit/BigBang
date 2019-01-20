@@ -38,23 +38,32 @@
       (define main (dynamic-require tongue.resw.rkt 'main void))
       (when (procedure? main)
         (define-values (classname data min-index max-index) (main))
+        (define identities (make-hasheq))
+
+        (for ([datum (in-list data)])
+          (hash-update! identities (tongue-id datum) add1 (λ [] 0)))
+
+        (define duplicates (filter (λ [id] (> (cdr id) 1)) (hash->list identities)))
+        (if (pair? duplicates)
+            (void (displayln "duplicate id:")
+                  (for ([id (in-list duplicates)])
+                    (printf "  '~a: ~a~n" (car id) (cdr id))))
+            (void (when (> rkt.mtime hpp.mtime)
+                    (do-make-resw (λ [/dev/stdout] (make-tongue-class classname tongue data min-index max-index tongue-en-US #:/dev/stdout /dev/stdout)) tongue.hpp))
         
-        (when (> rkt.mtime hpp.mtime)
-          (do-make-resw (λ [/dev/stdout] (make-tongue-class classname data min-index max-index tongue-en-US #:/dev/stdout /dev/stdout)) tongue.hpp))
-        
-        (newline)
-        (newline)
-        (newline)
-        
-        (when (> rkt.mtime en.mtime)
-          (do-make-resw (λ [/dev/stdout] (make-tongue-resw data tongue-en-US #:default #true #:/dev/stdout /dev/stdout)) tongue.en))
-        
-        (newline)
-        (newline)
-        (newline)
-        
-        (when (> rkt.mtime zh.mtime)
-          (do-make-resw (λ [/dev/stdout] (make-tongue-resw data tongue-zh-CN #:default #false #:/dev/stdout /dev/stdout)) tongue.zh))))))
+                  (newline)
+                  (newline)
+                  (newline)
+                  
+                  (when (> rkt.mtime en.mtime)
+                    (do-make-resw (λ [/dev/stdout] (make-tongue-resw data tongue-en-US #:default #true #:/dev/stdout /dev/stdout)) tongue.en))
+                  
+                  (newline)
+                  (newline)
+                  (newline)
+                  
+                  (when (> rkt.mtime zh.mtime)
+                    (do-make-resw (λ [/dev/stdout] (make-tongue-resw data tongue-zh-CN #:default #false #:/dev/stdout /dev/stdout)) tongue.zh))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (module+ main

@@ -22,7 +22,7 @@
     <data name="106" xml:space="preserve"> <value>SBDTPumpFBroken</value> </data>
     <data name="110" xml:space="preserve"> <value>SBDVPumpJBroken</value> </data>
     <data name="114" xml:space="preserve"> <value>DLBVPumpDBroken</value> </data>
-    <data name="118" xml:space="preserve"> <value>DLBVPumpDBroken</value> </data>
+    <data name="118" xml:space="preserve"> <value>DLBVPumpEBroken</value> </data>
     <data name="122" xml:space="preserve"> <value>CoolanPumpKBroken</value> </data>
     <data name="126" xml:space="preserve"> <value>MotorFlushingPumpLBroken</value> </data>
     <data name="130" xml:space="preserve"> <value>SparePumpMBroken</value> </data>
@@ -48,7 +48,7 @@
     <data name="215" xml:space="preserve"> <value>PSDIEmergence</value> </data>
     <data name="223" xml:space="preserve"> <value>PSDHEmergence</value> </data>
     <data name="231" xml:space="preserve"> <value>SBDTEmergence</value> </data>
-    <data name="239" xml:space="preserve"> <value>SBDTEmergence</value> </data>
+    <data name="239" xml:space="preserve"> <value>SBDIEmergence</value> </data>
     <data name="247" xml:space="preserve"> <value>SBDHEmergence</value> </data>
     <data name="255" xml:space="preserve"> <value>BargeWinchEmergence</value> </data>
     <data name="517" xml:space="preserve"> <value>PSHopperUnitPressureLow</value> </data>
@@ -62,9 +62,9 @@
     <data name="534" xml:space="preserve"> <value>SBHopperUnitLevelLow</value> </data>
     <data name="535" xml:space="preserve"> <value>SBHopperUnitOilTemperatureHigh</value> </data>
     <data name="536" xml:space="preserve"> <value>SBHopperUnitWaterTemperatureHigh</value> </data>
-    <data name="537" xml:space="preserve"> <value>PSHopperUnitBearingTemperatureHigh1</value> </data>
-    <data name="538" xml:space="preserve"> <value>PSHopperUnitBearingTemperatureHigh2</value> </data>
-    <data name="539" xml:space="preserve"> <value>PSHopperUnitBearingTemperatureHigh3</value> </data>
+    <data name="537" xml:space="preserve"> <value>SBHopperUnitBearingTemperatureHigh1</value> </data>
+    <data name="538" xml:space="preserve"> <value>SBHopperUnitBearingTemperatureHigh2</value> </data>
+    <data name="539" xml:space="preserve"> <value>SBHopperUnitBearingTemperatureHigh3</value> </data>
     <data name="547" xml:space="preserve"> <value>PSUnderWaterGlandPump1Broken</value> </data>
     <data name="551" xml:space="preserve"> <value>PSUnderWaterGlandPump2Broken</value> </data>
     <data name="554" xml:space="preserve"> <value>PSHopperGearboxMasterPumpBroken</value> </data>
@@ -72,7 +72,7 @@
     <data name="558" xml:space="preserve"> <value>PSHopperGearboxTemperatureHigh</value> </data>
     <data name="559" xml:space="preserve"> <value>PSHopperGearboxPressureLow</value> </data>
     <data name="563" xml:space="preserve"> <value>SBUnderWaterGlandPump1Broken</value> </data>
-    <data name="567" xml:space="preserve"> <value>SBUnderWaterGlandPump1Broken</value> </data>
+    <data name="567" xml:space="preserve"> <value>SBUnderWaterGlandPump2Broken</value> </data>
     <data name="570" xml:space="preserve"> <value>SBHopperGearboxMasterPumpBroken</value> </data>
     <data name="573" xml:space="preserve"> <value>SBHopperGearboxSparePumpBroken</value> </data>
     <data name="574" xml:space="preserve"> <value>SBHopperGearboxTemperatureHigh</value> </data>
@@ -138,7 +138,7 @@
     <data name="SBDTPumpFBroken" xml:space="preserve"> <value>SB Drag Trunnion Pump F Broken</value> </data>
     <data name="SBDVPumpJBroken" xml:space="preserve"> <value>SB Drag Visor Pump J Broken</value> </data>
     <data name="DLBVPumpDBroken" xml:space="preserve"> <value>Door Locker/Butterfly Valve Pump D Broken</value> </data>
-    <data name="DLBVPumpDBroken" xml:space="preserve"> <value>Door Locker/Butterfly Valve Pump E Broken</value> </data>
+    <data name="DLBVPumpEBroken" xml:space="preserve"> <value>Door Locker/Butterfly Valve Pump E Broken</value> </data>
     <data name="CoolanPumpKBroken" xml:space="preserve"> <value>Coolant Pump K Broken</value> </data>
     <data name="MotorFlushingPumpLBroken" xml:space="preserve"> <value>Motor Flushing Pump L Broken</value> </data>
     <data name="SparePumpMBroken" xml:space="preserve"> <value>Spare Pump M Broken</value> </data>
@@ -164,7 +164,7 @@
     <data name="PSDIEmergence" xml:space="preserve"> <value>PS Drag Intermediate Emergence</value> </data>
     <data name="PSDHEmergence" xml:space="preserve"> <value>PS Drag Head Emergence</value> </data>
     <data name="SBDTEmergence" xml:space="preserve"> <value>SB Drag Trunnion Emergence</value> </data>
-    <data name="SBDTEmergence" xml:space="preserve"> <value>SB Drag Intermediate Emergence</value> </data>
+    <data name="SBDIEmergence" xml:space="preserve"> <value>SB Drag Intermediate Emergence</value> </data>
     <data name="SBDHEmergence" xml:space="preserve"> <value>SB Drag Head Emergence</value> </data>
     <data name="BargeWinchEmergence" xml:space="preserve"> <value>Barge Winch Emergence</value> </data>
     <data name="PSHopperUnitPressureLow" xml:space="preserve"> <value>PS Hopper Lubricating Unit Pressure Low</value> </data>
@@ -178,9 +178,9 @@
     <data name="SBHopperUnitLevelLow" xml:space="preserve"> <value>SB Hopper Lubricating Unit Level Low</value> </data>
     <data name="SBHopperUnitOilTemperatureHigh" xml:space="preserve"> <value>SB Hopper Lubricating Unit Oil Temperature High</value> </data>
     <data name="SBHopperUnitWaterTemperatureHigh" xml:space="preserve"> <value>SB Hopper Lubricating Unit Water Temperature High</value> </data>
-    <data name="PSHopperUnitBearingTemperatureHigh1" xml:space="preserve"> <value>SB Hopper Lubricating Unit Bearing Temperature 1# High</value> </data>
-    <data name="PSHopperUnitBearingTemperatureHigh2" xml:space="preserve"> <value>SB Hopper Lubricating Unit Bearing Temperature 2# High</value> </data>
-    <data name="PSHopperUnitBearingTemperatureHigh3" xml:space="preserve"> <value>SB Hopper Lubricating Unit Bearing Temperature 3# High</value> </data>
+    <data name="SBHopperUnitBearingTemperatureHigh1" xml:space="preserve"> <value>SB Hopper Lubricating Unit Bearing Temperature 1# High</value> </data>
+    <data name="SBHopperUnitBearingTemperatureHigh2" xml:space="preserve"> <value>SB Hopper Lubricating Unit Bearing Temperature 2# High</value> </data>
+    <data name="SBHopperUnitBearingTemperatureHigh3" xml:space="preserve"> <value>SB Hopper Lubricating Unit Bearing Temperature 3# High</value> </data>
     <data name="PSUnderWaterGlandPump1Broken" xml:space="preserve"> <value>PS Underwater Master Gland Pump 1# Broken</value> </data>
     <data name="PSUnderWaterGlandPump2Broken" xml:space="preserve"> <value>PS Underwater Master Gland Pump 2# Broken</value> </data>
     <data name="PSHopperGearboxMasterPumpBroken" xml:space="preserve"> <value>PS Hopper Gearbox Master Pump Broken</value> </data>
@@ -188,7 +188,7 @@
     <data name="PSHopperGearboxTemperatureHigh" xml:space="preserve"> <value>PS Hopper Gearbox Temperature High</value> </data>
     <data name="PSHopperGearboxPressureLow" xml:space="preserve"> <value>PS Hopper Gearbox Pressure Low</value> </data>
     <data name="SBUnderWaterGlandPump1Broken" xml:space="preserve"> <value>SB Underwater Master Gland Pump 1# Broken</value> </data>
-    <data name="SBUnderWaterGlandPump1Broken" xml:space="preserve"> <value>SB Underwater Master Gland Pump 2# Broken</value> </data>
+    <data name="SBUnderWaterGlandPump2Broken" xml:space="preserve"> <value>SB Underwater Master Gland Pump 2# Broken</value> </data>
     <data name="SBHopperGearboxMasterPumpBroken" xml:space="preserve"> <value>SB Hopper Gearbox Master Pump Broken</value> </data>
     <data name="SBHopperGearboxSparePumpBroken" xml:space="preserve"> <value>SB Hopper Gearbox Spare Pump Broken</value> </data>
     <data name="SBHopperGearboxTemperatureHigh" xml:space="preserve"> <value>SB Hopper Gearbox Temperature High</value> </data>

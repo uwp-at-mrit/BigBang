@@ -7,7 +7,7 @@
 (define namespace 'WarGrey::SCADA)
 
 (define make-tongue-class
-  (lambda [classname data min-index max-index select #:/dev/stdout [/dev/stdout (current-output-port)]]
+  (lambda [classname tongue data min-index max-index select #:/dev/stdout [/dev/stdout (current-output-port)]]
     (define ns::Tongue (format "~a::Tongue" namespace))
     (define ns::class (format "~a::~a" namespace classname))
     (define Tongue<E> (format "~a<~a>" ns::Tongue ns::class))
@@ -20,7 +20,7 @@
     (fprintf /dev/stdout "    private class ~a : public ~a {~n" classname Tongue<E>)
     (fprintf /dev/stdout "        friend class ~a;~n" Tongue<E>)
     (fprintf /dev/stdout "    public:~n")
-    (fprintf /dev/stdout "        static Platform::String^ type() { return ~s; }~n" (symbol->string classname))
+    (fprintf /dev/stdout "        static Platform::String^ type() { return ~s; }~n" tongue)
     (fprintf /dev/stdout "        static unsigned int min_index() { return ~aU; }~n" min-index)
     (fprintf /dev/stdout "        static unsigned int max_index() { return ~aU; }~n" max-index)
 
