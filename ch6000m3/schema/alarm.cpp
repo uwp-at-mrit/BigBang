@@ -12,6 +12,7 @@ static const char* alarm_rowids[] = { "uuid" };
 static TableColumnInfo alarm_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
     { "code", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "status", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
     { "type", SDT::Integer, nullptr, 0 | 0 | 0 },
     { "alarmtime", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
     { "fixedtime", SDT::Integer, nullptr, 0 | 0 | 0 },
@@ -22,17 +23,18 @@ Alarm_pk WarGrey::SCADA::alarm_identity(Alarm& self) {
     return self.uuid;
 }
 
-Alarm WarGrey::SCADA::make_alarm(std::optional<Integer> code, std::optional<Integer> type, std::optional<Integer> alarmtime, std::optional<Integer> fixedtime) {
+Alarm WarGrey::SCADA::make_alarm(std::optional<Integer> code, std::optional<Integer> status, std::optional<Integer> type, std::optional<Integer> alarmtime, std::optional<Integer> fixedtime) {
     Alarm self;
 
-    default_alarm(self, code, type, alarmtime, fixedtime);
+    default_alarm(self, code, status, type, alarmtime, fixedtime);
 
     return self;
 }
 
-void WarGrey::SCADA::default_alarm(Alarm& self, std::optional<Integer> code, std::optional<Integer> type, std::optional<Integer> alarmtime, std::optional<Integer> fixedtime) {
+void WarGrey::SCADA::default_alarm(Alarm& self, std::optional<Integer> code, std::optional<Integer> status, std::optional<Integer> type, std::optional<Integer> alarmtime, std::optional<Integer> fixedtime) {
     self.uuid = pk64_timestamp();
     if (code.has_value()) { self.code = code.value(); }
+    if (status.has_value()) { self.status = status.value(); }
     self.type = ((type.has_value()) ? type.value() : 1000);
     if (alarmtime.has_value()) { self.alarmtime = alarmtime.value(); }
     self.fixedtime = ((fixedtime.has_value()) ? fixedtime.value() : 0);
@@ -44,17 +46,19 @@ void WarGrey::SCADA::refresh_alarm(Alarm& self) {
 void WarGrey::SCADA::store_alarm(Alarm& self, IPreparedStatement* stmt) {
     stmt->bind_parameter(0U, self.uuid);
     stmt->bind_parameter(1U, self.code);
-    stmt->bind_parameter(2U, self.type);
-    stmt->bind_parameter(3U, self.alarmtime);
-    stmt->bind_parameter(4U, self.fixedtime);
+    stmt->bind_parameter(2U, self.status);
+    stmt->bind_parameter(3U, self.type);
+    stmt->bind_parameter(4U, self.alarmtime);
+    stmt->bind_parameter(5U, self.fixedtime);
 }
 
 void WarGrey::SCADA::restore_alarm(Alarm& self, IPreparedStatement* stmt) {
     self.uuid = stmt->column_int64(0U);
     self.code = stmt->column_int64(1U);
-    self.type = stmt->column_maybe_int64(2U);
-    self.alarmtime = stmt->column_int64(3U);
-    self.fixedtime = stmt->column_maybe_int64(4U);
+    self.status = stmt->column_int64(2U);
+    self.type = stmt->column_maybe_int64(3U);
+    self.alarmtime = stmt->column_int64(4U);
+    self.fixedtime = stmt->column_maybe_int64(5U);
 }
 
 /**************************************************************************************************/
@@ -163,12 +167,13 @@ void WarGrey::SCADA::update_alarm(IDBSystem* dbc, Alarm* selves, size_t count, b
                 refresh_alarm(selves[i]);
             }
 
-            stmt->bind_parameter(4U, selves[i].uuid);
+            stmt->bind_parameter(5U, selves[i].uuid);
 
             stmt->bind_parameter(0U, selves[i].code);
-            stmt->bind_parameter(1U, selves[i].type);
-            stmt->bind_parameter(2U, selves[i].alarmtime);
-            stmt->bind_parameter(3U, selves[i].fixedtime);
+            stmt->bind_parameter(1U, selves[i].status);
+            stmt->bind_parameter(2U, selves[i].type);
+            stmt->bind_parameter(3U, selves[i].alarmtime);
+            stmt->bind_parameter(4U, selves[i].fixedtime);
 
             dbc->exec(stmt);
             stmt->reset(true);
