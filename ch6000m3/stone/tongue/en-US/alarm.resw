@@ -32,17 +32,17 @@
     <data name="150" xml:space="preserve"> <value>MasterTankLS2</value> </data>
     <data name="162" xml:space="preserve"> <value>VisorTankLS2</value> </data>
     <data name="176" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="177" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="178" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="179" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="180" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="181" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="182" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="183" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="184" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="185" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="186" xml:space="preserve"> <value>PumpA2C</value> </data>
-    <data name="187" xml:space="preserve"> <value>PumpA2C</value> </data>
+    <data name="177" xml:space="preserve"> <value>PumpC2A</value> </data>
+    <data name="178" xml:space="preserve"> <value>PumpB2C</value> </data>
+    <data name="179" xml:space="preserve"> <value>PumpC2B</value> </data>
+    <data name="180" xml:space="preserve"> <value>PumpF2C</value> </data>
+    <data name="181" xml:space="preserve"> <value>PumpC2F</value> </data>
+    <data name="182" xml:space="preserve"> <value>PumpH2F</value> </data>
+    <data name="183" xml:space="preserve"> <value>PumpF2H</value> </data>
+    <data name="184" xml:space="preserve"> <value>PumpG2F</value> </data>
+    <data name="185" xml:space="preserve"> <value>PumpF2G</value> </data>
+    <data name="186" xml:space="preserve"> <value>PumpI2J</value> </data>
+    <data name="187" xml:space="preserve"> <value>PumpJ2I</value> </data>
     <data name="195" xml:space="preserve"> <value>ShoreWinchEmergence</value> </data>
     <data name="207" xml:space="preserve"> <value>PSDTEmergence</value> </data>
     <data name="215" xml:space="preserve"> <value>PSDIEmergence</value> </data>
@@ -148,17 +148,17 @@
     <data name="MasterTankLS2" xml:space="preserve"> <value>Master Tank Level Ultra Low</value> </data>
     <data name="VisorTankLS2" xml:space="preserve"> <value>Drag Visor Tank Level Ultra Low</value> </data>
     <data name="PumpA2C" xml:space="preserve"> <value>Pump A Replace C</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump C Replace A</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump B Replace C</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump C Replace B</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump F Replace C</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump C Replace F</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump H Replace F</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump F Replace H</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump G Replace F</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump F Replace G</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump I Replace J</value> </data>
-    <data name="PumpA2C" xml:space="preserve"> <value>Pump J Replace I</value> </data>
+    <data name="PumpC2A" xml:space="preserve"> <value>Pump C Replace A</value> </data>
+    <data name="PumpB2C" xml:space="preserve"> <value>Pump B Replace C</value> </data>
+    <data name="PumpC2B" xml:space="preserve"> <value>Pump C Replace B</value> </data>
+    <data name="PumpF2C" xml:space="preserve"> <value>Pump F Replace C</value> </data>
+    <data name="PumpC2F" xml:space="preserve"> <value>Pump C Replace F</value> </data>
+    <data name="PumpH2F" xml:space="preserve"> <value>Pump H Replace F</value> </data>
+    <data name="PumpF2H" xml:space="preserve"> <value>Pump F Replace H</value> </data>
+    <data name="PumpG2F" xml:space="preserve"> <value>Pump G Replace F</value> </data>
+    <data name="PumpF2G" xml:space="preserve"> <value>Pump F Replace G</value> </data>
+    <data name="PumpI2J" xml:space="preserve"> <value>Pump I Replace J</value> </data>
+    <data name="PumpJ2I" xml:space="preserve"> <value>Pump J Replace I</value> </data>
     <data name="ShoreWinchEmergence" xml:space="preserve"> <value>Shore Dischange Winch Emergence</value> </data>
     <data name="PSDTEmergence" xml:space="preserve"> <value>PS Drag Trunnion Emergence</value> </data>
     <data name="PSDIEmergence" xml:space="preserve"> <value>PS Drag Intermediate Emergence</value> </data>

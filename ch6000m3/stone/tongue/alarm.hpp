@@ -43,17 +43,17 @@ namespace WarGrey::SCADA {
         static WarGrey::SCADA::alarm* MasterTankLS2() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(150U); } // Master Tank Level Ultra Low
         static WarGrey::SCADA::alarm* VisorTankLS2() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(162U); } // Drag Visor Tank Level Ultra Low
         static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(176U); } // Pump A Replace C
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(177U); } // Pump C Replace A
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(178U); } // Pump B Replace C
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(179U); } // Pump C Replace B
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(180U); } // Pump F Replace C
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(181U); } // Pump C Replace F
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(182U); } // Pump H Replace F
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(183U); } // Pump F Replace H
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(184U); } // Pump G Replace F
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(185U); } // Pump F Replace G
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(186U); } // Pump I Replace J
-        static WarGrey::SCADA::alarm* PumpA2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(187U); } // Pump J Replace I
+        static WarGrey::SCADA::alarm* PumpC2A() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(177U); } // Pump C Replace A
+        static WarGrey::SCADA::alarm* PumpB2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(178U); } // Pump B Replace C
+        static WarGrey::SCADA::alarm* PumpC2B() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(179U); } // Pump C Replace B
+        static WarGrey::SCADA::alarm* PumpF2C() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(180U); } // Pump F Replace C
+        static WarGrey::SCADA::alarm* PumpC2F() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(181U); } // Pump C Replace F
+        static WarGrey::SCADA::alarm* PumpH2F() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(182U); } // Pump H Replace F
+        static WarGrey::SCADA::alarm* PumpF2H() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(183U); } // Pump F Replace H
+        static WarGrey::SCADA::alarm* PumpG2F() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(184U); } // Pump G Replace F
+        static WarGrey::SCADA::alarm* PumpF2G() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(185U); } // Pump F Replace G
+        static WarGrey::SCADA::alarm* PumpI2J() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(186U); } // Pump I Replace J
+        static WarGrey::SCADA::alarm* PumpJ2I() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(187U); } // Pump J Replace I
         static WarGrey::SCADA::alarm* ShoreWinchEmergence() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(195U); } // Shore Dischange Winch Emergence
         static WarGrey::SCADA::alarm* PSDTEmergence() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(207U); } // PS Drag Trunnion Emergence
         static WarGrey::SCADA::alarm* PSDIEmergence() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::alarm>::UnsafeTongue(215U); } // PS Drag Intermediate Emergence
