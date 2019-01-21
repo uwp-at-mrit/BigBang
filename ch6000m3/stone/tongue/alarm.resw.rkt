@@ -17,8 +17,7 @@
 
 (define alarm-id
   (lambda [DB idx bidx]
-    (define offset (if (= DB 4) 4 204))
-    (+ (* (+ idx offset) 8) bidx)))
+    (+ (* idx 8) bidx)))
 
 (define identify
   (lambda [tokens]
