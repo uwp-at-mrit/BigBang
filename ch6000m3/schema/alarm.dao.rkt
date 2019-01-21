@@ -4,7 +4,7 @@
 
 (define-table alarm #:as Alarm #:with [uuid] #:order-by alarmtime
   ([uuid          : Integer       #:default pk64_timestamp]
-   [code          : Integer       #:not-null]
+   [index         : Integer       #:not-null]
    [type          : Integer       #:default 1000]
    [alarmtime     : Integer       #:not-null]
    [fixedtime     : Integer       #:default 0])
