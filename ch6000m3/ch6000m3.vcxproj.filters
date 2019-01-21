@@ -38,11 +38,11 @@
     <Filter Include="schema">
       <UniqueIdentifier>{2825713d-aae4-492e-b943-113d12c31da5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="schema\timeseries">
-      <UniqueIdentifier>{100a3152-8298-496b-adf9-c7fc74c297ff}</UniqueIdentifier>
-    </Filter>
     <Filter Include="widget">
       <UniqueIdentifier>{fca0f529-e967-4022-8c69-02c436a04cbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="schema\datalet">
+      <UniqueIdentifier>{100a3152-8298-496b-adf9-c7fc74c297ff}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -139,9 +139,6 @@
     <ClCompile Include="decorator\ship.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="schema\timeseries\earthwork_ds.cpp">
-      <Filter>schema\timeseries</Filter>
-    </ClCompile>
     <ClCompile Include="iotables\di_winches.cpp">
       <Filter>iotables</Filter>
     </ClCompile>
@@ -172,6 +169,13 @@
     </ClCompile>
     <ClCompile Include="widget\alarms.cpp">
       <Filter>widget</Filter>
+    </ClCompile>
+    <ClCompile Include="schema\alarm.cpp">
+      <Filter>schema</Filter>
+    </ClCompile>
+    <ClCompile Include="schema\datalet\alarm_tbl.cpp" />
+    <ClCompile Include="schema\datalet\earthwork_ts.cpp">
+      <Filter>schema\datalet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -289,9 +293,6 @@
     <ClInclude Include="decorator\ship.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
-    <ClInclude Include="schema\timeseries\earthwork_ds.hpp">
-      <Filter>schema\timeseries</Filter>
-    </ClInclude>
     <ClInclude Include="iotables\di_winches.hpp">
       <Filter>iotables</Filter>
     </ClInclude>
@@ -334,6 +335,13 @@
     </ClInclude>
     <ClInclude Include="stone\tongue\alarm.hpp">
       <Filter>stone\tongue</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\alarm.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\datalet\alarm_tbl.hpp" />
+    <ClInclude Include="schema\datalet\earthwork_ts.hpp">
+      <Filter>schema\datalet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -491,6 +499,9 @@
     </None>
     <None Include="stone\tongue\alarm.resw.rkt">
       <Filter>stone\tongue</Filter>
+    </None>
+    <None Include="schema\alarm.dao.rkt">
+      <Filter>schema</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

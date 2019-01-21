@@ -106,13 +106,13 @@ namespace WarGrey::SCADA {
 		void on_maniplation_complete(long long open_s, long long close_s) override;
 
 	public:
+		void set_values(double* values, bool persistent = true, long long timepoint_ms = 0LL);
 		void set_history_interval(long long open_s, long long close_s, bool force = false);
 		void scroll_to_timepoint(long long timepoint_ms, float visual_boundary_proportion_of_series_interval = 1.5F);
 		void no_selected();
 
 	protected:
 		void set_value(unsigned int idx, double value, long long timepoint_ms = 0LL);
-		void set_values(double* values, bool persistent = true, long long timepoint_ms = 0LL);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimeSeriesState state, WarGrey::SCADA::TimeSeriesStyle& style) override;
@@ -210,14 +210,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		using ITimeSerieslet::set_value;
-		using ITimeSerieslet::set_values;
 
 		void set_value(Name slot, double value, long long timepoint_ms = 0LL) {
 			ITimeSerieslet::set_value(_I(slot), value, timepoint_ms);
-		}
-
-		void set_values(double* values, bool persistent = true, long long timepoint_ms = 0LL) {
-			ITimeSerieslet::set_values(values, persistent, timepoint_ms);
 		}
 
 		void close_line(Name slot, double alpha) {

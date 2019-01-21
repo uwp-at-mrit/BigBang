@@ -305,8 +305,12 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 		long long request_earliest_s = std::min(this->realtime.start, limit - this->history_span);
 
 		if (this->loading_timepoint > request_earliest_s) {
-			if ((this->data_source != nullptr) && this->data_source->ready() && (!this->data_source->loading())) {
-				this->data_source->load(this, this->loading_timepoint, (this->loading_timepoint - request_interval));
+			if (this->data_source != nullptr) {
+				if (this->data_source->ready() && (!this->data_source->loading())) {
+					this->data_source->load(this, this->loading_timepoint, (this->loading_timepoint - request_interval));
+				}
+			} else {
+				this->on_maniplation_complete(this->loading_timepoint, (this->loading_timepoint - request_interval));
 			}
 		}
 	}
@@ -459,7 +463,6 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	 */
 	float y_axis_0 = y_axis_max + haxes_box.Height + style.lines_thickness;
 	
-	ds->FillRectangle(x, y, this->width, this->height, Colours::Background);
 	ds->DrawCachedGeometry(this->vaxes, x, y, style.vaxes_color);
 	ds->FillGeometry(this->haxes, x, y, style.haxes_color);
 

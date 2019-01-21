@@ -14,7 +14,9 @@ static std::string columns_join(const char* prefix, const char* separator, const
 	std::string sql = prefix;
 
 	for (size_t i = 0; i < c; i++) {
+		sql += "\"";
 		sql += cols[i].name;
+		sql += "\"";
 		sql += ((i < c - 1) ? separator : suffix);
 	}
 
@@ -25,7 +27,9 @@ static std::string columns_join(const char* prefix, const char* separator, const
 	std::string sql = prefix;
 
 	for (size_t i = 0; i < c; i++) {
+		sql += "\"";
 		sql += cols[i];
+		sql += "\"";
 		sql += ((i < c - 1) ? separator : suffix);
 	}
 
@@ -54,7 +58,7 @@ std::string VirtualSQLite3::create_table(const char* tablename, const char* rowi
 	}
 
 	for (size_t i = 0; i < count; i++) {
-		std::string column = make_nstring("%s %S", this->columns[i].name, sqlite_type_map(this->columns[i].type));
+		std::string column = make_nstring("\"%s\" %S", this->columns[i].name, sqlite_type_map(this->columns[i].type));
 		bool nnil = db_column_notnull(this->columns[i]);
 		bool uniq = db_column_unique(this->columns[i]);
 
@@ -73,7 +77,9 @@ std::string VirtualSQLite3::create_table(const char* tablename, const char* rowi
 
 		for (size_t i = 0; i < this->count; i++) {
 			if (db_column_primary(this->columns[i])) {
+				sql += "\"";
 				sql += this->columns[i].name;
+				sql += "\"";
 				sql += ((pk_count == 1) ? ")" : ", ");
 				pk_count -= 1;
 			}
@@ -91,7 +97,9 @@ std::string VirtualSQLite3::insert_into(const char* tablename, bool replace) {
 	std::string parameters = "";
 
 	for (size_t i = 1; i <= this->count; i++) {
+		sql += "\"";
 		sql += this->columns[i - 1].name;
+		sql += "\"";
 		sql += ((i < this->count) ? ", " : ") VALUES(");
 		parameters += "?";
 		parameters += ((i < this->count) ? ", " : ");");
@@ -136,7 +144,9 @@ std::string VirtualSQLite3::update_set(const char* tablename, const char* rowids
 
 	for (size_t i = 0; i < this->count; i++) {
 		if (!db_column_primary(this->columns[i])) {
+			sql += "\"";
 			sql += this->columns[i].name;
+			sql += "\"";
 			sql += ((i < this->count - 1) ? " = ?, " : " = ? ");
 		}
 	}

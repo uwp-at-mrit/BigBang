@@ -117,178 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Ready" xml:space="preserve">
-    <value>Ready</value>
+  <data name="AlarmTime" xml:space="preserve">
+    <value>Alarm Time</value>
   </data>
-  <data name="Remote" xml:space="preserve">
-    <value>Control Remotely</value>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
   </data>
-  <data name="Running" xml:space="preserve">
-    <value>Running</value>
+  <data name="Event" xml:space="preserve">
+    <value>Event</value>
   </data>
-  <data name="Starting" xml:space="preserve">
-    <value>Turning On</value>
+  <data name="FixedTime" xml:space="preserve">
+    <value>Fixed Time</value>
   </data>
-  <data name="Stopped" xml:space="preserve">
-    <value>Not Running</value>
-  </data>
-  <data name="Stopping" xml:space="preserve">
-    <value>Turning Off</value>
-  </data>
-  <data name="Unstartable" xml:space="preserve">
-    <value>Failed to Turn On</value>
-  </data>
-  <data name="Unstoppable" xml:space="preserve">
-    <value>Failed to Turn Off</value>
-  </data>
-  <data name="hydraulic_pump" xml:space="preserve">
-    <value>Hydraulic Pump</value>
-  </data>
-  <data name="gate_valve" xml:space="preserve">
-    <value>Gate Valve</value>
-  </data>
-  <data name="Closed" xml:space="preserve">
-    <value>Fully Closed</value>
-  </data>
-  <data name="Closing" xml:space="preserve">
-    <value>Turning Off</value>
-  </data>
-  <data name="CloseReady" xml:space="preserve">
-    <value>Ready to Close</value>
-  </data>
-  <data name="OpenReady" xml:space="preserve">
-    <value>Ready to Open</value>
-  </data>
-  <data name="VirtualClose" xml:space="preserve">
-    <value>Virtual Close</value>
-  </data>
-  <data name="VirtualOpen" xml:space="preserve">
-    <value>Virtual Open</value>
-  </data>
-  <data name="Open" xml:space="preserve">
-    <value>Fully Open</value>
-  </data>
-  <data name="Opening" xml:space="preserve">
-    <value>Turning On</value>
-  </data>
-  <data name="Unclosable" xml:space="preserve">
-    <value>Failed to Close</value>
-  </data>
-  <data name="Unopenable" xml:space="preserve">
-    <value>Failed to Open</value>
-  </data>
-  <data name="Disabled" xml:space="preserve">
-    <value>Disabled</value>
-  </data>
-  <data name="upperdoor" xml:space="preserve">
-    <value>Upper Hopper Door</value>
-  </data>
-  <data name="hopperdoor" xml:space="preserve">
-    <value>Hopper Door</value>
-  </data>
-  <data name="winch_1" xml:space="preserve">
-    <value>Winch</value>
-  </data>
-  <data name="motor_valve" xml:space="preserve">
-    <value>Motor Valve</value>
-  </data>
-  <data name="hopper_pump" xml:space="preserve">
-    <value>Hopper Pump</value>
-  </data>
-  <data name="water_pump" xml:space="preserve">
-    <value>Water Pump</value>
-  </data>
-  <data name="FastWindingOut" xml:space="preserve">
-    <value>High-Speed Winding Out</value>
-  </data>
-  <data name="FastWindingUp" xml:space="preserve">
-    <value>High-Speed Winding Up</value>
-  </data>
-  <data name="WindingOut" xml:space="preserve">
-    <value>Winding Out</value>
-  </data>
-  <data name="WindingUp" xml:space="preserve">
-    <value>Winding Up</value>
-  </data>
-  <data name="Unlettable" xml:space="preserve">
-    <value>Failed to Wind Out</value>
-  </data>
-  <data name="Unpullable" xml:space="preserve">
-    <value>Failed to Wind Up</value>
-  </data>
-  <data name="FastWindOutReady" xml:space="preserve">
-    <value>Ready to High-Speed Wind Out</value>
-  </data>
-  <data name="FastWindUpReady" xml:space="preserve">
-    <value>Ready to High-Speed Wind Up</value>
-  </data>
-  <data name="LowerLimited" xml:space="preserve">
-    <value>Cable Lower Limited</value>
-  </data>
-  <data name="SoftLowerLimited" xml:space="preserve">
-    <value>Soft Lower Limited</value>
-  </data>
-  <data name="SoftUpperLimited" xml:space="preserve">
-    <value>Soft Upper Limited</value>
-  </data>
-  <data name="UpperLimited" xml:space="preserve">
-    <value>Cable Upper Limited</value>
-  </data>
-  <data name="WindOutReady" xml:space="preserve">
-    <value>Ready to Wind Out</value>
-  </data>
-  <data name="WindUpReady" xml:space="preserve">
-    <value>Ready to Wind Up</value>
-  </data>
-  <data name="winch_2" xml:space="preserve">
-    <value>Winch</value>
-  </data>
-  <data name="Slack" xml:space="preserve">
-    <value>Cable Slack</value>
-  </data>
-  <data name="SaddleLimited" xml:space="preserve">
-    <value>Saddle Limited</value>
-  </data>
-  <data name="SuctionLimited" xml:space="preserve">
-    <value>Suction Limited</value>
-  </data>
-  <data name="Broken" xml:space="preserve">
-    <value>Broken</value>
-  </data>
-  <data name="StartReady" xml:space="preserve">
-    <value>Ready to Start</value>
-  </data>
-  <data name="StopReady" xml:space="preserve">
-    <value>Ready to Stop</value>
-  </data>
-  <data name="Alert" xml:space="preserve">
-    <value>Alert</value>
-  </data>
-  <data name="Maintenance" xml:space="preserve">
-    <value>Maintenance</value>
-  </data>
-  <data name="SuctionSlack" xml:space="preserve">
-    <value>Suction + Slack</value>
-  </data>
-  <data name="SaddleSlack" xml:space="preserve">
-    <value>Saddle  + Slack</value>
-  </data>
-  <data name="Default" xml:space="preserve">
-    <value>Default</value>
-  </data>
-  <data name="FastWindReady" xml:space="preserve">
-    <value>Ready to High-Speed Wind Up or Out</value>
-  </data>
-  <data name="WindReady" xml:space="preserve">
-    <value>Ready to Wind Up or Out</value>
-  </data>
-  <data name="heater" xml:space="preserve">
-    <value>Heater</value>
-  </data>
-  <data name="Auto" xml:space="preserve">
-    <value>Auto</value>
-  </data>
-  <data name="Limited" xml:space="preserve">
-    <value>Power Limited</value>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
   </data>
 </root>

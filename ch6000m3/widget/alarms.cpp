@@ -4,7 +4,8 @@
 #include "stone/tongue/alarm.hpp"
 #include "configuration.hpp"
 
-#include "graphlet/shapelet.hpp"
+#include "graphlet/tablet.hpp"
+#include "schema/datalet/alarm_tbl.hpp"
 
 #include "satellite.hpp"
 #include "system.hpp"
@@ -21,9 +22,21 @@ using namespace Microsoft::Graphics::Canvas::Text;
 #include "time.hpp"
 
 /*************************************************************************************************/
-private class Alarms : public ISatellite, public PLCConfirmation {
+private class AlarmMS : public ISatellite, public PLCConfirmation {
 public:
-	Alarms() : ISatellite(default_logging_level, __MODULE__) {}
+	virtual ~AlarmMS() noexcept {
+		this->datasource->destroy();
+	}
+
+	AlarmMS() : ISatellite(default_logging_level, __MODULE__), margin(0.0F) {
+		Syslog* logger = make_system_logger(default_logging_level, "AlarmHistory");
+
+		this->style.resolve_column_width_percentage = alarm_column_width_configure;
+		this->style.fill_cell_alignment = alarm_cell_alignment_configure;
+
+		this->datasource = new AlarmDataSource(logger, RotationPeriod::Daily);
+		this->datasource->reference();
+	}
 
 	void fill_extent(float* width, float* height) {
 		float margin = large_font_size * 4.0F;
@@ -40,20 +53,28 @@ public:
 	}
 
 	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
-		Alarm* alarm = Alarm::first();
+		Alarms* alarm = Alarms::first();
+		unsigned int db, dbx;
+		Alarm event;
 
+		double now = current_inexact_milliseconds();
+	
 		while (alarm != nullptr) {
-			const uint8* db = ((alarm->ToIndex() > 3000L) ? DB205 : DB4);
-			bool alerting = DBX(db, alarm->ToIndex());
+			alarm_index_translate(alarm->ToIndex(), &db, &dbx);
+			bool alerting = DBX(((db == 4) ? DB4 : DB205), dbx);
 
 			if (alerting) {
+				this->datasource->save(timepoint_ms, alarm->ToIndex(), event);
 				logger->log_message(Log::Alarm, alarm->ToLocalString());
 			} else {
-				//logger->log_message(Log::Info, alarm->ToLocalString());
+				alarm->ToLocalString();
 			}
 
 			alarm = alarm->foreward();
 		}
+
+		this->get_logger()->log_message(Log::Info, L"it took %lfms",
+			current_inexact_milliseconds() - now);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -63,27 +84,36 @@ public:
 
 public:
 	void load(CanvasCreateResourcesReason reason, float width, float height) override {
+		float inset = this->margin * 2.0F;
+
+		this->table = this->insert_one(new Tablet<AMS>(__MODULE__, width - inset, height - inset));
+		this->table->set_style(this->style);
 	}
 
 	void reflow(float width, float height) override {
+		this->move_to(this->table, this->margin, this->margin);
 	}
 
 public:
-	bool Alarms::can_select(IGraphlet* g) override {
+	bool can_select(IGraphlet* g) override {
 		return false;
 	}
 
 private: // never delete these graphlets manually.
+	Tablet<AMS>* table;
 
 private:
+	AlarmDataSource* datasource;
+	TableStyle style;
+	float margin;
 };
 
 /*************************************************************************************************/
-static Alarms* the_alarmer = nullptr;
+static AlarmMS* the_alarmer = nullptr;
 
 void WarGrey::SCADA::initialize_the_alarm(PLCMaster* plc) {
 	if (the_alarmer == nullptr) {
-		the_alarmer = new Alarms();
+		the_alarmer = new AlarmMS();
 
 		plc->push_confirmation_receiver(the_alarmer);
 	}

@@ -4,7 +4,7 @@
 #include "configuration.hpp"
 #include "menu.hpp"
 
-#include "schema/timeseries/earthwork_ds.hpp"
+#include "schema/datalet/earthwork_ts.hpp"
 
 #include "graphlet/dashboard/cylinderlet.hpp"
 #include "graphlet/device/overflowlet.hpp"
@@ -47,11 +47,16 @@ private enum class DL : unsigned int {
 /*************************************************************************************************/
 private class Draughts final : public PLCConfirmation {
 public:
+	virtual ~Draughts() noexcept {
+		this->datasource->destroy();
+	}
+
 	Draughts(DraughtsPage* master, ShipDecorator* ship, bool timemachine) : master(master), decorator(ship)
 		, timemachine(timemachine), departure(0LL), destination(0LL) {
 		Syslog* logger = make_system_logger(default_logging_level, "EarthWorkHistory");
 
 		this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Daily);
+		this->datasource->reference();
 
 		this->label_font = make_bold_text_format(large_font_size);
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2U);
@@ -350,7 +355,7 @@ private:
 private:
 	DraughtsPage* master;
 	ShipDecorator* decorator;
-	EarthWorkDataSource* datasource; // managed by the ITimeSerieslet
+	EarthWorkDataSource* datasource;
 
 private:
 	long long departure;

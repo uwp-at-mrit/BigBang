@@ -210,6 +210,7 @@
     <None Include="ch6000m3_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="ch6000m3.scrbl" />
+    <None Include="schema\alarm.dao.rkt" />
     <None Include="schema\earthwork.dao.rkt" />
     <None Include="stone\tongue\alarm.resw.rkt" />
   </ItemGroup>
@@ -357,8 +358,10 @@
     <ClCompile Include="page\dredges.cpp" />
     <ClCompile Include="page\lubricatings.cpp" />
     <ClCompile Include="iotables\ai_dredges.cpp" />
+    <ClCompile Include="schema\alarm.cpp" />
+    <ClCompile Include="schema\datalet\alarm_tbl.cpp" />
     <ClCompile Include="schema\earthwork.cpp" />
-    <ClCompile Include="schema\timeseries\earthwork_ds.cpp" />
+    <ClCompile Include="schema\datalet\earthwork_ts.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\flushs.cpp" />
     <ClCompile Include="page\charges.cpp" />
@@ -414,8 +417,10 @@
     <ClInclude Include="iotables\do_pumps.hpp" />
     <ClInclude Include="iotables\do_valves.hpp" />
     <ClInclude Include="iotables\do_water_pumps.hpp" />
+    <ClInclude Include="schema\alarm.hpp" />
+    <ClInclude Include="schema\datalet\alarm_tbl.hpp" />
     <ClInclude Include="schema\earthwork.hpp" />
-    <ClInclude Include="schema\timeseries\earthwork_ds.hpp" />
+    <ClInclude Include="schema\datalet\earthwork_ts.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\flushs.hpp" />
     <ClInclude Include="page\charges.hpp" />

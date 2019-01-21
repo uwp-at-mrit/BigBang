@@ -176,6 +176,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.cpp">
       <Filter>graphlet\time</Filter>
     </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\tablet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -356,6 +359,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.hpp">
       <Filter>graphlet\time</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\tablet.hpp">
+      <Filter>graphlet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

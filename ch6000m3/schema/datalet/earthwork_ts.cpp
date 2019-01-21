@@ -1,6 +1,4 @@
-﻿#include <ppltasks.h>
-
-#include "schema/timeseries/earthwork_ds.hpp"
+﻿#include "schema/datalet/earthwork_ts.hpp"
 #include "schema/earthwork.hpp"
 #include "dbmisc.hpp"
 
@@ -44,16 +42,15 @@ public:
 public:
 	bool step(EarthWork& ework, bool asc, int code) override {
 		long long ts = ework.timestamp;
-		bool okay = ((ts >= this->open_timepoint) && (ts <= this->close_timepoint));
-
-		if (okay) {
+		
+		if ((ts >= this->open_timepoint) && (ts <= this->close_timepoint)) {
 			this->tempdata[_I(EWTS::EarthWork)] = ework.product;
 			this->tempdata[_I(EWTS::Capacity)] = ework.vessel;
 			this->tempdata[_I(EWTS::HopperHeight)] = ework.hopper_height;
 			this->tempdata[_I(EWTS::Loading)] = ework.loading;
 			this->tempdata[_I(EWTS::Displacement)] = ework.displacement;
 
-			this->receiver->on_datum_values(this->open_s, ts, tempdata, _N(EWTS));
+			this->receiver->on_datum_values(this->open_s, ts, this->tempdata, _N(EWTS));
 
 			this->count++;
 		}
