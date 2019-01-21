@@ -35,7 +35,7 @@
     (fprintf /dev/stdout "            static const unsigned int indexes[] = {")
     (for ([datum (in-list (sort data < #:key tongue-index))]
           [index (in-naturals)])
-      (cond [(zero? (remainder index 16)) (fprintf /dev/stdout "~a~n                ~aU" (if (zero? index) "" ",") (tongue-index datum))]
+      (cond [(zero? (remainder index 8)) (fprintf /dev/stdout "~a~n                ~aU" (if (zero? index) "" ",") (tongue-index datum))]
             [else (fprintf /dev/stdout ", ~aU" (tongue-index datum))]))
     (newline /dev/stdout)
     (fprintf /dev/stdout "            };~n")

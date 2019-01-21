@@ -17,7 +17,8 @@
 
 (define alarm-id
   (lambda [DB idx bidx]
-    (+ (* idx 8) bidx)))
+    (+ (arithmetic-shift DB 16)
+       (+ (* idx 8) bidx))))
 
 (define identify
   (lambda [tokens]
