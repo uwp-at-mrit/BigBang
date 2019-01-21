@@ -91,6 +91,7 @@
 
 (define &interface
   (lambda [IName Table indent]
+    (&htab indent)
     (printf "private class ~a abstract {~n" IName)
     (&htab indent)
     (printf "public:~n")
