@@ -11,23 +11,22 @@ namespace WarGrey::SCADA {
     private struct Alarm {
         Integer uuid;
         Integer code;
-        Integer status;
         std::optional<Integer> type;
         Integer alarmtime;
         std::optional<Integer> fixedtime;
     };
 
-private class IAlarmCursor abstract {
+    private class IAlarmCursor abstract {
     public:
         virtual bool step(WarGrey::SCADA::Alarm& occurrence, bool asc, int code) = 0;
     };
 
-    private enum class alarm { uuid, code, status, type, alarmtime, fixedtime, _ };
+    private enum class alarm { uuid, code, type, alarmtime, fixedtime, _ };
 
     WarGrey::SCADA::Alarm_pk alarm_identity(WarGrey::SCADA::Alarm& self);
 
-    WarGrey::SCADA::Alarm make_alarm(std::optional<Integer> code = std::nullopt, std::optional<Integer> status = std::nullopt, std::optional<Integer> type = std::nullopt, std::optional<Integer> alarmtime = std::nullopt, std::optional<Integer> fixedtime = std::nullopt);
-    void default_alarm(WarGrey::SCADA::Alarm& self, std::optional<Integer> code = std::nullopt, std::optional<Integer> status = std::nullopt, std::optional<Integer> type = std::nullopt, std::optional<Integer> alarmtime = std::nullopt, std::optional<Integer> fixedtime = std::nullopt);
+    WarGrey::SCADA::Alarm make_alarm(std::optional<Integer> code = std::nullopt, std::optional<Integer> type = std::nullopt, std::optional<Integer> alarmtime = std::nullopt, std::optional<Integer> fixedtime = std::nullopt);
+    void default_alarm(WarGrey::SCADA::Alarm& self, std::optional<Integer> code = std::nullopt, std::optional<Integer> type = std::nullopt, std::optional<Integer> alarmtime = std::nullopt, std::optional<Integer> fixedtime = std::nullopt);
     void refresh_alarm(WarGrey::SCADA::Alarm& self);
     void store_alarm(WarGrey::SCADA::Alarm& self, WarGrey::SCADA::IPreparedStatement* stmt);
     void restore_alarm(WarGrey::SCADA::Alarm& self, WarGrey::SCADA::IPreparedStatement* stmt);
