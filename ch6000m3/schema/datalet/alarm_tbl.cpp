@@ -30,11 +30,21 @@ float WarGrey::SCADA::alarm_column_width_configure(unsigned int idx, unsigned in
 	return percentage;
 }
 
-void WarGrey::SCADA::alarm_cell_alignment_configure(unsigned int idx, float* fx, float* fy) {
+long long WarGrey::SCADA::alarm_salt(Alarm& alarm) {
+	long long salt = alarm.uuid; // see pk64_timestamp();
+
+	return salt;
+}
+
+void WarGrey::SCADA::alarm_cell_style_configure(unsigned int idx, long long salt, TableCellStyle* style) {
 	switch (_E(AMS, idx)) {
-	case AMS::Event: SET_VALUES(fx, 0.0F, fy, 0.5F); break;
-	default: SET_VALUES(fx, 0.5F, fy, 0.5F); break;
+	case AMS::Event: style->align_fx = 0.0F; break;
+	default: style->align_fx = 0.5F; break;
 	}
+
+	style->align_fy = 0.5F;
+	style->background_color = Colours::Background;
+	style->background_color = Colours::GhostWhite;
 }
 
 void WarGrey::SCADA::alarm_extract(Alarm& alarm, Platform::String^ fields[]) {
@@ -78,7 +88,7 @@ public:
 		
 		if (go_on) {
 			alarm_extract(alarm, this->tempdata);
-			this->receiver->on_row_datum(this->request_count, ++this->loaded_count, this->tempdata, _N(AMS));
+			this->receiver->on_row_datum(this->request_count, ++this->loaded_count, alarm_salt(alarm), this->tempdata, _N(AMS));
 		}
 
 		return go_on;

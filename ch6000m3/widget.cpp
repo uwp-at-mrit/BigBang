@@ -107,6 +107,7 @@ public:
 		Buttonlet* target = nullptr;
 
 		update_the_shown_gallery(count, interval, uptime, false);
+		update_the_shown_alarm(count, interval, uptime);
 
 		if ((this->settings != nullptr) && (this->settings->shown())) {
 			this->settings->on_elapse(count, interval, uptime);

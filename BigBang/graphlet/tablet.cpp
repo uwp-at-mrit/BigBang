@@ -33,20 +33,25 @@ float WarGrey::SCADA::resolve_average_column_width(unsigned int idx, unsigned in
 	return 1.0F / float(column_count);
 }
 
-void WarGrey::SCADA::fill_cell_alignment_lc(unsigned int idx, float* fx, float* fy) {
-	SET_VALUES(fx, 0.0F, fy, 0.5F);
-}
+void WarGrey::SCADA::prepare_default_cell_style(unsigned int idx, long long row_identity, TableCellStyle* style) {
+	CAS_SLOT(style->background_color, Colours::Background);
+	CAS_SLOT(style->foreground_color, Colours::GhostWhite);
 
-void WarGrey::SCADA::fill_cell_alignment_cc(unsigned int idx, float* fx, float* fy) {
-	SET_VALUES(fx, 0.5F, fy, 0.5F);
-}
+	FLCAS_SLOT(style->margin, 2.0F);
+	FLCAS_SLOT(style->corner_radius, 8.0F);
 
-void WarGrey::SCADA::fill_cell_alignment_rc(unsigned int idx, float* fx, float* fy) {
-	SET_VALUES(fx, 1.0F, fy, 0.5F);
+	if ((style->align_fx < 0.0F) || (style->align_fx > 1.0F)) {
+		style->align_fx = 0.5F;
+	}
+
+	if ((style->align_fy < 0.0F) || (style->align_fy > 1.0F)) {
+		style->align_fy = 0.5F;
+	}
 }
 
 /*************************************************************************************************/
 private struct tcell {
+	long long row_salt;
 	Platform::String^ value;
 	CanvasTextLayout^ content;
 	CanvasTextFormat^ font;
@@ -75,30 +80,34 @@ public:
 		this->virtual_iterator_slot = this->virtual_current_slot + this->slot_count;
 	}
 
-	CanvasTextLayout^ cursor_step_backward() {
-		CanvasTextLayout^ value = nullptr;
+	bool cursor_step_backward(tcell* cell, unsigned int step_count = 1U) {
+		bool has_value = false;
 
-		if (this->virtual_iterator_slot >= this->virtual_history_slot) {
+		if ((this->virtual_iterator_slot + step_count - 1U) >= this->virtual_history_slot) {
 			long long iterator_slot = this->virtual_iterator_slot % this->slot_count;
 		
-			this->virtual_iterator_slot -= 1;
+			this->virtual_iterator_slot -= step_count;
 
 			if ((this->cells[iterator_slot].content == nullptr) || (this->cells[iterator_slot].font != this->cell_font)) {
 				this->cells[iterator_slot].content = make_text_layout(this->cells[iterator_slot].value, this->cell_font);
 				this->cells[iterator_slot].font = this->cell_font;
 			}
 
-			value = this->cells[iterator_slot].content;
+			(*cell) = this->cells[iterator_slot];
+			has_value = true;
+		} else {
+			this->virtual_iterator_slot -= step_count;
 		}
 
-		return value;
+		return has_value;
 	}
 
-	void push_front_value(Platform::String^ value) {
+	void push_front_value(long long salt, Platform::String^ value) {
 		long long current_slot = this->virtual_history_slot % this->slot_count;
 
 		if (!this->history_full) {
 			if (this->virtual_history_slot > this->virtual_current_slot) {
+				this->cells[current_slot].row_salt = salt;
 				this->cells[current_slot].value = value;
 				this->cells[current_slot].content = nullptr;
 				this->cells[current_slot].font = this->cell_font;
@@ -107,7 +116,7 @@ public:
 		}
 	}
 
-	void push_back_value(Platform::String^ value) {
+	void push_back_value(long long salt, Platform::String^ value) {
 		long long current_slot = this->virtual_current_slot % this->slot_count;
 
 		if (this->virtual_history_slot <= this->virtual_current_slot) {
@@ -115,8 +124,10 @@ public:
 			this->virtual_history_slot += 1;
 		}
 
+		this->cells[current_slot].row_salt = salt;
 		this->cells[current_slot].value = value;
 		this->cells[current_slot].content = nullptr;
+		this->cells[current_slot].font = this->cell_font;
 		this->virtual_current_slot += 1;
 	}
 
@@ -151,8 +162,6 @@ public:
 	CanvasTextLayout^ caption;
 	Platform::String^ name;
 	float width;
-	float fx;
-	float fy;
 
 private:
 	tcell* cells = nullptr;
@@ -228,7 +237,7 @@ void ITablet::fill_extent(float x, float y, float* w, float* h) {
 
 void ITablet::prepare_style(TableState status, TableStyle& style) {
 	CAS_SLOT(style.resolve_column_width_percentage, resolve_average_column_width);
-	CAS_SLOT(style.fill_cell_alignment, fill_cell_alignment_cc);
+	CAS_SLOT(style.prepare_cell_style, prepare_default_cell_style);
 
 	CAS_SLOT(style.head_font, table_default_head_font);
 	CAS_SLOT(style.cell_font, table_default_cell_font);
@@ -251,15 +260,10 @@ void ITablet::prepare_style(TableState status, TableStyle& style) {
 
 	FLCAS_SLOT(style.head_minheight_em, 2.000F);
 	FLCAS_SLOT(style.cell_height_em, 1.618F);
-
-	FLCAS_SLOT(style.cell_margin, 2.0F);
-	FLCAS_SLOT(style.cell_corner_radius, 8.0F);
 }
 
 void ITablet::apply_style(TableStyle& style) {
 	for (unsigned int idx = 0; idx < this->column_count; idx++) {
-		style.fill_cell_alignment(idx, &this->columns[idx].fx, &this->columns[idx].fy);
-		
 		this->columns[idx].width = style.resolve_column_width_percentage(idx, this->column_count) * this->width;
 		this->columns[idx].update_font(style.head_font, style.cell_font);
 	}
@@ -301,87 +305,9 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	}
 
 	if (this->page_row_count > 0) {
-		/*
-		for (unsigned idx = 0; idx < this->count; idx++) {
-			TableColumn* line = &this->lines[idx];
-			tsdouble cursor_flonum;
-
-			line->selected_value = std::nanf("not resolved");
-
-			if (!line->hiden) {
-				float minimum_diff = style.selected_thickness * 0.5F;
-				float tolerance = style.lines_thickness;
-				float last_x = std::nanf("no datum");
-				float last_y = std::nanf("no datum");
-				float rx = x + haxes_box.Width;
-				CanvasPathBuilder^ area = nullptr;
-
-				line->cursor_end();
-
-				while (line->cursor_step_backward(&cursor_flonum)) {
-					double fx = (double(cursor_flonum.timepoint) - double(ts->start * 1000)) / double(ts->span * 1000);
-					double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - cursor_flonum.value) / (this->vmax - this->vmin);
-					float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
-					float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
-					float this_diff = std::fabsf(this_x - x_axis_selected);
-
-					if (this_diff < minimum_diff) {
-						minimum_diff = this_diff;
-						line->y_axis_selected = this_y;
-						line->selected_value = cursor_flonum.value;
-					}
-
-					if (std::isnan(last_x) || (this_x > rx)) {
-						last_x = this_x;
-						last_y = this_y;
-						x_axis_max = last_x;
-					} else {
-						if (((last_x - this_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_max == last_x)) {
-							if (line->close_color == nullptr) {
-								ds->DrawLine(last_x, last_y, this_x, this_y, line->color, style.lines_thickness, style.lines_style);
-							} else {
-								if (area == nullptr) {
-									area = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-									area->BeginFigure(last_x, y_axis_0);
-									area->AddLine(last_x, last_y);
-									x_axis_max = last_x;
-								} else {
-									area->AddLine(this_x, this_y);
-								}
-							}
-
-							last_x = this_x;
-							last_y = this_y;
-						}
-
-						if (this_x < x) {
-							break;
-						}
-					}
-				}
-
-				if (area != nullptr) {
-					if (last_x == x_axis_max) {
-						area->EndFigure(CanvasFigureLoop::Open);
-						ds->DrawLine(last_x, last_y, last_x, y_axis_0, line->color, style.lines_thickness);
-					} else {
-						area->AddLine(last_x, y_axis_0);
-						area->EndFigure(CanvasFigureLoop::Closed);
-
-						{ // draw closed line area
-							CanvasGeometry^ garea = CanvasGeometry::CreatePath(area);
-
-							ds->FillGeometry(garea, 0.0F, 0.0F, line->close_color);
-							ds->DrawGeometry(garea, 0.0F, 0.0F, line->color, style.lines_thickness);
-
-						}
-					}
-				}
-			}
+		for (unsigned int idx = 0; idx < this->column_count; idx++) {
+			TableColumn* col = &this->columns[idx];
 		}
-
-		ds->DrawCachedGeometry(this->vmarks, x, y, style.vaxes_color);
-		ds->DrawCachedGeometry(this->hmarks, x, y, style.haxes_color); */
 	}
 
 	ds->DrawRectangle(x + border_off, y + border_off,
@@ -389,21 +315,23 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 		style.border_color, style.border_thickness);
 }
 
-void ITablet::set_row(Platform::String^ fields[]) {
+void ITablet::set_row(long long salt, Platform::String^ fields[]) {
 	TableStyle style = this->get_style();
 
 	for (unsigned int idx = 0; idx < this->column_count; idx++) {
-		this->columns[idx].push_back_value(fields[idx]);
+		this->columns[idx].push_back_value(salt, fields[idx]);
 	}
 
 	this->notify_updated();
 }
 
-void ITablet::on_row_datum(long long request_count, long long nth, Platform::String^ fields[], unsigned int n) {
+void ITablet::on_row_datum(long long request_count, long long nth, long long salt, Platform::String^ fields[], unsigned int n) {
 	if (this->history_max == request_count) {
 		for (unsigned int idx = 0; idx < this->column_count; idx++) {
-			this->columns[idx].push_front_value(fields[idx]);
+			this->columns[idx].push_front_value(salt, fields[idx]);
 		}
+
+		this->notify_updated();
 	}
 }
 
@@ -411,54 +339,6 @@ void ITablet::on_maniplation_complete(long long request_count) {
 	if (this->history_max == request_count) {
 		this->request_loading = false;
 	}
-}
-
-void ITablet::set_history_interval(long long open_s, long long close_s, bool force) {
-	/*
-	long long span = std::max(std::abs(open_s - close_s), this->realtime.span);
-	long long destination = std::max(open_s, close_s);
-
-	if (force || (this->history_destination != destination) || (this->history_span != span)) {
-		if (this->data_source != nullptr) {
-			this->data_source->cancel();
-		}
-
-		this->history_span = span;
-		this->history_destination = destination;
-
-		this->realtime.start = this->history_destination - this->realtime.span;
-		this->loading_timepoint = this->history_destination;
-		this->history = this->realtime;
-
-		this->update_horizontal_axes(this->get_style());
-
-		for (unsigned int idx = 0; idx < this->count; idx++) {
-			this->construct_line(idx, this->lines[idx].name);
-		}
-
-		this->notify_updated();
-	}
-	*/
-}
-
-void ITablet::scroll_to_timepoint(long long timepoint_ms, float proportion) {
-	/*
-	long long axes_interval = this->realtime.span / this->realtime.step;
-	long long inset = (long long)(std::roundf(float(axes_interval) * proportion));
-	long long timepoint = timepoint_ms / 1000LL;
-
-	if (timepoint < this->realtime.start + inset) {
-		this->update_time_series(timepoint - inset);
-		this->notify_updated();
-	} else if (timepoint > (this->realtime.start + this->realtime.span - inset)) {
-		this->update_time_series(timepoint + inset + axes_interval - this->realtime.span);
-		this->notify_updated();
-	}
-
-	if (this->get_state() == TableState::Realtime) {
-		this->selected_x = float(timepoint - this->realtime.start) / float(this->realtime.span) * this->width;
-	}
-	*/
 }
 
 void ITablet::own_caret(bool yes) {

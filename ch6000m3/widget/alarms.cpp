@@ -32,7 +32,7 @@ public:
 		Syslog* logger = make_system_logger(default_logging_level, "AlarmHistory");
 
 		this->style.resolve_column_width_percentage = alarm_column_width_configure;
-		this->style.fill_cell_alignment = alarm_cell_alignment_configure;
+		this->style.prepare_cell_style = alarm_cell_style_configure;
 
 		this->datasource = new AlarmDataSource(logger, RotationPeriod::Daily);
 		this->datasource->reference();
@@ -64,10 +64,10 @@ public:
 			bool alerting = DBX(((db == 4) ? DB4 : DB205), dbx);
 
 			if (alerting) {
-				this->datasource->save(timepoint_ms, alarm->ToIndex(), event);
-				logger->log_message(Log::Alarm, alarm->ToLocalString());
+				//this->datasource->save(timepoint_ms, alarm->ToIndex(), event);
+				//logger->log_message(Log::Alarm, alarm->ToLocalString());
 			} else {
-				alarm->ToLocalString();
+				//alarm->ToLocalString();
 			}
 
 			alarm = alarm->foreward();
@@ -86,7 +86,7 @@ public:
 	void load(CanvasCreateResourcesReason reason, float width, float height) override {
 		float inset = this->margin * 2.0F;
 
-		this->table = this->insert_one(new Tablet<AMS>(__MODULE__, width - inset, height - inset));
+		this->table = this->insert_one(new Tablet<AMS>(__MODULE__, this->datasource, width - inset, height - inset));
 		this->table->set_style(this->style);
 	}
 
@@ -109,18 +109,26 @@ private:
 };
 
 /*************************************************************************************************/
-static AlarmMS* the_alarmer = nullptr;
+static AlarmMS* the_alarm = nullptr;
 
 void WarGrey::SCADA::initialize_the_alarm(PLCMaster* plc) {
-	if (the_alarmer == nullptr) {
-		the_alarmer = new AlarmMS();
+	if (the_alarm == nullptr) {
+		the_alarm = new AlarmMS();
 
-		plc->push_confirmation_receiver(the_alarmer);
+		plc->push_confirmation_receiver(the_alarm);
 	}
 }
 
 void WarGrey::SCADA::display_the_alarm() {
-	if (the_alarmer != nullptr) {
-		the_alarmer->show();
+	if (the_alarm != nullptr) {
+		the_alarm->show();
+	}
+}
+
+void WarGrey::SCADA::update_the_shown_alarm(long long count, long long interval, long long uptime) {
+	if (the_alarm != nullptr) {
+		if (the_alarm->shown()) {
+			the_alarm->on_elapse(count, interval, uptime);
+		}
 	}
 }

@@ -12,7 +12,9 @@ namespace WarGrey::SCADA {
 	private enum class AMS { Code, Event, Type, AlarmTime, FixedTime, _ };
 
 	float alarm_column_width_configure(unsigned int idx, unsigned int total);
-	void alarm_cell_alignment_configure(unsigned int idx, float* fx, float* fy);
+	void alarm_cell_style_configure(unsigned int idx, long long salt, WarGrey::SCADA::TableCellStyle* style);
+
+	long long alarm_salt(WarGrey::SCADA::Alarm& alarm);
 
 	void alarm_extract(WarGrey::SCADA::Alarm& alarm, Platform::String^ fields[]);
 

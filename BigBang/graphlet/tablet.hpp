@@ -10,16 +10,27 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	typedef float (*resolve_column_width_percentage)(unsigned int idx, unsigned int column_count);
-	typedef void (*fill_cell_alignment)(unsigned int idx, float* fx, float* fy);
-
 	class TableColumn;
 
 	private enum class TableState { Realtime, History, _ };
 
+	private struct TableCellStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ foreground_color;
+
+		float margin = -1.0F;
+		float corner_radius = -1.0F;
+
+		float align_fx = -1.0F;
+		float align_fy = -1.0F;
+	};
+
+	typedef float(*resolve_column_width_percentage)(unsigned int idx, unsigned int column_count);
+	typedef void (*prepare_cell_style)(unsigned int idx, long long row_identity, WarGrey::SCADA::TableCellStyle* style);
+
 	private struct TableStyle {
 		WarGrey::SCADA::resolve_column_width_percentage resolve_column_width_percentage = nullptr;
-		WarGrey::SCADA::fill_cell_alignment fill_cell_alignment = nullptr;
+		WarGrey::SCADA::prepare_cell_style prepare_cell_style = nullptr;
 
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ head_font;
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ cell_font;
@@ -43,23 +54,16 @@ namespace WarGrey::SCADA {
 
 		float head_minheight_em = -1.0F;
 		float cell_height_em = -1.0F;
-
-		float cell_margin = -1.0F;
-		float cell_corner_radius = -1.0F;
 	};
 
-
 	float resolve_average_column_width(unsigned int idx, unsigned int column_count);
-
-	void fill_cell_alignment_lc(unsigned int idx, float* fx, float* fy);
-	void fill_cell_alignment_cc(unsigned int idx, float* fx, float* fy);
-	void fill_cell_alignment_rc(unsigned int idx, float* fx, float* fy);
-
+	void prepare_default_cell_style(unsigned int idx, long long row_salt, WarGrey::SCADA::TableCellStyle* style);
+	
 	/************************************************************************************************/
 	private class ITableDataReceiver abstract {
 	public:
 		virtual void begin_maniplation_sequence() {}
-		virtual void on_row_datum(long long request_count, long long nth, Platform::String^ fields[], unsigned int n) = 0;
+		virtual void on_row_datum(long long request_count, long long nth, long long salt, Platform::String^ fields[], unsigned int n) = 0;
 		virtual void end_maniplation_sequence() {}
 
 	public:
@@ -98,14 +102,12 @@ namespace WarGrey::SCADA {
 		void own_caret(bool yes) override;
 
 	public:
-		void on_row_datum(long long request_count, long long nth, Platform::String^ fields[], unsigned int n) override;
+		void on_row_datum(long long request_count, long long nth, long long salt, Platform::String^ fields[], unsigned int n) override;
 		void on_maniplation_complete(long long request_count) override;
 
 	public:
-		void set_row(Platform::String^ fields[]);
-		void set_history_interval(long long open_s, long long close_s, bool force = false);
-		void scroll_to_timepoint(long long timepoint_ms, float visual_boundary_proportion_of_series_interval = 1.5F);
-
+		void set_row(long long salt, Platform::String^ fields[]);
+		
 	protected:
 		void prepare_style(WarGrey::SCADA::TableState state, WarGrey::SCADA::TableStyle& style) override;
 		void apply_style(WarGrey::SCADA::TableStyle& style) override;
