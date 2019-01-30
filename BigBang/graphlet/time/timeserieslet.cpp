@@ -627,7 +627,7 @@ void ITimeSerieslet::hide_line(unsigned int idx, bool yes_no) {
 	this->lines[idx].hiden = yes_no;
 }
 
-void ITimeSerieslet::set_value(unsigned int idx, double v, long long timepoint_ms) {
+void ITimeSerieslet::push_value(unsigned int idx, double v, long long timepoint_ms) {
 	long long timepoint = ((timepoint_ms <= 0) ? current_milliseconds() : timepoint_ms);
 	long long limit = ((this->history_destination <= 0) ? timepoint : (this->history_destination * 1000LL));
 	TimeSeriesStyle style = this->get_style();

@@ -112,7 +112,7 @@ namespace WarGrey::SCADA {
 		void no_selected();
 
 	protected:
-		void set_value(unsigned int idx, double value, long long timepoint_ms = 0LL);
+		void push_value(unsigned int idx, double value, long long timepoint_ms = 0LL);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimeSeriesState state, WarGrey::SCADA::TimeSeriesStyle& style) override;
@@ -209,10 +209,10 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
-		using ITimeSerieslet::set_value;
+		using ITimeSerieslet::push_value;
 
-		void set_value(Name slot, double value, long long timepoint_ms = 0LL) {
-			ITimeSerieslet::set_value(_I(slot), value, timepoint_ms);
+		void push_value(Name slot, double value, long long timepoint_ms = 0LL) {
+			ITimeSerieslet::push_value(_I(slot), value, timepoint_ms);
 		}
 
 		void close_line(Name slot, double alpha) {

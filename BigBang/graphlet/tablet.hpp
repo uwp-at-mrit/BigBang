@@ -10,8 +10,6 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	class TableColumn;
-
 	private enum class TableState { Realtime, History, _ };
 
 	private struct TableCellStyle {
@@ -36,8 +34,11 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ cell_font;
 
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_background_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_foreground_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cell_background_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cell_foreground_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_line_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cell_line_color;
 
@@ -54,12 +55,17 @@ namespace WarGrey::SCADA {
 
 		float head_minheight_em = -1.0F;
 		float cell_height_em = -1.0F;
+
+		float cell_corner_radius = -1.0F;
+		float cell_margin = -1.0F;
 	};
 
 	float resolve_average_column_width(unsigned int idx, unsigned int column_count);
 	void prepare_default_cell_style(unsigned int idx, long long row_salt, WarGrey::SCADA::TableCellStyle* style);
 	
 	/************************************************************************************************/
+	class TableBeing;
+
 	private class ITableDataReceiver abstract {
 	public:
 		virtual void begin_maniplation_sequence() {}
@@ -90,7 +96,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~ITablet() noexcept;
 
-		ITablet(WarGrey::SCADA::ITableDataSource* src, float width, float height, unsigned int column_count, long long history_max);
+		ITablet(WarGrey::SCADA::ITableDataSource* src, float width, float height, long long history_max);
 
 	public:
 		void update(long long count, long long interval, long long uptime) override;
@@ -106,18 +112,17 @@ namespace WarGrey::SCADA {
 		void on_maniplation_complete(long long request_count) override;
 
 	public:
-		void set_row(long long salt, Platform::String^ fields[]);
+		void push_row(long long salt, Platform::String^ fields[]);
 		
 	protected:
 		void prepare_style(WarGrey::SCADA::TableState state, WarGrey::SCADA::TableStyle& style) override;
 		void apply_style(WarGrey::SCADA::TableStyle& style) override;
 		
 	protected:
-		void construct_column(unsigned int idx, Platform::String^ name);
+		void construct_table(Platform::String^ fields[], unsigned int count);
 		
 	private:
-		WarGrey::SCADA::TableColumn* columns;
-		unsigned int column_count;
+		WarGrey::SCADA::TableBeing* table;
 		unsigned int page_row_count;
 
 	private:
@@ -137,13 +142,17 @@ namespace WarGrey::SCADA {
 			: Tablet(tongue, nullptr, width, height, history_max) {}
 
 		Tablet(Platform::String^ tongue, WarGrey::SCADA::ITableDataSource* src, float width, float height, long long history_max = 1024)
-			: ITablet(src, width, height, _N(Name), history_max), tongue(tongue) {}
+			: ITablet(src, width, height, history_max), tongue(tongue) {}
 
 	public:
 		void construct() override {
+			Platform::String^ fields[_N(Name)];
+
 			for (unsigned int idx = 0; idx < _N(Name); idx++) {
-				this->construct_column(idx, speak(_E(Name, idx), this->tongue));
+				fields[idx] = speak(_E(Name, idx), this->tongue);
 			}
+
+			this->construct_table(fields, _N(Name));
 		}
 
 	private:
