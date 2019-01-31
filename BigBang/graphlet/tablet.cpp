@@ -38,7 +38,7 @@ void WarGrey::SCADA::prepare_default_cell_style(unsigned int idx, long long row_
 	CAS_SLOT(style->foreground_color, Colours::GhostWhite);
 
 	FLCAS_SLOT(style->margin, 2.0F);
-	FLCAS_SLOT(style->corner_radius, 8.0F);
+	FLCAS_SLOT(style->corner_radius, 4.0F);
 
 	if ((style->align_fx < 0.0F) || (style->align_fx > 1.0F)) {
 		style->align_fx = 0.5F;
@@ -59,6 +59,8 @@ private struct theader {
 private struct tcell {
 	Platform::String^ value;
 	CanvasTextLayout^ content;
+	TableCellStyle style;
+	bool outdated;
 };
 
 private struct trow {
@@ -90,23 +92,23 @@ public:
 	}
 
 public:
-	tcell* tail_ref(unsigned int idx) {
-		long long iterator_slot = (this->virtual_current_slot + idx) % this->slot_count;
-		trow* row = &this->rows[iterator_slot];
-		tcell* cells = nullptr;
+	trow* tail_ref(unsigned int idx) {
+		long long target_slot = (this->virtual_current_slot + this->slot_count - idx - 1) % this->slot_count;
+		trow* row = nullptr;
 
-		if (row->cells != nullptr) {
+		if (this->rows[target_slot].cells != nullptr) {
+			row = &this->rows[target_slot];
+
 			for (unsigned int idx = 0; idx < this->column_count; idx++) {
 				if ((row->cells[idx].content == nullptr) || (row->font != this->cell_font)) {
 					row->cells[idx].content = make_text_layout(row->cells[idx].value, this->cell_font);
+					row->cells[idx].outdated = true;
 					row->font = this->cell_font;
 				}
 			}
-
-			cells = row->cells;
 		}
 	
-		return cells;
+		return row;
 	}
 
 	void push_front_value(long long salt, Platform::String^ fields[]) {
@@ -124,6 +126,7 @@ public:
 				for (unsigned int idx = 0; idx < this->column_count; idx++) {
 					this->rows[current_slot].cells[idx].value = fields[idx];
 					this->rows[current_slot].cells[idx].content = nullptr;
+					this->rows[current_slot].cells[idx].outdated = true;
 				}
 
 				this->virtual_history_slot -= 1;
@@ -149,6 +152,7 @@ public:
 		for (unsigned int idx = 0; idx < this->column_count; idx++) {
 			this->rows[current_slot].cells[idx].value = fields[idx];
 			this->rows[current_slot].cells[idx].content = nullptr;
+			this->rows[current_slot].cells[idx].outdated = true;
 		}
 		
 		this->virtual_current_slot += 1;
@@ -284,8 +288,19 @@ void ITablet::prepare_style(TableState status, TableStyle& style) {
 	FLCAS_SLOT(style.head_minheight_em, 2.4F);
 	FLCAS_SLOT(style.cell_height_em, 2.0F);
 
-	FLCAS_SLOT(style.cell_corner_radius, 8.0F);
 	FLCAS_SLOT(style.cell_margin, 2.0F);
+	FLCAS_SLOT(style.cell_corner_radius, 8.0F);
+}
+
+void ITablet::prepare_cell_style(TableStyle& table_style, TableCellStyle& cell_style) {
+	CAS_SLOT(cell_style.background_color, table_style.cell_background_color);
+	CAS_SLOT(cell_style.foreground_color, table_style.cell_foreground_color);
+
+	FLCAS_SLOT(cell_style.margin, table_style.cell_margin);
+	FLCAS_SLOT(cell_style.corner_radius, table_style.cell_corner_radius);
+
+	FLCAS_SLOT(cell_style.align_fx, 0.5F);
+	FLCAS_SLOT(cell_style.align_fy, 0.5F);
 }
 
 void ITablet::apply_style(TableStyle& style) {
@@ -338,29 +353,45 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	}
 
 	yrow += style.border_thickness;
-	for (unsigned int row = 0; row < this->page_row_count; row++) {
-		tcell* cells = this->table->tail_ref(row);
+	for (unsigned int ridx = 0; ridx < this->page_row_count; ridx++) {
+		trow* row = this->table->tail_ref(ridx);
 		float xcol = x + border_off * 2.0F;
 
-		for (unsigned int idx = 0; idx < this->table->column_count; idx++) {
-			theader* col = &this->table->headers[idx];
-			float margin = style.cell_margin;
-			float cradius = style.cell_corner_radius;
-			float bgwidth = col->width - margin * 2.0F;
-			float bgheight = cell_height - margin * 2.0F;
-			float bgx = xcol + margin;
-			float bgy = yrow + margin;
+		if (row != nullptr) {
+			for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
+				if (row->cells[cidx].outdated) {
+					TableCellStyle cell_style;
 
-			ds->FillRoundedRectangle(bgx, bgy, bgwidth, bgheight, cradius, cradius, style.cell_background_color);
+					// NOTE: do not use `row->cells[cidx].style` directly since it may hold dirty data.
+					style.prepare_cell_style(cidx, row->salt, &cell_style);
+					this->prepare_cell_style(style, cell_style);
 
-			xcol += col->width;
+					row->cells[cidx].style = cell_style;
+				}
+			}
+
+			for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
+				CanvasTextLayout^ content = row->cells[cidx].content;
+				TableCellStyle* cell_style = &row->cells[cidx].style;
+				theader* col = &this->table->headers[cidx];
+				float margin = row->cells[cidx].style.margin;
+				float cradius = row->cells[cidx].style.corner_radius;
+				float bgx = xcol + margin;
+				float bgy = yrow + margin;
+				float bgwidth = col->width - margin * 2.0F;
+				float bgheight = cell_height - margin * 2.0F;
+				float content_x = bgx + cradius + (bgwidth - cradius * 2.0F - content->LayoutBounds.Width) * cell_style->align_fx;
+				float content_y = bgy + (bgheight - content->LayoutBounds.Height) * cell_style->align_fy;
+
+				ds->FillRoundedRectangle(bgx, bgy, bgwidth, bgheight, cradius, cradius, cell_style->background_color);
+				ds->DrawTextLayout(content, content_x, content_y, cell_style->foreground_color);
+
+				xcol += col->width;
+			}
 		}
 
 		yrow += cell_height;
-
-		if (yrow <= ymax) {
-			ds->DrawLine(x, yrow, x + this->width, yrow, style.cell_line_color, style.cell_row_line_thickness, style.cell_row_line_style);
-		}
+		ds->DrawLine(x, yrow, x + this->width, yrow, style.cell_line_color, style.cell_row_line_thickness, style.cell_row_line_style);
 	}
 
 	ds->DrawRectangle(x + border_off, y + border_off,
@@ -369,8 +400,6 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 }
 
 void ITablet::push_row(long long salt, Platform::String^ fields[]) {
-	TableStyle style = this->get_style();
-
 	this->table->push_back_value(salt, fields);
 	this->notify_updated();
 }

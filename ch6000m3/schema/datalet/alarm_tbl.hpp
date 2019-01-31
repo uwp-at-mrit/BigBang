@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ppltasks.h>
+#include <map>
 
 #include "schema/alarm.hpp"
 
@@ -14,7 +15,7 @@ namespace WarGrey::SCADA {
 	float alarm_column_width_configure(unsigned int idx, unsigned int total);
 	void alarm_cell_style_configure(unsigned int idx, long long salt, WarGrey::SCADA::TableCellStyle* style);
 
-	long long alarm_salt(WarGrey::SCADA::Alarm& alarm);
+	long long alarm_salt(WarGrey::SCADA::Alarm& alarm, bool alert);
 
 	void alarm_extract(WarGrey::SCADA::Alarm& alarm, Platform::String^ fields[]);
 
@@ -25,12 +26,12 @@ namespace WarGrey::SCADA {
 		: public WarGrey::SCADA::ITableDataSource
 		, public WarGrey::SCADA::RotativeSQLite3 {
 	public:
-		AlarmDataSource(WarGrey::SCADA::Syslog* logger = nullptr,
+		AlarmDataSource(WarGrey::SCADA::IAlarmCursor* alerts_cursor, WarGrey::SCADA::Syslog* logger = nullptr,
 			WarGrey::SCADA::RotationPeriod period = RotationPeriod::Daily,
 			unsigned int period_count = 1U, unsigned int search_file_count_max = 31);
 
 	public:
-		void save(long long timepoint_ms, unsigned int index, WarGrey::SCADA::Alarm& alarm);
+		void save(long long timepoint_ms, unsigned int index, bool alert, WarGrey::SCADA::Alarm& alarm);
 
 	public:
 		bool ready() override;
@@ -41,6 +42,7 @@ namespace WarGrey::SCADA {
 		void load(WarGrey::SCADA::ITableDataReceiver* receiver, long long request_count) override;
 
 	protected:
+		void on_folder_ready(Windows::Storage::StorageFolder^ root, bool newly_created) override;
 		void on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc, WarGrey::SCADA::SQLite3* current_dbc, long long timepoint) override;
 
 	protected:
@@ -56,5 +58,9 @@ namespace WarGrey::SCADA {
 		unsigned int search_file_count_max;
 		long long request_count;
 		double time0;
+
+	private:
+		WarGrey::SCADA::ISQLite3* alerts_dbc;
+		WarGrey::SCADA::IAlarmCursor* alerts_cursor; // managed by itself
 	};
 }

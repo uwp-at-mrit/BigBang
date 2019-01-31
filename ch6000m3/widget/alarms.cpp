@@ -22,7 +22,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 #include "time.hpp"
 
 /*************************************************************************************************/
-private class AlarmMS : public ISatellite, public PLCConfirmation {
+private class AlarmMS : public ISatellite, public PLCConfirmation, public IAlarmCursor {
 public:
 	virtual ~AlarmMS() noexcept {
 		this->datasource->destroy();
@@ -34,7 +34,7 @@ public:
 		this->style.resolve_column_width_percentage = alarm_column_width_configure;
 		this->style.prepare_cell_style = alarm_cell_style_configure;
 
-		this->datasource = new AlarmDataSource(logger, RotationPeriod::Daily);
+		this->datasource = new AlarmDataSource(this, logger, RotationPeriod::Daily);
 		this->datasource->reference();
 	}
 
@@ -52,7 +52,22 @@ public:
 		this->begin_update_sequence();
 	}
 
+	bool step(Alarm& alarm, bool asc, int code) override {
+		long long key = alarm.index;
+		auto maybe_alert = this->alerts.find(key);
+
+		if (maybe_alert == this->alerts.end()) {
+			this->alerts.insert(std::pair<long long, Alarm>(key, alarm));
+		} else { // this should not happen
+			this->get_logger()->log_message(Log::Warning, L"Unexpected alarm: %s, ignored",
+				Alarms::fromIndex(key)->ToLocalString()->Data());
+		}
+
+		return true;
+	}
+
 	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+		Platform::String^ fields[_N(AMS)];
 		Alarms* alarm = Alarms::first();
 		unsigned int db, dbx;
 		Alarm event;
@@ -64,10 +79,19 @@ public:
 			bool alerting = DBX(((db == 4) ? DB4 : DB205), dbx);
 
 			if (alerting) {
-				//this->datasource->save(timepoint_ms, alarm->ToIndex(), event);
-				//logger->log_message(Log::Alarm, alarm->ToLocalString());
+				this->datasource->save(timepoint_ms, alarm->ToIndex(), true, event);
+				
+				if (this->table != nullptr) {
+					alarm_extract(event, fields);
+					this->table->push_row(alarm_salt(event, true), fields);
+				}
 			} else {
-				//alarm->ToLocalString();
+				this->datasource->save(timepoint_ms, alarm->ToIndex(), false, event);
+
+				if (this->table != nullptr) {
+					alarm_extract(event, fields);
+					this->table->push_row(alarm_salt(event, false), fields);
+				}
 			}
 
 			alarm = alarm->foreward();
@@ -106,6 +130,9 @@ private:
 	AlarmDataSource* datasource;
 	TableStyle style;
 	float margin;
+
+private:
+	std::map<unsigned int, Alarm> alerts;
 };
 
 /*************************************************************************************************/

@@ -30,31 +30,41 @@ float WarGrey::SCADA::alarm_column_width_configure(unsigned int idx, unsigned in
 	return percentage;
 }
 
-long long WarGrey::SCADA::alarm_salt(Alarm& alarm) {
+long long WarGrey::SCADA::alarm_salt(Alarm& alarm, bool alert) {
 	long long salt = alarm.uuid; // see pk64_timestamp();
+
+	if (alert) {
+		salt = (0b1ULL << 62U) | salt;
+	}
 
 	return salt;
 }
 
 void WarGrey::SCADA::alarm_cell_style_configure(unsigned int idx, long long salt, TableCellStyle* style) {
+	bool alert = (((salt >> 62U) & 0b1) == 0b1);
+
 	switch (_E(AMS, idx)) {
 	case AMS::Event: style->align_fx = 0.0F; break;
 	default: style->align_fx = 0.5F; break;
 	}
 
 	style->align_fy = 0.5F;
-	style->background_color = Colours::Background;
-	style->background_color = Colours::GhostWhite;
+
+	if (alert) {
+		style->background_color = Colours::Red;
+	}
 }
 
 void WarGrey::SCADA::alarm_extract(Alarm& alarm, Platform::String^ fields[]) {
 	unsigned int index = (unsigned int)alarm.index;
+	long long alarmtime = alarm.alarmtime / 1000LL;
+	long long fixedtime = (alarm.fixedtime.has_value() ? (alarm.fixedtime.value() / 1000LL) : 0LL);
 
 	fields[_I(AMS::Code)] = alarm_index_to_code(index).ToString();
 	fields[_I(AMS::Event)] = Alarms::fromIndex(index)->ToLocalString();
 	fields[_I(AMS::Type)] = alarm.type.value_or(1000LL).ToString();
-	fields[_I(AMS::AlarmTime)] = make_timestamp_utc(alarm.alarmtime / 1000LL, true);
-	fields[_I(AMS::FixedTime)] = (alarm.fixedtime.has_value() ? make_timestamp_utc(alarm.fixedtime.value() / 1000LL, true) : "");
+	fields[_I(AMS::AlarmTime)] = make_timestamp_utc(alarmtime, true);
+	fields[_I(AMS::FixedTime)] = ((fixedtime <= alarmtime) ? "-" : make_timestamp_utc(fixedtime, true));
 }
 
 void WarGrey::SCADA::alarm_index_translate(unsigned int index, unsigned int* db, unsigned int* dbx) {
@@ -87,8 +97,10 @@ public:
 		bool go_on = (this->loaded_count < this->request_count);
 		
 		if (go_on) {
+			long long salt = alarm_salt(alarm, alarm.fixedtime <= alarm.alarmtime);
+		
 			alarm_extract(alarm, this->tempdata);
-			this->receiver->on_row_datum(this->request_count, ++this->loaded_count, alarm_salt(alarm), this->tempdata, _N(AMS));
+			this->receiver->on_row_datum(this->request_count, ++this->loaded_count, salt, this->tempdata, _N(AMS));
 		}
 
 		return go_on;
@@ -104,8 +116,8 @@ private:
 };
 
 /*************************************************************************************************/
-AlarmDataSource::AlarmDataSource(Syslog* logger, RotationPeriod period, unsigned int period_count, unsigned int search_max)
-	: RotativeSQLite3("alarm", logger, period, period_count), search_file_count_max(search_max), request_count(0LL) {}
+AlarmDataSource::AlarmDataSource(IAlarmCursor* cursor, Syslog* logger, RotationPeriod period, unsigned int period_count, unsigned int search_max)
+	: RotativeSQLite3("alarm", logger, period, period_count), alerts_cursor(cursor), search_file_count_max(search_max), request_count(0LL) {}
 
 AlarmDataSource::~AlarmDataSource() {
 	this->cancel();
@@ -129,21 +141,36 @@ void AlarmDataSource::cancel() {
 	}
 }
 
-void AlarmDataSource::on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc, WarGrey::SCADA::SQLite3* dbc, long long timepoint) {
+void AlarmDataSource::on_folder_ready(StorageFolder^ root, bool newly_created) {
+	this->alerts_dbc = new SQLite3((root->Path + "/alerts.db")->Data(), this->get_logger());
+	this->alerts_dbc->set_busy_handler(alarm_busy_handler);
+
+	create_alarm(this->alerts_dbc, true);
+	this->get_logger()->log_message(Log::Info, L"unfixed alarms file: %S", this->alerts_dbc->filename().c_str());
+
+	foreach_alarm(this->alerts_dbc, this->alerts_cursor);
+}
+
+void AlarmDataSource::on_database_rotated(SQLite3* prev_dbc, SQLite3* dbc, long long timepoint) {
 	// TODO: move the temporary data from in-memory SQLite3 into the current SQLite3
 
 	create_alarm(dbc, true);
 	this->get_logger()->log_message(Log::Debug, L"current file: %S", dbc->filename().c_str());
 }
 
-void AlarmDataSource::save(long long timepoint_ms, unsigned int index, Alarm& alarm) {
+void AlarmDataSource::save(long long timepoint_ms, unsigned int index, bool alert, Alarm& alarm) {
 	default_alarm(alarm);
 
 	alarm.index = index;
 	alarm.alarmtime = timepoint_ms;
-	alarm.fixedtime = timepoint_ms;
+	
+	if (alert) {
+		alarm.fixedtime = 0LL;
 
-	insert_alarm(this, alarm);
+		insert_alarm(this->alerts_dbc, alarm);
+	}
+
+	//insert_alarm(this, alarm);
 }
 
 void AlarmDataSource::load(ITableDataReceiver* receiver, long long request_count) {

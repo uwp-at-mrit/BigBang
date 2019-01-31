@@ -16,7 +16,7 @@ static const wchar_t wspace = (wchar_t)(space);
 static const wchar_t wzero = (wchar_t)(zero);
 static const wchar_t wnine = (wchar_t)(nine);
 
-static inline size_t integer_length(unsigned int n) {
+static inline size_t integer_length(unsigned long long n) {
 	return (size_t)(std::floor(log(n) / log(2)) + 1.0);
 }
 
@@ -136,7 +136,7 @@ std::string WarGrey::SCADA::make_nstring(Platform::String^ wstr) {
 	return make_nstring("%S", wstr->Data());
 }
 
-std::string WarGrey::SCADA::binumber(unsigned int n, size_t bitsize) {
+std::string WarGrey::SCADA::binumber(unsigned long long n, size_t bitsize) {
 	static char support[64];
 	size_t size = ((bitsize < 1) ? ((n == 0) ? 1 : integer_length(n)) : bitsize);
 	char* pool = ((size > (sizeof(support) / sizeof(char))) ? new char[size] : support);

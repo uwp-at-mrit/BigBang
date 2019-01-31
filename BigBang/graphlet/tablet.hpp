@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 	};
 
 	typedef float(*resolve_column_width_percentage)(unsigned int idx, unsigned int column_count);
-	typedef void (*prepare_cell_style)(unsigned int idx, long long row_identity, WarGrey::SCADA::TableCellStyle* style);
+	typedef void (*prepare_cell_style)(unsigned int col_idx, long long row_salt, WarGrey::SCADA::TableCellStyle* style);
 
 	private struct TableStyle {
 		WarGrey::SCADA::resolve_column_width_percentage resolve_column_width_percentage = nullptr;
@@ -121,6 +121,9 @@ namespace WarGrey::SCADA {
 	protected:
 		void construct_table(Platform::String^ fields[], unsigned int count);
 		
+	private:
+		void prepare_cell_style(WarGrey::SCADA::TableStyle& table_style, WarGrey::SCADA::TableCellStyle& cell_style);
+
 	private:
 		WarGrey::SCADA::TableBeing* table;
 		unsigned int page_row_count;
