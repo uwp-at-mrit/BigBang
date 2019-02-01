@@ -1,6 +1,7 @@
 #lang racket
 
-(provide (all-defined-out))
+(provide (all-defined-out)
+         (rename-out [main alarm-tongues]))
 
 (require syntax/location)
 
@@ -15,10 +16,15 @@
                (string->number (cadddr tokens))
                (last tokens)))))
 
-(define alarm-id
+(define alarm-tongue-index
   (lambda [DB idx bidx]
     (+ (arithmetic-shift DB 16)
        (+ (* idx 8) bidx))))
+
+(define alarm-db-index
+  (lambda [tongue-index]
+    (values (arithmetic-shift tongue-index -16)
+            (bitwise-and tongue-index #xFFFF))))
 
 (define identify
   (lambda [tokens]
@@ -144,7 +150,7 @@
         [("右耙弯管钢丝绳下放长度过大报警") (cons 'SBDTCableExceed "SB Drag Trunnion Cable Exceed")] ;;; 3927[DB205.DBX286.7]
         [else #false]))
     
-    (let-values ([(code) (alarm-id DB idx bidx)]
+    (let-values ([(code) (alarm-tongue-index DB idx bidx)]
                  [(id en_US) (if (pair? e) (values (car e) (cdr e)) (values 'ID "en_US"))])
       (unless (pair? e)
         (printf "; [(~s) (cons '~s ~s)] ;;; ~a[DB~a.DBX~a.~a]~n"
