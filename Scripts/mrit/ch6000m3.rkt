@@ -54,6 +54,8 @@
     ;; alarms
     (for ([idx (in-list alarms4)])
       (clear-digital-input db4 (add1 idx)))
+
+    (set-digital-input db4 (add1 (car alarms4)))
     
     ;;; DB203
     (for ([i (in-range 280)])

@@ -149,7 +149,7 @@ std::optional<Alarm> WarGrey::SCADA::seek_alarm(IDBSystem* dbc, Alarm_pk where) 
 }
 
 void WarGrey::SCADA::update_alarm(IDBSystem* dbc, Alarm& self, bool refresh) {
-    update_alarm(dbc, &self, 1);
+    update_alarm(dbc, &self, 1, refresh);
 }
 
 void WarGrey::SCADA::update_alarm(IDBSystem* dbc, Alarm* selves, size_t count, bool refresh) {

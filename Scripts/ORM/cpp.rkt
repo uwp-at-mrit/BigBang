@@ -354,7 +354,7 @@
     [(λname Table tablename rowids fields table-rowids column_infos refresh)
      (define nonrowids (remove* rowids fields))
      (printf "void ~a::~a(IDBSystem* dbc, ~a& self, bool refresh) {~n" ns:: λname Table)
-     (&htab 1) (printf "~a(dbc, &self, 1);~n" λname)
+     (&htab 1) (printf "~a(dbc, &self, 1, refresh);~n" λname)
      (&brace 0)
      (&linebreak 1)
      (printf "void ~a::~a(IDBSystem* dbc, ~a* selves, size_t count, bool refresh) {~n" ns:: λname Table)

@@ -151,7 +151,7 @@ std::optional<SQLiteMaster> WarGrey::SCADA::seek_sqlite_master(IDBSystem* dbc, S
 }
 
 void WarGrey::SCADA::update_sqlite_master(IDBSystem* dbc, SQLiteMaster& self, bool refresh) {
-    update_sqlite_master(dbc, &self, 1);
+    update_sqlite_master(dbc, &self, 1, refresh);
 }
 
 void WarGrey::SCADA::update_sqlite_master(IDBSystem* dbc, SQLiteMaster* selves, size_t count, bool refresh) {

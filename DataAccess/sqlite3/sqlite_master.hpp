@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
         std::optional<Text> sql;
     };
 
-private class ISQLiteMasterCursor abstract {
+    private class ISQLiteMasterCursor abstract {
     public:
         virtual bool step(WarGrey::SCADA::SQLiteMaster& occurrence, bool asc, int code) = 0;
     };
