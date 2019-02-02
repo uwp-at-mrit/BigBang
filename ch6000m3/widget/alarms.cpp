@@ -19,8 +19,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-#include "time.hpp"
-
 /*************************************************************************************************/
 private class AlarmMS : public ISatellite, public PLCConfirmation, public IAlarmCursor {
 public:
@@ -52,53 +50,74 @@ public:
 		this->begin_update_sequence();
 	}
 
-	bool step(Alarm& alarm, bool asc, int code) override {
-		long long key = alarm.index;
-		auto maybe_alert = this->alerts.find(key);
-
-		if (maybe_alert == this->alerts.end()) {
-			this->alerts.insert(std::pair<long long, Alarm>(key, alarm));
-		} else { // this should not happen
-			this->get_logger()->log_message(Log::Warning, L"Unexpected alarm: %s, ignored",
-				Alarms::fromIndex(key)->ToLocalString()->Data());
-		}
-
-		return true;
-	}
-
 	void on_digital_input(long long timepoint_ms, const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		Platform::String^ fields[_N(AMS)];
 		Alarms* alarm = Alarms::first();
 		unsigned int db, dbx;
 		Alarm event;
 
-		double now = current_inexact_milliseconds();
-	
 		while (alarm != nullptr) {
-			alarm_index_translate(alarm->ToIndex(), &db, &dbx);
+			unsigned int alarm_index = alarm->ToIndex();
+			alarm_index_translate(alarm_index, &db, &dbx);
 			bool alerting = DBX(((db == 4) ? DB4 : DB205), dbx);
-
+			auto maybe_alert = this->alerts.find(alarm_index);
+			
 			if (alerting) {
-				this->datasource->save(timepoint_ms, alarm->ToIndex(), true, event);
-				
-				if (this->table != nullptr) {
+				if (maybe_alert == this->alerts.end()) {
+					this->datasource->save(timepoint_ms, alarm->ToIndex(), event);
+					this->alerts.insert(std::pair<unsigned int, Alarm>(alarm_index, event));
+
 					alarm_extract(event, fields);
-					this->table->push_row(alarm_salt(event, true), fields);
+
+					logger->log_message(Log::Error, L"[%s] %s - %s",
+						fields[_I(AMS::AlarmTime)]->Data(),
+						fields[_I(AMS::Event)]->Data(),
+						_speak("Alert")->Data());
+
+					if (this->table != nullptr) {
+						this->table->push_row(alarm_salt(event, true), fields);
+					}
 				}
 			} else {
-				this->datasource->save(timepoint_ms, alarm->ToIndex(), false, event);
-
-				if (this->table != nullptr) {
+				if (maybe_alert != this->alerts.end()) {
+					this->datasource->save(timepoint_ms, maybe_alert->second, event);
+					
 					alarm_extract(event, fields);
-					this->table->push_row(alarm_salt(event, false), fields);
+
+					logger->log_message(Log::Notice, L"[%s] %s - %s",
+						fields[_I(AMS::AlarmTime)]->Data(),
+						fields[_I(AMS::Event)]->Data(),
+						_speak("Fixed")->Data());
+
+					if (this->table != nullptr) {
+						this->table->push_row(alarm_salt(event, false), fields);
+						
+						alarm_extract(maybe_alert->second, fields);
+						this->table->update_row(alarm_salt(maybe_alert->second, true), fields);
+					}
+
+					this->alerts.erase(maybe_alert);
 				}
 			}
 
 			alarm = alarm->foreward();
 		}
+	}
 
-		this->get_logger()->log_message(Log::Info, L"it took %lfms",
-			current_inexact_milliseconds() - now);
+	bool step(Alarm& alarm, bool asc, int code) override {
+		unsigned int key = (unsigned int)(alarm.index);
+		auto maybe_alert = this->alerts.find(key);
+
+		if (maybe_alert == this->alerts.end()) {
+			this->alerts.insert(std::pair<unsigned int, Alarm>(key, alarm));
+			this->get_logger()->log_message(Log::Debug, L"Alerting alarm: %s",
+				Alarms::fromIndex(key)->ToLocalString()->Data());
+		} else { // this should not happen
+			this->get_logger()->log_message(Log::Warning, L"Unexpected alerting alarm: %s, ignored",
+				Alarms::fromIndex(key)->ToLocalString()->Data());
+		}
+
+		return true;
 	}
 
 	void post_read_data(Syslog* logger) override {

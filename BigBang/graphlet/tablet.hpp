@@ -113,6 +113,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void push_row(long long salt, Platform::String^ fields[]);
+		void update_row(long long salt, Platform::String^ fields[]);
 		
 	protected:
 		void prepare_style(WarGrey::SCADA::TableState state, WarGrey::SCADA::TableStyle& style) override;

@@ -49,10 +49,7 @@ void WarGrey::SCADA::alarm_cell_style_configure(unsigned int idx, long long salt
 	}
 
 	style->align_fy = 0.5F;
-
-	if (alert) {
-		style->background_color = Colours::Red;
-	}
+	style->background_color = alert ? Colours::Red : Colours::RoyalBlue;
 }
 
 void WarGrey::SCADA::alarm_extract(Alarm& alarm, Platform::String^ fields[]) {
@@ -64,12 +61,19 @@ void WarGrey::SCADA::alarm_extract(Alarm& alarm, Platform::String^ fields[]) {
 	fields[_I(AMS::Event)] = Alarms::fromIndex(index)->ToLocalString();
 	fields[_I(AMS::Type)] = alarm.type.value_or(1000LL).ToString();
 	fields[_I(AMS::AlarmTime)] = make_timestamp_utc(alarmtime, true);
-	fields[_I(AMS::FixedTime)] = ((fixedtime <= alarmtime) ? "-" : make_timestamp_utc(fixedtime, true));
+
+	if (fixedtime > alarmtime) {
+		fields[_I(AMS::FixedTime)] = make_timestamp_utc(fixedtime, true);
+	} else if (fixedtime == 0) {
+		fields[_I(AMS::FixedTime)] = "";
+	} else {
+		fields[_I(AMS::FixedTime)] = "-";
+	}
 }
 
 void WarGrey::SCADA::alarm_index_translate(unsigned int index, unsigned int* db, unsigned int* dbx) {
 	SET_BOX(db, index >> 16);
-	SET_BOX(dbx, index & 0xFF);
+	SET_BOX(dbx, index & 0xFFFF);
 }
 
 unsigned int WarGrey::SCADA::alarm_index_to_code(unsigned int index) {
@@ -78,9 +82,9 @@ unsigned int WarGrey::SCADA::alarm_index_to_code(unsigned int index) {
 	alarm_index_translate(index, &db, &dbx);
 
 	if (db == 4) {
-		dbx += 4U * 8U;
+		dbx += (4U * 8U);
 	} else {
-		dbx += 204U * 8U;
+		dbx += (204U * 8U);
 	}
 
 	return dbx;
@@ -97,7 +101,7 @@ public:
 		bool go_on = (this->loaded_count < this->request_count);
 		
 		if (go_on) {
-			long long salt = alarm_salt(alarm, alarm.fixedtime <= alarm.alarmtime);
+			long long salt = alarm_salt(alarm, alarm.fixedtime != alarm.alarmtime);
 		
 			alarm_extract(alarm, this->tempdata);
 			this->receiver->on_row_datum(this->request_count, ++this->loaded_count, salt, this->tempdata, _N(AMS));
@@ -124,6 +128,10 @@ AlarmDataSource::~AlarmDataSource() {
 
 	if (this->dbc != nullptr) {
 		delete this->dbc;
+	}
+
+	if (this->alerts_dbc != nullptr) {
+		delete this->alerts_dbc;
 	}
 }
 
@@ -152,25 +160,43 @@ void AlarmDataSource::on_folder_ready(StorageFolder^ root, bool newly_created) {
 }
 
 void AlarmDataSource::on_database_rotated(SQLite3* prev_dbc, SQLite3* dbc, long long timepoint) {
-	// TODO: move the temporary data from in-memory SQLite3 into the current SQLite3
+	// TODO: move the temporary data from in-memory SQLite3 into the current SQLite3 if necessary
 
 	create_alarm(dbc, true);
 	this->get_logger()->log_message(Log::Debug, L"current file: %S", dbc->filename().c_str());
 }
 
-void AlarmDataSource::save(long long timepoint_ms, unsigned int index, bool alert, Alarm& alarm) {
+void AlarmDataSource::save(long long timepoint_ms, unsigned int index, Alarm& alarm) { // alerting
 	default_alarm(alarm);
 
 	alarm.index = index;
 	alarm.alarmtime = timepoint_ms;
-	
-	if (alert) {
-		alarm.fixedtime = 0LL;
+	alarm.fixedtime = 0LL;
 
-		insert_alarm(this->alerts_dbc, alarm);
+	insert_alarm(this->alerts_dbc, alarm);
+	insert_alarm(this, alarm);
+}
+
+void AlarmDataSource::save(long long timepoint_ms, Alarm& alerting_alarm, Alarm& alarm) { // response
+	default_alarm(alarm);
+
+	alarm.index = alerting_alarm.index;
+	alarm.alarmtime = timepoint_ms;
+	alarm.fixedtime = timepoint_ms;
+
+	insert_alarm(this, alarm);
+
+	{ // update alarm state
+		ISQLite3* target = new SQLite3(this->resolve_pathname(alerting_alarm.alarmtime / 1000LL)->Data(), this->get_logger());
+		Alarm_pk pk = alarm_identity(alerting_alarm); // TODO: why cannot do `delete_alarm(dbc, alarm_identity(a))` directly?
+
+		alerting_alarm.fixedtime = timepoint_ms;
+
+		update_alarm(target, alerting_alarm);
+		delete_alarm(this->alerts_dbc, pk);
+
+		delete target;
 	}
-
-	//insert_alarm(this, alarm);
 }
 
 void AlarmDataSource::load(ITableDataReceiver* receiver, long long request_count) {

@@ -31,7 +31,8 @@ namespace WarGrey::SCADA {
 			unsigned int period_count = 1U, unsigned int search_file_count_max = 31);
 
 	public:
-		void save(long long timepoint_ms, unsigned int index, bool alert, WarGrey::SCADA::Alarm& alarm);
+		void save(long long timepoint_ms, unsigned int index, WarGrey::SCADA::Alarm& alarm);
+		void save(long long timepoint_ms, WarGrey::SCADA::Alarm& alerting_alarm, WarGrey::SCADA::Alarm& alarm);
 
 	public:
 		bool ready() override;

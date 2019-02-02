@@ -111,7 +111,24 @@ public:
 		return row;
 	}
 
-	void push_front_value(long long salt, Platform::String^ fields[]) {
+	void update_row(long long salt, Platform::String^ fields[]) {
+		for (long long idx = this->virtual_history_slot; idx <= this->virtual_current_slot + this->slot_count; idx++) {
+			long long current_slot = idx % this->slot_count;
+
+			if (this->rows[current_slot].cells != nullptr) {
+				if (this->rows[current_slot].salt == salt) {
+					for (unsigned int idx = 0; idx < this->column_count; idx++) {
+						this->rows[current_slot].cells[idx].value = fields[idx];
+						this->rows[current_slot].cells[idx].content = nullptr;
+					}
+
+					break;
+				}
+			}
+		}
+	}
+
+	void push_front_row(long long salt, Platform::String^ fields[]) {
 		long long current_slot = this->virtual_history_slot % this->slot_count;
 
 		if (!this->history_full) {
@@ -134,7 +151,7 @@ public:
 		}
 	}
 
-	void push_back_value(long long salt, Platform::String^ fields[]) {
+	void push_back_row(long long salt, Platform::String^ fields[]) {
 		long long current_slot = this->virtual_current_slot % this->slot_count;
 
 		if (this->virtual_history_slot <= this->virtual_current_slot) {
@@ -400,13 +417,18 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 }
 
 void ITablet::push_row(long long salt, Platform::String^ fields[]) {
-	this->table->push_back_value(salt, fields);
+	this->table->push_back_row(salt, fields);
+	this->notify_updated();
+}
+
+void ITablet::update_row(long long salt, Platform::String^ fields[]) {
+	this->table->update_row(salt, fields);
 	this->notify_updated();
 }
 
 void ITablet::on_row_datum(long long request_count, long long nth, long long salt, Platform::String^ fields[], unsigned int n) {
 	if (this->history_max == request_count) {
-		this->table->push_front_value(salt, fields);
+		this->table->push_front_row(salt, fields);
 		this->notify_updated();
 	}
 }
