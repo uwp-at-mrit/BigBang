@@ -32,32 +32,45 @@ namespace WarGrey::SCADA {
 
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ head_font;
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ cell_font;
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ status_font;
 
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_background_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_foreground_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_line_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cell_background_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cell_foreground_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_line_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cell_line_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_background_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_foreground_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_background_hicolor;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_foreground_hicolor;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_line_color;
 
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ head_col_line_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ head_row_line_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ cell_col_line_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ cell_row_line_style;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ status_line_style;
 
 		float border_thickness = -1.0F;
 		float head_row_line_thickness = -1.0F;
 		float head_col_line_thickness = -1.0F;
 		float cell_row_line_thickness = -1.0F;
 		float cell_col_line_thickness = -1.0F;
+		float status_line_thickness = -1.0F;
 
 		float head_minheight_em = -1.0F;
 		float cell_height_em = -1.0F;
+		float status_height_em = -1.0F;
 
 		float cell_corner_radius = -1.0F;
 		float cell_margin = -1.0F;
+
+		float status_corner_radius = -1.0F;
+		float status_margin = -1.0F;
 	};
 
 	float resolve_average_column_width(unsigned int idx, unsigned int column_count);
@@ -112,6 +125,7 @@ namespace WarGrey::SCADA {
 		void on_maniplation_complete(long long request_count) override;
 
 	public:
+		unsigned long long count();
 		void push_row(long long salt, Platform::String^ fields[]);
 		void update_row(long long salt, Platform::String^ fields[]);
 		
@@ -128,6 +142,7 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::TableBeing* table;
 		unsigned int page_row_count;
+		unsigned int page_index;
 
 	private:
 		float width;

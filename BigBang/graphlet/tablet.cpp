@@ -28,6 +28,8 @@ static CanvasSolidColorBrush^ table_default_head_foreground_color = Colours::mak
 static CanvasSolidColorBrush^ table_default_cell_background_color = Colours::make(0x141414U);
 static CanvasSolidColorBrush^ table_default_cell_foreground_color = Colours::make(0xF8F8FF);
 
+static Platform::String^ gestures[] = { L"⇤", L"←", L"→", L"⇥" };
+
 /*************************************************************************************************/
 float WarGrey::SCADA::resolve_average_column_width(unsigned int idx, unsigned int column_count) {
 	return 1.0F / float(column_count);
@@ -86,9 +88,13 @@ public:
 	}
 
 public:
-	void update_font(unsigned int idx, CanvasTextFormat^ head_font, CanvasTextFormat^ font) {
+	void update_font(unsigned int idx, CanvasTextFormat^ head_font, CanvasTextFormat^ cell_font, CanvasTextFormat^ status_font) {
 		this->headers[idx].caption = make_text_layout(this->headers[idx].name, head_font);
-		this->cell_font = font;
+		this->cell_font = cell_font;
+
+		for (size_t idx = 0; idx < sizeof(gestures) / sizeof(Platform::String^); idx++) {
+			this->gesture_captions[idx] = make_text_layout(gestures[idx], status_font);
+		}
 	}
 
 public:
@@ -176,6 +182,11 @@ public:
 	}
 
 public:
+	unsigned long long size() {
+		return (unsigned long long)(this->virtual_current_slot + this->slot_count - this->virtual_history_slot - 1LL);
+	}
+
+public:
 	void reset_pool(long long history_max) {
 		this->clear_pool();
 
@@ -207,8 +218,9 @@ public:
 	}
 
 public:
-	theader* headers;
+	CanvasTextLayout^ gesture_captions[sizeof(gestures) / sizeof(Platform::String^)];
 	unsigned int column_count;
+	theader* headers;
 
 private:
 	trow* rows = nullptr;
@@ -223,7 +235,8 @@ private:
 
 /*************************************************************************************************/
 ITablet::ITablet(ITableDataSource* datasrc, float width, float height, long long history_max)
-	: IStatelet(TableState::Realtime), width(width), height(height), data_source(datasrc), history_max(history_max), request_loading(true) {
+	: IStatelet(TableState::Realtime), width(width), height(height), page_index(0)
+	, data_source(datasrc), history_max(history_max), request_loading(true) {
 
 	if (this->data_source != nullptr) {
 		this->data_source->reference();
@@ -282,31 +295,44 @@ void ITablet::prepare_style(TableState status, TableStyle& style) {
 
 	CAS_SLOT(style.head_font, table_default_head_font);
 	CAS_SLOT(style.cell_font, table_default_cell_font);
+	CAS_SLOT(style.status_font, style.cell_font);
+
 	CAS_SLOT(style.border_color, table_default_border_color);
 	CAS_SLOT(style.background_color, table_default_background_color);
 	CAS_SLOT(style.head_background_color, table_default_head_background_color);
 	CAS_SLOT(style.head_foreground_color, table_default_head_foreground_color);
 	CAS_SLOT(style.cell_background_color, table_default_cell_background_color);
 	CAS_SLOT(style.cell_foreground_color, table_default_cell_foreground_color);
+	CAS_SLOT(style.status_foreground_color, style.cell_foreground_color);
+	CAS_SLOT(style.status_foreground_hicolor, style.status_foreground_color);
+	CAS_SLOT(style.status_background_color, style.cell_background_color);
+	CAS_SLOT(style.status_background_hicolor, Colours::RoyalBlue);
 	CAS_SLOT(style.head_line_color, Colours::WhiteSmoke);
 	CAS_SLOT(style.cell_line_color, Colours::Transparent);
+	CAS_SLOT(style.status_line_color, style.head_line_color);
+	CAS_SLOT(style.status_border_color, Colours::DodgerBlue);
 
 	CAS_SLOT(style.cell_col_line_style, make_dash_stroke(CanvasDashStyle::Solid));
 	CAS_SLOT(style.cell_row_line_style, make_dash_stroke(CanvasDashStyle::Solid));
 	CAS_SLOT(style.head_col_line_style, style.cell_col_line_style);
 	CAS_SLOT(style.head_row_line_style, style.cell_row_line_style);
+	CAS_SLOT(style.status_line_style, style.head_row_line_style);
 
 	FLCAS_SLOT(style.border_thickness, 1.5F);
 	FLCAS_SLOT(style.cell_col_line_thickness, 1.0F);
 	FLCAS_SLOT(style.cell_row_line_thickness, 1.0F);
 	FLCAS_SLOT(style.head_col_line_thickness, style.cell_col_line_thickness);
 	FLCAS_SLOT(style.head_row_line_thickness, style.cell_row_line_thickness);
+	FLCAS_SLOT(style.status_line_thickness, style.head_row_line_thickness);
 
 	FLCAS_SLOT(style.head_minheight_em, 2.4F);
 	FLCAS_SLOT(style.cell_height_em, 2.0F);
+	FLCAS_SLOT(style.status_height_em, 2.4F);
 
 	FLCAS_SLOT(style.cell_margin, 2.0F);
 	FLCAS_SLOT(style.cell_corner_radius, 8.0F);
+	FLCAS_SLOT(style.status_margin, style.cell_margin);
+	FLCAS_SLOT(style.status_corner_radius, 4.0F);
 }
 
 void ITablet::prepare_cell_style(TableStyle& table_style, TableCellStyle& cell_style) {
@@ -326,14 +352,15 @@ void ITablet::apply_style(TableStyle& style) {
 
 	for (unsigned int idx = 0; idx < this->table->column_count; idx++) {
 		this->table->headers[idx].width = style.resolve_column_width_percentage(idx, this->table->column_count) * available_width;
-		this->table->update_font(idx, style.head_font, style.cell_font);
+		this->table->update_font(idx, style.head_font, style.cell_font, style.status_font);
 	}
 
 	{ // resolve row count per page
 		float head_height = style.head_font->FontSize * style.head_minheight_em;
 		float cell_height = style.cell_font->FontSize * style.cell_height_em;
+		float status_height = style.status_font->FontSize * style.status_height_em;
 		
-		this->page_row_count = (unsigned int)(std::floorf((available_height - head_height) / cell_height));
+		this->page_row_count = (unsigned int)(std::floorf((available_height - head_height - status_height) / cell_height));
 	}
 }
 
@@ -342,14 +369,16 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	TableStyle style = this->get_style();
 	float border_off = style.border_thickness * 0.5F;
 	float cell_height = style.cell_font->FontSize * style.cell_height_em;
+	float status_height = style.status_font->FontSize * style.status_height_em;
 	float yrow = y; // no `+ border_off`;
-	float ymax = y + this->height - border_off;
+	float ymax = y + this->height - border_off - status_height;
+	unsigned long long total = this->count();
 	
 	ds->FillRectangle(x, y, this->width, this->height, style.background_color);
 
 	{ // draw table header (and cell column lines)
-		float xcol = x + style.border_thickness * 2.0F;
-		float head_height = this->height - style.border_thickness * 2.0F - cell_height * float(this->page_row_count);
+		float xcol = x + border_off * 2.0F;
+		float head_height = this->height - style.border_thickness * 2.0F - cell_height * float(this->page_row_count) - status_height;
 
 		yrow += head_height;
 
@@ -369,51 +398,85 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 		ds->DrawLine(x, yrow, x + this->width, yrow, style.head_line_color, style.head_row_line_thickness, style.head_row_line_style);
 	}
 
-	yrow += style.border_thickness;
-	for (unsigned int ridx = 0; ridx < this->page_row_count; ridx++) {
-		trow* row = this->table->tail_ref(ridx);
-		float xcol = x + border_off * 2.0F;
+	{ // draw table body
+		unsigned int page_start = this->page_row_count * this->page_index;
+		unsigned int ridx = 0U;
+		unsigned int n = 0U;
 
-		if (row != nullptr) {
-			for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
-				if (row->cells[cidx].outdated) {
-					TableCellStyle cell_style;
+		yrow += style.border_thickness;
+		while ((ridx < total) && (n < this->page_row_count)) {
+			trow* row = this->table->tail_ref(ridx);
+			float xcol = x + border_off * 2.0F;
 
-					// NOTE: do not use `row->cells[cidx].style` directly since it may hold dirty data.
-					style.prepare_cell_style(cidx, row->salt, &cell_style);
-					this->prepare_cell_style(style, cell_style);
+			if (row != nullptr) {
+				for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
+					if (row->cells[cidx].outdated) {
+						TableCellStyle cell_style;
 
-					row->cells[cidx].style = cell_style;
+						// NOTE: do not use `row->cells[cidx].style` directly since it may hold dirty data.
+						style.prepare_cell_style(cidx, row->salt, &cell_style);
+						this->prepare_cell_style(style, cell_style);
+
+						row->cells[cidx].style = cell_style;
+					}
+				}
+
+				for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
+					CanvasTextLayout^ content = row->cells[cidx].content;
+					TableCellStyle* cell_style = &row->cells[cidx].style;
+					theader* col = &this->table->headers[cidx];
+					float margin = row->cells[cidx].style.margin;
+					float cradius = row->cells[cidx].style.corner_radius;
+					float bgx = xcol + margin;
+					float bgy = yrow + margin;
+					float bgwidth = col->width - margin * 2.0F;
+					float bgheight = cell_height - margin * 2.0F;
+					float content_x = bgx + cradius + (bgwidth - cradius * 2.0F - content->LayoutBounds.Width) * cell_style->align_fx;
+					float content_y = bgy + (bgheight - content->LayoutBounds.Height) * cell_style->align_fy;
+
+					ds->FillRoundedRectangle(bgx, bgy, bgwidth, bgheight, cradius, cradius, cell_style->background_color);
+					ds->DrawTextLayout(content, content_x, content_y, cell_style->foreground_color);
+
+					xcol += col->width;
 				}
 			}
 
-			for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
-				CanvasTextLayout^ content = row->cells[cidx].content;
-				TableCellStyle* cell_style = &row->cells[cidx].style;
-				theader* col = &this->table->headers[cidx];
-				float margin = row->cells[cidx].style.margin;
-				float cradius = row->cells[cidx].style.corner_radius;
-				float bgx = xcol + margin;
-				float bgy = yrow + margin;
-				float bgwidth = col->width - margin * 2.0F;
-				float bgheight = cell_height - margin * 2.0F;
-				float content_x = bgx + cradius + (bgwidth - cradius * 2.0F - content->LayoutBounds.Width) * cell_style->align_fx;
-				float content_y = bgy + (bgheight - content->LayoutBounds.Height) * cell_style->align_fy;
+			n++;
+			yrow += cell_height;
+			ds->DrawLine(x, yrow, x + this->width, yrow, style.cell_line_color, style.cell_row_line_thickness, style.cell_row_line_style);
 
-				ds->FillRoundedRectangle(bgx, bgy, bgwidth, bgheight, cradius, cradius, cell_style->background_color);
-				ds->DrawTextLayout(content, content_x, content_y, cell_style->foreground_color);
-
-				xcol += col->width;
-			}
+			ridx++;
 		}
+	}
 
-		yrow += cell_height;
-		ds->DrawLine(x, yrow, x + this->width, yrow, style.cell_line_color, style.cell_row_line_thickness, style.cell_row_line_style);
+	if (status_height > 0.0F) { // draw status
+		float status_x = x + border_off * 2.0F;
+		float bradius = style.status_corner_radius;
+		float box_width = status_height - style.status_margin * 2.0F;
+		float box_y = ymax + style.status_margin;
+		float step = box_width + style.status_margin * 2.0F;
+
+		ds->DrawLine(x, ymax, x + this->width, ymax, style.status_line_color, style.status_line_thickness, style.status_line_style);
+
+		for (size_t idx = 0; idx < sizeof(gestures) / sizeof(Platform::String^); idx++) {
+			CanvasTextLayout^ gesture = this->table->gesture_captions[idx];
+			Rect symbox = gesture->LayoutBounds;
+			float box_x = status_x + style.status_margin + step * float(idx);
+			float sym_xoff = (box_width - symbox.Width) * 0.5F;
+			float sym_yoff = (box_width - symbox.Height) * 0.5F;
+
+			ds->DrawRoundedRectangle(box_x, box_y, box_width, box_width, bradius, bradius, style.status_border_color);
+			ds->DrawTextLayout(gesture, box_x + sym_xoff, box_y + sym_yoff, style.status_foreground_color);
+		}
 	}
 
 	ds->DrawRectangle(x + border_off, y + border_off,
 		this->width - style.border_thickness, this->height - style.border_thickness,
 		style.border_color, style.border_thickness);
+}
+
+unsigned long long ITablet::count() {
+	return this->table->size();
 }
 
 void ITablet::push_row(long long salt, Platform::String^ fields[]) {
