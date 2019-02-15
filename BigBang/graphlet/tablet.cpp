@@ -521,9 +521,10 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 		}
 
 		if (this->filter != nullptr) {
+			CanvasTextLayout^ description = (this->filter_actived ? this->active_description : this->inactive_description);
 			ICanvasBrush^ fgcolor = (this->filter_actived ? style.status_foreground_hicolor : style.status_foreground_color);
 			ICanvasBrush^ bgcolor = (this->filter_actived ? style.status_background_hicolor : style.status_background_color);
-			Rect fbox = (this->filter_actived ? this->active_description->LayoutBounds : this->inactive_description->LayoutBounds);
+			Rect fbox = description->LayoutBounds;
 			float filter_width = this->resolve_filter_width();
 			float filter_rx = x + this->width - (status_lx - x) - style.status_margin;
 			float filter_lx = filter_rx - filter_width;
@@ -532,7 +533,7 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 
 			ds->FillRoundedRectangle(filter_lx, box_y, filter_width, box_size, bradius, bradius, bgcolor);
 			ds->DrawRoundedRectangle(filter_lx, box_y, filter_width, box_size, bradius, bradius, style.status_border_color);
-			ds->DrawTextLayout(this->active_description, filter_lx + desc_xoff, box_y + desc_yoff, fgcolor);
+			ds->DrawTextLayout(description, filter_lx + desc_xoff, box_y + desc_yoff, fgcolor);
 		}
 	}
 
