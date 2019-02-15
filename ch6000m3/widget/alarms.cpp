@@ -20,7 +20,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 
 /*************************************************************************************************/
-private class AlarmMS : public ISatellite, public PLCConfirmation, public IAlarmCursor {
+private class AlarmMS : public ISatellite, public PLCConfirmation, public IAlarmCursor, public ITableFilter {
 public:
 	virtual ~AlarmMS() noexcept {
 		this->datasource->destroy();
@@ -66,6 +66,7 @@ public:
 				if (maybe_alert == this->alerts.end()) {
 					this->datasource->save(timepoint_ms, alarm->ToIndex(), event);
 					this->alerts.insert(std::pair<unsigned int, Alarm>(alarm_index, event));
+					this->alert_salts.insert(std::pair<long long, bool>(alarm_salt(event, true), true));
 
 					alarm_extract(event, fields);
 
@@ -80,6 +81,9 @@ public:
 				}
 			} else {
 				if (maybe_alert != this->alerts.end()) {
+					long long salt = alarm_salt(maybe_alert->second, true);
+					auto alert_slot = this->alert_salts.find(salt);
+
 					this->datasource->save(timepoint_ms, maybe_alert->second, event);
 					
 					alarm_extract(event, fields);
@@ -93,10 +97,14 @@ public:
 						this->table->push_row(alarm_salt(event, false), fields);
 						
 						alarm_extract(maybe_alert->second, fields);
-						this->table->update_row(alarm_salt(maybe_alert->second, true), fields);
+						this->table->update_row(salt, fields);
 					}
 
 					this->alerts.erase(maybe_alert);
+
+					if (alert_slot != this->alert_salts.end()) {
+						this->alert_salts.erase(alert_slot);
+					}
 				}
 			}
 
@@ -110,6 +118,8 @@ public:
 
 		if (maybe_alert == this->alerts.end()) {
 			this->alerts.insert(std::pair<unsigned int, Alarm>(key, alarm));
+			this->alert_salts.insert(std::pair<long long, bool>(alarm_salt(alarm, true), true));
+
 			this->get_logger()->log_message(Log::Debug, L"Alerting alarm: %s",
 				Alarms::fromIndex(key)->ToLocalString()->Data());
 		} else { // this should not happen
@@ -130,6 +140,8 @@ public:
 		float inset = this->margin * 2.0F;
 
 		this->table = this->insert_one(new Tablet<AMS>(__MODULE__, this->datasource, width - inset, height - inset));
+		this->table->set_filter(this, _speak("AlertsOnly"), _speak("AllAlarms"));
+		this->table->enable_filter(false);
 		this->table->set_style(this->style);
 	}
 
@@ -142,6 +154,11 @@ public:
 		return false;
 	}
 
+public:
+	bool filter(long long salt) override {
+		return (this->alert_salts.find(salt) != this->alert_salts.end());
+	}
+
 private: // never delete these graphlets manually.
 	Tablet<AMS>* table;
 
@@ -152,6 +169,7 @@ private:
 
 private:
 	std::map<unsigned int, Alarm> alerts;
+	std::map<long long, bool> alert_salts;
 };
 
 /*************************************************************************************************/

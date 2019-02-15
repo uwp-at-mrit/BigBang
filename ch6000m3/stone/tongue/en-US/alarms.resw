@@ -123,6 +123,12 @@
   <data name="Alert" xml:space="preserve">
     <value>Alert</value>
   </data>
+  <data name="AlertsOnly" xml:space="preserve">
+    <value>Alerts Only</value>
+  </data>
+  <data name="AllAlarms" xml:space="preserve">
+    <value>All Alarms</value>
+  </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>
   </data>

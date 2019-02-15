@@ -12,6 +12,8 @@ using namespace Windows::Storage;
 
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+#define IS_Alert(salt) (((salt >> 62U) & 0b1) == 0b1)
+
 static int alarm_busy_handler(void* args, int count) {
 	// keep trying until it works
 	return 1;
@@ -41,7 +43,7 @@ long long WarGrey::SCADA::alarm_salt(Alarm& alarm, bool alert) {
 }
 
 void WarGrey::SCADA::alarm_cell_style_configure(unsigned int idx, long long salt, TableCellStyle* style) {
-	bool alert = (((salt >> 62U) & 0b1) == 0b1);
+	bool alert = IS_Alert(salt);
 
 	switch (_E(AMS, idx)) {
 	case AMS::Event: style->align_fx = 0.0F; break;

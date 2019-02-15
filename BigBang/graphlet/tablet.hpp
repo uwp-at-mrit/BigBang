@@ -23,7 +23,7 @@ namespace WarGrey::SCADA {
 		float align_fy = -1.0F;
 	};
 
-	typedef float(*resolve_column_width_percentage)(unsigned int idx, unsigned int column_count);
+	typedef float (*resolve_column_width_percentage)(unsigned int idx, unsigned int column_count);
 	typedef void (*prepare_cell_style)(unsigned int col_idx, long long row_salt, WarGrey::SCADA::TableCellStyle* style);
 
 	private struct TableStyle {
@@ -47,6 +47,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_foreground_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_background_hicolor;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_foreground_hicolor;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_info_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_line_color;
 
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ head_col_line_style;
@@ -102,6 +103,11 @@ namespace WarGrey::SCADA {
 		~ITableDataSource() noexcept {}
 	};
 
+	private class ITableFilter abstract {
+	public:
+		virtual bool filter(long long salt) = 0;
+	};
+
 	/************************************************************************************************/
 	private class ITablet abstract
 		: public WarGrey::SCADA::IStatelet<WarGrey::SCADA::TableState, WarGrey::SCADA::TableStyle>
@@ -118,6 +124,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
+		void on_tap(float local_x, float local_y) override;
 		void own_caret(bool yes) override;
 
 	public:
@@ -128,6 +135,10 @@ namespace WarGrey::SCADA {
 		unsigned long long count();
 		void push_row(long long salt, Platform::String^ fields[]);
 		void update_row(long long salt, Platform::String^ fields[]);
+
+	public:
+		void set_filter(WarGrey::SCADA::ITableFilter* filter, Platform::String^ on_label, Platform::String^ off_label = nullptr);
+		void enable_filter(bool on_off);
 		
 	protected:
 		void prepare_style(WarGrey::SCADA::TableState state, WarGrey::SCADA::TableStyle& style) override;
@@ -138,11 +149,25 @@ namespace WarGrey::SCADA {
 		
 	private:
 		void prepare_cell_style(WarGrey::SCADA::TableStyle& table_style, WarGrey::SCADA::TableCellStyle& cell_style);
+		void update_statistics(WarGrey::SCADA::TableStyle& table_style);
+		void update_description(WarGrey::SCADA::TableStyle& table_style);
+		float resolve_filter_width();
+
+	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ statistics;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ active_description;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ inactive_description;
 
 	private:
 		WarGrey::SCADA::TableBeing* table;
 		unsigned int page_row_count;
 		unsigned int page_index;
+
+	private:
+		WarGrey::SCADA::ITableFilter* filter;
+		Platform::String^ on_description;
+		Platform::String^ off_description;
+		bool filter_actived;
 
 	private:
 		float width;

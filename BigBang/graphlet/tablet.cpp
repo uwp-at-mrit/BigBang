@@ -18,6 +18,8 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+#define PAGE_COUNT(total, count) int(std::ceilf(float(total) / float(count)))
+
 static CanvasSolidColorBrush^ table_default_border_color = Colours::make(0xBBBBBB);
 static CanvasTextFormat^ table_default_head_font = make_bold_text_format(16.0F);
 static CanvasTextFormat^ table_default_cell_font = make_bold_text_format(14.0F);
@@ -28,7 +30,22 @@ static CanvasSolidColorBrush^ table_default_head_foreground_color = Colours::mak
 static CanvasSolidColorBrush^ table_default_cell_background_color = Colours::make(0x141414U);
 static CanvasSolidColorBrush^ table_default_cell_foreground_color = Colours::make(0xF8F8FF);
 
-static Platform::String^ gestures[] = { L"⇤", L"←", L"→", L"⇥" };
+static VirtualKey gestures[] = { VirtualKey::Home, VirtualKey::Down, VirtualKey::Left, VirtualKey::Right, VirtualKey::Up, VirtualKey::End };
+
+static Platform::String^ gesture_symbol(VirtualKey gesture) {
+	Platform::String^ symbol = nullptr;
+	
+	switch (gesture) {
+	case VirtualKey::Home: symbol = L"⇤"; break;
+	case VirtualKey::Down: symbol = L"↞"; break;
+	case VirtualKey::Left: symbol = L"←"; break;
+	case VirtualKey::Right: symbol = L"→"; break;
+	case VirtualKey::Up: symbol = L"↠"; break;
+	case VirtualKey::End: symbol = L"⇥"; break;
+	};
+
+	return symbol;
+}
 
 /*************************************************************************************************/
 float WarGrey::SCADA::resolve_average_column_width(unsigned int idx, unsigned int column_count) {
@@ -92,8 +109,8 @@ public:
 		this->headers[idx].caption = make_text_layout(this->headers[idx].name, head_font);
 		this->cell_font = cell_font;
 
-		for (size_t idx = 0; idx < sizeof(gestures) / sizeof(Platform::String^); idx++) {
-			this->gesture_captions[idx] = make_text_layout(gestures[idx], status_font);
+		for (size_t idx = 0; idx < sizeof(gestures) / sizeof(VirtualKey); idx++) {
+			this->gesture_captions[idx] = make_text_layout(gesture_symbol(gestures[idx]), status_font);
 		}
 	}
 
@@ -218,7 +235,7 @@ public:
 	}
 
 public:
-	CanvasTextLayout^ gesture_captions[sizeof(gestures) / sizeof(Platform::String^)];
+	CanvasTextLayout^ gesture_captions[sizeof(gestures) / sizeof(VirtualKey)];
 	unsigned int column_count;
 	theader* headers;
 
@@ -235,7 +252,8 @@ private:
 
 /*************************************************************************************************/
 ITablet::ITablet(ITableDataSource* datasrc, float width, float height, long long history_max)
-	: IStatelet(TableState::Realtime), width(width), height(height), page_index(0)
+	: IStatelet(TableState::Realtime), width(width), height(height), page_index(0LL)
+	, filter(nullptr), on_description(nullptr), off_description(nullptr), filter_actived(false)
 	, data_source(datasrc), history_max(history_max), request_loading(true) {
 
 	if (this->data_source != nullptr) {
@@ -305,11 +323,12 @@ void ITablet::prepare_style(TableState status, TableStyle& style) {
 	CAS_SLOT(style.cell_foreground_color, table_default_cell_foreground_color);
 	CAS_SLOT(style.status_foreground_color, style.cell_foreground_color);
 	CAS_SLOT(style.status_foreground_hicolor, style.status_foreground_color);
-	CAS_SLOT(style.status_background_color, style.cell_background_color);
+	CAS_SLOT(style.status_background_color, Colours::Transparent);
 	CAS_SLOT(style.status_background_hicolor, Colours::RoyalBlue);
 	CAS_SLOT(style.head_line_color, Colours::WhiteSmoke);
 	CAS_SLOT(style.cell_line_color, Colours::Transparent);
 	CAS_SLOT(style.status_line_color, style.head_line_color);
+	CAS_SLOT(style.status_info_color, style.status_line_color);
 	CAS_SLOT(style.status_border_color, Colours::DodgerBlue);
 
 	CAS_SLOT(style.cell_col_line_style, make_dash_stroke(CanvasDashStyle::Solid));
@@ -355,12 +374,31 @@ void ITablet::apply_style(TableStyle& style) {
 		this->table->update_font(idx, style.head_font, style.cell_font, style.status_font);
 	}
 
+	this->update_description(style);
+
 	{ // resolve row count per page
 		float head_height = style.head_font->FontSize * style.head_minheight_em;
 		float cell_height = style.cell_font->FontSize * style.cell_height_em;
 		float status_height = style.status_font->FontSize * style.status_height_em;
 		
 		this->page_row_count = (unsigned int)(std::floorf((available_height - head_height - status_height) / cell_height));
+		this->update_statistics(style);
+	}
+}
+
+void ITablet::update_statistics(TableStyle& style) {
+	Platform::String^ description = make_wstring(L"%ld / %ld", this->page_index + 1, PAGE_COUNT(this->history_max, this->page_row_count));
+
+	this->statistics = make_text_layout(description, style.status_font);
+}
+
+void ITablet::update_description(TableStyle& style) {
+	this->active_description = make_text_layout(this->on_description, style.status_font);
+
+	if (this->off_description == nullptr) {
+		this->inactive_description = this->active_description;
+	} else {
+		this->inactive_description = make_text_layout(this->off_description, style.status_font);
 	}
 }
 
@@ -399,7 +437,7 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	}
 
 	{ // draw table body
-		unsigned int page_start = this->page_row_count * this->page_index;
+		unsigned int n_start = this->page_row_count * this->page_index;
 		unsigned int ridx = 0U;
 		unsigned int n = 0U;
 
@@ -409,64 +447,92 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 			float xcol = x + border_off * 2.0F;
 
 			if (row != nullptr) {
-				for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
-					if (row->cells[cidx].outdated) {
-						TableCellStyle cell_style;
+				if ((n >= n_start) && ((!this->filter_actived) || (this->filter == nullptr) || (this->filter->filter(row->salt)))) {
+					for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
+						if (row->cells[cidx].outdated) {
+							TableCellStyle cell_style;
 
-						// NOTE: do not use `row->cells[cidx].style` directly since it may hold dirty data.
-						style.prepare_cell_style(cidx, row->salt, &cell_style);
-						this->prepare_cell_style(style, cell_style);
+							// NOTE: do not use `row->cells[cidx].style` directly since it may hold dirty data.
+							style.prepare_cell_style(cidx, row->salt, &cell_style);
+							this->prepare_cell_style(style, cell_style);
 
-						row->cells[cidx].style = cell_style;
+							row->cells[cidx].style = cell_style;
+						}
 					}
-				}
 
-				for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
-					CanvasTextLayout^ content = row->cells[cidx].content;
-					TableCellStyle* cell_style = &row->cells[cidx].style;
-					theader* col = &this->table->headers[cidx];
-					float margin = row->cells[cidx].style.margin;
-					float cradius = row->cells[cidx].style.corner_radius;
-					float bgx = xcol + margin;
-					float bgy = yrow + margin;
-					float bgwidth = col->width - margin * 2.0F;
-					float bgheight = cell_height - margin * 2.0F;
-					float content_x = bgx + cradius + (bgwidth - cradius * 2.0F - content->LayoutBounds.Width) * cell_style->align_fx;
-					float content_y = bgy + (bgheight - content->LayoutBounds.Height) * cell_style->align_fy;
+					for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
+						CanvasTextLayout^ content = row->cells[cidx].content;
+						TableCellStyle* cell_style = &row->cells[cidx].style;
+						theader* col = &this->table->headers[cidx];
+						float margin = row->cells[cidx].style.margin;
+						float cradius = row->cells[cidx].style.corner_radius;
+						float bgx = xcol + margin;
+						float bgy = yrow + margin;
+						float bgwidth = col->width - margin * 2.0F;
+						float bgheight = cell_height - margin * 2.0F;
+						float content_x = bgx + cradius + (bgwidth - cradius * 2.0F - content->LayoutBounds.Width) * cell_style->align_fx;
+						float content_y = bgy + (bgheight - content->LayoutBounds.Height) * cell_style->align_fy;
 
-					ds->FillRoundedRectangle(bgx, bgy, bgwidth, bgheight, cradius, cradius, cell_style->background_color);
-					ds->DrawTextLayout(content, content_x, content_y, cell_style->foreground_color);
+						ds->FillRoundedRectangle(bgx, bgy, bgwidth, bgheight, cradius, cradius, cell_style->background_color);
+						ds->DrawTextLayout(content, content_x, content_y, cell_style->foreground_color);
 
-					xcol += col->width;
+						xcol += col->width;
+					}
+
+					n++;
+					yrow += cell_height;
+					ds->DrawLine(x, yrow, x + this->width, yrow, style.cell_line_color, style.cell_row_line_thickness, style.cell_row_line_style);
 				}
 			}
-
-			n++;
-			yrow += cell_height;
-			ds->DrawLine(x, yrow, x + this->width, yrow, style.cell_line_color, style.cell_row_line_thickness, style.cell_row_line_style);
 
 			ridx++;
 		}
 	}
 
 	if (status_height > 0.0F) { // draw status
-		float status_x = x + border_off * 2.0F;
+		float status_lx = x + border_off * 2.0F;
 		float bradius = style.status_corner_radius;
-		float box_width = status_height - style.status_margin * 2.0F;
+		float box_size = status_height - style.status_margin * 2.0F;
 		float box_y = ymax + style.status_margin;
-		float step = box_width + style.status_margin * 2.0F;
-
+		float step = box_size + style.status_margin * 2.0F;
+		
 		ds->DrawLine(x, ymax, x + this->width, ymax, style.status_line_color, style.status_line_thickness, style.status_line_style);
 
-		for (size_t idx = 0; idx < sizeof(gestures) / sizeof(Platform::String^); idx++) {
+		{ // draw statistics
+			Rect sbox = this->statistics->LayoutBounds;
+			float stats_cx = x + this->width * 0.5F;
+			float stats_cy = box_y + box_size * 0.5F;
+			
+			ds->DrawTextLayout(this->statistics,
+				stats_cx - sbox.Width * 0.5F, stats_cy - sbox.Height * 0.5F,
+				style.status_info_color);
+		}
+		
+		for (size_t idx = 0; idx < sizeof(gestures) / sizeof(VirtualKey); idx++) {
 			CanvasTextLayout^ gesture = this->table->gesture_captions[idx];
 			Rect symbox = gesture->LayoutBounds;
-			float box_x = status_x + style.status_margin + step * float(idx);
-			float sym_xoff = (box_width - symbox.Width) * 0.5F;
-			float sym_yoff = (box_width - symbox.Height) * 0.5F;
+			float box_x = status_lx + style.status_margin + step * float(idx);
+			float sym_xoff = (box_size - symbox.Width) * 0.5F;
+			float sym_yoff = (box_size - symbox.Height) * 0.5F;
 
-			ds->DrawRoundedRectangle(box_x, box_y, box_width, box_width, bradius, bradius, style.status_border_color);
+			ds->FillRoundedRectangle(box_x, box_y, box_size, box_size, bradius, bradius, style.status_background_color);
+			ds->DrawRoundedRectangle(box_x, box_y, box_size, box_size, bradius, bradius, style.status_border_color);
 			ds->DrawTextLayout(gesture, box_x + sym_xoff, box_y + sym_yoff, style.status_foreground_color);
+		}
+
+		if (this->filter != nullptr) {
+			ICanvasBrush^ fgcolor = (this->filter_actived ? style.status_foreground_hicolor : style.status_foreground_color);
+			ICanvasBrush^ bgcolor = (this->filter_actived ? style.status_background_hicolor : style.status_background_color);
+			Rect fbox = (this->filter_actived ? this->active_description->LayoutBounds : this->inactive_description->LayoutBounds);
+			float filter_width = this->resolve_filter_width();
+			float filter_rx = x + this->width - (status_lx - x) - style.status_margin;
+			float filter_lx = filter_rx - filter_width;
+			float desc_xoff = (filter_width - fbox.Width) * 0.5F;
+			float desc_yoff = (box_size - fbox.Height) * 0.5F;
+
+			ds->FillRoundedRectangle(filter_lx, box_y, filter_width, box_size, bradius, bradius, bgcolor);
+			ds->DrawRoundedRectangle(filter_lx, box_y, filter_width, box_size, bradius, bradius, style.status_border_color);
+			ds->DrawTextLayout(this->active_description, filter_lx + desc_xoff, box_y + desc_yoff, fgcolor);
 		}
 	}
 
@@ -489,6 +555,31 @@ void ITablet::update_row(long long salt, Platform::String^ fields[]) {
 	this->notify_updated();
 }
 
+float ITablet::resolve_filter_width() {
+	TableStyle style = this->get_style();
+	Rect adbox = this->active_description->LayoutBounds;
+	Rect idbox = this->inactive_description->LayoutBounds;
+	
+	return std::fmaxf(adbox.Width, idbox.Width) + (style.status_corner_radius + style.status_margin) * 2.0F;
+}
+
+void ITablet::set_filter(ITableFilter* filter, Platform::String^ on_description, Platform::String^ off_description) {
+	this->filter = filter;
+	this->on_description = on_description;
+	this->off_description = off_description;
+
+	this->update_description(this->get_style());
+
+	if (this->filter_actived) {
+		this->notify_updated();
+	}
+}
+
+void ITablet::enable_filter(bool on) {
+	this->filter_actived = on;
+	this->notify_updated();
+}
+
 void ITablet::on_row_datum(long long request_count, long long nth, long long salt, Platform::String^ fields[], unsigned int n) {
 	if (this->history_max == request_count) {
 		this->table->push_front_row(salt, fields);
@@ -506,45 +597,59 @@ void ITablet::own_caret(bool yes) {
 	this->set_state(yes ? TableState::History : TableState::Realtime);
 }
 
+void ITablet::on_tap(float x, float y) {
+	TableStyle style = this->get_style();
+	float status_height = style.status_font->FontSize * style.status_height_em;
+	float box_size = status_height - style.status_margin * 2.0F;
+	float box_y = this->height - status_height + style.status_margin;
+	float step = box_size + style.status_margin * 2.0F;
+	float inset = style.border_thickness + style.status_margin;
+	float filter_rx = this->width - inset;
+	float filter_lx = filter_rx - this->resolve_filter_width();
+
+	if ((y >= box_y) && (y <= (box_y + box_size))) { // draw status
+		if ((x >= filter_lx) && (x <= filter_rx)) {
+			this->filter_actived = !this->filter_actived;
+			this->notify_updated();
+		} else {
+			for (size_t idx = 0; idx < sizeof(gestures) / sizeof(VirtualKey); idx++) {
+				float box_x = inset + step * float(idx);
+
+				if ((x >= box_x) && (x <= (box_x + box_size))) {
+					this->on_key(gestures[idx], false);
+					break;
+				}
+			}
+		}
+	}
+}
+
 bool ITablet::on_key(VirtualKey key, bool screen_keyboard) {
-	/*
-	long long limit = ((this->history_destination <= 0) ? current_seconds() : this->history_destination);
-	long long interval = (this->history.span >> 3);
-	long long start_left_limit = limit - this->history_span;
-	long long start_right_limit = limit - interval;
-	*/
+	int max_index = PAGE_COUNT(this->history_max, this->page_row_count) - 1U;
+	unsigned int prev_index = this->page_index;
+	int next_index = this->page_index;
 
-	bool handled = true;
-
-	/*
 	switch (key) {
-	case VirtualKey::Left: {
-		this->history.start -= interval;
-		this->history.start = std::max(this->history.start, start_left_limit);
-	}; break;
-	case VirtualKey::Right: {
-		this->history.start += interval;
-		this->history.start = std::min(this->history.start, start_right_limit);
-	}; break;
-	case VirtualKey::Add: {
-		this->history.span = this->history.span >> 1;
-		this->history.span = std::max(this->history.span, minute_span_s);
-	}; break;
-	case VirtualKey::Subtract: {
-		this->history.span = this->history.span << 1;
-		this->history.span = std::min(this->history.span, day_span_s);
-	}; break;
-	case VirtualKey::Home: this->history.start = start_left_limit; break;
-	case VirtualKey::End: this->history.start = start_right_limit; break;
-	case VirtualKey::Escape: this->history = this->realtime; break;
-	default: handled = false; break;
+	case VirtualKey::Home: next_index = 0; break;
+	case VirtualKey::Up: next_index += 10; break;
+	case VirtualKey::Left: next_index -= 1; break;
+	case VirtualKey::Right: next_index += 1; break;
+	case VirtualKey::Down: next_index -= 10; break;
+	case VirtualKey::End: next_index = max_index; break;
 	}
 
-	if (handled) {
-		this->no_selected();
-		this->update_horizontal_axes(this->get_style());
+	if (next_index <= 0) {
+		this->page_index = 0U;
+	} else if (next_index >= max_index) {
+		this->page_index = (unsigned int)max_index;
+	} else {
+		this->page_index = (unsigned int)next_index;
 	}
-	*/
 
-	return handled;
+	if (this->page_index != prev_index) {
+		this->update_statistics(this->get_style());
+		this->notify_updated();
+	}
+
+	return (this->page_index != prev_index);
 }

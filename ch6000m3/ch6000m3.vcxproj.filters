@@ -173,8 +173,10 @@
     <ClCompile Include="schema\alarm.cpp">
       <Filter>schema</Filter>
     </ClCompile>
-    <ClCompile Include="schema\datalet\alarm_tbl.cpp" />
     <ClCompile Include="schema\datalet\earthwork_ts.cpp">
+      <Filter>schema\datalet</Filter>
+    </ClCompile>
+    <ClCompile Include="schema\datalet\alarm_tbl.cpp">
       <Filter>schema\datalet</Filter>
     </ClCompile>
   </ItemGroup>
@@ -339,8 +341,10 @@
     <ClInclude Include="schema\alarm.hpp">
       <Filter>schema</Filter>
     </ClInclude>
-    <ClInclude Include="schema\datalet\alarm_tbl.hpp" />
     <ClInclude Include="schema\datalet\earthwork_ts.hpp">
+      <Filter>schema\datalet</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\datalet\alarm_tbl.hpp">
       <Filter>schema\datalet</Filter>
     </ClInclude>
   </ItemGroup>

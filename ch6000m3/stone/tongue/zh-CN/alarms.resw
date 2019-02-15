@@ -123,6 +123,12 @@
   <data name="Alert" xml:space="preserve">
     <value>报警</value>
   </data>
+  <data name="AlertsOnly" xml:space="preserve">
+    <value>当前报警</value>
+  </data>
+  <data name="AllAlarms" xml:space="preserve">
+    <value>所有报警</value>
+  </data>
   <data name="Code" xml:space="preserve">
     <value>代码</value>
   </data>
