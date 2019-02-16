@@ -493,7 +493,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ch6000m3_TemporaryKey.pfx" />
-    <None Include="packages.config" />
     <None Include="ch6000m3.scrbl" />
     <None Include="Assets\ch6000m3.rkt">
       <Filter>Assets</Filter>
@@ -507,6 +506,7 @@
     <None Include="schema\alarm.dao.rkt">
       <Filter>schema</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
