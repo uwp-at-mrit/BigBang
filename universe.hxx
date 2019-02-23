@@ -125,7 +125,7 @@ namespace WarGrey::SCADA {
 	internal:
 		void refresh(WarGrey::SCADA::IPlanet* target) override;
 		read_only_property(WarGrey::SCADA::IPlanet*, current_planet);
-		read_only_property(WarGrey::SCADA::IPlanet*, heads_up_planet);
+		read_only_property(WarGrey::SCADA::IHeadUpPlanet*, heads_up_planet);
 		read_only_property(WarGrey::SCADA::IUniverseNavigator*, navigator);
 		read_only_property(int, current_planet_index);
 

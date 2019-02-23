@@ -424,7 +424,7 @@ IUniverseNavigator* UniverseDisplay::navigator::get() {
 	return this->_navigator;
 }
 
-IPlanet* UniverseDisplay::heads_up_planet::get() {
+IHeadUpPlanet* UniverseDisplay::heads_up_planet::get() {
 	return this->headup_planet;
 }
 
