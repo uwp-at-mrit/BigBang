@@ -141,7 +141,7 @@ float WarGrey::SCADA::statusbar_height() {
 }
 
 /*************************************************************************************************/
-Statusbarlet::Statusbarlet(IPLCMaster* device) : device(device) {
+Statusbarlet::Statusbarlet(ITCPConnection* device) : device(device) {
 	initialize_status_font();
 }
 

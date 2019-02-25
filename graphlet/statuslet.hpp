@@ -4,14 +4,14 @@
 #include <list>
 
 #include "graphlet/primitive.hpp"
-#include "IPLCMaster.hpp"
+#include "tcp.hpp"
 
 namespace WarGrey::SCADA {
 	float statusbar_height();
 
     private class Statusbarlet : public virtual WarGrey::SCADA::IGraphlet {
     public:
-		Statusbarlet(WarGrey::SCADA::IPLCMaster* device = nullptr);
+		Statusbarlet(WarGrey::SCADA::ITCPConnection* device = nullptr);
 
     public:
         void construct() override;
@@ -25,8 +25,8 @@ namespace WarGrey::SCADA {
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caption;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ device_name;
-		WarGrey::SCADA::IPLCMaster* device;
-		WarGrey::SCADA::PLCMasterMode plc_mode;
+		WarGrey::SCADA::ITCPConnection* device;
+		WarGrey::SCADA::TCPMode plc_mode;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ retry_icon;
