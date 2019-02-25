@@ -157,8 +157,8 @@ public:
 		 *
 		 * By the way, the pool is much bigger than desired.
 		 */
-		this->slot_count = slot_count + 1;
-		this->slot_size = slot_size;
+		this->slot_count = (unsigned int)(slot_count + 1);
+		this->slot_size = (unsigned int)(slot_size);
 
 		this->flonums = new tsdouble*[this->slot_count];
 
@@ -177,7 +177,7 @@ public:
 		this->legend_flonum = nullptr;
 
 		if (this->flonums != nullptr) {
-			for (int idx = 0; idx < this->slot_count; idx++) {
+			for (unsigned int idx = 0; idx < this->slot_count; idx++) {
 				if (this->flonums[idx] != nullptr) {
 					delete[] this->flonums[idx];
 				}
@@ -206,8 +206,8 @@ public:
 private:
 	tsdouble** flonums = nullptr;
 	tsdouble* legend_flonum = nullptr;
-	long long slot_count = 0;
-	long long slot_size = 0;
+	unsigned int slot_count = 0;
+	unsigned int slot_size = 0;
 	long long virtual_current_slot;
 	long long current_index;
 	long long virtual_history_slot;

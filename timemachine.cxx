@@ -503,7 +503,7 @@ uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t*
 		// TODO: find the reason if `open` fails.
 
 		if (tmstream.is_open()) {
-			this->ifeof = tmstream.tellg();
+			this->ifeof = size_t(tmstream.tellg());
 
 			if (this->ifsize < this->ifeof) {
 				if (this->ifpool != nullptr) {

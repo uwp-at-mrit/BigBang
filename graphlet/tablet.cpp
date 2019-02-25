@@ -207,7 +207,7 @@ public:
 	void reset_pool(long long history_max) {
 		this->clear_pool();
 
-		this->slot_count = history_max;
+		this->slot_count = (unsigned int)(history_max);
 
 		this->rows = new trow[this->slot_count];
 
@@ -241,7 +241,7 @@ public:
 
 private:
 	trow* rows = nullptr;
-	long long slot_count = 0;
+	unsigned int slot_count = 0;
 	long long virtual_current_slot;
 	long long virtual_history_slot;
 	bool history_full;
