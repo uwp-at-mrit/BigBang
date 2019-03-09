@@ -1044,10 +1044,10 @@ void UniverseDisplay::on_character(CoreWindow^ sender, CharacterReceivedEventArg
 						this->actual_width, this->actual_height);
 				}; break;
 				case 4: { // CTRL+D
-					this->recent_planet->save_logo();
+					this->recent_planet->save_logo(-2.0F, -2.0F);
 				}; break;
 				case 12: { // CTRL+L
-					this->recent_planet->save_logo(-2.0F, -2.0F);
+					this->recent_planet->save_logo();
 				}; break;
 				}
 			}
