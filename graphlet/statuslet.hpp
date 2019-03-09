@@ -4,7 +4,7 @@
 #include <list>
 
 #include "graphlet/primitive.hpp"
-#include "tcp.hpp"
+#include "network/tcp.hpp"
 
 namespace WarGrey::SCADA {
 	float statusbar_height();
