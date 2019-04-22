@@ -3,11 +3,11 @@
 #include <map>
 
 #include "graphlet/statuslet.hpp"
+#include "datum/string.hpp"
 
 #include "text.hpp"
 #include "polar.hpp"
 #include "paint.hpp"
-#include "string.hpp"
 #include "system.hpp"
 #include "tongue.hpp"
 #include "planet.hpp"

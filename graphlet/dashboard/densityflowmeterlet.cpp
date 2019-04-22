@@ -1,14 +1,14 @@
 ﻿#include "graphlet/dashboard/densityflowmeterlet.hpp"
 
+#include "datum/string.hpp"
+#include "measure/rhatchmark.hpp"
+
 #include "math.hpp"
 #include "shape.hpp"
 #include "paint.hpp"
 #include "geometry.hpp"
 
 #include "tongue.hpp"
-#include "string.hpp"
-
-#include "measure/rhatchmark.hpp"
 
 using namespace WarGrey::SCADA;
 

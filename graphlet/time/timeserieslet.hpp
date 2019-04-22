@@ -2,10 +2,10 @@
 
 #include "graphlet/primitive.hpp"
 
-#include "time.hpp"
-#include "tongue.hpp"
-#include "object.hpp"
+#include "datum/time.hpp"
+#include "datum/object.hpp"
 
+#include "tongue.hpp"
 #include "paint.hpp"
 #include "brushes.hxx"
 

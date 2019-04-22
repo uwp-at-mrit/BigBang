@@ -2,9 +2,10 @@
 
 #include "forward.hpp"
 #include "sprite.hpp"
-#include "enum.hpp"
-#include "box.hpp"
-#include "slot.hpp"
+
+#include "datum/enum.hpp"
+#include "datum/box.hpp"
+#include "datum/slot.hpp"
 
 namespace WarGrey::SCADA {
 #define GRAPHLETS_LENGTH(a) (sizeof(a) / sizeof(IGraphlet*))

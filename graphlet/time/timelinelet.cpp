@@ -2,8 +2,8 @@
 
 #include "graphlet/time/timelinelet.hpp"
 
-#include "string.hpp"
-#include "time.hpp"
+#include "datum/string.hpp"
+#include "datum/time.hpp"
 
 #include "text.hpp"
 #include "shape.hpp"

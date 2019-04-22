@@ -1,8 +1,9 @@
 #include "graphlet/svglet.hpp"
 #include "planet.hpp"
 
+#include "datum/path.hpp"
+
 #include "colorspace.hpp"
-#include "path.hpp"
 #include "draw.hpp"
 
 using namespace WarGrey::SCADA;

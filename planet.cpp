@@ -2,7 +2,8 @@
 #include <WindowsNumerics.h>
 #include <ppltasks.h>
 
-#include "path.hpp"
+#include "datum/path.hpp"
+
 #include "planet.hpp"
 #include "syslog.hpp"
 #include "system.hpp"

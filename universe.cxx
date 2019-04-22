@@ -4,11 +4,12 @@
 #include "planet.hpp"
 #include "navigator/null.hpp"
 
+#include "datum/time.hpp"
+#include "datum/path.hpp"
+#include "datum/box.hpp"
+
 #include "system.hpp"
 #include "syslog.hpp"
-#include "time.hpp"
-#include "path.hpp"
-#include "box.hpp"
 
 #include "paint.hpp"
 #include "brushes.hxx"

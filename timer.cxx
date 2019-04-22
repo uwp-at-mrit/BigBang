@@ -1,5 +1,6 @@
 #include "timer.hxx"
-#include "time.hpp"
+
+#include "datum/time.hpp"
 
 using namespace WarGrey::SCADA;
 

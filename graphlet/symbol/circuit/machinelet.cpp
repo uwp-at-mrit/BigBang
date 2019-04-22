@@ -1,6 +1,6 @@
 #include "graphlet/symbol/circuit/machinelet.hpp"
 
-#include "string.hpp"
+#include "datum/string.hpp"
 
 #include "math.hpp"
 #include "text.hpp"

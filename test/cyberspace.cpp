@@ -1,10 +1,9 @@
 ﻿#include "test/cyberspace.hpp"
 
 #include "decorator/border.hpp"
-
 #include "graphlet/textlet.hpp"
 
-#include "string.hpp"
+#include "datum/string.hpp"
 
 using namespace WarGrey::SCADA;
 

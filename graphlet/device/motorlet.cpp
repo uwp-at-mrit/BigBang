@@ -34,7 +34,7 @@ void Motorlet::construct() {
     auto serew_stops = make_gradient_stops(serew_colors); // don't mind, it's Visual Studio's fault.
     auto body_stops = make_gradient_stops(body_colors);   // don't mind, it's Visual Studio's fault.
 
-    float thread = fmax(this->width * 0.01F, 1.0F);
+    float thread = fmaxf(this->width * 0.01F, 1.0F);
     float body_height = this->height * 0.97F;
     float body_y = this->height - body_height;
     float serew_x = this->width * 0.8F;

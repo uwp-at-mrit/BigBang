@@ -1,7 +1,7 @@
 #include "graphlet/time/datepickerlet.hpp"
 
-#include "time.hpp"
-#include "string.hpp"
+#include "datum/time.hpp"
+#include "datum/string.hpp"
 
 #include "paint.hpp"
 

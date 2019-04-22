@@ -4,7 +4,8 @@
 
 #include "decorator/table.hpp"
 #include "brushes.hxx"
-#include "box.hpp"
+
+#include "datum/box.hpp"
 
 using namespace WarGrey::SCADA;
 

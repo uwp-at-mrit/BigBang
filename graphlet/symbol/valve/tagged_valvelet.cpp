@@ -1,6 +1,6 @@
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
-#include "string.hpp"
+#include "datum/string.hpp"
 
 #include "math.hpp"
 #include "text.hpp"

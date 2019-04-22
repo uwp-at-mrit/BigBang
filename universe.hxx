@@ -6,7 +6,8 @@
 #include "navigator/navigator.hpp"
 #include "timer.hxx"
 
-#include "class.hpp"
+#include "datum/class.hpp"
+
 #include "forward.hpp"
 #include "syslog.hpp"
 

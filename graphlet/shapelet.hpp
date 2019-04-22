@@ -3,8 +3,8 @@
 #include <list>
 
 #include "graphlet/primitive.hpp"
+#include "datum/credit.hpp"
 
-#include "credit.hpp"
 #include "turtle.hpp"
 #include "brushes.hxx"
 #include "geometry.hpp"

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "forward.hpp"
-#include "object.hpp"
 #include "syslog.hpp"
+
+#include "datum/object.hpp"
 
 namespace WarGrey::SCADA {
 	private class IPlanetDecorator abstract {

@@ -1,6 +1,7 @@
 #include <ppltasks.h>
 
-#include "box.hpp"
+#include "datum/box.hpp"
+
 #include "sprite.hpp"
 #include "syslog.hpp"
 

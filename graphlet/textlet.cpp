@@ -1,9 +1,9 @@
 #include <cwchar>
 
 #include "graphlet/textlet.hpp"
+#include "datum/string.hpp"
 
 #include "forward.hpp"
-#include "string.hpp"
 #include "tongue.hpp"
 
 #include "paint.hpp"

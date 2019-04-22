@@ -1,6 +1,6 @@
 ﻿#include "graphlet/time/timeserieslet.hpp"
 
-#include "string.hpp"
+#include "datum/string.hpp"
 
 #include "colorspace.hpp"
 

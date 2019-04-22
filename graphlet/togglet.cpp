@@ -1,6 +1,7 @@
 #include "graphlet/togglet.hpp"
 
-#include "box.hpp"
+#include "datum/box.hpp"
+
 #include "text.hpp"
 #include "tongue.hpp"
 #include "colorspace.hpp"

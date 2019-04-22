@@ -1,13 +1,13 @@
 ﻿#include "graphlet/device/overflowlet.hpp"
 
+#include "datum/string.hpp"
+#include "measure/vhatchmark.hpp"
+
 #include "text.hpp"
 #include "shape.hpp"
 #include "paint.hpp"
-#include "string.hpp"
 #include "geometry.hpp"
 #include "colorspace.hpp"
-
-#include "measure/vhatchmark.hpp"
 
 using namespace WarGrey::SCADA;
 

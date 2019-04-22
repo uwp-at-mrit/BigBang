@@ -2,12 +2,12 @@
 
 #include "navigator/thumbnail.hpp"
 #include "decorator/decorator.hpp"
+#include "graphlet/textlet.hpp"
+
+#include "datum/box.hpp"
 
 #include "universe.hxx"
 #include "planet.hpp"
-#include "box.hpp"
-
-#include "graphlet/textlet.hpp"
 
 using namespace WarGrey::SCADA;
 

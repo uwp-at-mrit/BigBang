@@ -2,17 +2,17 @@
 
 #include "graphlet/device/draglet.hpp"
 
+#include "datum/string.hpp"
+
+#include "measure/vhatchmark.hpp"
+#include "measure/hhatchmark.hpp"
+#include "measure/rhatchmark.hpp"
+
 #include "math.hpp"
 #include "shape.hpp"
 #include "paint.hpp"
 #include "polar.hpp"
 #include "geometry.hpp"
-
-#include "string.hpp"
-
-#include "measure/vhatchmark.hpp"
-#include "measure/hhatchmark.hpp"
-#include "measure/rhatchmark.hpp"
 
 using namespace WarGrey::SCADA;
 

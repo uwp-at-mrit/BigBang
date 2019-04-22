@@ -3,7 +3,7 @@
 #include <list>
 #include <shared_mutex>
 
-#include "credit.hpp"
+#include "datum/credit.hpp"
 
 #include "universe.hxx"
 #include "decorator/decorator.hpp"

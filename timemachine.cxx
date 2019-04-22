@@ -10,8 +10,9 @@
 #include "graphlet/time/datepickerlet.hpp"
 #include "graphlet/time/timelinelet.hpp"
 
-#include "path.hpp"
-#include "string.hpp"
+#include "datum/path.hpp"
+#include "datum/string.hpp"
+
 #include "module.hpp"
 
 using namespace WarGrey::SCADA;
