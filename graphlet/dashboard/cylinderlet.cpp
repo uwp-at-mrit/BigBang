@@ -32,7 +32,7 @@ Cylinderlet::Cylinderlet(LiquidSurface shape, double range, float base_width, fl
 
 Cylinderlet::Cylinderlet(LiquidSurface shape, double vmin, double vmax, float base_width, float height
 	, float thickness, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: IRangelet(vmin, vmax), base_width(std::fabsf(base_width)), height(height), thickness(thickness)
+	: IRangelet(vmin, vmax), base_width(fabsf(base_width)), height(height), thickness(thickness)
 	, step(step), precision(precision), liquid_shape(shape), leftward(base_width > 0.0F)
 	, border_color((bcolor == nullptr) ? cylinder_default_border_color : bcolor) {
 

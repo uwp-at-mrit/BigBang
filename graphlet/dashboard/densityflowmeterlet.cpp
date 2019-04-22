@@ -25,7 +25,7 @@ static CanvasSolidColorBrush^ dfmeter_default_flspeed_color = Colours::DodgerBlu
 static CanvasSolidColorBrush^ dfmeter_default_base_color = Colours::DarkSlateGray;
 
 static inline void dfmeter_point(float radius, double v, double vmin, double vmax, double start, double end, float* px, float* py) {
-	double percentage = std::fmax(std::fmin((v - vmin) / (vmax - vmin), 1.0), 0.0);
+	double percentage = fmax(fmin((v - vmin) / (vmax - vmin), 1.0), 0.0);
 	double degrees = (end - start) * percentage + start;
 
 	circle_point(radius, degrees, px, py);
@@ -62,11 +62,11 @@ void DensitySpeedmeterlet::construct() {
 	auto flspeed = rhatchmark(this->radius, this->flspeed_start, this->flspeed_end, this->flspeed_min, this->flspeed_max,
 		this->step, this->thickness, &fmetrics, this->precision);
 
-	float epr = std::fabsf(dmetrics.arc_sy);
+	float epr = fabsf(dmetrics.arc_sy);
 	float ldistance = dmetrics.arc_sx - dmetrics.label_lx;
 	float rdistance = fmetrics.label_rx - fmetrics.arc_sx;
 
-	this->yoff = -std::fminf(dmetrics.label_ty, fmetrics.label_ty) + thickoff;
+	this->yoff = -fminf(dmetrics.label_ty, fmetrics.label_ty) + thickoff;
 	this->epcxoff = epr + thickoff;
 	this->width = ldistance + rdistance + this->radius + this->thickness;
 	this->height = this->yoff + this->epcxoff;
@@ -75,7 +75,7 @@ void DensitySpeedmeterlet::construct() {
 
 	{ // relocate and construct
 		float epoff = thickoff;
-		float rxdiff = epr - std::fmaxf((dmetrics.arc_sx - dmetrics.label_lx), (fmetrics.label_rx - fmetrics.arc_sx));
+		float rxdiff = epr - fmaxf((dmetrics.arc_sx - dmetrics.label_lx), (fmetrics.label_rx - fmetrics.arc_sx));
 		auto endpoint_base = circle(0.0F, 0.0F, epr);
 		auto endpoint = circle(0.0F, 0.0F, this->thickness * 1.618F);
 

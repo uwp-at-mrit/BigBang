@@ -49,7 +49,7 @@ public:
 	}
 
     void on_wifi_signal_strength_changed(Platform::String^ ssid, char strength) override {
-		float percentage = std::roundf(float(strength) * 100.0F / 5.0F);
+		float percentage = roundf(float(strength) * 100.0F / 5.0F);
 		Platform::String^ label = speak("wifi", tongue_scope);
         Platform::String^ signal = ((ssid == nullptr) ? speak("nowifi", tongue_scope) : (ssid + " " + percentage.ToString() + "%"));
 
@@ -157,7 +157,7 @@ void Statusbarlet::construct() {
 }
 
 void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, fmax(this->available_visible_width(x), 0.0F));
+	SET_BOX(width, fmaxf(this->available_visible_width(x), 0.0F));
 	SET_BOX(height, status_height);
 }
 
@@ -275,10 +275,10 @@ void Statuslinelet::construct() {
 }
 
 void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, fmax(this->available_visible_width(x), 0.0F));
+	SET_BOX(width, fmaxf(this->available_visible_width(x), 0.0F));
 	
 	if (this->lines == 0) {
-		SET_BOX(height, fmax(this->available_visible_height(y), 0.0F));
+		SET_BOX(height, fmaxf(this->available_visible_height(y), 0.0F));
 	} else {
 		SET_BOX(height, status_height * float(this->lines));
 	}
@@ -295,7 +295,7 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 
 		if (this->lines == 0) {
 			float flcount = Height / status_height;
-			size_t alines = (size_t)(std::ceilf(flcount));
+			size_t alines = (size_t)(ceilf(flcount));
 
 			if (total > alines) {
 				for (size_t i = alines; i < total; i++) {
@@ -311,7 +311,7 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 		for (size_t idx = 0; idx < total; idx++, mit++, cit++) {
 			float content_y = y + status_height * float(idx);
 			
-			content_y += std::fmaxf((status_height - (*mit)->LayoutBounds.Height) * 0.5F, 0.0F);
+			content_y += fmaxf((status_height - (*mit)->LayoutBounds.Height) * 0.5F, 0.0F);
 			ds->DrawTextLayout((*mit), x, content_y, (*cit));
 		}
 

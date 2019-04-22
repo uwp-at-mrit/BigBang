@@ -27,7 +27,7 @@ static CanvasSolidColorBrush^ overflow_default_hatch_color = Colours::GhostWhite
 /*************************************************************************************************/
 OverflowPipelet::OverflowPipelet(double range, float width, float height, unsigned int step, unsigned int precision, ICanvasBrush^ color
 	, ICanvasBrush^ liquid_color, ICanvasBrush^ target_color, ICanvasBrush^ border_color, CanvasSolidColorBrush^ hatchmark_color)
-	: IRangelet(0.0, range), width(std::fabsf(width)), height(height), thickness(1.0F), step(step), precision(precision), leftward(width < 0.0F)
+	: IRangelet(0.0, range), width(fabsf(width)), height(height), thickness(1.0F), step(step), precision(precision), leftward(width < 0.0F)
 	, color((color == nullptr) ? overflow_default_color : color)
 	, liquid_color((liquid_color == nullptr) ? overflow_default_liquid_color : liquid_color)
 	, target_color((target_color == nullptr) ? overflow_default_target_color : target_color)

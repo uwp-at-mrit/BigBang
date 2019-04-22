@@ -191,7 +191,7 @@ void Timelinelet::on_tap(float x, float y) {
 		this->shift_speed();
 	} else if ((x >= tl_lx) && (x <= tl_rx) && (state != TimelineState::Terminated)) {
 		float percentage = std::max(std::min((x - this->timeline_lx) / (this->timeline_rx - this->timeline_lx), 1.0F), 0.0F);
-		long long this_timepoint = ((long long)(std::roundf(float(this->vmax - this->vmin) * percentage))) + this->vmin;
+		long long this_timepoint = ((long long)(roundf(float(this->vmax - this->vmin) * percentage))) + this->vmin;
 
 		for (auto observer : this->obsevers) {
 			observer->on_time_skipped(this, this_timepoint);
@@ -364,9 +364,9 @@ void Timelinelet::update_time_range() {
 	float rx = this->width - gridsize * 1.0F;
 	float lx = gridsize * 2.0F;
 
-	this->height = std::fmaxf(dbox0.height + tbox0.height, dboxn.height + tboxn.height) + this->endpoint_radius * 1.618F;
-	this->timeline_lx = lx + std::fmaxf(dwhalf0, twhalf0);
-	this->timeline_rx = std::fmaxf(rx - std::fmaxf(dwhalfn, twhalfn), this->timeline_lx + 1.0F);
+	this->height = fmaxf(dbox0.height + tbox0.height, dboxn.height + tboxn.height) + this->endpoint_radius * 1.618F;
+	this->timeline_lx = lx + fmaxf(dwhalf0, twhalf0);
+	this->timeline_rx = fmaxf(rx - fmaxf(dwhalfn, twhalfn), this->timeline_lx + 1.0F);
 
 	{ // merge timepoints
 		auto dt0 = geometry_union(dp0, this->timeline_lx - dwhalf0, this->height - dbox0.height + dbox0.bspace,

@@ -31,7 +31,7 @@ void Hatchlet::construct() {
 	float thickoff = this->thickness * 0.5F;
 	float border_width = this->width - this->thickness;
 	float border_height = this->height - this->thickness;
-	float wheel_radius = std::fminf(border_width, border_height) * 0.618F * 0.5F;
+	float wheel_radius = fminf(border_width, border_height) * 0.618F * 0.5F;
 	float wheel_thickness = this->thickness * 0.618F;
 	auto slash = polar_line(wheel_radius, -45.0, 135.0);
 	auto backslash = polar_line(wheel_radius, -135.0, 45.0);

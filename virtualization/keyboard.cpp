@@ -27,8 +27,8 @@ static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, flo
 	box.Width = cellsize * flncol + gapsize * (flncol - 1.0F);
 	box.Height = cellsize * flnrow + gapsize * (flnrow - 1.0F);
 
-	(*width) = std::fmaxf((*width), box.X + box.Width + gapsize);
-	(*height) = std::fmaxf((*height), box.Y + box.Height + gapsize);
+	(*width) = fmaxf((*width), box.X + box.Width + gapsize);
+	(*height) = fmaxf((*height), box.Y + box.Height + gapsize);
 }
 
 /*************************************************************************************************/

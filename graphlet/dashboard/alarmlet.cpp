@@ -54,7 +54,7 @@ void Alarmlet::construct() {
 	float body_bottom = base_y - light_thickness;
 	float hat_radius = body_width * 0.5F;
 	float shadow_radius = hat_radius * 0.618F;
-	float light_lradius = cx / std::cos(degrees_to_radians(theta)) - light_thickness;
+	float light_lradius = cx / cosf(degrees_to_radians(theta)) - light_thickness;
 	float light_sradius = hat_radius + light_thickness;
 	float body_y = light_lradius + light_thickness;
 

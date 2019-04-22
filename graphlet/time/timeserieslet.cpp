@@ -261,9 +261,9 @@ CanvasSolidColorBrush^ WarGrey::SCADA::lookup_default_dark_color(unsigned int id
 ITimeSerieslet::ITimeSerieslet(ITimeSeriesDataSource* datasrc
 	, double vmin, double vmax, TimeSeries& ts, unsigned int n, float width, float height
 	, unsigned int step, unsigned int precision, long long history_span)
-	: IStatelet(TimeSeriesState::Realtime), width(std::fabsf(width)), height(height), precision(precision)
+	: IStatelet(TimeSeriesState::Realtime), width(fabsf(width)), height(height), precision(precision)
 	, data_source(datasrc), vmin(vmin), vmax(vmax), count(n), vertical_step((step == 0) ? 5U : step)
-	, realtime(ts), history(ts), history_span(history_span), history_destination(0), selected_x(std::nanf("not exists")) {
+	, realtime(ts), history(ts), history_span(history_span), history_destination(0), selected_x(nanf("not exists")) {
 
 	if (this->height == 0.0F) {
 		this->height = this->width * 0.2718F;
@@ -453,7 +453,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	Rect haxes_box = this->haxes->ComputeBounds();
 	float x_axis_selected = x + this->selected_x;
 	float border_off = style.border_thickness * 0.5F;
-	float x_axis_max = std::nanf("unknown");
+	float x_axis_max = nanf("unknown");
 	float y_axis_max = y + haxes_box.Y;
 	
 	/** WARNING
@@ -493,13 +493,13 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 		TimeSeriesLine* line = &this->lines[idx];
 		tsdouble cursor_flonum;
 
-		line->selected_value = std::nanf("not resolved");
+		line->selected_value = nanf("not resolved");
 
 		if (!line->hiden) {
 			float minimum_diff = style.selected_thickness * 0.5F;
 			float tolerance = style.lines_thickness;
-			float last_x = std::nanf("no datum");
-			float last_y = std::nanf("no datum");
+			float last_x = nanf("no datum");
+			float last_y = nanf("no datum");
 			float rx = x + haxes_box.Width;
 			CanvasPathBuilder^ area = nullptr;
 
@@ -510,7 +510,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - cursor_flonum.value) / (this->vmax - this->vmin);
 				float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
 				float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
-				float this_diff = std::fabsf(this_x - x_axis_selected);
+				float this_diff = fabsf(this_x - x_axis_selected);
 
 				if (this_diff < minimum_diff) {
 					minimum_diff = this_diff;
@@ -518,12 +518,12 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 					line->selected_value = cursor_flonum.value;
 				}
 
-				if (std::isnan(last_x) || (this_x > rx)) {
+				if (isnan(last_x) || (this_x > rx)) {
 					last_x = this_x;
 					last_y = this_y;
 					x_axis_max = last_x;
 				} else {
-					if (((last_x - this_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_max == last_x)) {
+					if (((last_x - this_x) > tolerance) || (fabsf(this_y - last_y) > tolerance) || (x_axis_max == last_x)) {
 						if (line->close_color == nullptr) {
 							ds->DrawLine(last_x, last_y, this_x, this_y, line->color, style.lines_thickness, style.lines_style);
 						} else {
@@ -580,7 +580,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 		for (unsigned idx = 0; idx < this->count; idx++) {
 			TimeSeriesLine* line = &this->lines[idx];
 
-			if (!std::isnan(line->selected_value)) {
+			if (!isnan(line->selected_value)) {
 				Platform::String^ metric = line->name + ": " + flstring(line->selected_value, this->precision);
 				CanvasTextLayout^ desc = make_text_layout(metric, style.legend_font);
 				Rect this_box = desc->LayoutBounds;
@@ -602,7 +602,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 		{ // draw selected time
 			double selected_s = double(this->selected_x) / double(this->width) * double(ts->span) + double(ts->start);
-			long long utc_s = (long long)std::round(selected_s);
+			long long utc_s = (long long)round(selected_s);
 			CanvasTextLayout^ timestamp = make_text_layout(make_daytimestamp_utc(utc_s, true), style.font);
 			float xoff = timestamp->LayoutBounds.Width * 0.5F;
 
@@ -703,7 +703,7 @@ void ITimeSerieslet::set_history_interval(long long open_s, long long close_s, b
 
 void ITimeSerieslet::scroll_to_timepoint(long long timepoint_ms, float proportion) {
 	long long axes_interval = this->realtime.span / this->realtime.step;
-	long long inset = (long long)(std::roundf(float(axes_interval) * proportion));
+	long long inset = (long long)(roundf(float(axes_interval) * proportion));
 	long long timepoint = timepoint_ms / 1000LL;
 
 	if (timepoint < this->realtime.start + inset) {
@@ -720,7 +720,7 @@ void ITimeSerieslet::scroll_to_timepoint(long long timepoint_ms, float proportio
 }
 
 void ITimeSerieslet::no_selected() {
-	this->selected_x = std::nanf("reset");
+	this->selected_x = nanf("reset");
 }
 
 void ITimeSerieslet::check_visual_window(long long timepoint) {

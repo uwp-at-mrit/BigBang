@@ -24,7 +24,7 @@ static CanvasSolidColorBrush^ compensator_default_progress_color = Colours::Dodg
 /*************************************************************************************************/
 Compensatorlet::Compensatorlet(double range, float width, float height, unsigned int step
 	, unsigned int precision, ICanvasBrush^ color, ICanvasBrush^ pulley_color, ICanvasBrush^ progress_color)
-	: IRangelet(0.0, range), width(std::fabsf(width)), height(height), thickness(2.0F), step(step), precision(precision)
+	: IRangelet(0.0, range), width(fabsf(width)), height(height), thickness(2.0F), step(step), precision(precision)
 	, color((color == nullptr) ? compensator_default_color : color)
 	, pulley_color((pulley_color == nullptr) ? compensator_default_pulley_color : pulley_color)
 	, progress_color((progress_color == nullptr) ? compensator_default_progress_color : progress_color) {
@@ -66,7 +66,7 @@ void Compensatorlet::on_value_changed(double v) {
 	float percentage = float(this->get_percentage());
 	float progress_height = (this->height - this->base_height - this->pulley_size - this->thickness * 2.0F) * percentage;
 
-	this->progress = geometry_freeze(rectangle(this->progress_width, std::fmaxf(progress_height, 0.0F)));
+	this->progress = geometry_freeze(rectangle(this->progress_width, fmaxf(progress_height, 0.0F)));
 	this->anchor_py = this->height - this->base_height - progress_height - this->pulley_size * 0.5F - this->thickness * 1.5F;
 }
 

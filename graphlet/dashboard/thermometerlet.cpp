@@ -29,7 +29,7 @@ static CanvasGeometry^ make_thermometer_glass(float width, float height, float t
 	float tube_lx = (bulb_width - tube_width) * 0.5F + offset;
 	float tube_ty = tradius + offset;
 	float tube_rx = bulb_width - tube_lx + thickness;
-	float tube_by = height - bradius * (std::sinf(std::acosf(tradius / bradius)) + 1.0F) - offset;
+	float tube_by = height - bradius * (sinf(acosf(tradius / bradius)) + 1.0F) - offset;
 
 	glass->BeginFigure(tube_rx, tube_ty);
 	glass->AddArc(float2(tube_lx, tube_ty), tradius, tradius, 0.0F, CanvasSweepDirection::CounterClockwise, CanvasArcSize::Small);
@@ -67,7 +67,7 @@ Thermometerlet::Thermometerlet(double range, float width, float height, float th
 
 Thermometerlet::Thermometerlet(double tmin, double tmax, float width, float height
 	, float thickness, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: IRangelet(tmin, tmax), width(std::fabsf(width)), height(height), thickness(thickness), step(step)
+	: IRangelet(tmin, tmax), width(fabsf(width)), height(height), thickness(thickness), step(step)
 	, border_color(bcolor == nullptr ? thermometer_default_border_color : bcolor), leftward(width > 0.0F) {
 	
 	if (this->height == 0.0F) {

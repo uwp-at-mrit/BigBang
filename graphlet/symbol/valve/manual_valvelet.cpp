@@ -44,10 +44,10 @@ void ManualValvelet::fill_margin(float x, float y, float* top, float* right, flo
 	float hs = (this->width - box.Width) * 0.5F;
 	float vs = (this->height - box.Height) * 0.5F;
 	
-	SET_BOX(left, std::fminf(hs, stem_box.X + this->radiusX));
-	SET_BOX(right, std::fminf(hs, this->radiusX - (stem_box.X + stem_box.Width)));
-	SET_BOX(top, std::fminf(vs, stem_box.Y + this->radiusY));
-	SET_BOX(bottom, std::fminf(vs, this->radiusY - (stem_box.Y + stem_box.Height)));
+	SET_BOX(left, fminf(hs, stem_box.X + this->radiusX));
+	SET_BOX(right, fminf(hs, this->radiusX - (stem_box.X + stem_box.Width)));
+	SET_BOX(top, fminf(vs, stem_box.Y + this->radiusY));
+	SET_BOX(bottom, fminf(vs, this->radiusY - (stem_box.Y + stem_box.Height)));
 }
 
 void ManualValvelet::prepare_style(ManualValveState status, ManualValveStyle& s) {
