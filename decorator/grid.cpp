@@ -53,7 +53,7 @@ void GridDecorator::set_grid_height(float new_height, float start_y) {
 
 void GridDecorator::draw_before(CanvasDrawingSession^ ds, float Width, float Height) {
     static auto grid_color = make_solid_brush(system_color(UIElementType::GrayText));
-	static auto font = make_text_format(fmin(this->gwidth, this->gheight) * 0.42F);
+	static auto font = make_text_format(fminf(this->gwidth, this->gheight) * 0.42F);
 	size_t idx = 0;
 
     grid_color->Opacity = 0.64F;

@@ -104,7 +104,7 @@ void FuelTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	float capacity = float(this->get_percentage());
 	
 	if (capacity > 0.0F) {
-		float fuel_height = fmin(this->fuel.Height * capacity, this->fuel.Height);
+		float fuel_height = fminf(this->fuel.Height * capacity, this->fuel.Height);
 		float fuel_x = x + this->fuel.X;
 		float fuel_y = y + this->fuel.Y + this->fuel.Height - fuel_height;
 
