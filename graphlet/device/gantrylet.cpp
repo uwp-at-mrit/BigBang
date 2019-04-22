@@ -27,7 +27,7 @@ static CanvasSolidColorBrush^ gantry_default_progress_color = Colours::ForestGre
 static CanvasGeometry^ make_pivot_base(float radius, float extent_ratio, bool leftward) {
 	auto base = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float extent = radius * extent_ratio;
-	float alpha = atan2(radius, extent);
+	float alpha = float(atan2(radius, extent));
 	float rad180 = degrees_to_radians(180.0);
 
 	if (leftward) {
