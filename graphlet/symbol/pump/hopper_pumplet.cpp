@@ -1,5 +1,7 @@
 ﻿#include "graphlet/symbol/pump/hopper_pumplet.hpp"
 
+#include "datum/flonum.hpp"
+
 #include "polar.hpp"
 #include "paint.hpp"
 #include "shape.hpp"
@@ -19,7 +21,7 @@ HopperPumplet::HopperPumplet(float radiusX, float radiusY, double degrees)
 	: HopperPumplet(HopperPumpState::Stopped, radiusX, radiusY, degrees) {}
 
 HopperPumplet::HopperPumplet(HopperPumpState default_state, float radiusX, float radiusY, double degrees)
-	: ISymbollet(default_state, fabsf(radiusX), fabsf(radiusY), degrees, 2.0F)
+	: ISymbollet(default_state, flabs(radiusX), flabs(radiusY), degrees, 2.0F)
 	, leftward(radiusX > 0.0F), upward(radiusY >= 0.0F) {}
 
 void HopperPumplet::construct() {

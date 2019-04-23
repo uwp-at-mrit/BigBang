@@ -3,6 +3,7 @@
 #include <ppltasks.h>
 
 #include "datum/path.hpp"
+#include "datum/flonum.hpp"
 
 #include "planet.hpp"
 #include "syslog.hpp"
@@ -638,18 +639,18 @@ void Planet::recalculate_graphlets_extent_when_invalid() {
 
 				if (unsafe_graphlet_unmasked(info, this->mode)) {
 					unsafe_fill_graphlet_bound(child, info, &rx, &ry, &width, &height);
-					this->graphlets_left = min(this->graphlets_left, rx);
-					this->graphlets_top = min(this->graphlets_top, ry);
-					this->graphlets_right = max(this->graphlets_right, rx + width);
-					this->graphlets_bottom = max(this->graphlets_bottom, ry + height);
+					this->graphlets_left = flmin(this->graphlets_left, rx);
+					this->graphlets_top = flmin(this->graphlets_top, ry);
+					this->graphlets_right = flmax(this->graphlets_right, rx + width);
+					this->graphlets_bottom = flmax(this->graphlets_bottom, ry + height);
 				}
 
                 child = info->next;
             } while (child != this->head_graphlet);
         }
 
-        this->info->master->min_width = max(this->graphlets_right, this->preferred_min_width);
-        this->info->master->min_height = max(this->graphlets_bottom, this->preferred_min_height);
+        this->info->master->min_width = flmax(this->graphlets_right, this->preferred_min_width);
+        this->info->master->min_height = flmax(this->graphlets_bottom, this->preferred_min_height);
     }
 }
 
@@ -1162,10 +1163,10 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 	float3x2 transform = ds->Transform;
 	float transformX = transform.m31;
 	float transformY = transform.m32;
-	float dsX = abs(min(0.0F, transformX));
-	float dsY = abs(min(0.0F, transformY));
-	float dsWidth = Width - max(transformX, 0.0F);
-	float dsHeight = Height - max(transformY, 0.0F);
+	float dsX = flabs(flmin(0.0F, transformX));
+	float dsY = flabs(flmin(0.0F, transformY));
+	float dsWidth = Width - flmax(transformX, 0.0F);
+	float dsHeight = Height - flmax(transformY, 0.0F);
 
 	if (this->background != nullptr) {
 		ds->FillRoundedRectangle(0.0F, 0.0F, Width, Height,

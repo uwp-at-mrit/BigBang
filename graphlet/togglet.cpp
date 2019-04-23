@@ -1,6 +1,7 @@
 #include "graphlet/togglet.hpp"
 
 #include "datum/box.hpp"
+#include "datum/flonum.hpp"
 
 #include "text.hpp"
 #include "tongue.hpp"
@@ -31,7 +32,7 @@ Togglet::Togglet(bool initial_state, Platform::String^ checked_label, Platform::
 		float label_height = this->label->LayoutBounds.Height;
 
 		if (width == 0.0F) {
-			float label_width = std::max(this->label->LayoutBounds.Width, this->unlabel->LayoutBounds.Width);
+			float label_width = flmax(this->label->LayoutBounds.Width, this->unlabel->LayoutBounds.Width);
 
 			this->width = label_width + label_height * 1.618F;
 		} else {

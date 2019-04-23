@@ -1,5 +1,7 @@
 ﻿#include "graphlet/symbol/pump/water_pumplet.hpp"
 
+#include "datum/flonum.hpp"
+
 #include "polar.hpp"
 #include "paint.hpp"
 #include "shape.hpp"
@@ -19,7 +21,7 @@ WaterPumplet::WaterPumplet(float radius, double degrees)
 	: WaterPumplet(WaterPumpState::Stopped, radius, degrees) {}
 
 WaterPumplet::WaterPumplet(WaterPumpState default_state, float radius, double degrees)
-	: ISymbollet(default_state, fabsf(radius), 0.0F, degrees, 1.0F), leftward(radius > 0.0F) {}
+	: ISymbollet(default_state, flabs(radius), 0.0F, degrees, 1.0F), leftward(radius > 0.0F) {}
 
 void WaterPumplet::construct() {
 	float thickoff = default_thickness * 0.5F;

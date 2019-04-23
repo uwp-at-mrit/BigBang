@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-
 #include "decorator/grid.hpp"
 #include "system.hpp"
 #include "paint.hpp"

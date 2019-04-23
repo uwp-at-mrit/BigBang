@@ -2,6 +2,7 @@
 
 #include "graphlet/textlet.hpp"
 #include "datum/string.hpp"
+#include "datum/flonum.hpp"
 
 #include "forward.hpp"
 #include "tongue.hpp"
@@ -29,15 +30,15 @@ static ICanvasBrush^ default_unit_color = Colours::make(0x23EBB9U);
 static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExtent& unit_box
 	, TextExtent* label_box, float* tspace, float* bspace, float* height = nullptr) {
 	(*label_box) = ((layout == nullptr) ? num_box : get_text_extent(layout));
-	(*tspace) = fminf(label_box->tspace, fminf(num_box.tspace, unit_box.tspace));
-	(*bspace) = fminf(label_box->bspace, fminf(num_box.bspace, unit_box.bspace));
+	(*tspace) = flmin(label_box->tspace, flmin(num_box.tspace, unit_box.tspace));
+	(*bspace) = flmin(label_box->bspace, flmin(num_box.bspace, unit_box.bspace));
 
 	if (height != nullptr) {
 		float base_bspace = unit_box.bspace;
 		float link = label_box->height - label_box->tspace - base_bspace;
 		float nink = num_box.height - num_box.tspace - base_bspace;
 		float uink = unit_box.height - unit_box.tspace - base_bspace;
-		float ink_height = fmaxf(fmaxf(nink, uink), link);
+		float ink_height = flmax(flmax(nink, uink), link);
 
 		(*height) = (*tspace) + ink_height + (*bspace);
 	}
@@ -312,10 +313,10 @@ void IEditorlet::fill_extent(float x, float y, float* w, float* h) {
 	if (w != nullptr) {
 		TextExtent nbox = (this->has_caret() ? this->caret_box : this->number_box);
 		
-		(*w) = fmaxf(nbox.width, style.minimize_number_width) + this->unit_box.width;
+		(*w) = flmax(nbox.width, style.minimize_number_width) + this->unit_box.width;
 
 		if (this->text_layout != nullptr) {
-			(*w) += fmaxf(this->text_layout->LayoutBounds.Width, style.minimize_label_width);
+			(*w) += flmax(this->text_layout->LayoutBounds.Width, style.minimize_label_width);
 			(*w) += style.number_leading_space;
 		}
 
@@ -341,11 +342,11 @@ void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, flo
 	
 	if (this->text_layout == nullptr) {
 		TextExtent nbox = (this->has_caret() ? this->caret_box : this->number_box);
-		float region_width = fmaxf(nbox.width, style.minimize_number_width);
+		float region_width = flmax(nbox.width, style.minimize_number_width);
 		
 		label_box.lspace = (region_width - nbox.width) * style.number_xfraction + nbox.lspace;
 	} else {
-		float region_width = fmaxf(label_box.width, style.minimize_label_width);
+		float region_width = flmax(label_box.width, style.minimize_label_width);
 		
 		label_box.lspace += ((region_width - label_box.width) * style.label_xfraction);
 	}
@@ -431,7 +432,7 @@ void IEditorlet::set_maximum(long double maximum) {
 
 void IEditorlet::set_input_number(long double n, int precision) {
 	if (!isnan(this->maximum)) {
-		n = fminl(n, this->maximum);
+		n = flmin(n, this->maximum);
 	}
 
 	this->input_number = flstring(n, precision);
@@ -445,7 +446,7 @@ long double IEditorlet::get_input_number() {
 	}
 
 	if (!isnan(this->maximum)) {
-		v = fminl(v, this->maximum);
+		v = flmin(v, this->maximum);
 	}
 
 	return v;
@@ -519,7 +520,7 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	base_y = y + height;
 
 	if (this->text_layout != nullptr) {
-		float region_width = fmaxf(label_box.width, style.minimize_label_width);
+		float region_width = flmax(label_box.width, style.minimize_label_width);
 		float label_x = x + (region_width - label_box.width) * style.label_xfraction;
 
 		if (style.label_background_color != nullptr) {
@@ -542,7 +543,7 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	}
 
 	{ // draw number
-		float region_width = fmaxf(nbox.width, style.minimize_number_width);
+		float region_width = flmax(nbox.width, style.minimize_number_width);
 		float padding_x = ((style.number_border_color != nullptr) ? 1.0F : 0.0F);
 		
 		if (style.number_background_color != nullptr) {
@@ -577,7 +578,7 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 
 	if (this->flashing) {
 		float padding_x = 3.0F;
-		float caret_x = fmaxf(number_region_x + padding_x, number_x + nbox.width);
+		float caret_x = flmax(number_region_x + padding_x, number_x + nbox.width);
 
 		ds->DrawLine(caret_x, y + padding_x, caret_x, y + height - padding_x, style.caret_color);
 	}

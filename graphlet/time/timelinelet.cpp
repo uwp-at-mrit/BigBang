@@ -3,6 +3,8 @@
 #include "graphlet/time/timelinelet.hpp"
 
 #include "datum/string.hpp"
+#include "datum/flonum.hpp"
+#include "datum/fixnum.hpp"
 #include "datum/time.hpp"
 
 #include "text.hpp"
@@ -65,7 +67,7 @@ Timelinelet::Timelinelet(long long tmin, long long tmax, float width, unsigned i
 	this->timer = ref new Timer(stepper, 0);
 	this->speeds = new unsigned int[this->speeds_count];
 	for (size_t idx = 0; idx < this->speeds_count; idx++) {
-		this->speeds[idx] = std::max(speeds[idx], 1U);
+		this->speeds[idx] = fxmax(speeds[idx], 1U);
 	}
 }
 
@@ -190,8 +192,8 @@ void Timelinelet::on_tap(float x, float y) {
 	} else if (x >= speedx_lx) {
 		this->shift_speed();
 	} else if ((x >= tl_lx) && (x <= tl_rx) && (state != TimelineState::Terminated)) {
-		float percentage = std::max(std::min((x - this->timeline_lx) / (this->timeline_rx - this->timeline_lx), 1.0F), 0.0F);
-		long long this_timepoint = ((long long)(roundf(float(this->vmax - this->vmin) * percentage))) + this->vmin;
+		float percentage = flmax(flmin((x - this->timeline_lx) / (this->timeline_rx - this->timeline_lx), 1.0F), 0.0F);
+		long long this_timepoint = fxround(this->vmax - this->vmin, percentage) + this->vmin;
 
 		for (auto observer : this->obsevers) {
 			observer->on_time_skipped(this, this_timepoint);

@@ -1,6 +1,7 @@
 ﻿#include "graphlet/tablet.hpp"
 
 #include "datum/string.hpp"
+#include "datum/flonum.hpp"
 
 #include "colorspace.hpp"
 
@@ -18,7 +19,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-#define PAGE_COUNT(total, count) int(ceilf(float(total) / float(count)))
+#define PAGE_COUNT(total, count) int(flceiling(float(total) / float(count)))
 
 static CanvasSolidColorBrush^ table_default_border_color = Colours::make(0xBBBBBB);
 static CanvasTextFormat^ table_default_head_font = make_bold_text_format(16.0F);
@@ -381,7 +382,7 @@ void ITablet::apply_style(TableStyle& style) {
 		float cell_height = style.cell_font->FontSize * style.cell_height_em;
 		float status_height = style.status_font->FontSize * style.status_height_em;
 		
-		this->page_row_count = (unsigned int)(floorf((available_height - head_height - status_height) / cell_height));
+		this->page_row_count = (unsigned int)(flfloor((available_height - head_height - status_height) / cell_height));
 		this->update_statistics(style);
 	}
 }
@@ -561,7 +562,7 @@ float ITablet::resolve_filter_width() {
 	Rect adbox = this->active_description->LayoutBounds;
 	Rect idbox = this->inactive_description->LayoutBounds;
 	
-	return fmaxf(adbox.Width, idbox.Width) + (style.status_corner_radius + style.status_margin) * 2.0F;
+	return flmax(adbox.Width, idbox.Width) + (style.status_corner_radius + style.status_margin) * 2.0F;
 }
 
 void ITablet::set_filter(ITableFilter* filter, Platform::String^ on_description, Platform::String^ off_description) {

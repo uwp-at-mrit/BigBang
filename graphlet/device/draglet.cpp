@@ -3,6 +3,7 @@
 #include "graphlet/device/draglet.hpp"
 
 #include "datum/string.hpp"
+#include "datum/flonum.hpp"
 
 #include "measure/vhatchmark.hpp"
 #include "measure/hhatchmark.hpp"
@@ -46,8 +47,8 @@ static inline double drag_visor_earth(double visor_angle, double arm_angle) {
 }
 
 static inline float drag_arm_atan(float radius, float half_thickness, float* extended_radius = nullptr) {
-	float radians = std::atan2(half_thickness, radius);
-	float ext_radius = radius / std::cosf(radians);
+	float radians = flatan(half_thickness, radius);
+	float ext_radius = radius / flcos(radians);
 
 	SET_BOX(extended_radius, ext_radius);
 
@@ -115,7 +116,7 @@ static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth
 	double normal_start = ((sign > 0.0F) ? 0.0 : -180.0) - arm_degrees0;
 	float jaw_length = teeth_length * 0.85F;
 	float bottom_base_radians = degrees_to_radians(degrees + 90.0 * sign);
-	float bottom_diffradians = std::acos(bottom_radius / radius);
+	float bottom_diffradians = flacos(bottom_radius / radius);
 	float bottom_radians = bottom_base_radians + bottom_diffradians * sign;
 	float bottom_intermediate_radians = degrees_to_radians(degrees + 175.0 * sign);
 	float radians = degrees_to_radians(degrees + 180.0 * sign);
@@ -123,7 +124,7 @@ static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth
 	float top_start_radians = degrees_to_radians(degrees + 215.0 * sign); // TODO: this angle should based on the range
 	float top_stop_radians = degrees_to_radians(arm_degrees - drag_visor_end_angle * sign);
 	float top_sweep_radians = radians_normalize(top_stop_radians - top_start_radians, normal_start);
-	float jaw_radians = bottom_base_radians + std::acos(bottom_radius / jaw_length) * sign;
+	float jaw_radians = bottom_base_radians + flacos(bottom_radius / jaw_length) * sign;
 	float teeth_radians = jaw_radians - degrees_to_radians(6.18) * sign;
 	float2 bottom_start, bottom_teeth, teeth, bottom_intermediate, top_teeth, top_intermediate_far, top_intermediate_near, top_start;
 
@@ -202,7 +203,7 @@ float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info, double max_dept
 		depth += info.pipe_lengths[idx];
 	}
 
-	return depth * std::sinf(degrees_to_radians(max_depth_degrees));
+	return depth * flsin(degrees_to_radians(max_depth_degrees));
 }
 
 /*************************************************************************************************/
@@ -349,7 +350,7 @@ DragXYlet::DragXYlet(DragInfo& info, DragStyle& style, float ws_height, float in
 	this->step = ostep + istep;
 
 	this->ws_width = -float(this->outboard_most - this->inboard_most) * size_scale;
-	this->ws_height = std::fabsf(ws_height);
+	this->ws_height = flabs(ws_height);
 
 	this->drag_thickness = this->ws_height * drag_thickness_scale;
 	this->joint_radius = this->drag_thickness * 0.618F;
@@ -361,7 +362,7 @@ void DragXYlet::construct() {
 	double vmin = (this->leftward ? this->outboard_most : this->inboard_most);
 	double vmax = (this->leftward ? this->inboard_most : this->outboard_most);
 	HHatchMarkMetrics metrics = hhatchmark_metrics(vmin, vmax, this->style.thickness, 0U);
-	float hm_width = std::fabsf(this->ws_width) + metrics.hatch_x + metrics.hatch_rx;
+	float hm_width = flabs(this->ws_width) + metrics.hatch_x + metrics.hatch_rx;
 	CanvasGeometry^ hm = hbhatchmark(hm_width, vmin, vmax, this->step, this->style.thickness, &metrics, 0U, true);
 	
 	this->width = hm_width;
@@ -495,7 +496,7 @@ float2 DragXYlet::space_to_local(float3& position) {
 double DragXYlet::arctangent(float3& this_pt, float3& last_pt) {
 	double dx = double(this_pt.x) - double(last_pt.x);
 	double dy = double(this_pt.y) - double(last_pt.y);
-	double degrees = radians_to_degrees(std::atan2(dy, dx));
+	double degrees = radians_to_degrees(flatan(dy, dx));
 
 	return degrees;
 }
@@ -504,7 +505,7 @@ double DragXYlet::arctangent(float3& this_pt, float3& last_pt) {
 DragYZlet::DragYZlet(DragInfo& info, DragStyle& style, DragLinesStyle& lines_style, float ws_height, double max_depth_degrees
 	, float vinterval, float hinterval, unsigned int ostep, unsigned int istep)
 	: IDraglet(info, style, (ws_height < 0.0F)), depth_highest(vinterval), lines_style(lines_style) {
-	float depth_max = std::ceilf(this->drag_length * std::sinf(degrees_to_radians(max_depth_degrees)) / vinterval) * vinterval;
+	float depth_max = flceiling(this->drag_length * flsin(degrees_to_radians(max_depth_degrees)) / vinterval) * vinterval;
 	float drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
 	float size_scale = ws_height / this->drag_length;
 
@@ -513,7 +514,7 @@ DragYZlet::DragYZlet(DragInfo& info, DragStyle& style, DragLinesStyle& lines_sty
 	this->hstep = ostep + istep;
 
 	this->ws_width = -float(this->outboard_most - this->inboard_most) * size_scale;
-	this->ws_height = std::fabsf(ws_height);
+	this->ws_height = flabs(ws_height);
 	this->depth_lowest = -depth_max;
 
 	this->drag_thickness = this->ws_height * drag_thickness_scale;
@@ -527,9 +528,9 @@ void DragYZlet::construct() {
 	double vmax = (this->leftward ? this->inboard_most : this->outboard_most);
 	HHatchMarkMetrics hmetrics = hhatchmark_metrics(vmin, vmax, this->style.thickness, 0U);
 	VHatchMarkMetrics dmetrics = vhatchmark_metrics(this->depth_lowest, this->depth_highest, this->style.thickness, 0U);
-	unsigned int depth_step = ((unsigned int)std::round((this->depth_highest - this->depth_lowest) / this->depth_highest));
+	unsigned int depth_step = ((unsigned int)flround((this->depth_highest - this->depth_lowest) / this->depth_highest));
 	float depth_height = this->ws_height + dmetrics.em;
-	float hm_width = std::fabsf(this->ws_width) + hmetrics.hatch_x + hmetrics.hatch_rx;
+	float hm_width = flabs(this->ws_width) + hmetrics.hatch_x + hmetrics.hatch_rx;
 	CanvasGeometry^ hm = hbhatchmark(hm_width, vmin, vmax, this->hstep, this->style.thickness, &hmetrics, 0U, true);
 	
 	this->width = hm_width;
@@ -651,7 +652,7 @@ void DragYZlet::draw_metrics(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, 
 	, float lX, float rX, float tY, float bY, ICanvasBrush^ color, bool below) {
 	if (meter != nullptr) {
 		Rect box = meter->LayoutBounds;
-		float x = std::fmaxf(lX, joint_x - box.Width * 0.5F);
+		float x = flmax(lX, joint_x - box.Width * 0.5F);
 		float y = joint_y + box.Height * (below ? 0.1618F : -1.1618F);
 
 		if (x + box.Width >= rX) {
@@ -698,7 +699,7 @@ float2 DragYZlet::space_to_local(float3& position) {
 double DragYZlet::arctangent(float3& this_pt, float3& last_pt) {
 	double dx = double(this_pt.y) - double(last_pt.y);
 	double dy = double(this_pt.z) - double(last_pt.z);
-	double degrees = radians_to_degrees(std::atan2(dy, dx));
+	double degrees = radians_to_degrees(flatan(dy, dx));
 
 	return degrees;
 }
@@ -734,15 +735,15 @@ void DragYZlet::set_design_depth(double target, double tolerance) {
 DragXZlet::DragXZlet(DragInfo& info, DragStyle& style, DragLinesStyle& lines_style
 	, float ws_width, double max_depth_degrees, float interval, float suction_lowest)
 	: IDraglet(info, style, (ws_width < 0.0F)), depth_highest(interval), suction_lowest(suction_lowest), lines_style(lines_style) {
-	float size_scale = std::fabsf(ws_width) / this->drag_length;
-	float depth_max = std::ceilf(this->drag_length * std::sinf(degrees_to_radians(max_depth_degrees)) / interval) * interval;
+	float size_scale = flabs(ws_width) / this->drag_length;
+	float depth_max = flceiling(this->drag_length * flsin(degrees_to_radians(max_depth_degrees)) / interval) * interval;
 	float drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
 
 	this->ws_width = ws_width;
 	this->ws_height = float(this->depth_highest + depth_max) * size_scale;
 	this->depth_lowest = -depth_max;
 
-	this->drag_thickness = std::fabsf(this->ws_width) * drag_thickness_scale;
+	this->drag_thickness = flabs(this->ws_width) * drag_thickness_scale;
 	this->joint_radius = this->drag_thickness * 0.618F;
 	this->draghead_length = this->drag_thickness * 3.14F;
 	this->visor_length = this->draghead_length * 0.5F;
@@ -755,8 +756,8 @@ void DragXZlet::construct() {
 	double tail_range = this->depth_highest - this->suction_lowest;
 	float head_height = this->ws_height + hmetrics.em;
 	float tail_height = this->ws_height * float(tail_range / head_range) + hmetrics.em;
-	unsigned int head_step = ((unsigned int)std::round(head_range / this->depth_highest));
-	unsigned int tail_step = ((unsigned int)std::round(tail_range / this->depth_highest));
+	unsigned int head_step = ((unsigned int)flround(head_range / this->depth_highest));
+	unsigned int tail_step = ((unsigned int)flround(tail_range / this->depth_highest));
 	float gapsize = hmetrics.em * 2.0F;
 
 	this->height = head_height;
@@ -793,7 +794,7 @@ void DragXZlet::construct() {
 		float x_left = (this->leftward ? this->drag_length : 0.0F);
 		float x_right = (this->leftward ? 0.0F : this->drag_length);
 		HHatchMarkMetrics xmetrics = hhatchmark_metrics(x_left, x_right, this->style.thickness, this->style.precision);
-		float x_width = std::fabsf(this->ws_width) + xmetrics.hatch_x + xmetrics.hatch_rx;
+		float x_width = flabs(this->ws_width) + xmetrics.hatch_x + xmetrics.hatch_rx;
 		auto axis = hthatchmark(x_width, x_left, x_right, head_step - 1U, this->style.thickness, &xmetrics, this->style.precision);
 		float xoff = this->left_margin + gapsize - xmetrics.hatch_x;
 		float yoff = this->height - xmetrics.height - this->style.thickness * 0.5F;
@@ -913,7 +914,7 @@ void DragXZlet::draw_metrics(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, 
 	, float lX, float rX, float tY, float bY, ICanvasBrush^ color, bool below) {
 	if (meter != nullptr) {
 		Rect box = meter->LayoutBounds;
-		float x = std::fmaxf(lX, joint_x - box.Width * 0.5F);
+		float x = flmax(lX, joint_x - box.Width * 0.5F);
 		float y = joint_y + box.Height * (below ? 0.1618F : -1.1618F);
 
 		if (x + box.Width >= rX) {
@@ -960,7 +961,7 @@ float2 DragXZlet::space_to_local(float3& position) {
 double DragXZlet::arctangent(float3& this_pt, float3& last_pt) {
 	double dx = double(this_pt.x) - double(last_pt.x);
 	double dy = double(this_pt.z) - double(last_pt.z);
-	double degrees = radians_to_degrees(std::atan2(dy, dx));
+	double degrees = radians_to_degrees(flatan(dy, dx));
 
 	return degrees;
 }
@@ -995,7 +996,7 @@ void DragXZlet::set_design_depth(double target, double tolerance) {
 /*************************************************************************************************/
 DragHeadlet::DragHeadlet(DragInfo& info, float radius, unsigned int color, double max_depth_degrees, float thickness
 	, ICanvasBrush^ bcolor, ICanvasBrush^ acolor, ICanvasBrush^ sdcolor, ICanvasBrush^ ddcolor, ICanvasBrush^ hmcolor)
-	: info(info), radius(std::fabsf(radius)), sign((radius < 0.0F) ? 1.0F : -1.0F), thickness(thickness)
+	: info(info), radius(flabs(radius)), sign((radius < 0.0F) ? 1.0F : -1.0F), thickness(thickness)
 	, precision(2U), depth_interval(10.0F), offset(30.0), visor_color(Colours::make(color))
 	, body_color(bcolor == nullptr ? drag_default_head_color : bcolor)
 	, angle_pointer_color(acolor == nullptr ? drag_default_angle_pointer_color : acolor)
@@ -1003,7 +1004,7 @@ DragHeadlet::DragHeadlet(DragInfo& info, float radius, unsigned int color, doubl
 	, draghead_pointer_color(ddcolor == nullptr ? drag_default_draghead_depth_pointer_color : ddcolor)
 	, hatchmark_color(hmcolor == nullptr ? drag_default_hatchmark_color : hmcolor) {
 	this->pointer_style = make_dash_stroke(CanvasDashStyle::Dash);
-	this->depth_range = std::ceilf(drag_depth(info, max_depth_degrees) / depth_interval) * depth_interval;
+	this->depth_range = flceiling(drag_depth(info, max_depth_degrees) / depth_interval) * depth_interval;
 }
 
 void DragHeadlet::fill_extent(float x, float y, float* w, float* h) {
@@ -1017,7 +1018,7 @@ void DragHeadlet::fill_margin(float x, float y, float* ts, float* rs, float* bs,
 	if (this->depth_shown) {
 		SET_BOX(bs, 0.0F);
 	} else {
-		SET_BOX(bs, this->radius - std::max(this->arm_bottom, this->teeth_y));
+		SET_BOX(bs, this->radius - flmax(this->arm_bottom, this->teeth_y));
 	}
 }
 
@@ -1026,7 +1027,7 @@ void DragHeadlet::construct() {
 	VHatchMarkMetrics dmetrics;
 	float aradius = this->radius * 1.000F;
 	float vradius = this->radius * 0.618F;
-	unsigned int depth_step = ((unsigned int)std::round(this->depth_range / depth_interval)) + 1;
+	unsigned int depth_step = ((unsigned int)flround(this->depth_range / depth_interval)) + 1;
 	double adeg0 = drag_adjusted_angle(0.0, this->sign);
 	double adegn = drag_adjusted_angle(this->info.arm_degrees_max, this->sign);
 	double vdeg0 = drag_adjusted_angle(this->info.visor_degrees_min, -this->sign);

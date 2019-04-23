@@ -1,6 +1,8 @@
 ﻿#include "graphlet/time/timeserieslet.hpp"
 
 #include "datum/string.hpp"
+#include "datum/fixnum.hpp"
+#include "datum/flonum.hpp"
 
 #include "colorspace.hpp"
 
@@ -222,7 +224,7 @@ private:
 TimeSeries WarGrey::SCADA::make_minute_series(unsigned int count, unsigned int step) {
 	TimeSeries ts;
 
-	ts.span = minute_span_s * std::max(count, 1U);
+	ts.span = minute_span_s * fxmax(count, 1U);
 	ts.start = current_floor_seconds(minute_span_s) - ts.span / 2;
 	ts.step = step;
 
@@ -232,7 +234,7 @@ TimeSeries WarGrey::SCADA::make_minute_series(unsigned int count, unsigned int s
 TimeSeries WarGrey::SCADA::make_hour_series(unsigned int count, unsigned int step) {
 	TimeSeries ts;
 
-	ts.span = hour_span_s * std::max(count, 1U);
+	ts.span = hour_span_s * fxmax(count, 1U);
 	ts.start = current_floor_seconds(hour_span_s) - ts.span / 2;
 	ts.step = step;
 
@@ -261,7 +263,7 @@ CanvasSolidColorBrush^ WarGrey::SCADA::lookup_default_dark_color(unsigned int id
 ITimeSerieslet::ITimeSerieslet(ITimeSeriesDataSource* datasrc
 	, double vmin, double vmax, TimeSeries& ts, unsigned int n, float width, float height
 	, unsigned int step, unsigned int precision, long long history_span)
-	: IStatelet(TimeSeriesState::Realtime), width(fabsf(width)), height(height), precision(precision)
+	: IStatelet(TimeSeriesState::Realtime), width(flabs(width)), height(height), precision(precision)
 	, data_source(datasrc), vmin(vmin), vmax(vmax), count(n), vertical_step((step == 0) ? 5U : step)
 	, realtime(ts), history(ts), history_span(history_span), history_destination(0), selected_x(nanf("not exists")) {
 
@@ -302,7 +304,7 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 
 	{ // load exists data
 		long long request_interval = this->history_span / this->realtime.step;
-		long long request_earliest_s = std::min(this->realtime.start, limit - this->history_span);
+		long long request_earliest_s = fxmin(this->realtime.start, limit - this->history_span);
 
 		if (this->loading_timepoint > request_earliest_s) {
 			if (this->data_source != nullptr) {
@@ -510,7 +512,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - cursor_flonum.value) / (this->vmax - this->vmin);
 				float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
 				float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
-				float this_diff = fabsf(this_x - x_axis_selected);
+				float this_diff = flabs(this_x - x_axis_selected);
 
 				if (this_diff < minimum_diff) {
 					minimum_diff = this_diff;
@@ -523,7 +525,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 					last_y = this_y;
 					x_axis_max = last_x;
 				} else {
-					if (((last_x - this_x) > tolerance) || (fabsf(this_y - last_y) > tolerance) || (x_axis_max == last_x)) {
+					if (((last_x - this_x) > tolerance) || (flabs(this_y - last_y) > tolerance) || (x_axis_max == last_x)) {
 						if (line->close_color == nullptr) {
 							ds->DrawLine(last_x, last_y, this_x, this_y, line->color, style.lines_thickness, style.lines_style);
 						} else {
@@ -602,7 +604,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 		{ // draw selected time
 			double selected_s = double(this->selected_x) / double(this->width) * double(ts->span) + double(ts->start);
-			long long utc_s = (long long)round(selected_s);
+			long long utc_s = (long long)flround(selected_s);
 			CanvasTextLayout^ timestamp = make_text_layout(make_daytimestamp_utc(utc_s, true), style.font);
 			float xoff = timestamp->LayoutBounds.Width * 0.5F;
 
@@ -676,8 +678,8 @@ void ITimeSerieslet::on_maniplation_complete(long long open_s, long long close_s
 }
 
 void ITimeSerieslet::set_history_interval(long long open_s, long long close_s, bool force) {
-	long long span = std::max(std::abs(open_s - close_s), this->realtime.span);
-	long long destination = std::max(open_s, close_s);
+	long long span = fxmax(fxabs(open_s - close_s), this->realtime.span);
+	long long destination = fxmax(open_s, close_s);
 
 	if (force || (this->history_destination != destination) || (this->history_span != span)) {
 		if (this->data_source != nullptr) {
@@ -703,7 +705,7 @@ void ITimeSerieslet::set_history_interval(long long open_s, long long close_s, b
 
 void ITimeSerieslet::scroll_to_timepoint(long long timepoint_ms, float proportion) {
 	long long axes_interval = this->realtime.span / this->realtime.step;
-	long long inset = (long long)(roundf(float(axes_interval) * proportion));
+	long long inset = fxround(axes_interval, proportion);
 	long long timepoint = timepoint_ms / 1000LL;
 
 	if (timepoint < this->realtime.start + inset) {
@@ -752,19 +754,19 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 	switch (key) {
 	case VirtualKey::Left: {
 		this->history.start -= interval;
-		this->history.start = std::max(this->history.start, start_left_limit);
+		this->history.start = fxmax(this->history.start, start_left_limit);
 	}; break;
 	case VirtualKey::Right: {
 		this->history.start += interval;
-		this->history.start = std::min(this->history.start, start_right_limit);
+		this->history.start = fxmin(this->history.start, start_right_limit);
 	}; break;
 	case VirtualKey::Add: {
 		this->history.span = this->history.span >> 1;
-		this->history.span = std::max(this->history.span, minute_span_s);
+		this->history.span = fxmax(this->history.span, minute_span_s);
 	}; break;
 	case VirtualKey::Subtract: {
 		this->history.span = this->history.span << 1;
-		this->history.span = std::min(this->history.span, day_span_s);
+		this->history.span = fxmin(this->history.span, day_span_s);
 	}; break;
 	case VirtualKey::Home: this->history.start = start_left_limit; break;
 	case VirtualKey::End: this->history.start = start_right_limit; break;

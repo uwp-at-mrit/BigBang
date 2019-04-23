@@ -1,5 +1,7 @@
 ﻿#include "graphlet/device/tanklet.hpp"
 
+#include "datum/flonum.hpp"
+
 #include "shape.hpp"
 #include "geometry.hpp"
 
@@ -157,7 +159,7 @@ void IStateTanklet::prepare_style(StateTankStyle& style, unsigned int idx, unsig
 	}
 
 	if (style.indicator_color == nullptr) {
-		unsigned int fxweight = (unsigned int)floor(style.mark_weight * 10.0);
+		unsigned int fxweight = (unsigned int)flfloor(style.mark_weight * 10.0);
 		unsigned int weight = ((fxweight > 5) ? (10 - fxweight) : fxweight);
 
 		if (weight >= 4) {

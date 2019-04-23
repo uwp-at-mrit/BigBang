@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-
 #include "decorator/table.hpp"
 #include "brushes.hxx"
 

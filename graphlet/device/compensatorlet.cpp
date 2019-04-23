@@ -1,12 +1,13 @@
 ﻿#include "graphlet/device/compensatorlet.hpp"
 
+#include "measure/vhatchmark.hpp"
+#include "datum/flonum.hpp"
+
 #include "text.hpp"
 #include "shape.hpp"
 #include "paint.hpp"
 #include "geometry.hpp"
 #include "colorspace.hpp"
-
-#include "measure/vhatchmark.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -24,7 +25,7 @@ static CanvasSolidColorBrush^ compensator_default_progress_color = Colours::Dodg
 /*************************************************************************************************/
 Compensatorlet::Compensatorlet(double range, float width, float height, unsigned int step
 	, unsigned int precision, ICanvasBrush^ color, ICanvasBrush^ pulley_color, ICanvasBrush^ progress_color)
-	: IRangelet(0.0, range), width(fabsf(width)), height(height), thickness(2.0F), step(step), precision(precision)
+	: IRangelet(0.0, range), width(flabs(width)), height(height), thickness(2.0F), step(step), precision(precision)
 	, color((color == nullptr) ? compensator_default_color : color)
 	, pulley_color((pulley_color == nullptr) ? compensator_default_pulley_color : pulley_color)
 	, progress_color((progress_color == nullptr) ? compensator_default_progress_color : progress_color) {

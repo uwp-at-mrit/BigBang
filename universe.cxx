@@ -7,6 +7,7 @@
 #include "datum/time.hpp"
 #include "datum/path.hpp"
 #include "datum/box.hpp"
+#include "datum/flonum.hpp"
 
 #include "system.hpp"
 #include "syslog.hpp"
@@ -113,7 +114,7 @@ static void draw_planet(CanvasDrawingSession^ ds, Platform::String^ type, IPlane
 }
 
 static inline float display_contain_mode_scale(float to_width, float to_height, float from_width, float from_height) {
-	return std::fminf(std::fminf(to_width / from_width, to_height / from_height), 1.0F);
+	return flmin(flmin(to_width / from_width, to_height / from_height), 1.0F);
 }
 
 static inline void set_mask_alpha(CanvasSolidColorBrush^ color, double v) {
@@ -133,7 +134,7 @@ static inline void load_mask_alpha(ApplicationDataContainer^ container, CanvasSo
 /*************************************************************************************************/
 IDisplay::IDisplay(Syslog* logger, DisplayFit mode, float dest_width, float dest_height, float src_width, float src_height)
 	: logger((logger == nullptr) ? make_silent_logger("IDisplay") : logger), mode(mode)
-	, target_width(std::fmaxf(dest_width, 0.0F)), target_height(std::fmaxf(dest_height, 0.0F))
+	, target_width(flmax(dest_width, 0.0F)), target_height(flmax(dest_height, 0.0F))
 	, source_width(src_width), source_height(src_height) {
 	this->logger->reference();
 
@@ -340,7 +341,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight
 	, Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IHeadUpPlanet* heads_up_planet)
 	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight)
-	, figure_x0(std::nanf("swipe")), shortcuts_enabled(true), universe_settings(nullptr), follow_global_mask_setting(true)
+	, figure_x0(flnan_f), shortcuts_enabled(true), universe_settings(nullptr), follow_global_mask_setting(true)
 	, hup_top_margin(0.0F), hup_right_margin(0.0F), hup_bottom_margin(0.0F), hup_left_margin(0.0F) {
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Platform::Object^>(this, &UniverseDisplay::do_refresh);
@@ -811,7 +812,7 @@ void UniverseDisplay::do_refresh(Platform::Object^ sender, Platform::Object^ arg
 	const wchar_t* from = this->from_planet->name()->Data();
 	const wchar_t* to = this->recent_planet->name()->Data();
 	float width = this->display->Size.Width - this->hup_left_margin - this->hup_right_margin;
-	float percentage = abs(this->transferX) / width;
+	float percentage = flabs(this->transferX) / width;
 
 	if (percentage < 1.0F) {
 		this->get_logger()->log_message(Log::Debug, L"transferring[%.2f%%]: %s ==> %s", percentage * 100.0F, from, to);
@@ -879,7 +880,7 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 			} else {
 				bool handled = false;
 
-				this->figure_x0 = std::nanf("swipe");
+				this->figure_x0 = flnan_f;
 
 				if (this->headup_planet != nullptr) {
 					handled = this->headup_planet->on_pointer_pressed(pp->Position.X, pp->Position.Y, pdt, puk);
@@ -958,7 +959,7 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 			} else {
 				if ((this->figures.size() == 3) || MENUED(args->KeyModifiers)) {
 					this->on_translating_x();
-					this->figure_x0 = std::nanf("swipe");
+					this->figure_x0 = flnan_f;
 				}
 
 				args->Handled = true;

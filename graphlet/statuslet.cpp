@@ -1,9 +1,9 @@
-﻿#include <algorithm>
-#include <shared_mutex>
+﻿#include <shared_mutex>
 #include <map>
 
 #include "graphlet/statuslet.hpp"
 #include "datum/string.hpp"
+#include "datum/flonum.hpp"
 
 #include "text.hpp"
 #include "polar.hpp"
@@ -40,7 +40,7 @@ public:
 
     void on_battery_capacity_changed(float capacity) override {
 		Platform::String^ label = speak("power", tongue_scope);
-		Platform::String^ percentage = (round(capacity * 100.0F).ToString() + "%");
+		Platform::String^ percentage = (flround(capacity * 100.0F).ToString() + "%");
 
 		this->enter_critical_section();
 		this->battery = make_text_layout(label + percentage, status_font);
@@ -49,7 +49,7 @@ public:
 	}
 
     void on_wifi_signal_strength_changed(Platform::String^ ssid, char strength) override {
-		float percentage = roundf(float(strength) * 100.0F / 5.0F);
+		float percentage = flround(float(strength) * 100.0F / 5.0F);
 		Platform::String^ label = speak("wifi", tongue_scope);
         Platform::String^ signal = ((ssid == nullptr) ? speak("nowifi", tongue_scope) : (ssid + " " + percentage.ToString() + "%"));
 
@@ -157,7 +157,7 @@ void Statusbarlet::construct() {
 }
 
 void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, fmaxf(this->available_visible_width(x), 0.0F));
+	SET_BOX(width, flmax(this->available_visible_width(x), 0.0F));
 	SET_BOX(height, status_height);
 }
 
@@ -275,10 +275,10 @@ void Statuslinelet::construct() {
 }
 
 void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, fmaxf(this->available_visible_width(x), 0.0F));
+	SET_BOX(width, flmax(this->available_visible_width(x), 0.0F));
 	
 	if (this->lines == 0) {
-		SET_BOX(height, fmaxf(this->available_visible_height(y), 0.0F));
+		SET_BOX(height, flmax(this->available_visible_height(y), 0.0F));
 	} else {
 		SET_BOX(height, status_height * float(this->lines));
 	}
@@ -295,7 +295,7 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 
 		if (this->lines == 0) {
 			float flcount = Height / status_height;
-			size_t alines = (size_t)(ceilf(flcount));
+			size_t alines = (size_t)(flceiling(flcount));
 
 			if (total > alines) {
 				for (size_t i = alines; i < total; i++) {
@@ -311,7 +311,7 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 		for (size_t idx = 0; idx < total; idx++, mit++, cit++) {
 			float content_y = y + status_height * float(idx);
 			
-			content_y += fmaxf((status_height - (*mit)->LayoutBounds.Height) * 0.5F, 0.0F);
+			content_y += flmax((status_height - (*mit)->LayoutBounds.Height) * 0.5F, 0.0F);
 			ds->DrawTextLayout((*mit), x, content_y, (*cit));
 		}
 

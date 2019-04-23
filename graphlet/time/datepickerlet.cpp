@@ -2,6 +2,7 @@
 
 #include "datum/time.hpp"
 #include "datum/string.hpp"
+#include "datum/flonum.hpp"
 
 #include "paint.hpp"
 
@@ -29,15 +30,15 @@ static DatePickerState default_date_picker_status = DatePickerState::Default;
 static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& dt_box, TextExtent& ds_box, TextExtent& ts_box
 	, TextExtent* label_box, float* tspace, float* bspace, float* height = nullptr) {
 	(*label_box) = ((layout == nullptr) ? dt_box : get_text_extent(layout));
-	(*tspace) = fminf(label_box->tspace, fminf(dt_box.tspace, fminf(ds_box.tspace, ts_box.tspace)));
-	(*bspace) = fminf(label_box->bspace, fminf(dt_box.bspace, fminf(ds_box.bspace, ts_box.bspace)));
+	(*tspace) = flmin(label_box->tspace, flmin(dt_box.tspace, flmin(ds_box.tspace, ts_box.tspace)));
+	(*bspace) = flmin(label_box->bspace, flmin(dt_box.bspace, flmin(ds_box.bspace, ts_box.bspace)));
 
 	if (height != nullptr) {
 		float link = label_box->height - label_box->tspace - label_box->bspace;
 		float dtink = dt_box.height - dt_box.tspace - dt_box.bspace;
 		float dsink = ds_box.height - ds_box.tspace - ds_box.bspace;
 		float tsink = ts_box.height - ts_box.tspace - ts_box.bspace;
-		float ink_height = fmaxf(fmaxf(dtink, fmaxf(dsink, tsink)), link);
+		float ink_height = flmax(flmax(dtink, flmax(dsink, tsink)), link);
 
 		(*height) = (*tspace) + ink_height + (*bspace);
 	}
@@ -94,7 +95,7 @@ void DatePickerlet::fill_extent(float x, float y, float* w, float* h) {
 		}
 
 		if (this->text_layout != nullptr) {
-			(*w) += fmaxf(this->text_layout->LayoutBounds.Width, style.minimize_label_width);
+			(*w) += flmax(this->text_layout->LayoutBounds.Width, style.minimize_label_width);
 			(*w) += style.datetime_leading_space;
 		}
 	}
@@ -117,7 +118,7 @@ void DatePickerlet::fill_margin(float x, float y, float* t, float* r, float* b, 
 
 	if (this->text_layout != nullptr) {
 		DatePickerStyle style = this->get_style();
-		float region_width = fmaxf(label_box.width, style.minimize_label_width);
+		float region_width = flmax(label_box.width, style.minimize_label_width);
 
 		label_box.lspace += ((region_width - label_box.width) * style.label_xfraction);
 	} else {
@@ -244,7 +245,7 @@ void DatePickerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 	center_y = y + height * 0.5F;
 
 	if (this->text_layout != nullptr) {
-		float region_width = fmaxf(label_box.width, style.minimize_label_width);
+		float region_width = flmax(label_box.width, style.minimize_label_width);
 		float label_x = x + (region_width - label_box.width) * style.label_xfraction;
 
 		if (style.label_background_color != nullptr) {

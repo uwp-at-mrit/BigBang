@@ -9,6 +9,7 @@
 #include "colorspace.hpp"
 
 #include "measure/vhatchmark.hpp"
+#include "datum/flonum.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -27,7 +28,7 @@ static CanvasSolidColorBrush^ gantry_default_progress_color = Colours::ForestGre
 static CanvasGeometry^ make_pivot_base(float radius, float extent_ratio, bool leftward) {
 	auto base = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float extent = radius * extent_ratio;
-	float alpha = float(atan2(radius, extent));
+	float alpha = float(flatan(radius, extent));
 	float rad180 = degrees_to_radians(180.0);
 
 	if (leftward) {
@@ -57,7 +58,7 @@ Gantrylet::Gantrylet(GantryState default_state, float radius, float extent, doub
 	: IStatelet(default_state), thickness(2.0F), leftward(radius < 0.0F), base_extent_ratio(extent), degrees(degrees) {
 	float wo_x, wo_y;
 
-	this->radius = fabsf(radius);
+	this->radius = flabs(radius);
 	this->bottom_base_radius = this->radius * 0.085F;
 	this->pivot_base_radius = this->thickness * 1.618F;
 	this->pulley_radius = this->bottom_base_radius * 1.0F;
@@ -66,7 +67,7 @@ Gantrylet::Gantrylet(GantryState default_state, float radius, float extent, doub
 
 	circle_point(this->radius, degrees + 90.0, &wo_x, &wo_y);
 	
-	this->width = this->bottom_base_radius * this->base_extent_ratio + fabsf(wo_x) + this->pulley_radius * 2.0F + this->thickness;
+	this->width = this->bottom_base_radius * this->base_extent_ratio + flabs(wo_x) + this->pulley_radius * 2.0F + this->thickness;
 	this->height = this->radius + this->bottom_base_radius + this->hat_radiusY + this->thickness;
 }
 
@@ -224,9 +225,9 @@ void Gantrylet::make_hat(double ratio) {
 
 	circle_point(this->radius, this_degrees + 90.0, &wx, &wy);
 
-	this->pulley_cyoff = this->hat_radiusX * sinf(degrees_to_radians(this_degrees));
-	this->hat_cxoff = fabsf(wx);
-	this->hat_cy = this->height - this->bottom_base_radius - fabsf(wy) - this->thickness * 0.5F;
+	this->pulley_cyoff = this->hat_radiusX * flsin(degrees_to_radians(this_degrees));
+	this->hat_cxoff = flabs(wx);
+	this->hat_cy = this->height - this->bottom_base_radius - flabs(wy) - this->thickness * 0.5F;
 	this->hat = geometry_rotate(hat, this_degrees * (this->leftward ? -1.0 : 1.0), 0.0F, 0.0F);
 	this->hat_y = this->hat_cy - this->hat->ComputeBounds().Height * 0.5F;
 }
@@ -236,7 +237,7 @@ GantrySymbollet::GantrySymbollet(float width, float height)
 	: GantrySymbollet(GantryState::Default, width, height) {}
 
 GantrySymbollet::GantrySymbollet(GantryState default_state, float width, float height)
-	: IStatelet(default_state), width(fabsf(width)), height(height), leftward(width < 0.0F), thickness(1.0F) {
+	: IStatelet(default_state), width(flabs(width)), height(height), leftward(width < 0.0F), thickness(1.0F) {
 	if (this->height <= 0.0F) {
 		this->height = this->width * 0.618F;
 	}

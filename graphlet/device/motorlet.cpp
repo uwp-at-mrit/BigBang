@@ -1,6 +1,5 @@
-﻿#include <algorithm>
-
-#include "graphlet/device/motorlet.hpp"
+﻿#include "graphlet/device/motorlet.hpp"
+#include "datum/flonum.hpp"
 
 #include "shape.hpp"
 #include "paint.hpp"
@@ -34,7 +33,7 @@ void Motorlet::construct() {
     auto serew_stops = make_gradient_stops(serew_colors); // don't mind, it's Visual Studio's fault.
     auto body_stops = make_gradient_stops(body_colors);   // don't mind, it's Visual Studio's fault.
 
-    float thread = fmaxf(this->width * 0.01F, 1.0F);
+    float thread = flmax(this->width * 0.01F, 1.0F);
     float body_height = this->height * 0.97F;
     float body_y = this->height - body_height;
     float serew_x = this->width * 0.8F;
@@ -58,7 +57,7 @@ void Motorlet::construct() {
         auto lines = blank(); {
             int defcount = 8;
             int stepunit = 2;
-            int count = (head_height > float(stepunit * defcount)) ? defcount : int(floor(head_height / float(stepunit)));
+            int count = (head_height > float(stepunit * defcount)) ? defcount : int(flfloor(head_height / float(stepunit)));
             float thickness = head_height / float(count * stepunit);
             float end_x = body_x + body_width;
             float step = thickness * float(stepunit);
