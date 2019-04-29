@@ -23,28 +23,9 @@ using namespace Microsoft::Graphics::Canvas;
 
 #define PLANET_INFO(planet) (static_cast<PlanetInfo*>(planet->info))
 
-static inline float display_contain_mode_scale(float to_width, float to_height, float from_width, float from_height) {
-	return flmin(flmin(to_width / from_width, to_height / from_height), 1.0F);
-}
-
 /*************************************************************************************************/
-IDisplay::IDisplay(Syslog* logger, DisplayFit mode, float dest_width, float dest_height, float src_width, float src_height)
-	: logger((logger == nullptr) ? make_silent_logger("IDisplay") : logger), mode(mode)
-	, target_width(flmax(dest_width, 0.0F)), target_height(flmax(dest_height, 0.0F))
-	, source_width(src_width), source_height(src_height) {
+IDisplay::IDisplay(Syslog* logger) : logger((logger == nullptr) ? make_silent_logger("IDisplay") : logger) {
 	this->logger->reference();
-
-	if (this->source_width <= 0.0F) {
-		this->source_width = this->target_width;
-	}
-
-	if (this->source_height <= 0.0F) {
-		this->source_height = this->target_height;
-	}
-
-	if ((this->target_width * this->target_height) == 0.0F) {
-		this->mode = DisplayFit::None;
-	}
 }
 
 IDisplay::~IDisplay() {
@@ -126,47 +107,6 @@ float IDisplay::planet_actual_width(IPlanet* p) {
 
 float IDisplay::planet_actual_height(IPlanet* p) {
 	return this->actual_height;
-}
-
-void IDisplay::apply_source_size(float src_width, float src_height) {
-	this->width = this->sketch_to_application_width(src_width);
-	this->height = this->sketch_to_application_height(src_height);
-}
-
-float IDisplay::sketch_to_application_width(float sketch_width) {
-	static Size screen = system_screen_size();
-	float width = sketch_width;
-
-	switch (this->mode) {
-	case DisplayFit::Contain: {
-		static float scale = display_contain_mode_scale(screen.Width, screen.Height, target_width, target_height);
-
-		width = (sketch_width / this->source_width * this->target_width) * scale;
-	}; break;
-	case DisplayFit::Fill: {
-		width = sketch_width * screen.Width / this->source_width;
-	}; break;
-	}
-
-	return width;
-}
-
-float IDisplay::sketch_to_application_height(float sketch_height) {
-	static Size screen = system_screen_size();
-	float height = sketch_height;
-
-	switch (this->mode) {
-	case DisplayFit::Contain: {
-		static float scale = display_contain_mode_scale(screen.Width, screen.Height, target_width, target_height);
-
-		height = (sketch_height / this->source_height * this->target_height) * scale;
-	}; break;
-	case DisplayFit::Fill: {
-		height = sketch_height * screen.Height / this->source_height;
-	}; break;
-	}
-
-	return height;
 }
 
 void IDisplay::enter_critical_section() {

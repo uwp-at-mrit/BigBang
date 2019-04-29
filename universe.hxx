@@ -4,10 +4,11 @@
 #include <mutex>
 
 #include "navigator/navigator.hpp"
+#include "virtualization/screen.hpp"
+#include "datum/class.hpp"
+
 #include "display.hxx"
 #include "timer.hxx"
-
-#include "datum/class.hpp"
 
 #include "forward.hpp"
 #include "syslog.hpp"
@@ -130,6 +131,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ display;
+		WarGrey::SCADA::IScreen* screen;
 		WarGrey::SCADA::IUniverseNavigator* _navigator;
 		WarGrey::SCADA::IPlanet* head_planet;
 		WarGrey::SCADA::IPlanet* recent_planet;

@@ -6,16 +6,18 @@
 #include "datum/credit.hpp"
 
 #include "universe.hxx"
+
 #include "decorator/decorator.hpp"
+#include "virtualization/screen.hpp"
 
 namespace WarGrey::SCADA {
 	private class IPlanetInfo abstract {
 	public:
 		virtual ~IPlanetInfo() noexcept {}
-		IPlanetInfo(IDisplay^ master) : master(master) {}
+		IPlanetInfo(IScreen* master) : master(master) {}
 		
 	public:
-		IDisplay^ master;
+		IScreen* master;
 	};
 
 	private class IPlanet abstract {
@@ -26,7 +28,7 @@ namespace WarGrey::SCADA {
 	public:
 		Platform::String^ name();
 		Platform::String^ display_name();
-		WarGrey::SCADA::IDisplay^ master();
+		WarGrey::SCADA::IScreen* master();
 		WarGrey::SCADA::Syslog* get_logger();
 
 	public:

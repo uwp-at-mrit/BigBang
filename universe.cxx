@@ -2,7 +2,9 @@
 
 #include "universe.hxx"
 #include "planet.hpp"
+
 #include "navigator/null.hpp"
+#include "virtualization/screen/pasteboard.hpp"
 
 #include "datum/time.hpp"
 #include "datum/path.hpp"
@@ -61,14 +63,14 @@ static CanvasSolidColorBrush^ global_mask_color;
 
 class PlanetInfo : public WarGrey::SCADA::IPlanetInfo {
 public:
-	PlanetInfo(IDisplay^ master) : IPlanetInfo(master) {};
+	PlanetInfo(IScreen* master) : IPlanetInfo(master) {};
 
 public:
 	IPlanet* next;
 	IPlanet* prev;
 };
 
-static inline PlanetInfo* bind_planet_owership(IDisplay^ master, IPlanet* planet) {
+static inline PlanetInfo* bind_planet_owership(IScreen* master, IPlanet* planet) {
 	auto info = new PlanetInfo(master);
 	
 	planet->info = info;
@@ -137,7 +139,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight
 
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight
 	, Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IHeadUpPlanet* heads_up_planet)
-	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight)
+	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger))
 	, figure_x0(flnan_f), shortcuts_enabled(true), universe_settings(nullptr), follow_global_mask_setting(true)
 	, hup_top_margin(0.0F), hup_right_margin(0.0F), hup_bottom_margin(0.0F), hup_left_margin(0.0F) {
 	this->transfer_clock = ref new DispatcherTimer();
@@ -154,12 +156,13 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 
 	this->display = ref new CanvasControl();
 	this->display->Name = this->get_logger()->get_name();
+	this->screen = new Pasteboard(this, mode, dwidth, dheight, swidth, sheight);
 	
 	// CanvasControl uses the shared one by default, while CanvasAnimatedControl is not.
 	// this->display->UseSharedDevice = true;
 
 	if (heads_up_planet != nullptr) {
-		PlanetInfo* info = bind_planet_owership(this, heads_up_planet);
+		PlanetInfo* info = bind_planet_owership(this->screen, heads_up_planet);
 
 		info->next = heads_up_planet;
 		info->prev = heads_up_planet;
@@ -210,6 +213,10 @@ UniverseDisplay::~UniverseDisplay() {
 	this->transfer_clock->Stop();
 	this->collapse();
 	
+	if (this->screen != nullptr) {
+		delete this->screen;
+	}
+
 	if (this->headup_planet != nullptr) {
 		delete this->headup_planet;
 	}
@@ -334,7 +341,7 @@ void UniverseDisplay::push_planet(IPlanet* planet) {
 	// NOTE: this method is designed to be invoked before CreateResources event
 
 	if (planet->info == nullptr) {
-		PlanetInfo* info = bind_planet_owership(this, planet);
+		PlanetInfo* info = bind_planet_owership(this->screen, planet);
 		
 		if (this->head_planet == nullptr) {
 			this->head_planet = planet;

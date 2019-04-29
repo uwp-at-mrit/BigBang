@@ -4,24 +4,18 @@
 #include <mutex>
 
 #include "navigator/navigator.hpp"
-#include "timer.hxx"
-
 #include "datum/class.hpp"
 
+#include "timer.hxx"
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
-    private enum class DisplayFit { Fill, Contain, None };
-
-	private ref class IDisplay abstract : public WarGrey::SCADA::ITimerListener, public WarGrey::SCADA::IUniverseNavigatorListener {
+    private ref class IDisplay abstract : public WarGrey::SCADA::ITimerListener, public WarGrey::SCADA::IUniverseNavigatorListener {
 	public:
 		virtual ~IDisplay();
 
 	internal:
-		IDisplay(WarGrey::SCADA::Syslog* logger,
-			WarGrey::SCADA::DisplayFit mode = DisplayFit::None,
-			float target_width = 0.0F, float target_height = 0.0F,
-			float source_width = 0.0F, float source_height = 0.0F);
+		IDisplay(WarGrey::SCADA::Syslog* logger);
 
 	public:
 		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
@@ -50,11 +44,6 @@ namespace WarGrey::SCADA {
 		virtual void on_navigate(int from_index, int to_index) = 0;
 
 	public:
-		void apply_source_size(float sketch_width, float sketch_height);
-		float sketch_to_application_width(float sketch_width);
-		float sketch_to_application_height(float sketch_height);
-
-	public:
 		void enter_critical_section();
 		void leave_critical_section();
 
@@ -73,12 +62,5 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::Syslog* logger;
 		std::mutex section;
-
-	private:
-		DisplayFit mode;
-		float target_width;
-		float target_height;
-		float source_width;
-		float source_height;
     };
 }

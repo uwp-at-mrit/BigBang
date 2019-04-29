@@ -1,6 +1,5 @@
-#define _USE_MATH_DEFINES
-#include <WindowsNumerics.h>
 #include <ppltasks.h>
+#include <WindowsNumerics.h>
 
 #include "datum/path.hpp"
 #include "datum/flonum.hpp"
@@ -17,9 +16,9 @@
 #include "graphlet/primitive.hpp"
 #include "decorator/decorator.hpp"
 
-#include "virtualization/numpad.hpp"
-#include "virtualization/affinepad.hpp"
-#include "virtualization/bucketpad.hpp"
+#include "virtualization/keyboard/numpad.hpp"
+#include "virtualization/keyboard/affinepad.hpp"
+#include "virtualization/keyboard/bucketpad.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -649,8 +648,8 @@ void Planet::recalculate_graphlets_extent_when_invalid() {
             } while (child != this->head_graphlet);
         }
 
-        this->info->master->min_width = flmax(this->graphlets_right, this->preferred_min_width);
-        this->info->master->min_height = flmax(this->graphlets_bottom, this->preferred_min_height);
+        this->info->master->min_width(flmax(this->graphlets_right, this->preferred_min_width));
+        this->info->master->min_height(flmax(this->graphlets_bottom, this->preferred_min_height));
     }
 }
 
@@ -1311,14 +1310,14 @@ Platform::String^ IPlanet::display_name() {
 	return speak(this->caption);
 }
 
-IDisplay^ IPlanet::master() {
-	IDisplay^ display = nullptr;
+IScreen* IPlanet::master() {
+	IScreen* screen = nullptr;
 
 	if (this->info != nullptr) {
-		display = this->info->master;
+		screen = this->info->master;
 	}
 
-	return display;
+	return screen;
 }
 
 bool IPlanet::shown() {
@@ -1349,7 +1348,7 @@ float IPlanet::actual_width() {
 	float width = 0.0F;
 
 	if (this->info != nullptr) {
-		width = this->info->master->planet_actual_width(this);
+		width = this->info->master->view_width();
 	}
 
 	return width;
@@ -1359,7 +1358,7 @@ float IPlanet::actual_height() {
 	float height = 0.0F;
 
 	if (this->info != nullptr) {
-		height = this->info->master->planet_actual_height(this);
+		height = this->info->master->view_height();
 	}
 
 	return height;
@@ -1369,7 +1368,7 @@ float IPlanet::min_width() {
 	float width = 0.0F;
 
 	if (this->info != nullptr) {
-		width = this->info->master->min_width;
+		width = this->info->master->min_width();
 	}
 
 	return width;
@@ -1379,7 +1378,7 @@ float IPlanet::min_height() {
 	float height = 0.0F;
 
 	if (this->info != nullptr) {
-		height = this->info->master->min_height;
+		height = this->info->master->min_height();
 	}
 
 	return height;

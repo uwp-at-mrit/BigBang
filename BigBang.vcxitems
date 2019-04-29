@@ -64,8 +64,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\affinepad.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\bucketpad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\primitive.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\togglet.cpp" />
@@ -79,7 +79,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\textlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\alarmlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\numpad.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp" />
@@ -135,8 +137,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\affinepad.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\bucketpad.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sprite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\togglet.hpp" />
@@ -152,7 +154,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\textlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\alarmlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\numpad.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">

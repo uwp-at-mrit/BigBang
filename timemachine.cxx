@@ -202,7 +202,7 @@ public:
 			switch (icon->id) {
 			case TMIcon::Quit: this->machine->hide(); break;
 			case TMIcon::PrintScreen: {
-				auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master());
+				auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master()->display());
 
 				if (tmd != nullptr) {
 					tmd->save(this->name() + "-"
@@ -211,7 +211,7 @@ public:
 				}
 			}; break;
 			case TMIcon::BookMark: {
-				auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master());
+				auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master()->display());
 
 				if (tmd != nullptr) {
 					tmd->flyout_content()->IsPaneOpen = true;

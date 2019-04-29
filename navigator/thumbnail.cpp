@@ -1,6 +1,8 @@
 #include <map>
 
 #include "navigator/thumbnail.hpp"
+
+#include "virtualization/screen/pasteboard.hpp"
 #include "decorator/decorator.hpp"
 #include "graphlet/textlet.hpp"
 
@@ -68,14 +70,14 @@ public:
 
 	void refresh() {
 		if (this->master != this->entity->master()) {
-			this->master = dynamic_cast<UniverseDisplay^>(this->entity->master());
+			this->master = dynamic_cast<Pasteboard*>(this->entity->master());
 		}
 
 		if (this->master != nullptr) {
 			Point pt = this->master->local_to_global_point(this->entity, 0.0F, 0.0F);
 
 			this->thumbnail = this->entity->take_snapshot(-pt.X, -pt.Y,
-				this->master->actual_width, this->master->actual_height,
+				this->master->view_width(), this->master->view_height(),
 				Colours::Transparent);
 		}
 	}
@@ -91,7 +93,7 @@ private:
 
 private:
 	IPlanet* entity; // managed by its original `UniverseDisplay`.
-	UniverseDisplay^ master;
+	Pasteboard* master;
 	unsigned int id;
 };
 

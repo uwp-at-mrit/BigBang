@@ -17,9 +17,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp">
       <Filter>virtualization</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp">
-      <Filter>virtualization</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp">
       <Filter>decorator</Filter>
@@ -161,12 +158,6 @@
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.cpp">
-      <Filter>virtualization</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\affinepad.cpp">
-      <Filter>virtualization</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\datepickerlet.cpp">
       <Filter>graphlet\time</Filter>
     </ClCompile>
@@ -180,6 +171,21 @@
       <Filter>graphlet</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)display.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.cpp">
+      <Filter>virtualization\keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\bucketpad.cpp">
+      <Filter>virtualization\keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\numpad.cpp">
+      <Filter>virtualization\keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen.cpp">
+      <Filter>virtualization</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.cpp">
+      <Filter>virtualization\screen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -199,9 +205,6 @@
       <Filter>decorator</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp">
-      <Filter>virtualization</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp">
       <Filter>virtualization</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx" />
@@ -346,12 +349,6 @@
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)timemachine.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\bucketpad.hpp">
-      <Filter>virtualization</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\affinepad.hpp">
-      <Filter>virtualization</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\datepickerlet.hpp">
       <Filter>graphlet\time</Filter>
     </ClInclude>
@@ -365,6 +362,21 @@
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)display.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.hpp">
+      <Filter>virtualization\keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\bucketpad.hpp">
+      <Filter>virtualization\keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\numpad.hpp">
+      <Filter>virtualization\keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen.hpp">
+      <Filter>virtualization</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp">
+      <Filter>virtualization\screen</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -420,6 +432,12 @@
     </Filter>
     <Filter Include="graphlet\time">
       <UniqueIdentifier>{ba44d149-6853-4348-912c-cb7461afcdaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="virtualization\keyboard">
+      <UniqueIdentifier>{4bd974dc-5a02-4614-b95b-3256ede254a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="virtualization\screen">
+      <UniqueIdentifier>{dbd45099-a9c5-45ef-9070-e018f5424d8b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

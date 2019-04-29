@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "virtualization/affinepad.hpp"
+#include "virtualization/keyboard/affinepad.hpp"
 
 #include "text.hpp"
 #include "planet.hpp"
