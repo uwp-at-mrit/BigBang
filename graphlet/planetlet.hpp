@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~Planetlet() noexcept;
 		Planetlet(WarGrey::SCADA::IPlanet* planet, float width, float height,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ background = nullptr);
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr);
 
 	public:
 		void construct() override;
@@ -25,9 +25,7 @@ namespace WarGrey::SCADA {
 		void on_goodbye(float local_x, float local_y) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ background;
-		Microsoft::Graphics::Canvas::CanvasRenderTarget^ snapshot;
-		Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background;
 
 	private:
 		WarGrey::SCADA::IScreen* screen;

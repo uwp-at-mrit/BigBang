@@ -170,7 +170,15 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\tablet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)display.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.cpp">
+      <Filter>virtualization\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.cpp">
+      <Filter>virtualization\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)test\visitor.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.cpp">
       <Filter>virtualization\keyboard</Filter>
     </ClCompile>
@@ -183,16 +191,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen.cpp">
       <Filter>virtualization</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.cpp">
-      <Filter>virtualization\screen</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\planetlet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.cpp">
-      <Filter>virtualization\screen</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)test\visitor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -368,7 +369,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\tablet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)display.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.hpp">
+      <Filter>virtualization\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp">
+      <Filter>virtualization\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\visitor.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.hpp">
       <Filter>virtualization\keyboard</Filter>
     </ClInclude>
@@ -381,16 +390,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen.hpp">
       <Filter>virtualization</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp">
-      <Filter>virtualization\screen</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\planetlet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.hpp">
-      <Filter>virtualization\screen</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)test\visitor.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

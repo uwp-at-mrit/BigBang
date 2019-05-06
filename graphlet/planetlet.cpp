@@ -3,17 +3,22 @@
 
 #include "planet.hpp"
 #include "shape.hpp"
+#include "transformation.hpp"
 
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::Foundation;
 using namespace Windows::System;
+using namespace Windows::Foundation;
+using namespace Windows::Devices::Input;
+using namespace Windows::UI::Input;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+
+using namespace Windows::Foundation::Numerics;
 
 namespace {
 	private class PlaceholderPlanet : public Planet {
@@ -28,7 +33,7 @@ namespace {
 	};
 }
 
-static inline PlanetInfo* bind_planet_owership(IScreen* master, IPlanet* planet) {
+static inline PlanetInfo* bind_subplanet_owership(IScreen* master, IPlanet* planet) {
 	auto info = new PlanetInfo(master);
 
 	planet->info = info;
@@ -36,7 +41,7 @@ static inline PlanetInfo* bind_planet_owership(IScreen* master, IPlanet* planet)
 	return info;
 }
 
-static void construct_planet(IPlanet* planet, Platform::String^ type, Syslog* logger, CanvasCreateResourcesReason reason, float width, float height) {
+static void construct_subplanet(IPlanet* planet, Platform::String^ type, Syslog* logger, CanvasCreateResourcesReason reason, float width, float height) {
 	planet->begin_update_sequence();
 
 	try {
@@ -46,8 +51,7 @@ static void construct_planet(IPlanet* planet, Platform::String^ type, Syslog* lo
 		planet->notify_surface_ready();
 
 		logger->log_message(Log::Debug, L"%s[%s] is constructed in region[%f, %f]", type->Data(), planet->name()->Data(), width, height);
-	}
-	catch (Platform::Exception ^ e) {
+	} catch (Platform::Exception ^ e) {
 		logger->log_message(Log::Critical, L"%s: constructing: %s", planet->name()->Data(), e->Message->Data());
 	}
 
@@ -55,7 +59,7 @@ static void construct_planet(IPlanet* planet, Platform::String^ type, Syslog* lo
 }
 
 /**************************************************************************************************/
-Planetlet::Planetlet(IPlanet* planet, float width, float height, CanvasSolidColorBrush^ background)
+Planetlet::Planetlet(IPlanet* planet, float width, float height, ICanvasBrush^ background)
 	: planet(planet), width(width), height(height), background(background) {
 	if (this->planet == nullptr) {
 		this->planet = new PlaceholderPlanet();
@@ -83,13 +87,8 @@ Planetlet::~Planetlet() {
 }
 
 void Planetlet::construct() {
-	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
-	
-	this->snapshot = ref new CanvasRenderTarget(shared_dc, width, height, 96.0F);
-	this->ds = snapshot->CreateDrawingSession();
-
-	bind_planet_owership(this->screen, this->planet);
-	construct_planet(this->planet, "embedded planet", this->get_logger(), CanvasCreateResourcesReason::FirstTime, this->width, this->height);
+	bind_subplanet_owership(this->screen, this->planet);
+	construct_subplanet(this->planet, "subplanet", this->get_logger(), CanvasCreateResourcesReason::FirstTime, this->width, this->height);
 }
 
 void Planetlet::fill_extent(float x, float y, float* width, float* height) {
@@ -97,13 +96,20 @@ void Planetlet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Planetlet::update(long long count, long long interval, long long uptime) {
-	this->ds->Clear(this->background->Color);
+	this->planet->begin_update_sequence();
 	this->planet->on_elapse(count, interval, uptime);
-	this->planet->draw(this->ds, this->width, this->height);
+	this->planet->end_update_sequence();
 }
 
 void Planetlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	ds->DrawImage(this->snapshot, x, y);
+	float3x2 saved_transform = ds->Transform;
+
+	ds->DrawRectangle(x, y, Width, Height, this->background);
+
+	ds->Transform = make_translation_matrix(x, y);
+	this->planet->draw(ds, Width, Height);
+
+	ds->Transform = saved_transform;
 }
 
 bool Planetlet::on_key(VirtualKey key, bool screen_keyboard) {
@@ -119,7 +125,7 @@ void Planetlet::on_hover(float local_x, float local_y) {
 }
 
 void Planetlet::on_tap(float local_x, float local_y) {
-
+	this->planet->on_pointer_released(local_x, local_y, PointerDeviceType::Mouse, PointerUpdateKind::LeftButtonPressed);
 }
 
 void Planetlet::on_goodbye(float local_x, float local_y) {

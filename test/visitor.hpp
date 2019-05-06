@@ -1,6 +1,7 @@
 #pragma once
 
 #include "planet.hpp"
+#include "graphlet/planetlet.hpp"
 
 namespace WarGrey::SCADA {
 	private class VisitorSpace : public WarGrey::SCADA::Planet {
@@ -10,8 +11,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
-		
-	public:
-		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y) override;
+		void reflow(float width, float height) override;
+
+	private: // never deletes these graphlets manually
+		WarGrey::SCADA::Planetlet* space;
 	};
 }
