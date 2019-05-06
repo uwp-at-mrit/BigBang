@@ -26,14 +26,15 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual WarGrey::SCADA::IDisplay^ display() = 0;
+		
+		virtual float actual_width(IPlanet* p) = 0;
+		virtual float actual_height(IPlanet* p) = 0;
 
-		virtual void view_width(float width) = 0;
-		virtual void view_height(float height) = 0;
+		virtual void view_resize(float width, float height) = 0;
 		virtual float view_width() = 0;
 		virtual float view_height() = 0;
 
-		virtual void min_width(float width) = 0;
-		virtual void min_height(float height) = 0;
+		virtual void min_resize(float width, float height) = 0;
 		virtual float min_width() = 0;
 		virtual float min_height() = 0;
 

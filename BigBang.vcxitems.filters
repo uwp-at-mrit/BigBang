@@ -186,6 +186,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.cpp">
       <Filter>virtualization\screen</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\planetlet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.cpp">
+      <Filter>virtualization\screen</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)test\visitor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -377,6 +384,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp">
       <Filter>virtualization\screen</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\planetlet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.hpp">
+      <Filter>virtualization\screen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\visitor.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

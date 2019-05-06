@@ -20,6 +20,12 @@ namespace WarGrey::SCADA {
 		IScreen* master;
 	};
 
+	/** Note
+	 * The destruction of `IPlanet` is always performed by its `display`
+	 *  since its instance cannot belong to multiple `display`s.
+	 *
+	 *  Do not `delete` it on your own.
+	 */
 	private class IPlanet abstract {
 	public:
 		virtual ~IPlanet() noexcept;
@@ -146,19 +152,19 @@ namespace WarGrey::SCADA {
 		void leave_shared_section();
 
 	public:
-		void save_logo(float logo_width = 0.0F, float logo_height = 0.0F, Platform::String^ path = nullptr, float dpi = 96.0);
+		void save_logo(float logo_width = 0.0F, float logo_height = 0.0F, Platform::String^ path = nullptr, float dpi = 96.0F);
 		
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0);
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0F);
 		
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float x, float y, float width, float height,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0);
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0F);
 
 		void save(Platform::String^ path, float width, float height,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0);
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0F);
 
 		void save(Platform::String^ path, float x, float y, float width, float height,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0);
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0F);
 
 	public:
 		bool fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAnchor a);
@@ -317,8 +323,6 @@ namespace WarGrey::SCADA {
         float graphlets_top;
         float graphlets_right;
         float graphlets_bottom;
-        float preferred_min_width;
-        float preferred_min_height;
 
 	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background;

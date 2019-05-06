@@ -8,8 +8,6 @@
 #include "datum/slot.hpp"
 
 namespace WarGrey::SCADA {
-#define GRAPHLETS_LENGTH(a) (sizeof(a) / sizeof(IGraphlet*))
-
 	private class IGraphletInfo abstract {
     public:
 		virtual ~IGraphletInfo() noexcept {};
@@ -41,11 +39,11 @@ namespace WarGrey::SCADA {
 		float sketch_to_application_height(float sketch_height);
 
 	public:
-		IGraphletInfo * info;
-
-	protected:
 		void notify_ready();
 		void notify_updated();
+
+	public:
+		IGraphletInfo * info;
 
 	private:
 		WarGrey::SCADA::GraphletAnchor anchor;

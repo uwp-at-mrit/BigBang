@@ -2,13 +2,14 @@
 
 #include "virtualization/screen.hpp"
 
+#include "graphlet/primitive.hpp"
 #include "display.hxx"
 #include "forward.hpp"
 
 namespace WarGrey::SCADA {
-	private class Pasteboard : public WarGrey::SCADA::IScreen {
+	private class Frame : public WarGrey::SCADA::IScreen {
 	public:
-		Pasteboard(WarGrey::SCADA::IDisplay^ display,
+		Frame(WarGrey::SCADA::IGraphlet* display,
 			WarGrey::SCADA::DisplayFit mode = DisplayFit::None,
 			float dest_width = 0.0F, float dest_height = 0.0F,
 			float src_width = 0.0F, float src_height = 0.0F);
@@ -40,6 +41,6 @@ namespace WarGrey::SCADA {
 		void refresh(IPlanet* target) override;
 
 	private:
-		WarGrey::SCADA::IDisplay^ _display;
+		WarGrey::SCADA::IGraphlet* _display;
     };
 }

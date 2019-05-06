@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
 	private class CyberSpace : public WarGrey::SCADA::Planet {
 	public:
-		~CyberSpace() noexcept;
+		virtual ~CyberSpace() noexcept;
 		CyberSpace();
 
 	public:

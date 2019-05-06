@@ -42,8 +42,7 @@ Syslog* IScreen::get_logger() {
 }
 
 void IScreen::apply_source_size(float src_width, float src_height) {
-	this->view_width(this->sketch_to_application_width(src_width));
-	this->view_height(this->sketch_to_application_height(src_height));
+	this->view_resize(this->sketch_to_application_width(src_width), this->sketch_to_application_height(src_height));
 }
 
 float IScreen::sketch_to_application_width(float sketch_width) {

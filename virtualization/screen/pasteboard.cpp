@@ -13,13 +13,19 @@ IDisplay^ Pasteboard::display() {
 	return this->_display;
 }
 
-void Pasteboard::min_width(float width) {
+float Pasteboard::actual_width(IPlanet* p) {
+	return this->_display->planet_actual_width(p);
+}
+
+float Pasteboard::actual_height(IPlanet* p) {
+	return this->_display->planet_actual_height(p);
+}
+
+void Pasteboard::min_resize(float width, float height) {
 	if (width > 0.0F) {
 		this->_display->min_width = width;
 	}
-}
 
-void Pasteboard::min_height(float height) {
 	if (height > 0.0F) {
 		this->_display->min_height = height;
 	}
@@ -33,12 +39,8 @@ float Pasteboard::min_height() {
 	return this->_display->min_height;
 }
 
-void Pasteboard::view_width(float width) {
-	this->min_width(width);	
-}
-
-void Pasteboard::view_height(float height) {
-	this->min_height(height);
+void Pasteboard::view_resize(float width, float height) {
+	this->min_resize(width, height);	
 }
 
 float Pasteboard::view_width() {

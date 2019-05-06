@@ -648,8 +648,7 @@ void Planet::recalculate_graphlets_extent_when_invalid() {
             } while (child != this->head_graphlet);
         }
 
-        this->info->master->min_width(flmax(this->graphlets_right, this->preferred_min_width));
-        this->info->master->min_height(flmax(this->graphlets_bottom, this->preferred_min_height));
+        this->info->master->min_resize(this->graphlets_right, this->graphlets_bottom);
     }
 }
 
@@ -1348,7 +1347,7 @@ float IPlanet::actual_width() {
 	float width = 0.0F;
 
 	if (this->info != nullptr) {
-		width = this->info->master->view_width();
+		width = this->info->master->actual_width(this);
 	}
 
 	return width;
@@ -1358,7 +1357,7 @@ float IPlanet::actual_height() {
 	float height = 0.0F;
 
 	if (this->info != nullptr) {
-		height = this->info->master->view_height();
+		height = this->info->master->actual_height(this);
 	}
 
 	return height;

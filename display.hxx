@@ -32,8 +32,8 @@ namespace WarGrey::SCADA {
         read_write_property(float, max_height);
 
 	public:
-		virtual Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0) = 0;
-		virtual void save(Platform::String^ path, float dpi = 96.0);
+		virtual Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F) = 0;
+		virtual void save(Platform::String^ path, float dpi = 96.0F);
 
 	public:
 		virtual bool surface_ready() = 0;

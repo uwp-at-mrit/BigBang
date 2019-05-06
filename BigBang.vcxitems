@@ -28,6 +28,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\planetlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\tablet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.cpp" />
@@ -62,6 +63,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)navigator\thumbnail.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)test\visitor.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.cpp" />
@@ -81,6 +83,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\numpad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +99,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\planetlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\tablet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.hpp" />
@@ -133,6 +137,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)navigator\thumbnail.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\visitor.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timemachine.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
@@ -156,6 +161,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\numpad.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp" />
   </ItemGroup>
   <ItemGroup>

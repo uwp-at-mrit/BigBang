@@ -49,7 +49,7 @@ using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-#define PLANET_INFO(planet) (static_cast<PlanetInfo*>(planet->info))
+#define PLANET_INFO(planet) (static_cast<LinkedPlanetInfo*>(planet->info))
 
 #define SHIFTED(vkms) ((vkms & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift)
 #define CONTROLLED(vkms) ((vkms & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control)
@@ -61,17 +61,19 @@ static Platform::String^ mask_setting_key = "Mask_Alpha";
 
 static CanvasSolidColorBrush^ global_mask_color;
 
-class PlanetInfo : public WarGrey::SCADA::IPlanetInfo {
-public:
-	PlanetInfo(IScreen* master) : IPlanetInfo(master) {};
+namespace {
+	private class LinkedPlanetInfo : public WarGrey::SCADA::IPlanetInfo {
+	public:
+		LinkedPlanetInfo(IScreen* master) : IPlanetInfo(master) {};
 
-public:
-	IPlanet* next;
-	IPlanet* prev;
-};
+	public:
+		IPlanet* next;
+		IPlanet* prev;
+	};
+}
 
-static inline PlanetInfo* bind_planet_owership(IScreen* master, IPlanet* planet) {
-	auto info = new PlanetInfo(master);
+static inline LinkedPlanetInfo* bind_planet_owership(IScreen* master, IPlanet* planet) {
+	auto info = new LinkedPlanetInfo(master);
 	
 	planet->info = info;
 
@@ -162,7 +164,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 	// this->display->UseSharedDevice = true;
 
 	if (heads_up_planet != nullptr) {
-		PlanetInfo* info = bind_planet_owership(this->screen, heads_up_planet);
+		LinkedPlanetInfo* info = bind_planet_owership(this->screen, heads_up_planet);
 
 		info->next = heads_up_planet;
 		info->prev = heads_up_planet;
@@ -341,7 +343,7 @@ void UniverseDisplay::push_planet(IPlanet* planet) {
 	// NOTE: this method is designed to be invoked before CreateResources event
 
 	if (planet->info == nullptr) {
-		PlanetInfo* info = bind_planet_owership(this->screen, planet);
+		LinkedPlanetInfo* info = bind_planet_owership(this->screen, planet);
 		
 		if (this->head_planet == nullptr) {
 			this->head_planet = planet;
@@ -353,8 +355,8 @@ void UniverseDisplay::push_planet(IPlanet* planet) {
 
 			this->get_logger()->log_message(Log::Debug, L"found the first planet[%s]", planet->name()->Data());
 		} else { 
-			PlanetInfo* head_info = PLANET_INFO(this->head_planet);
-			PlanetInfo* prev_info = PLANET_INFO(head_info->prev);
+			LinkedPlanetInfo* head_info = PLANET_INFO(this->head_planet);
+			LinkedPlanetInfo* prev_info = PLANET_INFO(head_info->prev);
 			 
 			info->prev = head_info->prev;
 			prev_info->next = planet;
@@ -431,7 +433,7 @@ void UniverseDisplay::transfer_to(Platform::String^ name, unsigned int ms, unsig
 		int idx = 0;
 
 		do {
-			PlanetInfo* info = PLANET_INFO(child);
+			LinkedPlanetInfo* info = PLANET_INFO(child);
 
 			if (child->name()->Equals(name)) {
 				index = idx;
@@ -477,8 +479,8 @@ void UniverseDisplay::on_navigate(int from_index, int to_index) {
 void UniverseDisplay::collapse() {
 	if (this->head_planet != nullptr) {
 		IPlanet* temp_head = this->head_planet;
-		PlanetInfo* temp_info = PLANET_INFO(temp_head);
-		PlanetInfo* prev_info = PLANET_INFO(temp_info->prev);
+		LinkedPlanetInfo* temp_info = PLANET_INFO(temp_head);
+		LinkedPlanetInfo* prev_info = PLANET_INFO(temp_info->prev);
 
 		this->head_planet = nullptr;
 		this->recent_planet = nullptr;
@@ -514,7 +516,7 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 				float height = nheight - this->hup_top_margin - this->hup_bottom_margin;
 
 				do {
-					PlanetInfo* info = PLANET_INFO(child);
+					LinkedPlanetInfo* info = PLANET_INFO(child);
 
 					reflow_planet(child, width, height);
 					child = info->next;
@@ -542,7 +544,7 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 		float height = region.Height - this->hup_top_margin - this->hup_bottom_margin;
 
 		do {
-			PlanetInfo* info = PLANET_INFO(child);
+			LinkedPlanetInfo* info = PLANET_INFO(child);
 
 			construct_planet(child, "planet", this->get_logger(), args->Reason, width, height);
 			child = info->next;
@@ -896,7 +898,7 @@ void UniverseDisplay::notify_transfer(IPlanet* from, IPlanet* to) {
 		IPlanet* child = this->head_planet;
 
 		do {
-			PlanetInfo* info = PLANET_INFO(child);
+			LinkedPlanetInfo* info = PLANET_INFO(child);
 
 			child->on_transfer(from, to);
 			child = info->next;

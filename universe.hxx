@@ -70,7 +70,7 @@ namespace WarGrey::SCADA {
 		read_write_property(double, mask_alpha);
 
 	public:
-		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0) override;
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F) override;
 		void use_global_mask_setting(bool yes, bool* prev_state = nullptr);
 		bool surface_ready() override;
 		bool ui_thread_ready() override;
