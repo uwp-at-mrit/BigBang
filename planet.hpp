@@ -309,7 +309,9 @@ namespace WarGrey::SCADA {
     private:
 		void switch_virtual_keyboard(WarGrey::SCADA::ScreenKeyboard type);
         void recalculate_graphlets_extent_when_invalid();
-		bool say_goodbye_to_the_hovering_graphlet(float x, float y);
+		bool say_goodbye_to_hover_graphlet(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk);
 
     private:
 #ifdef _DEBUG

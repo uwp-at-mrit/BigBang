@@ -30,8 +30,30 @@ namespace WarGrey::SCADA {
 		virtual void on_goodbye(float local_x, float local_y) {}
 
 	public:
-		void enable_events(bool yes) { this->deal_with_events = yes; }
+		virtual bool on_pointer_moved(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk)
+		{ return false; }
+
+		virtual bool on_pointer_pressed(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk)
+		{ return false; }
+
+		virtual bool on_pointer_released(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk)
+		{ return false; }
+
+		virtual bool on_pointer_moveout(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk)
+		{ return false; }
+
+	public:
+		void enable_events(bool yes_no, bool low_level = false) { this->deal_with_events = yes_no; this->deal_with_low_level_events = low_level; }
 		bool handles_events() { return this->deal_with_events; }
+		bool handles_low_level_events() { return (this->handles_events() && this->deal_with_low_level_events); }
 
 	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
@@ -39,5 +61,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool deal_with_events = false;
+		bool deal_with_low_level_events = false;
 	};
 }

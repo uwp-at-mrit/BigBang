@@ -20,9 +20,22 @@ namespace WarGrey::SCADA {
 	public:
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
 		bool on_character(unsigned int keycode) override;
-		void on_hover(float local_x, float local_y) override;
-		void on_tap(float local_x, float local_y) override;
-		void on_goodbye(float local_x, float local_y) override;
+
+		bool on_pointer_moved(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk) override;
+
+		bool on_pointer_pressed(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk) override;
+
+		bool on_pointer_released(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk) override;
+
+		bool on_pointer_moveout(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background;

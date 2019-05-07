@@ -12,7 +12,7 @@ Frame::Frame(IGraphlet* display, DisplayFit mode, float target_width, float targ
 	: IScreen(display->get_logger(), mode, target_width, target_height, source_width, source_height), _display(display) {}
 
 IDisplay^ Frame::display() {
-	return this->_display->info->master->master()->display();
+	return this->_display->master()->master()->display();
 }
 
 float Frame::actual_width(IPlanet* p) {
@@ -72,9 +72,21 @@ void Frame::refresh(IPlanet* planet) {
 }
 
 Point Frame::global_to_local_point(IPlanet* p, float global_x, float global_y, float xoff, float yoff) {
-	return Point(global_x + xoff, global_y + yoff);
+	IPlanet* master = this->_display->master();
+	Point local_global = master->master()->global_to_local_point(p, global_x, global_y, xoff, yoff);
+	float x, y;
+
+	master->fill_graphlet_location(this->_display, &x, &y, GraphletAnchor::LT);
+
+	return Point(local_global.Y - x, local_global.Y - y);
 }
 
 Point Frame::local_to_global_point(IPlanet* p, float local_x, float local_y, float xoff, float yoff) {
-	return Point(local_x + xoff, local_y + yoff);
+	IPlanet* master = this->_display->master();
+	Point global_local = master->master()->local_to_global_point(p, local_x, local_y, xoff, yoff);
+	float x, y;
+
+	master->fill_graphlet_location(this->_display, &x, &y, GraphletAnchor::LT);
+
+	return Point(global_local.X + x, global_local.Y + y);
 }

@@ -78,7 +78,7 @@ Planetlet::Planetlet(IPlanet* planet, float width, float height, ICanvasBrush^ b
 	}
 
 	this->screen = new Frame(this);
-	this->enable_events(true);
+	this->enable_events(true, true);
 }
 
 Planetlet::~Planetlet() {
@@ -112,22 +112,26 @@ void Planetlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	ds->Transform = saved_transform;
 }
 
+bool Planetlet::on_pointer_moved(float x, float y, PointerDeviceType type, PointerUpdateKind puk) {
+	return this->planet->on_pointer_moved(x, y, type, puk);
+}
+
+bool Planetlet::on_pointer_pressed(float x, float y, PointerDeviceType type, PointerUpdateKind puk) {
+	return this->planet->on_pointer_pressed(x, y, type, puk);
+}
+
+bool Planetlet::on_pointer_released(float x, float y, PointerDeviceType type, PointerUpdateKind puk) {
+	return this->planet->on_pointer_released(x, y, type, puk);
+}
+
+bool Planetlet::on_pointer_moveout(float x, float y, PointerDeviceType type, PointerUpdateKind puk) {
+	return this->planet->on_pointer_moveout(x, y, type, puk);
+}
+
 bool Planetlet::on_key(VirtualKey key, bool screen_keyboard) {
-	return false;
+	return this->planet->on_key(key, screen_keyboard);
 }
 
 bool Planetlet::on_character(unsigned int keycode) {
-	return false;
-}
-
-void Planetlet::on_hover(float local_x, float local_y) {
-
-}
-
-void Planetlet::on_tap(float local_x, float local_y) {
-	this->planet->on_pointer_released(local_x, local_y, PointerDeviceType::Mouse, PointerUpdateKind::LeftButtonPressed);
-}
-
-void Planetlet::on_goodbye(float local_x, float local_y) {
-
+	return this->planet->on_character(keycode);
 }

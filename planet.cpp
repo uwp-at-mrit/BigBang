@@ -853,7 +853,7 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 				this->track_thickness = 8.0F;
 
 				if (unmasked_graphlet != this->hovering_graphlet) {
-					this->say_goodbye_to_the_hovering_graphlet(x, y);
+					this->say_goodbye_to_hover_graphlet(x, y, pdt, puk);
 				}
 
 				if (unmasked_graphlet != nullptr) {
@@ -865,6 +865,10 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 
 					if (this->hovering_graphlet->handles_events()) {
 						this->hovering_graphlet->on_hover(local_x, local_y);
+
+						if (this->hovering_graphlet->handles_low_level_events()) {
+							this->hovering_graphlet->on_pointer_pressed(local_x, local_y, pdt, puk);
+						}
 					}
 
 					this->on_hover(this->hovering_graphlet, local_x, local_y);
@@ -934,7 +938,7 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 			IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
 			if (unmasked_graphlet != this->hovering_graphlet) {
-				this->say_goodbye_to_the_hovering_graphlet(x, y);
+				this->say_goodbye_to_hover_graphlet(x, y, pdt, puk);
 			}
 
 			if (unmasked_graphlet != nullptr) {
@@ -945,7 +949,11 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 				this->hovering_graphlet = unmasked_graphlet;
 
 				if (unmasked_graphlet->handles_events()) {
-					this->hovering_graphlet->on_hover(local_x, local_y);
+					unmasked_graphlet->on_hover(local_x, local_y);
+
+					if (unmasked_graphlet->handles_low_level_events()) {
+						unmasked_graphlet->on_pointer_moved(local_x, local_y, pdt, puk);
+					}
 				}
 
 				this->on_hover(this->hovering_graphlet, local_x, local_y);
@@ -1013,6 +1021,10 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 						if (pdt == PointerDeviceType::Touch) {
 							unmasked_graphlet->on_goodbye(local_x, local_y);
 						}
+
+						if (unmasked_graphlet->handles_low_level_events()) {
+							unmasked_graphlet->on_pointer_released(local_x, local_y, pdt, puk);
+						}
 					}
 
 					this->on_tap(unmasked_graphlet, local_x, local_y);
@@ -1054,10 +1066,10 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 }
 
 bool Planet::on_pointer_moveout(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
-	return this->say_goodbye_to_the_hovering_graphlet(x, y);
+	return this->say_goodbye_to_hover_graphlet(x, y, pdt, puk);
 }
 
-bool Planet::say_goodbye_to_the_hovering_graphlet(float x, float y) {
+bool Planet::say_goodbye_to_hover_graphlet(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
 	bool done = false;
 
 	if (this->hovering_graphlet != nullptr) {
@@ -1067,6 +1079,10 @@ bool Planet::say_goodbye_to_the_hovering_graphlet(float x, float y) {
 
 		if (this->hovering_graphlet->handles_events()) {
 			this->hovering_graphlet->on_goodbye(local_x, local_y);
+
+			if (this->hovering_graphlet->handles_low_level_events()) {
+				this->hovering_graphlet->on_pointer_moveout(local_x, local_y, pdt, puk);
+			}
 		}
 
 		this->on_goodbye(this->hovering_graphlet, local_x, local_y);
