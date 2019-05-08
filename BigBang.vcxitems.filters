@@ -194,6 +194,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\planetlet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)display.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -393,6 +394,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\planetlet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)display.hxx" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
