@@ -3,6 +3,7 @@
 #include <map>
 
 #include "graphlet/msappxlet.hxx"
+#include "graphlet/primitive.hpp"
 
 #include "datum/path.hpp"
 
@@ -12,7 +13,7 @@
 namespace WarGrey::SCADA {
 	void adjust_window_size(Windows::Foundation::Rect& window, Microsoft::Graphics::Canvas::CanvasBitmap^ doc_bmp);
 
-	private class Bitmaplet : public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap, int> {
+	private class Bitmaplet : public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap, WarGrey::SCADA::IGraphlet, int> {
 	public:
 		virtual ~Bitmaplet() noexcept;
 
@@ -39,7 +40,7 @@ namespace WarGrey::SCADA {
 	};
 
 	private class OptionBitmaplet
-		: public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap, bool>
+		: public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap, WarGrey::SCADA::IGraphlet, bool>
 		, public virtual WarGrey::SCADA::IValuelet<bool> {
 	public:
 		virtual ~OptionBitmaplet() noexcept;
@@ -72,7 +73,7 @@ namespace WarGrey::SCADA {
 
 	template <typename U>
 	private class UnionBitmaplet
-		: public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap, U>
+		: public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap, WarGrey::SCADA::IGraphlet, U>
 		, public virtual WarGrey::SCADA::IValuelet<U> {
 	public:
 		virtual ~UnionBitmaplet() noexcept {

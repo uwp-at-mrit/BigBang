@@ -46,12 +46,14 @@ namespace WarGrey::SCADA {
 			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk) override;
 
+	protected:
+		WarGrey::SCADA::IPlanet* planet;
+
 	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background;
 
 	private:
 		WarGrey::SCADA::IScreen* screen;
-		WarGrey::SCADA::IPlanet* planet;
 		float width;
 		float height;
 

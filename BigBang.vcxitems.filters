@@ -195,6 +195,9 @@
       <Filter>graphlet</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)display.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\matrix\diglet.cpp">
+      <Filter>graphlet\matrix</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -243,9 +246,6 @@
       <Filter>graphlet\dashboard</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp">
-      <Filter>graphlet</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx">
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp">
@@ -395,6 +395,15 @@
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)display.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\matrix\diglet.hpp">
+      <Filter>graphlet\matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\DredgeConstruct\BigBang\graphlet\msappxlet.hxx">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappdatalet.hxx">
+      <Filter>graphlet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -456,6 +465,9 @@
     </Filter>
     <Filter Include="virtualization\screen">
       <UniqueIdentifier>{dbd45099-a9c5-45ef-9070-e018f5424d8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\matrix">
+      <UniqueIdentifier>{c3683d4d-c151-4016-817c-19fe614641fc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
