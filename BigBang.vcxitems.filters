@@ -198,6 +198,24 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\matrix\diglet.cpp">
       <Filter>graphlet\matrix</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\sunken_shiplet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\light_houselet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\anchorlet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\radar_reflectorlet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\buoylet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -398,11 +416,27 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\matrix\diglet.hpp">
       <Filter>graphlet\matrix</Filter>
     </ClInclude>
-    <ClInclude Include="F:\DredgeConstruct\BigBang\graphlet\msappxlet.hxx">
-      <Filter>graphlet</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappdatalet.hxx">
       <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\sunken_shiplet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\light_houselet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\anchorlet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\radar_reflectorlet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\buoylet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -468,6 +502,9 @@
     </Filter>
     <Filter Include="graphlet\matrix">
       <UniqueIdentifier>{c3683d4d-c151-4016-817c-19fe614641fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\symbol\dig">
+      <UniqueIdentifier>{35373403-f2b7-4e2e-bcf4-82ebcdd63892}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

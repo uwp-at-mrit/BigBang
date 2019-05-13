@@ -1,12 +1,36 @@
 #pragma once
 
+#include <deque>
+#include <map>
+
 #include "graphlet/msappdatalet.hxx"
 #include "graphlet/planetlet.hpp"
 
+#include "graphlet/symbol/dig/dig.hpp"
+
 namespace WarGrey::SCADA {
-	private ref class DigVectorMap {
+	private ref class DigVectorMap sealed {
 	public:
 		static Windows::Foundation::IAsyncOperation<WarGrey::SCADA::DigVectorMap^>^ LoadAsync(Platform::String^ dig);
+
+	public:
+		virtual ~DigVectorMap();
+
+	internal:
+		void push_back_item(WarGrey::SCADA::IDigDatum* item);
+
+	private:
+		DigVectorMap();
+
+	private:
+		double lx;
+		double ty;
+		double rx;
+		double by;
+
+	private:
+		std::deque<WarGrey::SCADA::IDigDatum*> items;
+		std::map<WarGrey::SCADA::DigDatumType, unsigned int> counters;
 	};
 
 	private class Diglet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::DigVectorMap, WarGrey::SCADA::Planetlet, int> {

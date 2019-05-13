@@ -1,8 +1,13 @@
 #include <ppltasks.h>
+#include <iostream>
+#include <fstream>
 
 #include "graphlet/matrix/diglet.hpp"
+#include "graphlet/symbol/dig/dig.hpp"
 
+#include "datum/flonum.hpp"
 #include "datum/path.hpp"
+#include "datum/file.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -10,16 +15,51 @@ using namespace Concurrency;
 
 using namespace Windows::Foundation;
 
-using namespace Windows::Storage;
-using namespace Windows::Storage::Streams;
-
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
-IAsyncOperation<DigVectorMap^>^ DigVectorMap::LoadAsync(Platform::String^ dig) {
+DigVectorMap::DigVectorMap() {}
+
+DigVectorMap::~DigVectorMap() {
+	while (!this->items.empty()) {
+		auto it = this->items.begin();
+		
+		delete (*it);
+		
+		this->items.erase(it);
+	}
+}
+
+void DigVectorMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
+	this->items.push_back(item);
+	this->counters[item->type] = this->counters[item->type] + 1;
+
+	syslog(Log::Info, L"%s: %d", item->to_string()->Data(), this->counters[item->type]);
+
+	this->lx = flmin(this->lx, item->x);
+	this->rx = flmax(this->rx, item->x);
+	this->ty = flmin(this->ty, item->y);
+	this->by = flmax(this->by, item->y);
+}
+
+IAsyncOperation<DigVectorMap^>^ DigVectorMap::LoadAsync(Platform::String^ _dig) {
 	return create_async([=] {
-		return ref new DigVectorMap();
+		DigVectorMap^ map = ref new DigVectorMap();
+		IDigDatum* datum;
+		std::filebuf dig;
+
+		if (dig.open(_dig->Data(), std::ios::in)) {
+			while ((datum = read_dig(dig)) != nullptr) {
+				if (datum->type < DigDatumType::_) {
+					map->push_back_item(datum);
+				}
+
+				read_skip_this_line(dig);
+			}
+		}
+
+		return map;
 	});
 }
 
