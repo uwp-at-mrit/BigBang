@@ -32,15 +32,18 @@ DigVectorMap::~DigVectorMap() {
 }
 
 void DigVectorMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
+	double cx, cy, radius;
+
 	this->items.push_back(item);
 	this->counters[item->type] = this->counters[item->type] + 1;
 
 	syslog(Log::Info, L"%s: %d", item->to_string()->Data(), this->counters[item->type]);
 
-	this->lx = flmin(this->lx, item->x);
-	this->rx = flmax(this->rx, item->x);
-	this->ty = flmin(this->ty, item->y);
-	this->by = flmax(this->by, item->y);
+	item->fill_polar_extent(&cx, &cy, &radius);
+	this->lx = flmin(this->lx, cx - radius);
+	this->rx = flmax(this->rx, cx + radius);
+	this->ty = flmin(this->ty, cy - radius);
+	this->by = flmax(this->by, cy + radius);
 }
 
 IAsyncOperation<DigVectorMap^>^ DigVectorMap::LoadAsync(Platform::String^ _dig) {
@@ -53,6 +56,8 @@ IAsyncOperation<DigVectorMap^>^ DigVectorMap::LoadAsync(Platform::String^ _dig) 
 			while ((datum = read_dig(dig)) != nullptr) {
 				if (datum->type < DigDatumType::_) {
 					map->push_back_item(datum);
+				} else {
+					syslog(Log::Warning, L"Unrecognized type: %s", datum->name->Data());
 				}
 
 				read_skip_this_line(dig);
