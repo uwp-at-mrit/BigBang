@@ -628,10 +628,10 @@ void Planet::recalculate_graphlets_extent_when_invalid() {
         } else {
             IGraphlet* child = this->head_graphlet;
 
-            this->graphlets_left = FLT_MAX;
-            this->graphlets_top = FLT_MAX;
-            this->graphlets_right = -FLT_MAX;
-            this->graphlets_bottom = -FLT_MAX;
+            this->graphlets_left = infinity_f;
+            this->graphlets_top = infinity_f;
+            this->graphlets_right = -infinity_f;
+            this->graphlets_bottom = -infinity_f;
 
             do {
                 GraphletInfo* info = GRAPHLET_INFO(child);

@@ -11,10 +11,13 @@
 namespace WarGrey::SCADA {
 	private ref class DigVectorMap sealed {
 	public:
-		static Windows::Foundation::IAsyncOperation<WarGrey::SCADA::DigVectorMap^>^ LoadAsync(Platform::String^ dig);
+		static Windows::Foundation::IAsyncOperation<WarGrey::SCADA::DigVectorMap^>^ load_async(Platform::String^ dig);
 
 	public:
 		virtual ~DigVectorMap();
+
+	public:
+		void fill_enclosing_box(double* x, double* y, double* width, double* height);
 
 	internal:
 		void push_back_item(WarGrey::SCADA::IDigDatum* item);

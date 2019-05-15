@@ -4,10 +4,13 @@
 
 #include "graphlet/matrix/diglet.hpp"
 #include "graphlet/symbol/dig/dig.hpp"
+#include "graphlet/textlet.hpp"
 
 #include "datum/flonum.hpp"
 #include "datum/path.hpp"
 #include "datum/file.hpp"
+
+#include "planet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -19,7 +22,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
-DigVectorMap::DigVectorMap() {}
+DigVectorMap::DigVectorMap() : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {}
 
 DigVectorMap::~DigVectorMap() {
 	while (!this->items.empty()) {
@@ -32,21 +35,26 @@ DigVectorMap::~DigVectorMap() {
 }
 
 void DigVectorMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
-	double cx, cy, radius;
+	double x, y, width, height;
 
 	this->items.push_back(item);
 	this->counters[item->type] = this->counters[item->type] + 1;
 
 	syslog(Log::Info, L"%s: %d", item->to_string()->Data(), this->counters[item->type]);
 
-	item->fill_polar_extent(&cx, &cy, &radius);
-	this->lx = flmin(this->lx, cx - radius);
-	this->rx = flmax(this->rx, cx + radius);
-	this->ty = flmin(this->ty, cy - radius);
-	this->by = flmax(this->by, cy + radius);
+	item->fill_enclosing_box(&x, &y, &width, &height);
+	this->lx = flmin(this->lx, x);
+	this->rx = flmax(this->rx, x + width);
+	this->ty = flmin(this->ty, y);
+	this->by = flmax(this->by, y + height);
 }
 
-IAsyncOperation<DigVectorMap^>^ DigVectorMap::LoadAsync(Platform::String^ _dig) {
+void DigVectorMap::fill_enclosing_box(double* x, double* y, double* width, double* height) {
+	SET_VALUES(x, this->lx, y, this->ty);
+	SET_VALUES(width, this->rx - this->lx, height, this->by - this->ty);
+}
+
+IAsyncOperation<DigVectorMap^>^ DigVectorMap::load_async(Platform::String^ _dig) {
 	return create_async([=] {
 		DigVectorMap^ map = ref new DigVectorMap();
 		IDigDatum* datum;
@@ -60,7 +68,7 @@ IAsyncOperation<DigVectorMap^>^ DigVectorMap::LoadAsync(Platform::String^ _dig) 
 					syslog(Log::Warning, L"Unrecognized type: %s", datum->name->Data());
 				}
 
-				read_skip_this_line(dig);
+				discard_this_line(dig);
 			}
 		}
 
@@ -83,7 +91,12 @@ void Diglet::construct() {
 }
 
 void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
+	double x, y, width, height;
+
 	this->graph_dig = doc_dig;
+
+	this->graph_dig->fill_enclosing_box(&x, &y, &width, &height);
+	this->planet->insert(new Labellet(L"DIG(%f, %f, %f, %f)", x, y, width, height));
 }
 
 bool Diglet::ready() {
