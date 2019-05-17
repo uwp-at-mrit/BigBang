@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "decorator/border.hpp"
+
 #include "graphlet/matrix/diglet.hpp"
 #include "graphlet/symbol/dig/dig.hpp"
 #include "graphlet/textlet.hpp"
@@ -11,6 +13,7 @@
 #include "datum/file.hpp"
 
 #include "planet.hpp"
+#include "draw.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -19,6 +22,7 @@ using namespace Concurrency;
 using namespace Windows::Foundation;
 
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
@@ -39,8 +43,6 @@ void DigVectorMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
 
 	this->items.push_back(item);
 	this->counters[item->type] = this->counters[item->type] + 1;
-
-	syslog(Log::Info, L"%s: %d", item->to_string()->Data(), this->counters[item->type]);
 
 	item->fill_enclosing_box(&x, &y, &width, &height);
 	this->lx = flmin(this->lx, x);
@@ -64,8 +66,6 @@ IAsyncOperation<DigVectorMap^>^ DigVectorMap::load_async(Platform::String^ _dig)
 			while ((datum = read_dig(dig)) != nullptr) {
 				if (datum->type < DigDatumType::_) {
 					map->push_back_item(datum);
-				} else {
-					syslog(Log::Warning, L"Unrecognized type: %s", datum->name->Data());
 				}
 
 				discard_this_line(dig);
@@ -77,9 +77,26 @@ IAsyncOperation<DigVectorMap^>^ DigVectorMap::load_async(Platform::String^ _dig)
 }
 
 /*************************************************************************************************/
-Diglet::Diglet(Platform::String^ file, GraphletAnchor anchor, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Planetlet(nullptr, anchor, background) {
+private class DigFrame : public Planet {
+public:
+	virtual ~DigFrame() noexcept {}
+
+	DigFrame(Platform::String^ name) : Planet(name) {
+		this->push_decorator(new BorderDecorator());
+	}
+
+public:
+	bool can_select(IGraphlet* g) override {
+		return true;
+	}
+};
+
+/*************************************************************************************************/
+Diglet::Diglet(Platform::String^ file, float view_width, float view_height, double scale, ICanvasBrush^ background, Platform::String^ rootdir)
+	: Planetlet(new DigFrame(file), GraphletAnchor::LT, background)
+	, view_width(view_width), view_height(view_height), origin_scale(scale) {
 	this->ms_appdata_dig = ms_appdata_file(file, ".DIG", rootdir);
+	this->enable_resize(false, false);
 }
 
 Diglet::~Diglet() {
@@ -88,15 +105,16 @@ Diglet::~Diglet() {
 
 void Diglet::construct() {
 	this->load(this->ms_appdata_dig, 0);
+	Planetlet::construct();
 }
 
 void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
-	double x, y, width, height;
-
 	this->graph_dig = doc_dig;
 
-	this->graph_dig->fill_enclosing_box(&x, &y, &width, &height);
-	this->planet->insert(new Labellet(L"DIG(%f, %f, %f, %f)", x, y, width, height));
+	this->graph_dig->fill_enclosing_box(&this->map_x, &this->map_y, &this->map_width, &this->map_height);
+	this->planet->insert(new Labellet(L"DIG(%f, %f, %f, %f)",
+		this->map_x * this->origin_scale, this->map_y * this->origin_scale,
+		this->map_width * this->origin_scale, this->map_height * this->origin_scale));
 }
 
 bool Diglet::ready() {
@@ -104,16 +122,15 @@ bool Diglet::ready() {
 }
 
 void Diglet::fill_extent(float x, float y, float* w, float* h) {
-	SET_VALUES(w, this->window.Width, h, this->window.Height);
+	SET_VALUES(w, this->view_width, h, this->view_height);
 }
 
 void Diglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	this->window.X = x;
-	this->window.Y = y;
-
-	//ds->DrawImage(this->graph_dig, this->window);
+	Planetlet::draw(ds, x, y, Width, Height);
 }
 
 void Diglet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	Platform::String^ hint = file_name_from_path(this->ms_appdata_dig);
+
+	draw_invalid_bitmap(hint, ds, x, y, Width, Height);
 }

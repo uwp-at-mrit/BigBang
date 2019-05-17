@@ -40,8 +40,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~Diglet() noexcept;
 
-		Diglet(Platform::String^ file_bmp,
-			WarGrey::SCADA::GraphletAnchor anchor = GraphletAnchor::CC,
+		Diglet(Platform::String^ file_bmp, float view_width, float view_height, double scale = 0.01,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "dig");
 
@@ -60,7 +59,15 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::DigVectorMap^ graph_dig;
 
 	private:
-		Windows::Foundation::Rect window;
 		Windows::Foundation::Uri^ ms_appdata_dig;
+		double map_x;
+		double map_y;
+		double map_width;
+		double map_height;
+
+	private:
+		float view_width;
+		float view_height;
+		double origin_scale;
 	};
 }

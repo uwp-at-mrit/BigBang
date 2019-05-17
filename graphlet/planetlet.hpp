@@ -23,8 +23,9 @@ namespace WarGrey::SCADA {
 		bool resize(float width, float height) override;
 
 	public:
-		void enable_resize(bool resizable_width, bool resizable_height, WarGrey::SCADA::GraphletAnchor anchor);
-		void enable_resize(bool yes_or_no, WarGrey::SCADA::GraphletAnchor anchor = GraphletAnchor::CC);
+		void enable_resize(bool resizable_width, bool resizable_height);
+		void enable_resize(bool yes_or_no);
+		void set_stretch_anchor(WarGrey::SCADA::GraphletAnchor anchor);
 
 	public:
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;

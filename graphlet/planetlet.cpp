@@ -60,7 +60,8 @@ static void construct_subplanet(IPlanet* planet, Platform::String^ type, Syslog*
 
 /**************************************************************************************************/
 Planetlet::Planetlet(IPlanet* planet, float width, float height, ICanvasBrush^ background)
-	: planet(planet), width(width), height(height), stretchable_width(false), stretchable_height(false), background(background) {
+	: planet(planet), width(width), height(height), background(background)
+	, stretchable_width(false), stretchable_height(false), stretching_anchor(GraphletAnchor::CC) {
 	if (this->planet == nullptr) {
 		this->planet = new PlaceholderPlanet();
 	}
@@ -145,14 +146,17 @@ bool Planetlet::resize(float width, float height) {
 	return resized;
 }
 
-void Planetlet::enable_resize(bool resizable_width, bool resizable_height, GraphletAnchor anchor) {
+void Planetlet::enable_resize(bool resizable_width, bool resizable_height) {
 	this->stretchable_width = resizable_width;
 	this->stretchable_height = resizable_height;
-	this->stretching_anchor = anchor;
 }
 
-void Planetlet::enable_resize(bool yes_or_no, GraphletAnchor anchor) {
-	this->enable_resize(yes_or_no, yes_or_no, anchor);
+void Planetlet::enable_resize(bool yes_or_no) {
+	this->enable_resize(yes_or_no, yes_or_no);
+}
+
+void Planetlet::set_stretch_anchor(GraphletAnchor anchor) {
+	this->stretching_anchor = anchor;
 }
 
 bool Planetlet::on_pointer_moved(float x, float y, PointerDeviceType type, PointerUpdateKind puk) {
