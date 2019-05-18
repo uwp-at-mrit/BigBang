@@ -51,9 +51,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IPlanet* planet;
 
 	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background;
-
-	private:
 		WarGrey::SCADA::IScreen* screen;
 		float width;
 		float height;

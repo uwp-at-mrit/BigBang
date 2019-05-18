@@ -60,14 +60,13 @@ static void construct_subplanet(IPlanet* planet, Platform::String^ type, Syslog*
 
 /**************************************************************************************************/
 Planetlet::Planetlet(IPlanet* planet, float width, float height, ICanvasBrush^ background)
-	: planet(planet), width(width), height(height), background(background)
-	, stretchable_width(false), stretchable_height(false), stretching_anchor(GraphletAnchor::CC) {
+	: planet(planet), width(width), height(height), stretchable_width(false), stretchable_height(false), stretching_anchor(GraphletAnchor::CC) {
 	if (this->planet == nullptr) {
 		this->planet = new PlaceholderPlanet();
 	}
 
-	if (this->background == nullptr) {
-		this->background = Colours::Transparent;
+	if (background != nullptr) {
+		this->planet->set_background(background);
 	}
 
 	this->screen = new Frame(this);
@@ -117,8 +116,6 @@ void Planetlet::update(long long count, long long interval, long long uptime) {
 
 void Planetlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float3x2 saved_transform = ds->Transform;
-
-	ds->DrawRectangle(x, y, Width, Height, this->background);
 
 	ds->Transform = make_translation_matrix(x, y);
 	this->planet->draw(ds, Width, Height);

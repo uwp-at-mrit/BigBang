@@ -12,6 +12,7 @@
 #include "datum/path.hpp"
 #include "datum/file.hpp"
 
+#include "transformation.hpp"
 #include "planet.hpp"
 #include "draw.hpp"
 
@@ -20,6 +21,7 @@ using namespace WarGrey::SCADA;
 using namespace Concurrency;
 
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -115,6 +117,15 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
 	this->planet->insert(new Labellet(L"DIG(%f, %f, %f, %f)",
 		this->map_x * this->origin_scale, this->map_y * this->origin_scale,
 		this->map_width * this->origin_scale, this->map_height * this->origin_scale));
+
+	{ // translate
+		float mx = float(this->map_x * this->origin_scale);
+		float my = float(this->map_y * this->origin_scale);
+		float mwidth = float(this->map_width * this->origin_scale);
+		float mheight = float(this->map_height * this->origin_scale);
+
+		this->planet->translate((this->view_width - mwidth) * 0.5F, (this->view_height - mheight) * 0.5F);
+	}
 }
 
 bool Diglet::ready() {
