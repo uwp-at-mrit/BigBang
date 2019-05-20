@@ -114,18 +114,10 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
 	this->graph_dig = doc_dig;
 
 	this->graph_dig->fill_enclosing_box(&this->map_x, &this->map_y, &this->map_width, &this->map_height);
-	this->planet->insert(new Labellet(L"DIG(%f, %f, %f, %f)",
-		this->map_x * this->origin_scale, this->map_y * this->origin_scale,
-		this->map_width * this->origin_scale, this->map_height * this->origin_scale));
-
-	{ // translate
-		float mx = float(this->map_x * this->origin_scale);
-		float my = float(this->map_y * this->origin_scale);
-		float mwidth = float(this->map_width * this->origin_scale);
-		float mheight = float(this->map_height * this->origin_scale);
-
-		this->planet->translate((this->view_width - mwidth) * 0.5F, (this->view_height - mheight) * 0.5F);
-	}
+	
+	this->planet->scale(this->origin_scale, this->origin_scale);
+	this->planet->translate((this->view_width / this->origin_scale - this->map_width) * 0.5F - this->map_x,
+		(this->view_height / this->origin_scale - this->map_height) * 0.5F - this->map_y);
 }
 
 bool Diglet::ready() {

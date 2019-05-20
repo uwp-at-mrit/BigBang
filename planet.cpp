@@ -229,7 +229,7 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 /*************************************************************************************************/
 Planet::Planet(Platform::String^ name, unsigned int initial_mode)
 	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0), background(nullptr)
-	, translate_x(0.0F), translate_y(0.0F) {
+	, translate_x(0.0F), translate_y(0.0F), scale_x(1.0F), scale_y(1.0F) {
 	this->numpad = new Numpad(this);
 	this->arrowpad = new Affinepad(this);
 	this->bucketpad = new Bucketpad(this);
@@ -342,6 +342,14 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 		g->construct();
 		g->sprite_construct();
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
+
+		if ((this->scale_x != 1.0F) || (this->scale_y != 1.0)) {
+			float width, height;
+
+			g->fill_extent(x, y, &width, &height);
+			g->resize(width * this->scale_x, height * this->scale_y);
+		}
+
 		this->end_update_sequence();
 
 		this->notify_graphlet_updated(g);
@@ -520,6 +528,46 @@ void Planet::translate(float x, float y) {
 	}
 }
 
+void Planet::scale(float sx, float sy) {
+	// TODO: implement flipping
+	if (sx > 0.0F) {
+		if (sy <= 0.0F) {
+			sy = sx;
+		}
+
+		if ((this->scale_x != sx) || (this->scale_y != sy)) {
+			bool resized_any = false;
+
+			if (this->head_graphlet != nullptr) {
+				GraphletInfo* head_info = GRAPHLET_INFO(this->head_graphlet);
+				IGraphlet* child = head_info->prev;
+
+				do {
+					GraphletInfo* info = GRAPHLET_INFO(child);
+
+					if (unsafe_graphlet_unmasked(info, this->mode)) {
+						float sx, sy, sw, sh;
+
+						unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
+						
+						resized_any |= child->resize((sw / this->scale_x) * sx, (sh / this->scale_y) * sy);
+					}
+
+					child = info->prev;
+				} while (child != head_info->prev);
+			}
+
+			this->scale_x = sx;
+			this->scale_y = sy;
+
+			if (resized_any) {
+				this->size_cache_invalid();
+				this->notify_graphlet_updated(nullptr);
+			}
+		}
+	}
+}
+
 void Planet::set_background(ICanvasBrush^ background, float corner_radius) {
 	this->background = background;
 	this->background_corner_radius = corner_radius;
@@ -548,8 +596,8 @@ IGraphlet* Planet::find_graphlet(float x, float y) {
 
 				unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
 
-				sx += this->translate_x;
-				sy += this->translate_y;
+				sx += (this->translate_x * this->scale_x);
+				sy += (this->translate_y * this->scale_y);
 
 				if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
 					found = child;
@@ -1219,8 +1267,8 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 		do {
 			GraphletInfo* info = GRAPHLET_INFO(child);
 
-			graphlet_x = info->x + this->translate_x;
-			graphlet_y = info->y + this->translate_y;
+			graphlet_x = (info->x + this->translate_x) * this->scale_x;
+			graphlet_y = (info->y + this->translate_y) * this->scale_y;
 
 			if (unsafe_graphlet_unmasked(info, this->mode)) {
 				child->fill_extent(info->x, info->y, &width, &height);

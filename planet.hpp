@@ -76,6 +76,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void translate(float x, float y) = 0;
+		virtual void scale(float sx, float sy = 0.0F) = 0;
 
 	public: // TODO: find a way to get the real background of the underneath controller such as the `Flyout` instance.
 		virtual void set_background(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color, float corner_radius = 0.0F) = 0;
@@ -252,6 +253,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void translate(float x, float y) override;
+		void scale(float sx, float sy = 0.0F) override;
 
 	public:
 		virtual void set_background(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color, float corner_radius = 0.0F) override;
@@ -358,6 +360,8 @@ namespace WarGrey::SCADA {
 	private:
 		float translate_x;
 		float translate_y;
+		float scale_x;
+		float scale_y;
     };
 
 	private class IHeadUpPlanet abstract : public WarGrey::SCADA::Planet {
