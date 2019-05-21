@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
 	private struct BuoyDig : public IconDig {
 	public:
-		BuoyDig(std::filebuf& dig, char subtype);
+		BuoyDig(std::filebuf& dig, char subtype, float size);
 
 	public:
 		Platform::String^ to_string() override;

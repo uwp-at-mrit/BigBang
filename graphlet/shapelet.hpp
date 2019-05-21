@@ -34,6 +34,9 @@ namespace WarGrey::SCADA {
 		
 		void fill_shape_origin(float* x, float* y);
 
+	protected:
+		void on_resize(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape);
+
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ surface;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ border;
@@ -43,6 +46,10 @@ namespace WarGrey::SCADA {
 	private:
 		Windows::Foundation::Rect border_box;
 		Windows::Foundation::Rect box;
+
+	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style;
+		float thickness;
 	};
 
 	private class Shiplet : public WarGrey::SCADA::Shapelet {
@@ -69,6 +76,13 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
 			float thickness = 1.0F);
+
+	public:
+		bool resize(float width, float height) override;
+
+	private:
+		float width;
+		float height;
 	};
 
 	private class RoundedRectanglet : public WarGrey::SCADA::Shapelet {

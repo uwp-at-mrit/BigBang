@@ -28,7 +28,9 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
-DigVectorMap::DigVectorMap() : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {}
+DigVectorMap::DigVectorMap() : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {
+	this->items_it = this->items.end();
+}
 
 DigVectorMap::~DigVectorMap() {
 	while (!this->items.empty()) {
@@ -53,6 +55,20 @@ void DigVectorMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
 	this->by = flmax(this->by, y + height);
 }
 
+void DigVectorMap::rewind() {
+	this->items_it = this->items.end();
+}
+
+IDigDatum* DigVectorMap::step() {
+	if (this->items_it == this->items.end()) {
+		this->items_it = this->items.begin();
+	} else {
+		this->items_it++;
+	}
+
+	return ((this->items_it == this->items.end()) ? nullptr : (*this->items_it));
+}
+
 void DigVectorMap::fill_enclosing_box(double* x, double* y, double* width, double* height) {
 	SET_VALUES(x, this->lx, y, this->ty);
 	SET_VALUES(width, this->rx - this->lx, height, this->by - this->ty);
@@ -65,7 +81,7 @@ IAsyncOperation<DigVectorMap^>^ DigVectorMap::load_async(Platform::String^ _dig)
 		std::filebuf dig;
 
 		if (dig.open(_dig->Data(), std::ios::in)) {
-			while ((datum = read_dig(dig)) != nullptr) {
+			while ((datum = read_dig(dig, 800.0F)) != nullptr) {
 				if (datum->type < DigDatumType::_) {
 					map->push_back_item(datum);
 				}
@@ -115,9 +131,23 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
 
 	this->graph_dig->fill_enclosing_box(&this->map_x, &this->map_y, &this->map_width, &this->map_height);
 	
-	this->planet->scale(this->origin_scale, this->origin_scale);
-	this->planet->translate((this->view_width / this->origin_scale - this->map_width) * 0.5F - this->map_x,
-		(this->view_height / this->origin_scale - this->map_height) * 0.5F - this->map_y);
+	this->planet->scale(float(this->origin_scale));
+	this->planet->translate(float(this->view_width / this->origin_scale - this->map_width) * 0.5F - float(this->map_x),
+		float(this->view_height / this->origin_scale - this->map_height) * 0.5F - float(this->map_y));
+
+	{ // make graphlets
+		IDigDatum* datum = nullptr;
+		double x, y;
+
+		this->graph_dig->rewind();
+		while ((datum = this->graph_dig->step()) != nullptr) {
+			IGraphlet* g = datum->make_graphlet(&x, &y);
+
+			if (g != nullptr) {
+				this->planet->insert(g, float(x), float(y), GraphletAnchor::LT);
+			}
+		}
+	}
 }
 
 bool Diglet::ready() {

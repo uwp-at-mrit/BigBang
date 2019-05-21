@@ -3,6 +3,8 @@
 #include <fstream>
 #include <deque>
 
+#include "forward.hpp"
+
 namespace WarGrey::SCADA {
 	private enum class DigDatumType {
 		SunkenShip, LightShip, OilWell, PilotStation, ReportPoint, LightHouse, RedFlag,
@@ -19,7 +21,8 @@ namespace WarGrey::SCADA {
 		IDigDatum(WarGrey::SCADA::DigDatumType type) : type(type), name(nullptr) {}
 
 	public:
-		virtual void fill_enclosing_box(double* x, double* y, double* width, double* height);
+		virtual void fill_enclosing_box(double* x, double* y, double* width = nullptr, double* height = nullptr);
+		virtual WarGrey::SCADA::IGraphlet* make_graphlet(double* x, double* y);
 		virtual Platform::String^ to_string();
 
 	public:
@@ -29,9 +32,9 @@ namespace WarGrey::SCADA {
 		double y;
 	};
 
-	private struct IMultiDigDatum abstract : public WarGrey::SCADA::IDigDatum {
+	private struct IMultilineDigDatum abstract : public WarGrey::SCADA::IDigDatum {
 	protected:
-		IMultiDigDatum(WarGrey::SCADA::DigDatumType type) : IDigDatum(type) {}
+		IMultilineDigDatum(WarGrey::SCADA::DigDatumType type) : IDigDatum(type) {}
 
 	public:
 		virtual void append_line(std::filebuf& src);
@@ -43,7 +46,14 @@ namespace WarGrey::SCADA {
 
 	private struct IconDig : public WarGrey::SCADA::IDigDatum {
 	public:
-		IconDig(std::filebuf& dig, WarGrey::SCADA::DigDatumType type);
+		IconDig(std::filebuf& dig, WarGrey::SCADA::DigDatumType type, float size);
+
+	public:
+		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
+		WarGrey::SCADA::IGraphlet* make_graphlet(double* x, double* y) override;
+
+	private:
+		float size;
 	};
 
 	private struct CompassDig : public WarGrey::SCADA::IDigDatum {
@@ -139,7 +149,7 @@ namespace WarGrey::SCADA {
 		Platform::String^ font_name;
 	};
 
-	private struct PolylineDig : public WarGrey::SCADA::IMultiDigDatum {
+	private struct PolylineDig : public WarGrey::SCADA::IMultilineDigDatum {
 	public:
 		PolylineDig(std::filebuf& dig);
 
@@ -154,7 +164,7 @@ namespace WarGrey::SCADA {
 		long long width;
 	};
 
-	private struct TyphoonDig : public WarGrey::SCADA::IMultiDigDatum {
+	private struct TyphoonDig : public WarGrey::SCADA::IMultilineDigDatum {
 	public:
 		TyphoonDig(std::filebuf& dig);
 
@@ -176,5 +186,5 @@ namespace WarGrey::SCADA {
 		std::deque<double> move_speeds;
 	};
 
-	WarGrey::SCADA::IDigDatum* read_dig(std::filebuf& dig);
+	WarGrey::SCADA::IDigDatum* read_dig(std::filebuf& dig, float icon_size);
 }

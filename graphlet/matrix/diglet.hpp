@@ -21,7 +21,9 @@ namespace WarGrey::SCADA {
 
 	internal:
 		void push_back_item(WarGrey::SCADA::IDigDatum* item);
-
+		void rewind();
+		WarGrey::SCADA::IDigDatum* step();
+		
 	private:
 		DigVectorMap();
 
@@ -33,6 +35,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		std::deque<WarGrey::SCADA::IDigDatum*> items;
+		std::deque<WarGrey::SCADA::IDigDatum*>::iterator items_it;
 		std::map<WarGrey::SCADA::DigDatumType, unsigned int> counters;
 	};
 

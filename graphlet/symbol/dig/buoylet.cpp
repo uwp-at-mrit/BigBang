@@ -10,7 +10,7 @@ using namespace Windows::Foundation;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-BuoyDig::BuoyDig(std::filebuf& dig, char subtype) : IconDig(dig, DigDatumType::Buoy), subtype(subtype) {}
+BuoyDig::BuoyDig(std::filebuf& dig, char subtype, float size) : IconDig(dig, DigDatumType::Buoy, size), subtype(subtype) {}
 
 Platform::String^ BuoyDig::to_string() {
 	return make_wstring(L"%s%c(%f, %f)", this->type.ToString()->Data(), this->subtype, this->x, this->y);

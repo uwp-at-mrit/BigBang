@@ -12,13 +12,9 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
-Shapelet::Shapelet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ bcolor
-	, float thickness, CanvasStrokeStyle^ style) : color(color), border_color(bcolor) {
-	this->surface = geometry_freeze(shape);
-	this->border = geometry_draft(shape, thickness, style);
-
-	this->box = shape->ComputeBounds();
-	this->border_box = shape->ComputeStrokeBounds(thickness);
+Shapelet::Shapelet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ bcolor, float thickness, CanvasStrokeStyle^ style)
+	: color(color), border_color(bcolor), style(style), thickness(thickness) {
+	this->on_resize(shape);
 }
 
 void Shapelet::construct() {
@@ -82,6 +78,16 @@ void Shapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	}
 }
 
+void Shapelet::on_resize(CanvasGeometry^ shape) {
+	// TODO: should the style be affected?
+
+	this->surface = geometry_freeze(shape);
+	this->border = geometry_draft(shape, this->thickness, this->style);
+
+	this->box = shape->ComputeBounds();
+	this->border_box = shape->ComputeStrokeBounds(this->thickness);
+}
+
 /*************************************************************************************************/
 Shiplet::Shiplet(float length, float radius, unsigned int border_color, float thickness)
 	: Shiplet(length, radius, nullptr, Colours::make(border_color), thickness) {}
@@ -97,10 +103,23 @@ Rectanglet::Rectanglet(float width, float height, unsigned int border_color, flo
 	: Rectanglet(width, height, nullptr, Colours::make(border_color), thickness) {}
 
 Rectanglet::Rectanglet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
-	: Shapelet(rectangle(edge_size, edge_size), color, border_color, thickness) {}
+	: Shapelet(rectangle(edge_size, edge_size), color, border_color, thickness), width(edge_size), height(edge_size) {}
 
 Rectanglet::Rectanglet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
-	: Shapelet(rectangle(width, height), color, border_color, thickness) {}
+	: Shapelet(rectangle(width, height), color, border_color, thickness), width(width), height(height) {}
+
+bool Rectanglet::resize(float w, float h) {
+	bool resized = false;
+
+	if ((w > 0.0F) && (h > 0.0F)) {
+		if ((this->width != w) || (this->height != h)) {
+			this->on_resize(rectangle(w, h));
+			resized = true;
+		}
+	}
+
+	return resized;
+}
 
 RoundedRectanglet::RoundedRectanglet(float edge_size, float corner_radius, unsigned int border_color, float thickness)
 	: RoundedRectanglet(edge_size, corner_radius, nullptr, Colours::make(border_color), thickness) {}
