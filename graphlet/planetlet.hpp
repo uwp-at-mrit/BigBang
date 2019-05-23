@@ -8,7 +8,11 @@ namespace WarGrey::SCADA {
 	private class Planetlet : public WarGrey::SCADA::IGraphlet {
 	public:
 		virtual ~Planetlet() noexcept;
-		Planetlet(WarGrey::SCADA::IPlanet* planet, float width, float height,
+		
+		Planetlet(WarGrey::SCADA::IPlanet* planet, float width = 0.0F, float height = 0.0F,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr);
+
+		Planetlet(WarGrey::SCADA::IPlanet* planet, WarGrey::SCADA::GraphletAnchor anchor,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr);
 
 	public:
@@ -16,6 +20,12 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+		bool resize(float width, float height) override;
+
+	public:
+		void enable_resize(bool resizable_width, bool resizable_height);
+		void enable_resize(bool yes_or_no);
+		void set_stretch_anchor(WarGrey::SCADA::GraphletAnchor anchor);
 
 	public:
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
@@ -37,13 +47,17 @@ namespace WarGrey::SCADA {
 			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk) override;
 
-	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background;
+	protected:
+		WarGrey::SCADA::IPlanet* planet;
 
 	private:
 		WarGrey::SCADA::IScreen* screen;
-		WarGrey::SCADA::IPlanet* planet;
 		float width;
 		float height;
+
+	private:
+		bool stretchable_width;
+		bool stretchable_height;
+		WarGrey::SCADA::GraphletAnchor stretching_anchor;
 	};
 }

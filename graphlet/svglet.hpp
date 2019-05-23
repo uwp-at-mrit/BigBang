@@ -2,11 +2,12 @@
 #pragma warning(disable: 4250) 
 
 #include "graphlet/msappxlet.hxx"
+#include "graphlet/primitive.hpp"
 
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class ISvglet abstract : public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument, int> {
+	private class ISvglet abstract : public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument, WarGrey::SCADA::IGraphlet, int> {
 	public:
 		virtual ~ISvglet() noexcept;
 		ISvglet(float width, float height);

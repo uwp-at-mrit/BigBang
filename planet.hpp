@@ -74,6 +74,10 @@ namespace WarGrey::SCADA {
 		virtual void remove(IGraphlet* g) = 0;
 		virtual void erase() = 0;
 
+	public:
+		virtual void translate(float x, float y) = 0;
+		virtual void scale(float sx, float sy = 0.0F) = 0;
+
 	public: // TODO: find a way to get the real background of the underneath controller such as the `Flyout` instance.
 		virtual void set_background(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color, float corner_radius = 0.0F) = 0;
 		virtual void cellophane(IGraphlet* g, float opacity) = 0;
@@ -248,6 +252,10 @@ namespace WarGrey::SCADA {
 		void size_cache_invalid();
 
 	public:
+		void translate(float x, float y) override;
+		void scale(float sx, float sy = 0.0F) override;
+
+	public:
 		virtual void set_background(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color, float corner_radius = 0.0F) override;
 		void cellophane(IGraphlet* g, float opacity) override;
 
@@ -348,6 +356,12 @@ namespace WarGrey::SCADA {
 	private:
 		int update_sequence_depth;
 		bool needs_update;
+
+	private:
+		float translate_x;
+		float translate_y;
+		float scale_x;
+		float scale_y;
     };
 
 	private class IHeadUpPlanet abstract : public WarGrey::SCADA::Planet {

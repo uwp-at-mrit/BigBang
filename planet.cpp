@@ -228,7 +228,8 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 
 /*************************************************************************************************/
 Planet::Planet(Platform::String^ name, unsigned int initial_mode)
-	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0), background(nullptr) {
+	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0), background(nullptr)
+	, translate_x(0.0F), translate_y(0.0F), scale_x(1.0F), scale_y(1.0F) {
 	this->numpad = new Numpad(this);
 	this->arrowpad = new Affinepad(this);
 	this->bucketpad = new Bucketpad(this);
@@ -341,6 +342,14 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 		g->construct();
 		g->sprite_construct();
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
+
+		if ((this->scale_x != 1.0F) || (this->scale_y != 1.0)) {
+			float width, height;
+
+			g->fill_extent(x, y, &width, &height);
+			g->resize(width * this->scale_x, height * this->scale_y);
+		}
+
 		this->end_update_sequence();
 
 		this->notify_graphlet_updated(g);
@@ -511,6 +520,54 @@ void Planet::move(IGraphlet* g, float x, float y) {
     }
 }
 
+void Planet::translate(float x, float y) {
+	if ((this->translate_x != x) || (this->translate_y != y)) {
+		this->translate_x = x;
+		this->translate_y = y;
+		this->notify_graphlet_updated(nullptr);
+	}
+}
+
+void Planet::scale(float sx, float sy) {
+	// TODO: implement flipping
+	if (sx > 0.0F) {
+		if (sy <= 0.0F) {
+			sy = sx;
+		}
+
+		if ((this->scale_x != sx) || (this->scale_y != sy)) {
+			bool resized_any = false;
+
+			if (this->head_graphlet != nullptr) {
+				GraphletInfo* head_info = GRAPHLET_INFO(this->head_graphlet);
+				IGraphlet* child = head_info->prev;
+
+				do {
+					GraphletInfo* info = GRAPHLET_INFO(child);
+
+					if (unsafe_graphlet_unmasked(info, this->mode)) {
+						float sx, sy, sw, sh;
+
+						unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
+						
+						resized_any |= child->resize((sw / this->scale_x) * sx, (sh / this->scale_y) * sy);
+					}
+
+					child = info->prev;
+				} while (child != head_info->prev);
+			}
+
+			this->scale_x = sx;
+			this->scale_y = sy;
+
+			if (resized_any) {
+				this->size_cache_invalid();
+				this->notify_graphlet_updated(nullptr);
+			}
+		}
+	}
+}
+
 void Planet::set_background(ICanvasBrush^ background, float corner_radius) {
 	this->background = background;
 	this->background_corner_radius = corner_radius;
@@ -538,6 +595,9 @@ IGraphlet* Planet::find_graphlet(float x, float y) {
 				float sx, sy, sw, sh;
 
 				unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
+
+				sx += (this->translate_x * this->scale_x);
+				sy += (this->translate_y * this->scale_y);
 
 				if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
 					found = child;
@@ -628,10 +688,10 @@ void Planet::recalculate_graphlets_extent_when_invalid() {
         } else {
             IGraphlet* child = this->head_graphlet;
 
-            this->graphlets_left = FLT_MAX;
-            this->graphlets_top = FLT_MAX;
-            this->graphlets_right = -FLT_MAX;
-            this->graphlets_bottom = -FLT_MAX;
+            this->graphlets_left = infinity_f;
+            this->graphlets_top = infinity_f;
+            this->graphlets_right = -infinity_f;
+            this->graphlets_bottom = -infinity_f;
 
             do {
                 GraphletInfo* info = GRAPHLET_INFO(child);
@@ -1202,30 +1262,33 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 
 	if (this->head_graphlet != nullptr) {
 		IGraphlet* child = this->head_graphlet;
-		float width, height;
+		float graphlet_x, graphlet_y, width, height;
 
 		do {
 			GraphletInfo* info = GRAPHLET_INFO(child);
 
+			graphlet_x = (info->x + this->translate_x) * this->scale_x;
+			graphlet_y = (info->y + this->translate_y) * this->scale_y;
+
 			if (unsafe_graphlet_unmasked(info, this->mode)) {
 				child->fill_extent(info->x, info->y, &width, &height);
 
-				if (((info->x < dsWidth) || ((info->x + width) > dsX)) && ((info->y < dsHeight) || ((info->y + height) > dsY))) {
+				if (((graphlet_x < dsWidth) || ((graphlet_x + width) > dsX)) && ((graphlet_y < dsHeight) || ((graphlet_y + height) > dsY))) {
 					if (info->rotation == 0.0F) {
-						layer = ds->CreateLayer(info->alpha, Rect(info->x, info->y, width, height));
+						layer = ds->CreateLayer(info->alpha, Rect(graphlet_x, graphlet_y, width, height));
 					} else {
-						float cx = info->x + width * 0.5F;
-						float cy = info->y + height * 0.5F;
+						float cx = graphlet_x + width * 0.5F;
+						float cy = graphlet_y + height * 0.5F;
 
 						ds->Transform = make_rotation_matrix(info->rotation, cx, cy, transformX, transformY);
-						layer = ds->CreateLayer(info->alpha, Rect(info->x, info->y, width, height));
+						layer = ds->CreateLayer(info->alpha, Rect(graphlet_x, graphlet_y, width, height));
 					}
 
 					for (IPlanetDecorator* decorator : this->decorators) {
 #ifdef _DEBUG
 						try {
 #endif
-							decorator->draw_before_graphlet(child, ds, info->x, info->y, width, height, info->selected);
+							decorator->draw_before_graphlet(child, ds, graphlet_x, graphlet_y, width, height, info->selected);
 #ifdef _DEBUG
 						} catch (Platform::Exception^ e) {
 							this->get_logger()->log_message(Log::Critical, L"%s: predecorating graphlet: %s",
@@ -1238,9 +1301,9 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 					try {
 #endif
 						if (child->ready()) {
-							child->draw(ds, info->x, info->y, width, height);
+							child->draw(ds, graphlet_x, graphlet_y, width, height);
 						} else {
-							child->draw_progress(ds, info->x, info->y, width, height);
+							child->draw_progress(ds, graphlet_x, graphlet_y, width, height);
 						}
 #ifdef _DEBUG
 					} catch (Platform::Exception^ e) {
@@ -1253,7 +1316,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 #ifdef _DEBUG
 						try {
 #endif
-							decorator->draw_after_graphlet(child, ds, info->x, info->y, width, height, info->selected);
+							decorator->draw_after_graphlet(child, ds, graphlet_x, graphlet_y, width, height, info->selected);
 #ifdef _DEBUG
 						} catch (Platform::Exception^ e) {
 							this->get_logger()->log_message(Log::Critical, L"%s: postdecorating graphlet: %s",
@@ -1263,7 +1326,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 					}
 
 					if (info->selected) {
-						this->draw_visible_selection(ds, info->x, info->y, width, height);
+						this->draw_visible_selection(ds, graphlet_x, graphlet_y, width, height);
 					}
 
 					delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.
