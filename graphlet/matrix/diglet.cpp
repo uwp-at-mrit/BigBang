@@ -81,7 +81,7 @@ IAsyncOperation<DigVectorMap^>^ DigVectorMap::load_async(Platform::String^ _dig)
 		std::filebuf dig;
 
 		if (dig.open(_dig->Data(), std::ios::in)) {
-			while ((datum = read_dig(dig, 800.0F)) != nullptr) {
+			while ((datum = read_dig(dig, 1600.0F)) != nullptr) {
 				if (datum->type < DigDatumType::_) {
 					map->push_back_item(datum);
 				}

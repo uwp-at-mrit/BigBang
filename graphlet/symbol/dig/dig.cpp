@@ -69,7 +69,6 @@ void IMultilineDigDatum::append_line(std::filebuf& dig) {
 	this->rest_xs.push_back(read_flonum(dig));
 }
 
-
 /*************************************************************************************************/
 CompassDig::CompassDig(std::filebuf& dig) : IDigDatum(DigDatumType::Compass) {
 	this->y = read_flonum(dig);
@@ -306,20 +305,20 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 		case 'V': datum = new IconDig(dig, DigDatumType::FishNet, icon_size); break;
 		case 'W': datum = new IconDig(dig, DigDatumType::Wreck, icon_size); break;
 
-		case 'p': case '[': datum = new BuoyDig(dig, '1', icon_size); break;
-		case 'q': datum = new BuoyDig(dig, '2', icon_size); break;
-		case 'r': datum = new BuoyDig(dig, '3', icon_size); break;
-		case 's': datum = new BuoyDig(dig, '4', icon_size); break;
-		case 't': datum = new BuoyDig(dig, '5', icon_size); break;
-		case 'u': datum = new BuoyDig(dig, '6', icon_size); break;
-		case 'v': datum = new BuoyDig(dig, '7', icon_size); break;
-		case 'w': datum = new BuoyDig(dig, '8', icon_size); break;
-		case 'x': datum = new BuoyDig(dig, '9', icon_size); break;
-		case 'y': datum = new BuoyDig(dig, 'a', icon_size); break;
-		case 'B': datum = new BuoyDig(dig, 'W', icon_size); break;
-		case 'M': datum = new BuoyDig(dig, 'G', icon_size); break;
-		case 'F': datum = new BuoyDig(dig, 'R', icon_size); break;
-		case 'Q': datum = new BuoyDig(dig, 'Y', icon_size); break;
+		case 'p': case '[': datum = new BuoyDig(dig, BuoyType::_1, icon_size); break;
+		case 'q': datum = new BuoyDig(dig, BuoyType::_2, icon_size); break;
+		case 'r': datum = new BuoyDig(dig, BuoyType::_3, icon_size); break;
+		case 's': datum = new BuoyDig(dig, BuoyType::_4, icon_size); break;
+		case 't': datum = new BuoyDig(dig, BuoyType::_5, icon_size); break;
+		case 'u': datum = new BuoyDig(dig, BuoyType::_6, icon_size); break;
+		case 'v': datum = new BuoyDig(dig, BuoyType::_7, icon_size); break;
+		case 'w': datum = new BuoyDig(dig, BuoyType::_8, icon_size); break;
+		case 'x': datum = new BuoyDig(dig, BuoyType::_9, icon_size); break;
+		case 'y': datum = new BuoyDig(dig, BuoyType::_10, icon_size); break;
+		case 'B': datum = new BuoyDig(dig, BuoyType::White, icon_size); break;
+		case 'M': datum = new BuoyDig(dig, BuoyType::Green, icon_size); break;
+		case 'F': datum = new BuoyDig(dig, BuoyType::Red, icon_size); break;
+		case 'Q': datum = new BuoyDig(dig, BuoyType::BlackYellow, icon_size); break;
 
 		case 'A': datum = new ArcDig(dig); break;
 		case 'C': datum = new CircleDig(dig); break;
