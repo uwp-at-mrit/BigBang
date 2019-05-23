@@ -28,7 +28,7 @@ namespace WarGrey::SCADA {
 	private struct BuoyStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color_right;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
 	};
 
 	private struct Buoylet : public IStatelet<WarGrey::SCADA::BuoyType, WarGrey::SCADA::BuoyStyle> {
@@ -46,7 +46,8 @@ namespace WarGrey::SCADA {
 
 	private:
 		void construct_buoy(bool resized);
-		WarGrey::SCADA::ITurtle* make_colored_buoy_turtle(float width, float height);
+		WarGrey::SCADA::GreenTurtle* make_colored_buoy_turtle(float width, float height);
+		WarGrey::SCADA::GreenTurtle* make_buoy_mask_turtle(float width, float height);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape;
