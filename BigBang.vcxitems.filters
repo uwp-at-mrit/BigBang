@@ -419,7 +419,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappdatalet.hxx">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\sunken_shiplet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
@@ -437,6 +436,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\buoylet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx">
+      <Filter>graphlet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
