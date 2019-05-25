@@ -27,10 +27,10 @@ namespace WarGrey::SCADA {
 	};
 
 	private struct BuoyStyle {
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color = nullptr;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_color = nullptr;
 	};
 
 	private struct Buoylet : public IStatelet<WarGrey::SCADA::BuoyType, WarGrey::SCADA::BuoyStyle> {

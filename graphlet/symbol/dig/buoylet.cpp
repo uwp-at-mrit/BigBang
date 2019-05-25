@@ -19,7 +19,7 @@ private enum class B {
 	Home, Bottom,
 	_,
 
-	lb, rb
+	lb, rb, flag
 };
 
 /*************************************************************************************************/
@@ -60,6 +60,7 @@ void Buoylet::construct_buoy(bool resized) {
 	}
 
 	this->shape = bturtle->snap_path();
+	bturtle->destroy();
 
 	if (mturtle != nullptr) {
 		this->right_mask = mturtle->snap_path();
@@ -67,8 +68,6 @@ void Buoylet::construct_buoy(bool resized) {
 	} else {
 		this->right_mask = nullptr;
 	}
-
-	bturtle->destroy();
 }
 
 void Buoylet::fill_extent(float x, float y, float* width, float* height) {
@@ -80,6 +79,7 @@ void Buoylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 
 	ds->DrawRectangle(x, y, Width, Height, Colours::Firebrick);
 
+	/*
 	if (style.ring_color != nullptr) {
 		float rx = this->width * 0.5F;
 		float ry = this->height * 0.5F;
@@ -89,6 +89,8 @@ void Buoylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 			rx - half_thick, ry - half_thick,
 			style.ring_color, half_thick * 2.0F);
 	}
+	*/
+
 
 	if (style.color != nullptr) {
 		ds->FillGeometry(this->shape, x, y, style.color);
@@ -215,10 +217,11 @@ ITurtle* Buoylet::make_buoy_type4_turtle(float width, float height) {
 
 	buoy->reference();
 
-	buoy->jump_right(3.0F)->jump_down(1.5F, B::Home);
-	buoy->jump_down(4.0F)->jump_left(2.0F, B::lb)->move_to(B::Home)->jump_back()->move_left(1.0F)->jump_right(1.0F);
+	buoy->jump_right(5.5F)->jump_down(2.0F, B::Home);
+	buoy->move_left(0.5F)->move_left_down(4.0F)->move_left(1.0F)->jump_right(1.0F);
 	buoy->move_right(2.0F)->turn_up_right_down()->turn_down_left_up()->jump_right(2.0F)->move_right(3.0F);
-	buoy->jump_left(1.5F, B::Bottom)->jump_up(2.5F)->jump_right(1.0F, B::rb)->move_to(B::Bottom)->jump_back()->move_to(B::Home);
+	buoy->jump_left(1.0F, B::Bottom)->move_left_up(1.5F)->move_to(B::Home);
+	buoy->move_right(1.0F, B::flag)->jump_left(1.0F)->move_up(0.5F)->move_to(B::flag);
 
 	return buoy;
 }
