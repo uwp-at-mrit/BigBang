@@ -19,7 +19,8 @@ private enum class B {
 	Home, Bottom,
 	_,
 
-	lb, rb, flag
+	lb, rb, flag,
+	ll, ls, rl, rs
 };
 
 /*************************************************************************************************/
@@ -53,10 +54,12 @@ void Buoylet::construct_buoy(bool resized) {
 	case BuoyType::Green: case BuoyType::Red: case BuoyType::White: case BuoyType::Yellow: case BuoyType::Black: {
 		bturtle = this->make_colored_buoy_turtle(this->width, this->height);
 	}; break;
-	case BuoyType::_1: bturtle = this->make_buoy_type1_turtle(this->width, this->height); break;
-	case BuoyType::_2: bturtle = this->make_buoy_type2_turtle(this->width, this->height); break;
-	case BuoyType::_3: bturtle = this->make_buoy_type3_turtle(this->width, this->height); break;
-	default: bturtle = this->make_buoy_type4_turtle(this->width, this->height);
+	//case BuoyType::_1: bturtle = this->make_buoy_type1_turtle(this->width, this->height); break;
+	//case BuoyType::_2: bturtle = this->make_buoy_type2_turtle(this->width, this->height); break;
+	//case BuoyType::_3: bturtle = this->make_buoy_type3_turtle(this->width, this->height); break;
+	//case BuoyType::_4: bturtle = this->make_buoy_type4_turtle(this->width, this->height); break;
+	//case BuoyType::_5: bturtle = this->make_buoy_type5_turtle(this->width, this->height); break;
+	default: bturtle = this->make_buoy_type6_turtle(this->width, this->height);
 	}
 
 	this->shape = bturtle->snap_path();
@@ -79,7 +82,6 @@ void Buoylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 
 	ds->DrawRectangle(x, y, Width, Height, Colours::Firebrick);
 
-	/*
 	if (style.ring_color != nullptr) {
 		float rx = this->width * 0.5F;
 		float ry = this->height * 0.5F;
@@ -89,8 +91,6 @@ void Buoylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 			rx - half_thick, ry - half_thick,
 			style.ring_color, half_thick * 2.0F);
 	}
-	*/
-
 
 	if (style.color != nullptr) {
 		ds->FillGeometry(this->shape, x, y, style.color);
@@ -227,27 +227,33 @@ ITurtle* Buoylet::make_buoy_type4_turtle(float width, float height) {
 }
 
 ITurtle* Buoylet::make_buoy_type5_turtle(float width, float height) {
-	Turtle<B>* buoy = new Turtle<B>(width / buoy_base_size * 2.0F, height / buoy_base_size * 2.0F, true);
-
+	Turtle<B>* buoy = new Turtle<B>(width / buoy_base_size, height / buoy_base_size, true);
+	
 	buoy->reference();
 
-	buoy->jump_right(3.0F)->jump_down(1.5F, B::Home);
-	buoy->jump_down(4.0F)->jump_left(2.0F, B::lb)->move_to(B::Home)->jump_back()->move_left(1.0F)->jump_right(1.0F);
-	buoy->move_right(2.0F)->turn_up_right_down()->turn_down_left_up()->jump_right(2.0F)->move_right(3.0F);
-	buoy->jump_left(1.5F, B::Bottom)->jump_up(2.5F)->jump_right(1.0F, B::rb)->move_to(B::Bottom)->jump_back()->move_to(B::Home);
+	buoy->jump_right(6.0F)->jump_down(1.0F, B::Home);
+	buoy->move_down(2.0F)->jump_right_down()->move_right(3.0F)->jump_right_up(1.0F)->move_up(2.0F)->move_to(B::Home);
+	buoy->jump_down(4.0F)->move_down(7.0F, B::lb)->move_down(1.0F, B::ll)->move_down(2.0F, B::ls);
+	buoy->move_right(5.0F, B::rs)->move_up(1.0F, B::rb)->move_up(1.0F)->move_up(8.0F);
+
+	buoy->jump_back(B::ll)->move_left(4.0F)->jump_back(B::ll)->move_right(5.0F)->move_right(4.0F);
+	buoy->jump_back(B::ls)->move_left(3.0F)->jump_back(B::rs)->move_right(3.0F);
+	buoy->jump_back(B::lb)->move_right(5.0F)->jump_back(B::rb)->move_left(5.0F);
 
 	return buoy;
 }
 
 ITurtle* Buoylet::make_buoy_type6_turtle(float width, float height) {
-	Turtle<B>* buoy = new Turtle<B>(width / buoy_base_size * 2.0F, height / buoy_base_size * 2.0F, true);
+	Turtle<B>* buoy = new Turtle<B>(width / buoy_base_size, height / buoy_base_size, true);
 
 	buoy->reference();
 
-	buoy->jump_right(3.0F)->jump_down(1.5F, B::Home);
-	buoy->jump_down(4.0F)->jump_left(2.0F, B::lb)->move_to(B::Home)->jump_back()->move_left(1.0F)->jump_right(1.0F);
-	buoy->move_right(2.0F)->turn_up_right_down()->turn_down_left_up()->jump_right(2.0F)->move_right(3.0F);
-	buoy->jump_left(1.5F, B::Bottom)->jump_up(2.5F)->jump_right(1.0F, B::rb)->move_to(B::Bottom)->jump_back()->move_to(B::Home);
+	buoy->jump_right(6.0F)->jump_down(1.0F, B::Home);
+	buoy->move_down(2.0F, B::lb)->move_down(11.0F, B::ll)->move_down(1.0F)->move_right(5.0F);
+	buoy->move_up(1.0F, B::rl)->move_up(1.0F, B::rs)->move_up(9.0F, B::rb)->move_up(3.0F)->move_to(B::Home);
+
+	buoy->jump_back(B::ll)->move_left(4.0F)->jump_back(B::rl)->move_right(4.0F)->jump_back(B::rs)->move_left(5.0F);
+	buoy->jump_back(B::lb)->move_right(5.0F)->jump_back(B::rb)->move_left(5.0F);
 
 	return buoy;
 }
