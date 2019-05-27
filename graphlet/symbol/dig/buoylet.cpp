@@ -54,12 +54,13 @@ void Buoylet::construct_buoy(bool resized) {
 	case BuoyType::Green: case BuoyType::Red: case BuoyType::White: case BuoyType::Yellow: case BuoyType::Black: {
 		bturtle = this->make_colored_buoy_turtle(this->width, this->height);
 	}; break;
-	//case BuoyType::_1: bturtle = this->make_buoy_type1_turtle(this->width, this->height); break;
-	//case BuoyType::_2: bturtle = this->make_buoy_type2_turtle(this->width, this->height); break;
-	//case BuoyType::_3: bturtle = this->make_buoy_type3_turtle(this->width, this->height); break;
-	//case BuoyType::_4: bturtle = this->make_buoy_type4_turtle(this->width, this->height); break;
-	//case BuoyType::_5: bturtle = this->make_buoy_type5_turtle(this->width, this->height); break;
-	default: bturtle = this->make_buoy_type6_turtle(this->width, this->height);
+	case BuoyType::_1: bturtle = this->make_buoy_type1_turtle(this->width, this->height); break;
+	case BuoyType::_2: bturtle = this->make_buoy_type2_turtle(this->width, this->height); break;
+	case BuoyType::_3: bturtle = this->make_buoy_type3_turtle(this->width, this->height); break;
+	case BuoyType::_4: bturtle = this->make_buoy_type4_turtle(this->width, this->height); break;
+	case BuoyType::_5: bturtle = this->make_buoy_type5_turtle(this->width, this->height); break;
+	case BuoyType::_6: bturtle = this->make_buoy_type6_turtle(this->width, this->height); break;
+	default: bturtle = this->make_buoy_type7_turtle(this->width, this->height);
 	}
 
 	this->shape = bturtle->snap_path();

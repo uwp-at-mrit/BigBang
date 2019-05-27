@@ -43,7 +43,7 @@ namespace WarGrey::SCADA {
 		void notify_updated();
 
 	public:
-		IGraphletInfo * info;
+		IGraphletInfo* info = nullptr;
 
 	private:
 		WarGrey::SCADA::GraphletAnchor anchor;

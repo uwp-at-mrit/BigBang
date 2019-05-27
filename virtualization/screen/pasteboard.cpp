@@ -7,7 +7,11 @@ using namespace Windows::UI::Xaml;
 
 /*************************************************************************************************/
 Pasteboard::Pasteboard(IDisplay^ display, DisplayFit mode, float target_width, float target_height, float source_width, float source_height)
-	: IScreen(display->get_logger(), mode, target_width, target_height, source_width, source_height), _display(display) {}
+	: IScreen(mode, target_width, target_height, source_width, source_height), _display(display) {}
+
+Syslog* Pasteboard::get_logger() {
+	return this->_display->get_logger();
+}
 
 IDisplay^ Pasteboard::display() {
 	return this->_display;

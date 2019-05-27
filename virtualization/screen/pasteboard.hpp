@@ -14,6 +14,7 @@ namespace WarGrey::SCADA {
 			float src_width = 0.0F, float src_height = 0.0F);
 
 	public:
+		WarGrey::SCADA::Syslog* get_logger() override;
 		WarGrey::SCADA::IDisplay^ display() override;
 		
 		float actual_width(IPlanet* p) override;

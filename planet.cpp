@@ -343,7 +343,7 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 		g->sprite_construct();
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
 
-		if ((this->scale_x != 1.0F) || (this->scale_y != 1.0)) {
+		if ((this->scale_x != 1.0F) || (this->scale_y != 1.0F)) {
 			float width, height;
 
 			g->fill_extent(x, y, &width, &height);
@@ -353,6 +353,12 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 		this->end_update_sequence();
 
 		this->notify_graphlet_updated(g);
+#if _DEBUG
+	} else {
+		this->get_logger()->log_message(Log::Warning,
+			L"%s: inserting: ignored graphlet since it has already had a owner",
+			this->name()->Data());
+#endif
 	}
 }
 
@@ -373,6 +379,12 @@ void Planet::insert(IGraphlet* g, IGraphlet* target, float tfx, float tfy, float
 		}
 
 		this->insert(g, x, y, fx, fy, dx, dy);
+#ifdef _DEBUG
+	} else {
+		this->get_logger()->log_message(Log::Warning,
+			L"%s: inserting: ignored graphlet since it has already had a owner",
+			this->name()->Data());
+#endif
 	}
 }
 
@@ -396,6 +408,12 @@ void Planet::insert(IGraphlet* g, IGraphlet* xtarget, float xfx, IGraphlet* ytar
 		}
 
 		this->insert(g, x, y, fx, fy, dx, dy);
+#ifdef _DEBUG
+	} else {
+		this->get_logger()->log_message(Log::Warning,
+			L"%s: inserting: ignored graphlet since it has already had a owner",
+			this->name()->Data());
+#endif
 	}
 }
 
@@ -1263,7 +1281,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 	if (this->head_graphlet != nullptr) {
 		IGraphlet* child = this->head_graphlet;
 		float graphlet_x, graphlet_y, width, height;
-
+		
 		do {
 			GraphletInfo* info = GRAPHLET_INFO(child);
 
