@@ -312,9 +312,9 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 		case 't': datum = new BuoyDig(dig, BuoyType::_5, icon_size); break;
 		case 'u': datum = new BuoyDig(dig, BuoyType::_6, icon_size); break;
 		case 'v': datum = new BuoyDig(dig, BuoyType::_7, icon_size); break;
-		case 'w': datum = new BuoyDig(dig, BuoyType::_8, icon_size); break;
-		case 'x': datum = new BuoyDig(dig, BuoyType::_9, icon_size); break;
-		case 'y': datum = new BuoyDig(dig, BuoyType::_10, icon_size); break;
+		case 'w': datum = new BuoyDig(dig, BuoyType::RedWhite, icon_size); break;
+		case 'x': datum = new BuoyDig(dig, BuoyType::Yellow, icon_size); break;
+		case 'y': datum = new BuoyDig(dig, BuoyType::Black, icon_size); break;
 		case 'B': datum = new BuoyDig(dig, BuoyType::White, icon_size); break;
 		case 'M': datum = new BuoyDig(dig, BuoyType::Green, icon_size); break;
 		case 'F': datum = new BuoyDig(dig, BuoyType::Red, icon_size); break;

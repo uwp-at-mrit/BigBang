@@ -14,12 +14,9 @@ static inline float display_contain_mode_scale(float to_width, float to_height, 
 }
 
 /*************************************************************************************************/
-IScreen::IScreen(Syslog* logger, DisplayFit mode, float target_width, float target_height, float source_width, float source_height)
-	: logger((logger == nullptr) ? make_silent_logger("IScreen") : logger), mode(mode)
-	, target_width(flmax(target_width, 0.0F)), target_height(flmax(target_height, 0.0F))
-	, source_width(source_width), source_height(source_height) {
-	this->logger->reference();
-	
+IScreen::IScreen(DisplayFit mode, float target_width, float target_height, float source_width, float source_height)
+	: mode(mode), target_width(flmax(target_width, 0.0F)), target_height(flmax(target_height, 0.0F))
+	, source_width(source_width), source_height(source_height) {	
 	if (this->source_width <= 0.0F) {
 		this->source_width = this->target_width;
 	}
@@ -31,14 +28,6 @@ IScreen::IScreen(Syslog* logger, DisplayFit mode, float target_width, float targ
 	if ((this->target_width * this->target_height) == 0.0F) {
 		this->mode = DisplayFit::None;
 	}
-}
-
-IScreen::~IScreen() {
-	this->logger->destroy();
-}
-
-Syslog* IScreen::get_logger() {
-	return this->logger;
 }
 
 void IScreen::apply_source_size(float src_width, float src_height) {

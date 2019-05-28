@@ -122,15 +122,16 @@ Diglet::~Diglet() {
 }
 
 void Diglet::construct() {
-	this->load(this->ms_appdata_dig, 0);
 	Planetlet::construct();
+
+	this->load(this->ms_appdata_dig, 0);
 }
 
 void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
-	this->graph_dig = doc_dig;
-
-	this->graph_dig->fill_enclosing_box(&this->map_x, &this->map_y, &this->map_width, &this->map_height);
+	doc_dig->fill_enclosing_box(&this->map_x, &this->map_y, &this->map_width, &this->map_height);
 	
+	this->planet->begin_update_sequence();
+
 	this->planet->scale(float(this->origin_scale));
 	this->planet->translate(float(this->view_width / this->origin_scale - this->map_width) * 0.5F - float(this->map_x),
 		float(this->view_height / this->origin_scale - this->map_height) * 0.5F - float(this->map_y));
@@ -138,9 +139,10 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
 	{ // make graphlets
 		IDigDatum* datum = nullptr;
 		double x, y;
+		
+		doc_dig->rewind();
 
-		this->graph_dig->rewind();
-		while ((datum = this->graph_dig->step()) != nullptr) {
+		while ((datum = doc_dig->step()) != nullptr) {
 			IGraphlet* g = datum->make_graphlet(&x, &y);
 
 			if (g != nullptr) {
@@ -148,6 +150,10 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
 			}
 		}
 	}
+
+	this->planet->end_update_sequence();
+
+	this->graph_dig = doc_dig;
 }
 
 bool Diglet::ready() {

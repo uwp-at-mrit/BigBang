@@ -41,7 +41,7 @@ static inline PlanetInfo* bind_subplanet_owership(IScreen* master, IPlanet* plan
 	return info;
 }
 
-static void construct_subplanet(IPlanet* planet, Platform::String^ type, Syslog* logger, CanvasCreateResourcesReason reason, float width, float height) {
+static void construct_subplanet(IPlanet* planet, Syslog* logger, CanvasCreateResourcesReason reason, float width, float height) {
 	planet->begin_update_sequence();
 
 	try {
@@ -50,9 +50,9 @@ static void construct_subplanet(IPlanet* planet, Platform::String^ type, Syslog*
 		planet->reflow(width, height);
 		planet->notify_surface_ready();
 
-		logger->log_message(Log::Debug, L"%s[%s] is constructed in region[%f, %f]", type->Data(), planet->name()->Data(), width, height);
+		logger->log_message(Log::Debug, L"Planetlet[%s] is constructed in region[%f, %f]", planet->name()->Data(), width, height);
 	} catch (Platform::Exception ^ e) {
-		logger->log_message(Log::Critical, L"%s: constructing: %s", planet->name()->Data(), e->Message->Data());
+		logger->log_message(Log::Critical, L"Planetlet[%s]: constructing: %s", planet->name()->Data(), e->Message->Data());
 	}
 
 	planet->end_update_sequence();
@@ -95,7 +95,7 @@ void Planetlet::construct() {
 	}
 
 	bind_subplanet_owership(this->screen, this->planet);
-	construct_subplanet(this->planet, "subplanet", this->get_logger(), CanvasCreateResourcesReason::FirstTime, this->width, this->height);
+	construct_subplanet(this->planet, this->get_logger(), CanvasCreateResourcesReason::FirstTime, this->width, this->height);
 }
 
 void Planetlet::fill_extent(float x, float y, float* width, float* height) {
@@ -118,8 +118,15 @@ void Planetlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	float3x2 saved_transform = ds->Transform;
 
 	ds->Transform = make_translation_matrix(x, y);
-	this->planet->draw(ds, Width, Height);
 
+	try {
+		this->planet->draw(ds, Width, Height);
+	} catch (Platform::Exception^ e) {
+		this->get_logger()->log_message(Log::Critical,
+			L"Planetlet[%s]: rendering: %s",
+			planet->name()->Data(), e->Message->Data());
+	}
+	
 	ds->Transform = saved_transform;
 }
 

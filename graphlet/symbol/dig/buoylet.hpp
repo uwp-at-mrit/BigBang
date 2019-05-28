@@ -7,7 +7,8 @@
 
 namespace WarGrey::SCADA {
 	private enum class BuoyType {
-		_1, _2, _3, _4, _5, _6, _7, _8, _9, _10,
+		_1, _2, _3, _4, _5, _6, _7,
+		RedWhite, Yellow, Black,
 		White, Green, Red, BlackYellow,
 		_
 	};
@@ -26,9 +27,10 @@ namespace WarGrey::SCADA {
 	};
 
 	private struct BuoyStyle {
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color_right;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color = nullptr;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_color = nullptr;
 	};
 
 	private struct Buoylet : public IStatelet<WarGrey::SCADA::BuoyType, WarGrey::SCADA::BuoyStyle> {
@@ -47,6 +49,14 @@ namespace WarGrey::SCADA {
 	private:
 		void construct_buoy(bool resized);
 		WarGrey::SCADA::ITurtle* make_colored_buoy_turtle(float width, float height);
+		WarGrey::SCADA::ITurtle* make_buoy_mask_turtle(float width, float height);
+		WarGrey::SCADA::ITurtle* make_buoy_type1_turtle(float width, float height);
+		WarGrey::SCADA::ITurtle* make_buoy_type2_turtle(float width, float height);
+		WarGrey::SCADA::ITurtle* make_buoy_type3_turtle(float width, float height);
+		WarGrey::SCADA::ITurtle* make_buoy_type4_turtle(float width, float height);
+		WarGrey::SCADA::ITurtle* make_buoy_type5_turtle(float width, float height);
+		WarGrey::SCADA::ITurtle* make_buoy_type6_turtle(float width, float height);
+		WarGrey::SCADA::ITurtle* make_buoy_type7_turtle(float width, float height);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape;

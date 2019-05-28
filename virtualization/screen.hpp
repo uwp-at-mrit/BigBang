@@ -11,15 +11,12 @@ namespace WarGrey::SCADA {
 
     private class IScreen abstract {
 	public:
-		virtual ~IScreen();
-
-	public:
-		IScreen(WarGrey::SCADA::Syslog* logger,
-			WarGrey::SCADA::DisplayFit mode = DisplayFit::None,
+		IScreen(WarGrey::SCADA::DisplayFit mode = DisplayFit::None,
 			float target_width = 0.0F, float target_height = 0.0F,
 			float source_width = 0.0F, float source_height = 0.0F);
 
 	public:
+		virtual WarGrey::SCADA::Syslog* get_logger() = 0;
 		virtual bool surface_ready() = 0;
 		virtual bool ui_thread_ready() = 0;
 		virtual bool shown() = 0;
@@ -49,12 +46,6 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void refresh(IPlanet* target) = 0;
-
-	public:
-		WarGrey::SCADA::Syslog* get_logger();
-
-	private:
-		WarGrey::SCADA::Syslog* logger;
 
 	private:
 		DisplayFit mode;
