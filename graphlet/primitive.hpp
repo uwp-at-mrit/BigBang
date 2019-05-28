@@ -174,6 +174,10 @@ namespace WarGrey::SCADA {
 		IStatelet(State state0) {
 			this->default_state = ((state0 == State::_) ? 0 : _I(state0));
 			this->current_state = this->default_state;
+
+			for (unsigned int idx = 0; idx < _N(State); idx++) {
+				this->style_ready[idx] = false;
+			}
 		}
 
 	public:
