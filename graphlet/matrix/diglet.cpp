@@ -114,7 +114,7 @@ Diglet::Diglet(Platform::String^ file, float view_width, float view_height, doub
 	: Planetlet(new DigFrame(file), GraphletAnchor::LT, background)
 	, view_width(view_width), view_height(view_height), origin_scale(scale) {
 	this->ms_appdata_dig = ms_appdata_file(file, ".DIG", rootdir);
-	this->enable_resize(false, false);
+	this->enable_stretch(false, false);
 }
 
 Diglet::~Diglet() {

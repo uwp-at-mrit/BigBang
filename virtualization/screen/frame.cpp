@@ -28,8 +28,8 @@ float Frame::actual_height(IPlanet* p) {
 }
 
 void Frame::min_resize(float width, float height) {
-	if (this->_display->resize(width, height)) {
-		this->_display->notify_updated();
+	if (this->_display->resizable()) {
+		this->_display->resize(width, height);
 	}
 }
 

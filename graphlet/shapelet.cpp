@@ -14,6 +14,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 /*************************************************************************************************/
 Shapelet::Shapelet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ bcolor, float thickness, CanvasStrokeStyle^ style)
 	: color(color), border_color(bcolor), style(style), thickness(thickness) {
+	this->enable_resizing(true);
 	this->on_resize(shape);
 }
 
@@ -108,17 +109,13 @@ Rectanglet::Rectanglet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBru
 Rectanglet::Rectanglet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
 	: Shapelet(rectangle(width, height), color, border_color, thickness), width(width), height(height) {}
 
-bool Rectanglet::resize(float w, float h) {
-	bool resized = false;
-
+void Rectanglet::resize(float w, float h) {
 	if ((w > 0.0F) && (h > 0.0F)) {
 		if ((this->width != w) || (this->height != h)) {
 			this->on_resize(rectangle(w, h));
-			resized = true;
+			this->notify_updated();
 		}
 	}
-
-	return resized;
 }
 
 RoundedRectanglet::RoundedRectanglet(float edge_size, float corner_radius, unsigned int border_color, float thickness)

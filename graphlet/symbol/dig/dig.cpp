@@ -6,7 +6,7 @@
 #include "datum/string.hpp"
 
 #include "graphlet/shapelet.hpp"
-#include "graphlet/symbol/dig/sunken_shiplet.hpp"
+#include "graphlet/symbol/dig/wrecklet.hpp"
 #include "graphlet/symbol/dig/light_houselet.hpp"
 #include "graphlet/symbol/dig/anchorlet.hpp"
 #include "graphlet/symbol/dig/radar_reflectorlet.hpp"
@@ -54,9 +54,17 @@ IconDig::IconDig(std::filebuf& dig, DigDatumType type, float size) : IDigDatum(t
 }
 
 IGraphlet* IconDig::make_graphlet(double* x, double* y) {
+	IGraphlet* graphlet = nullptr;
+	
 	SET_VALUES(x, this->x, y, this->y);
 
-	return new Rectanglet(this->size, Colours::Azure);
+	switch (this->type) {
+	case DigDatumType::SunkenShip: graphlet = new SunkenShiplet(this->size); break;
+	case DigDatumType::Wreck: graphlet = new Wrecklet(this->size); break;
+	default: graphlet = new Rectanglet(this->size, Colours::Azure);
+	}
+
+	return graphlet;
 }
 
 void IconDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
@@ -300,9 +308,7 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 		case 'N': datum = new IconDig(dig, DigDatumType::Seamark, icon_size); break;
 		case 'P': datum = new IconDig(dig, DigDatumType::Picket, icon_size); break;
 		case 'R': datum = new IconDig(dig, DigDatumType::Rock, icon_size); break;
-		case 'T': datum = new IconDig(dig, DigDatumType::Text, icon_size); break;
-		case 'U': datum = new IconDig(dig, DigDatumType::Number, icon_size); break;
-		case 'V': datum = new IconDig(dig, DigDatumType::FishNet, icon_size); break;
+		case 'V': datum = new IconDig(dig, DigDatumType::FishingFloat, icon_size); break;
 		case 'W': datum = new IconDig(dig, DigDatumType::Wreck, icon_size); break;
 
 		case 'p': case '[': datum = new BuoyDig(dig, BuoyType::_1, icon_size); break;
@@ -319,6 +325,9 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 		case 'M': datum = new BuoyDig(dig, BuoyType::Green, icon_size); break;
 		case 'F': datum = new BuoyDig(dig, BuoyType::Red, icon_size); break;
 		case 'Q': datum = new BuoyDig(dig, BuoyType::BlackYellow, icon_size); break;
+
+		case 'T': datum = new IconDig(dig, DigDatumType::Text, icon_size); break;
+		case 'U': datum = new IconDig(dig, DigDatumType::Number, icon_size); break;
 
 		case 'A': datum = new ArcDig(dig); break;
 		case 'C': datum = new CircleDig(dig); break;

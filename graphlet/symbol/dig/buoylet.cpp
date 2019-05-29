@@ -40,7 +40,9 @@ Platform::String^ BuoyDig::to_string() {
 }
 
 /*************************************************************************************************/
-Buoylet::Buoylet(BuoyType subtype, float size) : IStatelet(subtype), width(size), height(size) {}
+Buoylet::Buoylet(BuoyType subtype, float size) : IStatelet(subtype), width(size), height(size) {
+	this->enable_resizing(true);
+}
 
 void Buoylet::construct_buoy(bool resized) {
 	ITurtle* bturtle = nullptr;
@@ -81,8 +83,6 @@ void Buoylet::fill_extent(float x, float y, float* width, float* height) {
 void Buoylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	BuoyStyle style = this->get_style();
 
-	ds->DrawRectangle(x, y, Width, Height, Colours::Firebrick);
-
 	if (style.ring_color != nullptr) {
 		float rx = this->width * 0.5F;
 		float ry = this->height * 0.5F;
@@ -104,7 +104,7 @@ void Buoylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	ds->DrawGeometry(this->shape, x, y, style.border_color);
 }
 
-bool Buoylet::resize(float width, float height) {
+void Buoylet::resize(float width, float height) {
 	bool resized = false;
 
 	if ((width > 0.0F) && (height > 0.0F)) {
@@ -121,9 +121,8 @@ bool Buoylet::resize(float width, float height) {
 
 	if (resized) {
 		this->construct_buoy(true);
+		this->notify_updated();
 	}
-
-	return resized;
 }
 
 void Buoylet::prepare_style(BuoyType type, BuoyStyle& s) {

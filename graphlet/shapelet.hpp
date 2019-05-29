@@ -78,7 +78,7 @@ namespace WarGrey::SCADA {
 			float thickness = 1.0F);
 
 	public:
-		bool resize(float width, float height) override;
+		void resize(float width, float height) override;
 
 	private:
 		float width;

@@ -198,9 +198,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\matrix\diglet.cpp">
       <Filter>graphlet\matrix</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\sunken_shiplet.cpp">
-      <Filter>graphlet\symbol\dig</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
@@ -214,6 +211,9 @@
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\buoylet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\wrecklet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
   </ItemGroup>
@@ -419,9 +419,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappdatalet.hxx">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\sunken_shiplet.hpp">
-      <Filter>graphlet\symbol\dig</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
@@ -439,6 +436,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx">
       <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\wrecklet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -16,7 +16,7 @@ namespace WarGrey::SCADA {
 		virtual void construct() {}
 		virtual void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) = 0;
 		virtual void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr);
-		virtual bool resize(float width, float height) { return false; }
+		virtual void resize(float width, float height) {}
 		virtual void update(long long count, long long interval, long long uptime) {}
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) = 0;
 		virtual void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {}
@@ -51,6 +51,10 @@ namespace WarGrey::SCADA {
 		{ return false; }
 
 	public:
+		void enable_resizing(bool yes_no) { this->can_resize = yes_no; }
+		bool resizable() { return this->can_resize; }
+
+	public:
 		void enable_events(bool yes_no, bool low_level = false) { this->deal_with_events = yes_no; this->deal_with_low_level_events = low_level; }
 		bool handles_events() { return this->deal_with_events; }
 		bool handles_low_level_events() { return (this->handles_events() && this->deal_with_low_level_events); }
@@ -60,6 +64,7 @@ namespace WarGrey::SCADA {
 		void save(Platform::String^ path, float dpi = 96.0F);
 
 	private:
+		bool can_resize = false;
 		bool deal_with_events = false;
 		bool deal_with_low_level_events = false;
 	};

@@ -39,7 +39,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void fill_extent(float x, float y, float* width, float* height) override;
-		bool resize(float width, float height) override;
+		void resize(float width, float height) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
