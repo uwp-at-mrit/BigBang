@@ -19,6 +19,9 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::ITurtle* make_sunken_ship_turtle(float width, float height);
 
 	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
+
+	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_color;
 
