@@ -115,10 +115,15 @@ void Wrecklet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Wrecklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	ds->DrawCachedGeometry(this->body, x, y, this->color);
 }
 
 void Wrecklet::construct_wreck(bool resized) {
+	ITurtle* turtle = this->make_wreck_turtle(this->width, this->height);
 
+	this->body = geometry_freeze(turtle->snap_path());
+
+	turtle->destroy();
 }
 
 void Wrecklet::resize(float width, float height) {
@@ -143,5 +148,18 @@ void Wrecklet::resize(float width, float height) {
 }
 
 ITurtle* Wrecklet::make_wreck_turtle(float width, float height) {
-	return nullptr;
+	Turtle<W>* turtle = new Turtle<W>(width / wreck_base_size, height / wreck_base_size, true);
+
+	turtle->reference();
+
+	turtle->jump_down(wreck_base_size * 0.5F)->jump_right(2.0F, W::Home);
+	turtle->jump_right(3.0F)->jump_down(6.0F, W::ll)->move_to(W::Home)->jump_back();
+	turtle->move_left(5.0F)->move_down(2.0F)->move_right(wreck_base_size)->move_up(2.0F);
+	turtle->move_left(4.0F)->move_up(1.0F)->move_left(2.0F)->move_left_up(3.0F, W::l);
+	turtle->move_left_down(1.0F)->move_to(W::Home)->jump_back();
+	
+	turtle->move_up(2.0F)->move_right(1.0F)->move_up(4.0F)->move_right(2.0F);
+	turtle->move_down(4.0F)->move_left(1.0F)->move_down(4.0F)->move_to(W::l);
+
+	return turtle;
 }

@@ -45,6 +45,9 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::ITurtle* make_wreck_turtle(float width, float height);
 
 	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
+
+	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 
 	private:
