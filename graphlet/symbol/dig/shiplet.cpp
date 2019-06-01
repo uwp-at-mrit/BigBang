@@ -14,11 +14,13 @@ static ICanvasBrush^ default_ship_color = Colours::Snow;
 static ICanvasBrush^ default_ring_color = Colours::Red;
 static ICanvasBrush^ default_light_color = Colours::Tomato;
 
-private enum class S {
-	Home, Deck, Level, lLevel, rLevel,
-	_,
-	ll, rl, ld, rd, l
-};
+namespace {
+	private enum class S {
+		Home, Deck, Level, lLevel, rLevel,
+		_,
+		ll, rl, ld, rd, l
+	};
+}
 
 /*************************************************************************************************/
 LightShiplet::LightShiplet(float size, ICanvasBrush^ body_color, ICanvasBrush^ ring_color) : width(size), height(size)

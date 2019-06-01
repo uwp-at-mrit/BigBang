@@ -15,13 +15,15 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static const float buoy_base_size = 16.0F;
 
-private enum class B {
-	Home, Bottom,
-	_,
+namespace {
+	private enum class B {
+		Home, Bottom,
+		_,
 
-	lb, rb, flag,
-	ll, ls, rl, rs
-};
+		lb, rb, flag,
+		ll, ls, rl, rs
+	};
+}
 
 /*************************************************************************************************/
 BuoyDig::BuoyDig(std::filebuf& dig, BuoyType subtype, float size)
