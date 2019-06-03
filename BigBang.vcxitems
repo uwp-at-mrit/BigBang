@@ -35,7 +35,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\light_houselet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\radar_reflectorlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\sunken_shiplet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\shiplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\tablet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.cpp" />
@@ -114,7 +114,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\light_houselet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\radar_reflectorlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\sunken_shiplet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\shiplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\tablet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.hpp" />

@@ -15,13 +15,15 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static const float buoy_base_size = 16.0F;
 
-private enum class B {
-	Home, Bottom,
-	_,
+namespace {
+	private enum class B {
+		Home, Bottom,
+		_,
 
-	lb, rb, flag,
-	ll, ls, rl, rs
-};
+		lb, rb, flag,
+		ll, ls, rl, rs
+	};
+}
 
 /*************************************************************************************************/
 BuoyDig::BuoyDig(std::filebuf& dig, BuoyType subtype, float size)
@@ -40,7 +42,9 @@ Platform::String^ BuoyDig::to_string() {
 }
 
 /*************************************************************************************************/
-Buoylet::Buoylet(BuoyType subtype, float size) : IStatelet(subtype), width(size), height(size) {}
+Buoylet::Buoylet(BuoyType subtype, float size) : IStatelet(subtype), width(size), height(size) {
+	this->enable_resizing(true);
+}
 
 void Buoylet::construct_buoy(bool resized) {
 	ITurtle* bturtle = nullptr;
@@ -81,8 +85,6 @@ void Buoylet::fill_extent(float x, float y, float* width, float* height) {
 void Buoylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	BuoyStyle style = this->get_style();
 
-	ds->DrawRectangle(x, y, Width, Height, Colours::Firebrick);
-
 	if (style.ring_color != nullptr) {
 		float rx = this->width * 0.5F;
 		float ry = this->height * 0.5F;
@@ -104,7 +106,7 @@ void Buoylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	ds->DrawGeometry(this->shape, x, y, style.border_color);
 }
 
-bool Buoylet::resize(float width, float height) {
+void Buoylet::resize(float width, float height) {
 	bool resized = false;
 
 	if ((width > 0.0F) && (height > 0.0F)) {
@@ -121,9 +123,8 @@ bool Buoylet::resize(float width, float height) {
 
 	if (resized) {
 		this->construct_buoy(true);
+		this->notify_updated();
 	}
-
-	return resized;
 }
 
 void Buoylet::prepare_style(BuoyType type, BuoyStyle& s) {
@@ -222,7 +223,7 @@ ITurtle* Buoylet::make_buoy_type4_turtle(float width, float height) {
 	buoy->move_left(0.5F)->move_left_down(4.0F)->move_left(1.0F)->jump_right(1.0F);
 	buoy->move_right(2.0F)->turn_up_right_down()->turn_down_left_up()->jump_right(2.0F)->move_right(3.0F);
 	buoy->jump_left(1.0F, B::Bottom)->move_left_up(1.5F)->move_to(B::Home);
-	buoy->move_right(1.0F, B::flag)->jump_left(1.0F)->move_up(0.5F)->move_to(B::flag);
+	buoy->move_right(1.0F, B::flag)->jump_back(B::Home)->move_up(0.5F)->move_to(B::flag);
 
 	return buoy;
 }
@@ -261,13 +262,19 @@ ITurtle* Buoylet::make_buoy_type6_turtle(float width, float height) {
 
 ITurtle* Buoylet::make_buoy_type7_turtle(float width, float height) {
 	Turtle<B>* buoy = new Turtle<B>(width / buoy_base_size * 2.0F, height / buoy_base_size * 2.0F, true);
+	float flag_step = 0.618F;
 
 	buoy->reference();
 
-	buoy->jump_right(3.0F)->jump_down(1.5F, B::Home);
-	buoy->jump_down(4.0F)->jump_left(2.0F, B::lb)->move_to(B::Home)->jump_back()->move_left(1.0F)->jump_right(1.0F);
-	buoy->move_right(2.0F)->turn_up_right_down()->turn_down_left_up()->jump_right(2.0F)->move_right(3.0F);
-	buoy->jump_left(1.5F, B::Bottom)->jump_up(2.5F)->jump_right(1.0F, B::rb)->move_to(B::Bottom)->jump_back()->move_to(B::Home);
+	buoy->jump_right(5.5F)->jump_down(2.5F, B::Home)->move_left(2.0F);
+	buoy->move_down(0.5F)->move_left(1.0F)->move_down(0.5F)->move_left(0.5F);
+	buoy->move_down(0.5F)->move_left(0.5F)->move_down(0.5F)->move_left(0.5F);
+	buoy->move_down(0.5F)->move_left(1.0F)->jump_right(1.0F);
+	buoy->move_right(2.0F)->turn_up_right_down()->turn_down_left_up()->jump_right(2.0F)->move_right(3.0F)->jump_left(1.0F);
+
+	buoy->move_up(0.5F)->move_left(0.5F)->move_up(0.5F)->move_left(0.5F);
+	buoy->move_up(0.5F)->move_left(0.5F)->move_to(B::Home)->jump_left(flag_step);
+	buoy->move_up(flag_step, B::flag)->move_left_up(flag_step)->jump_back()->move_right_up(flag_step);
 
 	return buoy;
 }

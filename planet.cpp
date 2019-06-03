@@ -554,7 +554,7 @@ void Planet::scale(float sx, float sy) {
 		}
 
 		if ((this->scale_x != sx) || (this->scale_y != sy)) {
-			bool resized_any = false;
+			this->begin_update_sequence();
 
 			if (this->head_graphlet != nullptr) {
 				GraphletInfo* head_info = GRAPHLET_INFO(this->head_graphlet);
@@ -564,11 +564,12 @@ void Planet::scale(float sx, float sy) {
 					GraphletInfo* info = GRAPHLET_INFO(child);
 
 					if (unsafe_graphlet_unmasked(info, this->mode)) {
-						float sx, sy, sw, sh;
+						if (child->resizable()) {
+							float sx, sy, sw, sh;
 
-						unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
-						
-						resized_any |= child->resize((sw / this->scale_x) * sx, (sh / this->scale_y) * sy);
+							unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
+							child->resize((sw / this->scale_x) * sx, (sh / this->scale_y) * sy);
+						}
 					}
 
 					child = info->prev;
@@ -578,10 +579,11 @@ void Planet::scale(float sx, float sy) {
 			this->scale_x = sx;
 			this->scale_y = sy;
 
-			if (resized_any) {
+			if (this->needs_update) {
 				this->size_cache_invalid();
-				this->notify_graphlet_updated(nullptr);
 			}
+
+			this->end_update_sequence();
 		}
 	}
 }

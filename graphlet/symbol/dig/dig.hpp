@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 	private enum class DigDatumType {
 		SunkenShip, LightShip, OilWell, PilotStation, ReportPoint, LightHouse, RedFlag,
 		Hoisptal, Tree, Anchor, Chimney, WaterTower, RadarReflector, IslandReef,
-		Aquatic, Buoy, TideStation, Kettle, Light, Seamark, Picket, Rock, Text, Number, FishNet, Wreck,
+		Aquatic, Buoy, TideStation, Kettle, Light, Seamark, Picket, Rock, Text, Number, FishingFloat, Wreck,
 		Typhoon, Compass,
 
 		Arc, Circle, Polyline, Rectangle, Line, FontText,

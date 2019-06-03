@@ -85,11 +85,13 @@ Planetlet::~Planetlet() {
 
 void Planetlet::construct() {
 	if (this->width <= 0.0F) {
+		this->enable_resizing(true);
 		this->stretchable_width = true;
 		this->width = 0.0F;
 	}
 
 	if (this->height <= 0.0F) {
+		this->enable_resizing(true);
 		this->stretchable_height = true;
 		this->height = 0.0F;
 	}
@@ -130,7 +132,7 @@ void Planetlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	ds->Transform = saved_transform;
 }
 
-bool Planetlet::resize(float width, float height) {
+void Planetlet::resize(float width, float height) {
 	bool resized = false;
 
 	if (this->stretchable_width) {
@@ -147,16 +149,20 @@ bool Planetlet::resize(float width, float height) {
 		}
 	}
 
-	return resized;
+	if (resized) {
+		this->notify_updated();
+	}
 }
 
-void Planetlet::enable_resize(bool resizable_width, bool resizable_height) {
+void Planetlet::enable_stretch(bool resizable_width, bool resizable_height) {
 	this->stretchable_width = resizable_width;
 	this->stretchable_height = resizable_height;
+
+	this->enable_resizing(this->stretchable_width || this->stretchable_height);
 }
 
-void Planetlet::enable_resize(bool yes_or_no) {
-	this->enable_resize(yes_or_no, yes_or_no);
+void Planetlet::enable_stretch(bool yes_or_no) {
+	this->enable_stretch(yes_or_no, yes_or_no);
 }
 
 void Planetlet::set_stretch_anchor(GraphletAnchor anchor) {

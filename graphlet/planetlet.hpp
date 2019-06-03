@@ -20,11 +20,11 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-		bool resize(float width, float height) override;
+		void resize(float width, float height) override;
 
 	public:
-		void enable_resize(bool resizable_width, bool resizable_height);
-		void enable_resize(bool yes_or_no);
+		void enable_stretch(bool resizable_width, bool resizable_height);
+		void enable_stretch(bool yes_or_no);
 		void set_stretch_anchor(WarGrey::SCADA::GraphletAnchor anchor);
 
 	public:
