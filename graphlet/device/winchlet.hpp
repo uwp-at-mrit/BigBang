@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 		Default,
 		WindingUp, FastWindingUp, WindingOut, FastWindingOut,
 		WindUpReady, FastWindUpReady, WindOutReady, FastWindOutReady, WindReady, FastWindReady,
-		UpperLimited, SoftUpperLimited, LowerLimited, SoftLowerLimited,
+		CableTopLimited, SoftTopLimited, TopLimited, CableBottomLimited, SoftBottomLimited, BottomLimited,
 		SaddleLimited, SuctionLimited, Slack, SaddleSlack, SuctionSlack, Unpullable, Unlettable,
 		_,
 	};
