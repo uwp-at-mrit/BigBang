@@ -17,24 +17,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasGeometry^ make_alert_lights(float cx, float cy, float start_radius, float end_radius
-	, double start_degrees, double end_degrees, size_t count, float thickness, CanvasStrokeStyle^ style) {
-	CanvasPathBuilder^ lights = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-	double step = (end_degrees - start_degrees) / double(count - 1);
-	float start_x, start_y, end_x, end_y;
-
-	for (double degrees = start_degrees; degrees <= end_degrees; degrees += step) {
-		circle_point(start_radius, degrees, &start_x, &start_y);
-		circle_point(end_radius, degrees, &end_x, &end_y);
-
-		lights->BeginFigure(cx + start_x, cy + start_y);
-		lights->AddLine(cx + end_x, cy + end_y);
-		lights->EndFigure(CanvasFigureLoop::Open);
-	}
-
-	return geometry_stroke(CanvasGeometry::CreatePath(lights), thickness, style);
-}
-
 /*************************************************************************************************/
 Alarmlet::Alarmlet(float size) : Alarmlet(AlarmState::None, size) {}
 
@@ -67,7 +49,7 @@ void Alarmlet::construct() {
 		rounded_rectangle(base_x, base_y, base_width, base_height * 2.0F, base_radius, base_radius),
 		rectangle(body_x, body_y, body_width, body_bottom - body_y),
 		segment(cx, body_y, 180.0, 360.0, hat_radius),
-		make_alert_lights(cx, body_y, light_lradius, light_sradius, theta - 180.0, -theta, 7, light_thickness, light_style)
+		radiation(cx, body_y, light_lradius, light_sradius, theta - 180.0, -theta, 7, light_thickness, light_style)
 	};
 
 	this->body = geometry_freeze(geometry_intersect(geometry_union(parts), // don't mind, it's Visual Studio's fault

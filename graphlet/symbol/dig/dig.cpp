@@ -31,6 +31,7 @@ static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
 	case DigDatumType::SunkenShip: icon = new SunkenShiplet(size); break;
 	case DigDatumType::Wreck: icon = new Wrecklet(size); break;
 	case DigDatumType::Anchor: icon = new Anchorlet(size); break;
+	case DigDatumType::RadarReflector: icon = new RadarReflectorlet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 
