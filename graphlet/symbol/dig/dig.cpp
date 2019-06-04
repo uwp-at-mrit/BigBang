@@ -11,6 +11,7 @@
 #include "graphlet/symbol/dig/anchorlet.hpp"
 #include "graphlet/symbol/dig/radar_reflectorlet.hpp"
 #include "graphlet/symbol/dig/buoylet.hpp"
+#include "graphlet/symbol/dig/welllet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -33,6 +34,7 @@ static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
 	case DigDatumType::Anchor: icon = new Anchorlet(size); break;
 	case DigDatumType::RadarReflector: icon = new RadarReflectorlet(size); break;
 	case DigDatumType::LightHouse: icon = new LightHouselet(size); break;
+	case DigDatumType::OilWell: icon = new OilWelllet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 
