@@ -12,6 +12,8 @@
 #include "graphlet/symbol/dig/radar_reflectorlet.hpp"
 #include "graphlet/symbol/dig/buoylet.hpp"
 #include "graphlet/symbol/dig/welllet.hpp"
+#include "graphlet/symbol/dig/report_spotlet.hpp"
+#include "graphlet/symbol/dig/pilot_stationlet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -35,6 +37,8 @@ static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
 	case DigDatumType::RadarReflector: icon = new RadarReflectorlet(size); break;
 	case DigDatumType::LightHouse: icon = new LightHouselet(size); break;
 	case DigDatumType::OilWell: icon = new OilWelllet(size); break;
+	case DigDatumType::ReportSpot: icon = new ReportSpotlet(size); break;
+	case DigDatumType::PilotStation: icon = new PilotStationlet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 
@@ -52,7 +56,7 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 		case 'b': datum = new IconDig(dig, DigDatumType::SunkenShip, icon_size); break;
 		case 'c': datum = new IconDig(dig, DigDatumType::OilWell, icon_size); break;
 		case 'd': datum = new IconDig(dig, DigDatumType::PilotStation, icon_size); break;
-		case 'e': datum = new IconDig(dig, DigDatumType::ReportPoint, icon_size); break;
+		case 'e': datum = new IconDig(dig, DigDatumType::ReportSpot, icon_size); break;
 		case 'f': datum = new IconDig(dig, DigDatumType::LightHouse, icon_size); break;
 		case 'g': datum = new IconDig(dig, DigDatumType::RedFlag, icon_size); break;
 		case 'h': datum = new IconDig(dig, DigDatumType::Hoisptal, icon_size); break;

@@ -15,8 +15,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static const float radar_icon_base_size = 16.0F;
-
 static CanvasSolidColorBrush^ default_radar_color = Colours::Crimson;
 
 /*************************************************************************************************/
