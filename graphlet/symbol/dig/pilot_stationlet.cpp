@@ -5,7 +5,6 @@
 #include "brushes.hxx"
 #include "polar.hpp"
 #include "shape.hpp"
-#include "paint.hpp"
 #include "math.hpp"
 
 using namespace WarGrey::SCADA;

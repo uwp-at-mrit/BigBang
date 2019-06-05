@@ -1,7 +1,6 @@
 #include "graphlet/symbol/dig/treelet.hpp"
 
 #include "brushes.hxx"
-#include "paint.hpp"
 
 using namespace WarGrey::SCADA;
 
