@@ -219,16 +219,15 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\shiplet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
-    <ClCompile Include="F:\DredgeConstruct\BigBang\graphlet\symbol\dig\report_spotlet.cpp">
-      <Filter>graphlet\symbol\dig</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\pilot_stationlet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
-    <ClCompile Include="F:\DredgeConstruct\BigBang\graphlet\symbol\dig\water_towerlet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\report_spotlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
   </ItemGroup>
@@ -458,16 +457,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\shiplet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
-    <ClInclude Include="F:\DredgeConstruct\BigBang\graphlet\symbol\dig\report_spotlet.hpp">
-      <Filter>graphlet\symbol\dig</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\pilot_stationlet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
-    <ClInclude Include="F:\DredgeConstruct\BigBang\graphlet\symbol\dig\water_towerlet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\report_spotlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
   </ItemGroup>

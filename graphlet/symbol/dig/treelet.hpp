@@ -3,9 +3,9 @@
 #include "turtle.hpp"
 
 namespace WarGrey::SCADA {
-	private class Chimneylet : public WarGrey::SCADA::IGraphlet {
+	private class Treelet : public WarGrey::SCADA::IGraphlet {
 	public:
-		Chimneylet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);
+		Treelet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);
 
 	public:
 		void construct() override;
@@ -14,8 +14,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	private:
-		void construct_chimney(bool resized);
-		WarGrey::SCADA::ITurtle* make_chimney_turtle(float width, float height);
+		void construct_tree(bool resized);
+		WarGrey::SCADA::ITurtle* make_tree_turtle(float width, float height);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;

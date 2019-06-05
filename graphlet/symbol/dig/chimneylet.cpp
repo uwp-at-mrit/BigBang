@@ -10,7 +10,7 @@ using namespace Windows::Foundation;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static const float tower_icon_base_size = 16.0F;
+static const float chimney_icon_base_size = 16.0F;
 
 static CanvasSolidColorBrush^ default_tower_color = Colours::WhiteSmoke;
 
@@ -20,7 +20,7 @@ Chimneylet::Chimneylet(float size, ICanvasBrush^ color) : width(size), height(si
 }
 
 void Chimneylet::construct() {
-	this->construct_water_tower(false);
+	this->construct_chimney(false);
 }
 
 void Chimneylet::fill_extent(float x, float y, float* width, float* height) {
@@ -31,8 +31,8 @@ void Chimneylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	ds->DrawCachedGeometry(this->body, x, y, this->color);
 }
 
-void Chimneylet::construct_water_tower(bool resized) {
-	ITurtle* turtle = this->make_tower_turtle(this->width, this->height);
+void Chimneylet::construct_chimney(bool resized) {
+	ITurtle* turtle = this->make_chimney_turtle(this->width, this->height);
 
 	this->body = geometry_freeze(turtle->snap_track());
 
@@ -55,17 +55,17 @@ void Chimneylet::resize(float width, float height) {
 	}
 
 	if (resized) {
-		this->construct_water_tower(true);
+		this->construct_chimney(true);
 		this->notify_updated();
 	}
 }
 
-ITurtle* Chimneylet::make_tower_turtle(float width, float height) {
-	GreenTurtle* turtle = new GreenTurtle(width / tower_icon_base_size, height / tower_icon_base_size, true);
+ITurtle* Chimneylet::make_chimney_turtle(float width, float height) {
+	GreenTurtle* turtle = new GreenTurtle(width / chimney_icon_base_size, height / chimney_icon_base_size, true);
 
 	turtle->reference();
 
-	turtle->jump_right(tower_icon_base_size * 0.5F)->jump_down(1.0F);
+	turtle->jump_right(chimney_icon_base_size * 0.5F)->jump_down(1.0F);
 	turtle->move_right(2.0F)->move_right_down(1.0F)->move_right_up(1.0F)->move_right(2.0F)->move_right_down(1.0F);
 	turtle->move_down(1.0F)->move_left_down(1.0F)->move_left(1.0F)->move_left_up(1.0F)->move_left(2.0F);
 
