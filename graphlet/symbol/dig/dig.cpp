@@ -15,6 +15,7 @@
 #include "graphlet/symbol/dig/report_spotlet.hpp"
 #include "graphlet/symbol/dig/pilot_stationlet.hpp"
 #include "graphlet/symbol/dig/water_towerlet.hpp"
+#include "graphlet/symbol/dig/chimneylet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -41,6 +42,7 @@ static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
 	case DigDatumType::ReportSpot: icon = new ReportSpotlet(size); break;
 	case DigDatumType::PilotStation: icon = new PilotStationlet(size); break;
 	case DigDatumType::WaterTower: icon = new WaterTowerlet(size); break;
+	case DigDatumType::Chimney: icon = new Chimneylet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 

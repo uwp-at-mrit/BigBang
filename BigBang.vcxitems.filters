@@ -228,6 +228,9 @@
     <ClCompile Include="F:\DredgeConstruct\BigBang\graphlet\symbol\dig\water_towerlet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -462,6 +465,9 @@
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
     <ClInclude Include="F:\DredgeConstruct\BigBang\graphlet\symbol\dig\water_towerlet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
   </ItemGroup>
