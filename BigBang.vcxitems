@@ -35,6 +35,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\buoylet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\flaglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\light_houselet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\pilot_stationlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\reeflet.cpp" />
@@ -122,6 +123,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\buoylet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\flaglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\light_houselet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\pilot_stationlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\reeflet.hpp" />

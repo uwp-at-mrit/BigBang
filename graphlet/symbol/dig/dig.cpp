@@ -19,6 +19,7 @@
 #include "graphlet/symbol/dig/treelet.hpp"
 #include "graphlet/symbol/dig/aquaticlet.hpp"
 #include "graphlet/symbol/dig/reeflet.hpp"
+#include "graphlet/symbol/dig/flaglet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -49,6 +50,7 @@ static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
 	case DigDatumType::Tree: icon = new Treelet(size); break;
 	case DigDatumType::Aquatic: icon = new Aquaticlet(size); break;
 	case DigDatumType::IslandReef: icon = new Reeflet(size); break;
+	case DigDatumType::RedFlag: icon = new Flaglet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 
