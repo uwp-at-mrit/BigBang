@@ -64,8 +64,8 @@ ITurtle* Flaglet::make_tree_turtle(float width, float height) {
 
 	turtle->reference();
 
-	turtle->jump_right(flag_icon_base_size * 0.5F, GreenTurtleAnchor::Home);
-	turtle->move_left(3.0F)->move_down(13.0F)->move_left(4.0F)->move_down(3.0F)->move_right(11.0F)->move_up(3.0F);
+	turtle->jump_right(flag_icon_base_size * 0.5F)->jump_down(2.0F, GreenTurtleAnchor::Home);
+	turtle->turn_up_left_down()->move_down(12.0F)->move_left(4.0F)->turn_left_down_right()->move_right(10.0F)->turn_right_up_left();
 	turtle->move_left(4.0F)->move_up(7.0F)->move_right(5.0F)->move_left_up(2.0F, 3.0F)->move_left(3.0F);
 	turtle->move_to(GreenTurtleAnchor::Home);
 		

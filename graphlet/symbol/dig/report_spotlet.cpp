@@ -16,11 +16,11 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasSolidColorBrush^ default_pilot_color = Colours::Crimson;
+static CanvasSolidColorBrush^ default_spot_color = Colours::Crimson;
 
 /*************************************************************************************************/
 ReportSpotlet::ReportSpotlet(float size, ICanvasBrush^ color)
-	: width(size), height(size), color((color == nullptr) ? default_pilot_color : color) {
+	: width(size), height(size), color((color == nullptr) ? default_spot_color : color) {
 	this->enable_resizing(true);
 }
 
