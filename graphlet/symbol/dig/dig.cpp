@@ -21,6 +21,7 @@
 #include "graphlet/symbol/dig/reeflet.hpp"
 #include "graphlet/symbol/dig/flaglet.hpp"
 #include "graphlet/symbol/dig/hospitallet.hpp"
+#include "graphlet/symbol/dig/lightlet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -53,6 +54,7 @@ static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
 	case DigDatumType::IslandReef: icon = new Reeflet(size); break;
 	case DigDatumType::RedFlag: icon = new Flaglet(size); break;
 	case DigDatumType::Hoisptal: icon = new Hospitallet(size); break;
+	case DigDatumType::Light: icon = new Lightlet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 
