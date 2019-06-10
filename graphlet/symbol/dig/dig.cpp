@@ -26,6 +26,7 @@
 #include "graphlet/symbol/dig/navigation_marklet.hpp"
 #include "graphlet/symbol/dig/picketlet.hpp"
 #include "graphlet/symbol/dig/kettlet.hpp"
+#include "graphlet/symbol/dig/tide_stationlet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -63,6 +64,7 @@ static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
 	case DigDatumType::NavigationMark: icon = new NavigationMarklet(size); break;
 	case DigDatumType::Picket: icon = new Picketlet(size); break;
 	case DigDatumType::Kettle: icon = new Kettlet(size); break;
+	case DigDatumType::TideStation: icon = new TideStationlet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 
