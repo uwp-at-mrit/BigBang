@@ -11,10 +11,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static const float tree_icon_base_size = 16.0F;
 
-static CanvasSolidColorBrush^ default_tower_color = Colours::SpringGreen;
+static CanvasSolidColorBrush^ default_tree_color = Colours::SpringGreen;
 
 /*************************************************************************************************/
-Treelet::Treelet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_tower_color : color) {
+Treelet::Treelet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_tree_color : color) {
 	this->enable_resizing(true);
 }
 

@@ -12,10 +12,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static const float aquatic_icon_base_size = 16.0F;
 
-static CanvasSolidColorBrush^ default_tower_color = Colours::Azure;
+static CanvasSolidColorBrush^ default_aquatic_color = Colours::Azure;
 
 /*************************************************************************************************/
-Aquaticlet::Aquaticlet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_tower_color : color) {
+Aquaticlet::Aquaticlet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_aquatic_color : color) {
 	this->enable_resizing(true);
 }
 

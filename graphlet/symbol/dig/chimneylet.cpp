@@ -11,10 +11,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static const float chimney_icon_base_size = 16.0F;
 
-static CanvasSolidColorBrush^ default_tower_color = Colours::WhiteSmoke;
+static CanvasSolidColorBrush^ default_chimney_color = Colours::WhiteSmoke;
 
 /*************************************************************************************************/
-Chimneylet::Chimneylet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_tower_color : color) {
+Chimneylet::Chimneylet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_chimney_color : color) {
 	this->enable_resizing(true);
 }
 

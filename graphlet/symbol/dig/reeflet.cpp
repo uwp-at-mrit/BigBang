@@ -11,10 +11,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static const float reef_icon_base_size = 16.0F;
 
-static CanvasSolidColorBrush^ default_tower_color = Colours::AntiqueWhite;
+static CanvasSolidColorBrush^ default_reef_color = Colours::AntiqueWhite;
 
 /*************************************************************************************************/
-Reeflet::Reeflet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_tower_color : color) {
+Reeflet::Reeflet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_reef_color : color) {
 	this->enable_resizing(true);
 }
 

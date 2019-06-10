@@ -11,10 +11,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static const float flag_icon_base_size = 16.0F;
 
-static CanvasSolidColorBrush^ default_tower_color = Colours::Crimson;
+static CanvasSolidColorBrush^ default_flag_color = Colours::Crimson;
 
 /*************************************************************************************************/
-Flaglet::Flaglet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_tower_color : color) {
+Flaglet::Flaglet(float size, ICanvasBrush^ color) : width(size), height(size), color((color == nullptr) ? default_flag_color : color) {
 	this->enable_resizing(true);
 }
 
