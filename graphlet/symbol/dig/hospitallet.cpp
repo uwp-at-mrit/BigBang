@@ -1,11 +1,8 @@
 #include "graphlet/symbol/dig/hospitallet.hpp"
 
-#include "datum/flonum.hpp"
-
 #include "brushes.hxx"
 #include "shape.hpp"
 #include "paint.hpp"
-#include "math.hpp"
 
 using namespace WarGrey::SCADA;
 

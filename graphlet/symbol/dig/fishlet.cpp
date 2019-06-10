@@ -68,7 +68,7 @@ ITurtle* Fishlet::make_fish_turtle(float width, float height) {
 	turtle->move_left(1.0F, GreenTurtleAnchor::Home);
 	turtle->turn_up_left_down()->turn_down_right_up();
 	turtle->drift(-14.0F, -3.0F, -4.0F, -8.0F, -10.0F, 1.0F);
-	turtle->move_right_down(2.0, 3.0F)->move_left_down(2.0F, 4.0F);
+	turtle->drift(2.0F, 3.0F, 1.0F, 3.0F)->drift(-2.0F, 4.0F, -1.0F, 1.0F);
 	turtle->drift_to(GreenTurtleAnchor::Home, 4.0F, -4.0F, 10.0F, 2.0F);
 
 	return turtle;

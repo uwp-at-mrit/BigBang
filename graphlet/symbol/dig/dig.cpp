@@ -23,6 +23,7 @@
 #include "graphlet/symbol/dig/hospitallet.hpp"
 #include "graphlet/symbol/dig/lightlet.hpp"
 #include "graphlet/symbol/dig/fishlet.hpp"
+#include "graphlet/symbol/dig/navigation_marklet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -57,6 +58,7 @@ static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
 	case DigDatumType::Hoisptal: icon = new Hospitallet(size); break;
 	case DigDatumType::Light: icon = new Lightlet(size); break;
 	case DigDatumType::FishingFloat: icon = new Fishlet(size); break;
+	case DigDatumType::NavigationMark: icon = new NavigationMarklet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 
@@ -89,7 +91,7 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 		case 'G': datum = new IconDig(dig, DigDatumType::TideStation, icon_size); break;
 		case 'K': datum = new IconDig(dig, DigDatumType::Kettle, icon_size); break;
 		case 'L': datum = new IconDig(dig, DigDatumType::Light, icon_size); break;
-		case 'N': datum = new IconDig(dig, DigDatumType::Seamark, icon_size); break;
+		case 'N': datum = new IconDig(dig, DigDatumType::NavigationMark, icon_size); break;
 		case 'P': datum = new IconDig(dig, DigDatumType::Picket, icon_size); break;
 		case 'R': datum = new IconDig(dig, DigDatumType::Rock, icon_size); break;
 		case 'V': datum = new IconDig(dig, DigDatumType::FishingFloat, icon_size); break;
