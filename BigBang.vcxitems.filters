@@ -253,6 +253,9 @@
     <ClCompile Include="F:\DredgeConstruct\BigBang\graphlet\symbol\dig\navigation_marklet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\picketlet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -512,6 +515,9 @@
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
     <ClInclude Include="F:\DredgeConstruct\BigBang\graphlet\symbol\dig\navigation_marklet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\picketlet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
   </ItemGroup>

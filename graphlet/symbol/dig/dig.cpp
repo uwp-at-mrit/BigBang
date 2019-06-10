@@ -24,6 +24,7 @@
 #include "graphlet/symbol/dig/lightlet.hpp"
 #include "graphlet/symbol/dig/fishlet.hpp"
 #include "graphlet/symbol/dig/navigation_marklet.hpp"
+#include "graphlet/symbol/dig/picketlet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -59,6 +60,7 @@ static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
 	case DigDatumType::Light: icon = new Lightlet(size); break;
 	case DigDatumType::FishingFloat: icon = new Fishlet(size); break;
 	case DigDatumType::NavigationMark: icon = new NavigationMarklet(size); break;
+	case DigDatumType::Picket: icon = new Picketlet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 
