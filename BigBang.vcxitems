@@ -47,6 +47,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\report_spotlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\radar_reflectorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\navigation_marklet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\rocklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\shiplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\tide_stationlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\report_spotlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\radar_reflectorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\navigation_marklet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\rocklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\shiplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\tide_stationlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.hpp" />
