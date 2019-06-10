@@ -36,8 +36,8 @@ void Lightlet::fill_extent(float x, float y, float* width, float* height) {
 void Lightlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float cx = x + this->width * 0.5F;
 	float cy = y + this->height * 0.5F;
-	float rx = cx - x;
-	float ry = cy - y;
+	float rx = cx - x - 0.5F;
+	float ry = cy - y - 0.5F;
 
 	ds->FillEllipse(cx, cy, rx, ry, this->color);
 	ds->DrawCachedGeometry(this->reflection, cx, cy, this->reflection_color);

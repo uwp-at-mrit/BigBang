@@ -1,9 +1,7 @@
 #include "graphlet/symbol/dig/picketlet.hpp"
 
 #include "brushes.hxx"
-#include "polar.hpp"
 #include "shape.hpp"
-#include "paint.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -17,9 +15,9 @@ static CanvasSolidColorBrush^ default_border_color = Colours::SeaGreen;
 static CanvasSolidColorBrush^ default_picket_color = Colours::Burlywood;
 
 /*************************************************************************************************/
-Picketlet::Picketlet(float size, ICanvasBrush^ border_color, ICanvasBrush^ body_color) : width(size), height(size)
+Picketlet::Picketlet(float size, ICanvasBrush^ border_color, ICanvasBrush^ picket_color) : width(size), height(size)
 , border_color((border_color == nullptr) ? default_border_color : border_color)
-, picket_color((body_color == nullptr) ? default_picket_color : body_color) {
+, picket_color((picket_color == nullptr) ? default_picket_color : picket_color) {
 	this->enable_resizing(true);
 }
 
