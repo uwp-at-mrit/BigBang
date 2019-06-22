@@ -225,7 +225,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
@@ -262,7 +261,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\rocklet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\navigation_marklet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\navigation_marklet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.cpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -496,7 +500,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\chimneylet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
@@ -533,7 +536,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\rocklet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\navigation_marklet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\navigation_marklet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.hpp">
+      <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
