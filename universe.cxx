@@ -189,7 +189,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 		this->display->PointerExited += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moveout);
 
 		CoreWindow::GetForCurrentThread()->CharacterReceived +=
-			ref new TypedEventHandler<CoreWindow^, CharacterReceivedEventArgs^>(this, &UniverseDisplay::on_character);
+			ref new TypedEventHandler<CoreWindow^, CharacterReceivedEventArgs^>(this, &UniverseDisplay::on_keycode);
 	}
 
 	{ // initialize masks
@@ -208,7 +208,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 }
 
 void UniverseDisplay::register_virtual_keydown_event_handler(UIElement^ target) {
-	target->KeyDown += ref new KeyEventHandler(this, &UniverseDisplay::on_key);
+	target->KeyDown += ref new KeyEventHandler(this, &UniverseDisplay::on_virtual_key);
 }
 
 UniverseDisplay::~UniverseDisplay() {
@@ -810,7 +810,7 @@ void UniverseDisplay::on_pointer_moveout(Platform::Object^ sender, PointerRouted
 	this->leave_critical_section();
 }
 
-void UniverseDisplay::on_key(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
+void UniverseDisplay::on_virtual_key(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
 	this->enter_critical_section();
 
 	if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
@@ -828,13 +828,20 @@ void UniverseDisplay::on_key(Platform::Object^ sender, KeyRoutedEventArgs^ args)
 	}
 
 	this->leave_critical_section();
+
+	if (!args->Handled) {
+		this->enter_critical_section();
+		args->Handled = this->on_key(args->Key, false);
+		this->leave_critical_section();
+	}
 }
 
-void UniverseDisplay::on_character(CoreWindow^ sender, CharacterReceivedEventArgs^ args) {
+void UniverseDisplay::on_keycode(CoreWindow^ sender, CharacterReceivedEventArgs^ args) {
+	unsigned int keycode = args->KeyCode;
+	
 	this->enter_critical_section();
 
 	if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
-		unsigned int keycode = args->KeyCode;
 		bool handled = false;
 
 		if (this->headup_planet != nullptr) {
@@ -865,6 +872,10 @@ void UniverseDisplay::on_character(CoreWindow^ sender, CharacterReceivedEventArg
 	}
 
 	this->leave_critical_section();
+
+	if (!args->Handled) {
+		args->Handled = this->on_character(keycode);
+	}
 }
 
 void UniverseDisplay::disable_predefined_shortcuts(bool yes) {

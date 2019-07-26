@@ -100,6 +100,8 @@ namespace WarGrey::SCADA {
 	protected private:
 		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason) {}
 		virtual void update(long long count, long long interval, long long uptime) {}
+		virtual bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) { return false; }
+		virtual bool on_character(unsigned int keycode) { return false; }
 		
 	protected private:
 		void push_planet(WarGrey::SCADA::IPlanet* planet);
@@ -118,8 +120,8 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^ args);
 
 	private:
-		void on_key(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
-		void on_character(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CharacterReceivedEventArgs^ args);
+		void on_virtual_key(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
+		void on_keycode(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CharacterReceivedEventArgs^ args);
 		void on_pointer_pressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_moveout(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
