@@ -15,6 +15,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)about.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\background.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\margin.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp" />
@@ -111,6 +112,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)about.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\margin.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp" />

@@ -267,6 +267,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)about.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -542,6 +543,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)about.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

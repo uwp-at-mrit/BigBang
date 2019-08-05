@@ -830,9 +830,7 @@ void UniverseDisplay::on_virtual_key(Platform::Object^ sender, KeyRoutedEventArg
 	this->leave_critical_section();
 
 	if (!args->Handled) {
-		this->enter_critical_section();
 		args->Handled = this->on_key(args->Key, false);
-		this->leave_critical_section();
 	}
 }
 

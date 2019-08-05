@@ -36,232 +36,242 @@ private enum class TM : unsigned int { Departure, Destination, _ };
 
 static const float time_machine_alpha = 0.64F;
 
+static Platform::String^ time_machine_icon_caption(TMIcon icon) {
+	Platform::String^ caption = nullptr;
+
+	switch (icon) {
+	case TMIcon::PrintScreen: caption = L"📸"; break;
+	case TMIcon::BookMark: caption = L"🔖"; break;
+	case TMIcon::Quit: caption = L"🚪"; break;
+	}
+
+	return caption;
+}
+
 /*************************************************************************************************/
-private ref class TimeMachineDisplay sealed : public UniverseDisplay {
-internal:
-	TimeMachineDisplay(Syslog* logger, ITimeMachine* entity, IHeadUpPlanet* dashboard)
-		: UniverseDisplay(logger, logger->get_name(), new ListViewNavigator(), dashboard), machine(entity), closed(true) {
-		this->use_global_mask_setting(false);
+namespace {
+	private ref class TimeMachineDisplay sealed : public UniverseDisplay {
+	internal:
+		TimeMachineDisplay(Syslog* logger, ITimeMachine* entity, IHeadUpPlanet* dashboard)
+			: UniverseDisplay(logger, logger->get_name(), new ListViewNavigator(), dashboard), machine(entity), closed(true) {
+			this->use_global_mask_setting(false);
 
-		this->_void = ref new SplitView();
-		this->_void->Content = this->canvas;
-		this->_void->Pane = this->navigator->user_interface();
-		
-		this->_void->OpenPaneLength = 256.0;
-		this->_void->PanePlacement = SplitViewPanePlacement::Right;
-		this->_void->DisplayMode = SplitViewDisplayMode::Overlay;
-	}
+			this->_void = ref new SplitView();
+			this->_void->Content = this->canvas;
+			this->_void->Pane = this->navigator->user_interface();
 
-internal:
-	void pickup_planet(IPlanet* planet) {
-		UniverseDisplay::push_planet(planet);
-	}
+			this->_void->OpenPaneLength = 256.0;
+			this->_void->PanePlacement = SplitViewPanePlacement::Right;
+			this->_void->DisplayMode = SplitViewDisplayMode::Overlay;
+		}
 
-public:
-	SplitView^ flyout_content() {
-		return this->_void;
-	}
+	internal:
+		void pickup_planet(IPlanet* planet) {
+			UniverseDisplay::push_planet(planet);
+		}
 
-public:
-	void on_opening(Platform::Object^ target, Platform::Object^ args) {
-		this->darkness = this->global_mask_alpha;
-		this->machine->on_showing();
-	}
+	public:
+		SplitView^ flyout_content() {
+			return this->_void;
+		}
 
-	void on_opened(Platform::Object^ target, Platform::Object^ args) {
-		this->closed = false;
-		this->global_mask_alpha = 0.8;
-		this->_void->IsPaneOpen = false;
-		this->machine->on_shown();
-	}
+	public:
+		void on_opening(Platform::Object^ target, Platform::Object^ args) {
+			this->darkness = this->global_mask_alpha;
+			this->machine->on_showing();
+		}
 
-	void on_closing(FlyoutBase^ target, FlyoutBaseClosingEventArgs^ args) {
-		args->Cancel = !(this->machine->can_hide());
-	}
+		void on_opened(Platform::Object^ target, Platform::Object^ args) {
+			this->closed = false;
+			this->global_mask_alpha = 0.8;
+			this->_void->IsPaneOpen = false;
+			this->machine->on_shown();
+		}
 
-	void on_closed(Platform::Object^ target, Platform::Object^ args) {
-		this->closed = true;
-		this->machine->on_hiden();
-		this->global_mask_alpha = this->darkness;
-	}
+		void on_closing(FlyoutBase^ target, FlyoutBaseClosingEventArgs^ args) {
+			args->Cancel = !(this->machine->can_hide());
+		}
 
-	void on_elapse(long long count, long long interval, long long uptime) override {
-		this->machine->step();
-	}
+		void on_closed(Platform::Object^ target, Platform::Object^ args) {
+			this->closed = true;
+			this->machine->on_hiden();
+			this->global_mask_alpha = this->darkness;
+		}
 
-public:
-	bool shown() override {
-		return !(this->closed);
-	}
+		void on_elapse(long long count, long long interval, long long uptime) override {
+			this->machine->step();
+		}
 
-protected:
-	void construct(CanvasCreateResourcesReason reason) override {
-		this->machine->construct(reason);
-	}
+	public:
+		bool shown() override {
+			return !(this->closed);
+		}
 
-private: // never delete these objects manually
-	ITimeMachine* machine;
-	SplitView^ _void;
-	double darkness;
-	bool closed;
-};
+	protected:
+		void construct(CanvasCreateResourcesReason reason) override {
+			this->machine->construct(reason);
+		}
 
-private class TimeMachineDashboard : public IHeadUpPlanet, public ITimeMachineListener, public ITimelineListener {
-public:
-	TimeMachineDashboard(ITimeMachine* master, int frame_rate) : IHeadUpPlanet(__MODULE__), machine(master), frame_rate(frame_rate) {}
+	private: // never delete these objects manually
+		ITimeMachine* machine;
+		SplitView^ _void;
+		double darkness;
+		bool closed;
+	};
 
-	void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override {
-		float base_size = statusbar_height();
+	private class TimeMachineDashboard : public IHeadUpPlanet, public ITimeMachineListener, public ITimelineListener {
+	public:
+		TimeMachineDashboard(ITimeMachine* master, int frame_rate) : IHeadUpPlanet(__MODULE__), machine(master), frame_rate(frame_rate) {}
 
-		SET_BOX(top, base_size * 3.0F);
-		SET_BOX(bottom, base_size);
-		SET_BOXES(left, right, base_size);
-	}
+		void fill_margin(float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override {
+			float base_size = statusbar_height();
 
-public:
-	void load(CanvasCreateResourcesReason reason, float width, float height) override {
-		auto icon_font = make_text_format("Consolas", statusbar_height());
-		auto icon_color = Colours::GhostWhite;
+			SET_BOX(top, base_size * 3.0F);
+			SET_BOX(bottom, base_size);
+			SET_BOXES(left, right, base_size);
+		}
 
-		for (TMIcon id = _E0(TMIcon); id < TMIcon::_; id++) {
-			Platform::String^ caption = nullptr;
+	public:
+		void load(CanvasCreateResourcesReason reason, float width, float height) override {
+			auto icon_font = make_text_format("Consolas", statusbar_height());
+			auto icon_color = Colours::GhostWhite;
 
-			switch (id) {
-			case TMIcon::PrintScreen: caption = L"📸"; break;
-			case TMIcon::BookMark: caption = L"🔖"; break;
-			case TMIcon::Quit: caption = L"🚪"; break;
+			for (TMIcon id = _E0(TMIcon); id < TMIcon::_; id++) {
+				Platform::String^ caption = time_machine_icon_caption(id);
+
+				if (caption != nullptr) {
+					this->icons[id] = this->insert_one(new Credit<Labellet, TMIcon>(caption, icon_font, icon_color), id);
+					this->cellophane(this->icons[id], time_machine_alpha);
+				}
 			}
 
-			this->icons[id] = this->insert_one(new Credit<Labellet, TMIcon>(caption, icon_font, icon_color), id);
-			this->cellophane(this->icons[id], time_machine_alpha);
-		}
+			this->load_date_picker(this->time_pickers, TM::Departure, -this->machine->span_seconds());
+			this->load_date_picker(this->time_pickers, TM::Destination, 0LL);
 
-		this->load_date_picker(this->time_pickers, TM::Departure, -this->machine->span_seconds());
-		this->load_date_picker(this->time_pickers, TM::Destination, 0LL);
+			{ // load the timeline
+				long long departure = this->time_pickers[TM::Departure]->get_value() * 1000LL;
+				long long destination = this->time_pickers[TM::Destination]->get_value() * 1000LL;
+				float tlwidth = width * 0.618F;
 
-		{ // load the timeline
-			long long departure = this->time_pickers[TM::Departure]->get_value() * 1000LL;
-			long long destination = this->time_pickers[TM::Destination]->get_value() * 1000LL;
-			float tlwidth = width * 0.618F;
+				this->timeline = this->insert_one(new Timelinelet(departure, destination, tlwidth, this->frame_rate));
+				this->cellophane(this->timeline, time_machine_alpha);
 
-			this->timeline = this->insert_one(new Timelinelet(departure, destination, tlwidth, this->frame_rate));
-			this->cellophane(this->timeline, time_machine_alpha);
-
-			this->timeline->push_event_listener(this);
-		}
-	}
-
-	void reflow(float width, float height) override {
-		float icon_y = statusbar_height() * 0.25F;
-		float gapsize = icon_y * 2.0F;
-		float icon_rx = width - icon_y;
-		float icon_width;
-
-		for (unsigned int idx = _N(TMIcon); idx > 0; idx--) {
-			auto icon = this->icons[_E(TMIcon, idx - 1)];
-
-			icon->fill_extent(0.0F, 0.0F, &icon_width);
-			this->move_to(icon, icon_rx, icon_y, GraphletAnchor::RT);
-
-			icon_rx -= (icon_width + gapsize);
-		}
-
-		this->move_to(this->time_pickers[TM::Departure], icon_y, icon_y, GraphletAnchor::LT);
-		this->move_to(this->time_pickers[TM::Destination], this->time_pickers[TM::Departure], GraphletAnchor::LB, GraphletAnchor::LT);
-		this->move_to(this->timeline, this->time_pickers[TM::Destination], GraphletAnchor::RT, GraphletAnchor::LC, gapsize * 2.0F);
-	}
-
-public:
-	bool can_select(IGraphlet* g) override {
-		return (dynamic_cast<Labellet*>(g) != nullptr);
-	}
-
-	void on_focus(IGraphlet* g, bool yes) override {
-		auto editor = dynamic_cast<DatePickerlet*>(g);
-
-		if (editor != nullptr) {
-			if (this->timeline->can_change_range()) {
-				if (yes) {
-					this->show_virtual_keyboard(ScreenKeyboard::Bucketpad, GraphletAnchor::CB, 0.0F, 4.0F);
-				} else {
-					long long departure = this->time_pickers[TM::Departure]->get_value() * 1000LL;
-					long long destination = this->time_pickers[TM::Destination]->get_value() * 1000LL;
- 
-					this->timeline->set_range(departure, destination);
-				}
-			} else if (yes) {
-				this->set_caret_owner(nullptr);
+				this->timeline->push_event_listener(this);
 			}
 		}
-	}
 
-	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
-		auto icon = dynamic_cast<Credit<Labellet, TMIcon>*>(g);
+		void reflow(float width, float height) override {
+			float icon_y = statusbar_height() * 0.25F;
+			float gapsize = icon_y * 2.0F;
+			float icon_rx = width - icon_y;
+			float icon_width;
 
-		if (icon != nullptr) {
-			switch (icon->id) {
-			case TMIcon::Quit: this->machine->hide(); break;
-			case TMIcon::PrintScreen: {
-				auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master()->display());
+			for (unsigned int idx = _N(TMIcon); idx > 0; idx--) {
+				auto icon = this->icons[_E(TMIcon, idx - 1)];
 
-				if (tmd != nullptr) {
-					tmd->save(this->name() + "-"
-						+ tmd->current_planet->name() + "-"
-						+ file_basename_from_second(this->timeline->get_value() / 1000L) + ".png");
+				icon->fill_extent(0.0F, 0.0F, &icon_width);
+				this->move_to(icon, icon_rx, icon_y, GraphletAnchor::RT);
+
+				icon_rx -= (icon_width + gapsize);
+			}
+
+			this->move_to(this->time_pickers[TM::Departure], icon_y, icon_y, GraphletAnchor::LT);
+			this->move_to(this->time_pickers[TM::Destination], this->time_pickers[TM::Departure], GraphletAnchor::LB, GraphletAnchor::LT);
+			this->move_to(this->timeline, this->time_pickers[TM::Destination], GraphletAnchor::RT, GraphletAnchor::LC, gapsize * 2.0F);
+		}
+
+	public:
+		bool can_select(IGraphlet* g) override {
+			return (dynamic_cast<Labellet*>(g) != nullptr);
+		}
+
+		void on_focus(IGraphlet* g, bool yes) override {
+			auto editor = dynamic_cast<DatePickerlet*>(g);
+
+			if (editor != nullptr) {
+				if (this->timeline->can_change_range()) {
+					if (yes) {
+						this->show_virtual_keyboard(ScreenKeyboard::Bucketpad, GraphletAnchor::CB, 0.0F, 4.0F);
+					} else {
+						long long departure = this->time_pickers[TM::Departure]->get_value() * 1000LL;
+						long long destination = this->time_pickers[TM::Destination]->get_value() * 1000LL;
+
+						this->timeline->set_range(departure, destination);
+					}
+				} else if (yes) {
+					this->set_caret_owner(nullptr);
 				}
-			}; break;
-			case TMIcon::BookMark: {
-				auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master()->display());
-
-				if (tmd != nullptr) {
-					tmd->flyout_content()->IsPaneOpen = true;
-				}
-			}; break;
 			}
 		}
-	}
 
-public:
-	void on_startover(Timelinelet* timeline, long long departure_ms, long long destination_ms) override {
-		this->machine->startover(departure_ms, destination_ms);
-	}
+		void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
+			auto icon = dynamic_cast<Credit<Labellet, TMIcon>*>(g);
 
-	void on_step(Timelinelet* timeline) override {
-		this->machine->step();
-	}
+			if (icon != nullptr) {
+				switch (icon->id) {
+				case TMIcon::Quit: this->machine->hide(); break;
+				case TMIcon::PrintScreen: {
+					auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master()->display());
 
-	void on_terminate(Timelinelet* timeline) override {
-		this->machine->terminate();
-	}
+					if (tmd != nullptr) {
+						tmd->save(this->name() + "-"
+							+ tmd->current_planet->name() + "-"
+							+ file_basename_from_second(this->timeline->get_value() / 1000L) + ".png");
+					}
+				}; break;
+				case TMIcon::BookMark: {
+					auto tmd = dynamic_cast<TimeMachineDisplay^>(this->master()->display());
 
-	void on_time_skipped(Timelinelet* timeline, long long timepoint_ms) override {
-		this->machine->timeskip(timepoint_ms);
-	}
+					if (tmd != nullptr) {
+						tmd->flyout_content()->IsPaneOpen = true;
+					}
+				}; break;
+				}
+			}
+		}
 
-	void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) override {
-		this->timeline->set_value(timepoint_ms);
-	}
+	public:
+		void on_startover(Timelinelet* timeline, long long departure_ms, long long destination_ms) override {
+			this->machine->startover(departure_ms, destination_ms);
+		}
 
-public:
-	Timelinelet* get_timeline() {
-		return this->timeline;
-	}
+		void on_step(Timelinelet* timeline) override {
+			this->machine->step();
+		}
 
-private:
-	void load_date_picker(std::map<TM, Credit<DatePickerlet, TM>*>& tps, TM id, long long time_offset) {
-		tps[id] = this->insert_one(new Credit<DatePickerlet, TM>(DatePickerState::Input, time_offset, _speak(id)), id);
-		this->cellophane(tps[id], time_machine_alpha);
-	}
+		void on_terminate(Timelinelet* timeline) override {
+			this->machine->terminate();
+		}
 
-private: // never delete this graphlets manually
-	std::map<TMIcon, Credit<Labellet, TMIcon>*> icons;
-	std::map<TM, Credit<DatePickerlet, TM>*> time_pickers;
-	Timelinelet* timeline;
+		void on_time_skipped(Timelinelet* timeline, long long timepoint_ms) override {
+			this->machine->timeskip(timepoint_ms);
+		}
 
-private:
-	ITimeMachine* machine;
-	unsigned int frame_rate;
-};
+		void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) override {
+			this->timeline->set_value(timepoint_ms);
+		}
+
+	public:
+		Timelinelet* get_timeline() {
+			return this->timeline;
+		}
+
+	private:
+		void load_date_picker(std::map<TM, Credit<DatePickerlet, TM>*>& tps, TM id, long long time_offset) {
+			tps[id] = this->insert_one(new Credit<DatePickerlet, TM>(DatePickerState::Input, time_offset, _speak(id)), id);
+			this->cellophane(tps[id], time_machine_alpha);
+		}
+
+	private: // never delete this graphlets manually
+		std::map<TMIcon, Credit<Labellet, TMIcon>*> icons;
+		std::map<TM, Credit<DatePickerlet, TM>*> time_pickers;
+		Timelinelet* timeline;
+
+	private:
+		ITimeMachine* machine;
+		unsigned int frame_rate;
+	};
+}
 
 /*************************************************************************************************/
 ITimeMachine::ITimeMachine(Platform::String^ dirname, long long time_speed_mspf, int frame_rate, Syslog* logger
