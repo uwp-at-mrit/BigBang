@@ -25,16 +25,16 @@ namespace {
 	private class AboutApplication : public ISatellite {
 	public:
 		AboutApplication(Platform::String^ logo_name, ICanvasBrush^ bgcolor, ICanvasBrush^ fgcolor, int start_year, Platform::String^ logo_rootdir)
-			: ISatellite(Log::Debug, __MODULE__) {
+			: ISatellite(Log::Info, __MODULE__) {
 			this->push_decorator(new BackgroundDecorator(bgcolor));
 
 			this->fgcolor = fgcolor;
-			this->large_font = make_bold_text_format(32.0F);
-			this->font = make_text_format(20.0F);
-			this->small_font = make_text_format(14.0F);
+			this->large_font = make_bold_text_format("Microsoft Yahei", 32.0F);
+			this->font = make_text_format("Microsoft Yahei", 20.0F);
+			this->small_font = make_text_format("Microsoft Yahei", 14.0F);
 
 			this->logo = new Bitmaplet(logo_name, logo_rootdir);
-			this->copyright = this->make_label(make_wstring(L"copyright © %d - %d", start_year, current_year()), this->small_font);
+			this->copyright = this->make_label(make_wstring(L"Copyright © %d - %d", start_year, current_year()), this->small_font);
 		}
 
 		void fill_extent(float* width, float* height) {
