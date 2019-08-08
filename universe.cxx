@@ -263,6 +263,8 @@ float UniverseDisplay::actual_height::get() {
 void UniverseDisplay::global_mask_alpha::set(double v) {
 	ApplicationData::Current->LocalSettings->Values->Insert(mask_setting_key, v);
 	set_mask_alpha(global_mask_color, v);
+
+	this->refresh(this->recent_planet);
 }
 
 double UniverseDisplay::global_mask_alpha::get() {
@@ -275,6 +277,8 @@ void UniverseDisplay::mask_alpha::set(double v) {
 	if (this->universe_settings != nullptr) {
 		this->universe_settings->Values->Insert(mask_setting_key, v);
 	}
+
+	this->refresh(this->recent_planet);
 }
 
 double UniverseDisplay::mask_alpha::get() {
