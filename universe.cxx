@@ -294,7 +294,7 @@ bool UniverseDisplay::surface_ready() {
 }
 
 void UniverseDisplay::refresh(IPlanet* which) {
-	if ((this->headup_planet == which) || (this->recent_planet == which)) {
+	if ((which == nullptr) || (this->headup_planet == which) || (this->recent_planet == which)) {
 		this->display->Invalidate();
 	}
 }

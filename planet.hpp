@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include <shared_mutex>
 
 #include "datum/credit.hpp"
 
@@ -83,13 +82,9 @@ namespace WarGrey::SCADA {
 		virtual void cellophane(IGraphlet* g, float opacity) = 0;
 
 	public:
-		virtual void notify_graphlet_updated(ISprite* g) = 0;
 		virtual void notify_graphlet_ready(IGraphlet* g) = 0;
 		virtual void on_graphlet_ready(IGraphlet* g) = 0;
-		virtual void begin_update_sequence() = 0;
-		virtual bool in_update_sequence() = 0;
-		virtual void end_update_sequence() = 0;
-
+		
 	public:
 		virtual void on_focus(WarGrey::SCADA::IGraphlet* g, bool on_off) {}
 		virtual bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) { return false; }
@@ -148,6 +143,12 @@ namespace WarGrey::SCADA {
 	public:
 		Windows::Foundation::Point global_to_local_point(IGraphlet* g, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Point local_to_global_point(IGraphlet* g, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
+
+	public:
+		void begin_update_sequence();
+		bool in_update_sequence();
+		void end_update_sequence();
+		void notify_graphlet_updated(ISprite* g);
 
 	public:
 		void enter_critical_section();
@@ -212,7 +213,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		Platform::String^ caption;
-		std::shared_mutex section;
     };
 
 	private class Planet : public WarGrey::SCADA::IPlanet {
@@ -260,13 +260,9 @@ namespace WarGrey::SCADA {
 		void cellophane(IGraphlet* g, float opacity) override;
 
 	public:
-		void notify_graphlet_updated(ISprite* g) override;
 		void notify_graphlet_ready(IGraphlet* g) override;
-		void on_graphlet_ready(IGraphlet* g) override {}
-		void begin_update_sequence() override;
-		bool in_update_sequence() override;
-		void end_update_sequence() override;
-
+		void on_graphlet_ready(IGraphlet* g) {}
+		
 	public:
 		using WarGrey::SCADA::IPlanet::on_elapse;
 

@@ -26,7 +26,8 @@ namespace WarGrey::SCADA {
 
 	private struct DragStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_meter_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ joint_meter_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ arm_angle_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ joint_angle_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color;
@@ -39,7 +40,7 @@ namespace WarGrey::SCADA {
 	};
 
 	private struct DragLinesStyle {
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ tilde_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ tide_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ target_depth_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ tolerance_depth_color;
 
@@ -194,7 +195,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void set_tilde_mark(double tildemark);
+		void set_tide_mark(double tidemark);
 		void set_design_depth(double target, double tolerance);
 
 	protected:
@@ -234,7 +235,7 @@ namespace WarGrey::SCADA {
 		unsigned int hstep;
 
 	private:
-		float tildemark;
+		float tidemark;
 		float silt_depth;
 		float target_depth;
 		float tolerance_depth;
@@ -251,7 +252,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void set_tilde_mark(double tildemark);
+		void set_tide_mark(double tidemark);
 		void set_design_depth(double target, double tolerance);
 
 	protected:
@@ -295,7 +296,7 @@ namespace WarGrey::SCADA {
 		double suction_lowest;
 
 	private:
-		float tildemark;
+		float tidemark;
 		float silt_depth;
 		float target_depth;
 		float tolerance_depth;

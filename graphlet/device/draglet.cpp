@@ -168,7 +168,8 @@ DragStyle WarGrey::SCADA::drag_default_style(unsigned int color, unsigned int pr
 	DragStyle style;
 
 	style.color = Colours::make(color);
-	style.meter_color = drag_default_meter_color;
+	style.head_meter_color = drag_default_meter_color;
+	style.joint_meter_color = drag_default_meter_color;
 	style.arm_angle_color = drag_default_arm_angle_color;
 	style.joint_angle_color = drag_default_joint_angle_color;
 	style.head_color = drag_default_head_color;
@@ -186,7 +187,7 @@ DragStyle WarGrey::SCADA::drag_default_style(unsigned int color, unsigned int pr
 DragLinesStyle WarGrey::SCADA::drag_default_lines_style(CanvasStrokeStyle^ stroke, float thickness) {
 	DragLinesStyle style;
 
-	style.tilde_color = Colours::SeaGreen;
+	style.tide_color = Colours::SeaGreen;
 	style.target_depth_color = Colours::Orange;
 	style.tolerance_depth_color = Colours::OrangeRed;
 
@@ -439,12 +440,12 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				x0 = ix;
 				y0 = iy;
 
-				this->draw_metrics(ds, this->ujoint_ms[idx], ix, iy, x, this->drag_thickness, this->style.meter_color);
+				this->draw_metrics(ds, this->ujoint_ms[idx], ix, iy, x, this->drag_thickness, this->style.joint_meter_color);
 				this->draw_metrics(ds, this->arm_degs[idx], ax, ay, x, this->drag_thickness, this->style.arm_angle_color);
 			}
 		}
 
-		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, x, this->drag_thickness * 1.618F, this->style.meter_color);
+		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, x, this->drag_thickness * 1.618F, this->style.head_meter_color);
 		this->draw_metrics(ds, this->forearm_deg,
 			x0 + (draghead_x - x0) * 0.5F, y0 + (draghead_y - y0) * 0.5F,
 			x, this->drag_thickness, this->style.arm_angle_color);
@@ -562,7 +563,7 @@ void DragYZlet::construct() {
 		this->set_figure(this->trunnion, this->ujoints, this->draghead, 0.0, true);
 	}
 
-	this->set_tilde_mark(0.0);
+	this->set_tide_mark(0.0);
 	this->set_design_depth(0.0, 0.0);
 }
 
@@ -588,7 +589,7 @@ void DragYZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 		float x0 = x + this->y_to_x(this->inboard_most);
 		float xn = x + this->y_to_x(this->outboard_most);
 
-		this->draw_line(ds, x0, xn, y + this->tildemark, this->lines_style.tilde_color);
+		this->draw_line(ds, x0, xn, y + this->tidemark, this->lines_style.tide_color);
 		this->draw_line(ds, x0, xn, y + this->target_depth, this->lines_style.target_depth_color);
 		this->draw_line(ds, x0, xn, y + this->tolerance_depth, this->lines_style.tolerance_depth_color);
 	}
@@ -720,8 +721,8 @@ float DragYZlet::z_to_y(double z) {
 	return this->ws_height * py + this->ws_y;
 }
 
-void DragYZlet::set_tilde_mark(double tildemark) {
-	this->tildemark = this->z_to_y(tildemark);
+void DragYZlet::set_tide_mark(double tidemark) {
+	this->tidemark = this->z_to_y(tidemark);
 	this->notify_updated();
 }
 
@@ -802,7 +803,7 @@ void DragXZlet::construct() {
 		this->x_axis = geometry_freeze(geometry_translate(axis, xoff, yoff));
 	}
 
-	this->set_tilde_mark(0.0);
+	this->set_tide_mark(0.0);
 	this->set_design_depth(0.0, 0.0);
 }
 
@@ -840,7 +841,7 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 		float x0 = x + this->x_to_x(0.0);
 		float xn = x + this->x_to_x(this->drag_length);
 		
-		this->draw_line(ds, x0, xn, y + this->tildemark, this->lines_style.tilde_color);
+		this->draw_line(ds, x0, xn, y + this->tidemark, this->lines_style.tide_color);
 		this->draw_line(ds, x0, xn, y + this->target_depth, this->lines_style.target_depth_color);
 		this->draw_line(ds, x0, xn, y + this->tolerance_depth, this->lines_style.tolerance_depth_color);
 	}
@@ -892,7 +893,7 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				float ax = last_x + (ix - last_x) * 0.5F;
 				float ay = last_y + (iy - last_y) * 0.5F;
 
-				this->draw_metrics(ds, this->ujoint_ms[idx], ix, iy, lX, rX, y, Y, this->style.meter_color, true);
+				this->draw_metrics(ds, this->ujoint_ms[idx], ix, iy, lX, rX, y, Y, this->style.joint_meter_color, true);
 				this->draw_metrics(ds, this->arm_degs[idx], ax, ay, lX, rX, y, Y, this->style.arm_angle_color, true);
 
 				last_x = ix;
@@ -900,9 +901,9 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 			}
 		}
 
-		this->draw_metrics(ds, this->suction_m, x + this->_suction.x, y + this->_suction.y, lX, rX, y, Y, this->style.meter_color, true);
+		this->draw_metrics(ds, this->suction_m, x + this->_suction.x, y + this->_suction.y, lX, rX, y, Y, this->style.joint_meter_color, true);
 
-		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, lX, rX, y, Y, this->style.meter_color, true);
+		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, lX, rX, y, Y, this->style.head_meter_color, true);
 		this->draw_metrics(ds, this->forejoint_deg, last_x, last_y, lX, rX, y, Y, this->style.joint_angle_color, false);
 		this->draw_metrics(ds, this->forearm_deg,
 			last_x + (draghead_x - last_x) * 0.5F, last_y + (draghead_y - last_y) * 0.5F,
@@ -982,8 +983,8 @@ float DragXZlet::z_to_y(double z) {
 	return this->ws_height * py + this->ws_y;
 }
 
-void DragXZlet::set_tilde_mark(double tildemark) {
-	this->tildemark = this->z_to_y(tildemark);
+void DragXZlet::set_tide_mark(double tidemark) {
+	this->tidemark = this->z_to_y(tidemark);
 	this->notify_updated();
 }
 

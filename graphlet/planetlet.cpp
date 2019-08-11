@@ -110,7 +110,7 @@ void Planetlet::update(long long count, long long interval, long long uptime) {
 	this->planet->end_update_sequence();
 
 	if (this->stretchable_width || this->stretchable_height) {
-		// all null arguments, just for triggling the resizing event
+		// all arguments are null, just for triggling the resizing event
 		this->moor(this->stretching_anchor);
 		this->planet->fill_graphlets_boundary(nullptr, nullptr, nullptr, nullptr);
 	}

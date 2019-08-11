@@ -96,3 +96,35 @@ Point Frame::local_to_global_point(IPlanet* p, float local_x, float local_y, flo
 
 	return Point(global_local.X + x, global_local.Y + y);
 }
+
+void Frame::begin_update_sequence() {
+	this->_display->master()->begin_update_sequence();
+}
+
+bool Frame::in_update_sequence() {
+	return this->_display->master()->in_update_sequence();
+}
+
+void Frame::end_update_sequence() {
+	this->_display->master()->end_update_sequence();
+}
+
+void Frame::notify_graphlet_updated(ISprite* g) {
+	this->_display->master()->notify_graphlet_updated(this->_display);
+}
+
+void Frame::enter_critical_section() {
+	this->_display->master()->enter_critical_section();
+}
+
+void Frame::enter_shared_section() {
+	this->_display->master()->enter_shared_section();
+}
+
+void Frame::leave_critical_section() {
+	this->_display->master()->leave_critical_section();
+}
+
+void Frame::leave_shared_section() {
+	this->_display->master()->leave_shared_section();
+}

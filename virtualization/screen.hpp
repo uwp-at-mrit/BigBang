@@ -40,12 +40,24 @@ namespace WarGrey::SCADA {
 		virtual Windows::Foundation::Point local_to_global_point(IPlanet* p, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F) = 0;
 
 	public:
-		void apply_source_size(float sketch_width, float sketch_height);
-		float sketch_to_application_width(float sketch_width);
-		float sketch_to_application_height(float sketch_height);
+		virtual void begin_update_sequence() = 0;
+		virtual bool in_update_sequence() = 0;
+		virtual void end_update_sequence() = 0;
+		virtual void notify_graphlet_updated(ISprite* g) = 0;
+
+	public:
+		virtual void enter_critical_section() = 0;
+		virtual void enter_shared_section() = 0;
+		virtual void leave_critical_section() = 0;
+		virtual void leave_shared_section() = 0;
 
 	public:
 		virtual void refresh(IPlanet* target) = 0;
+
+	public:
+		void apply_source_size(float sketch_width, float sketch_height);
+		float sketch_to_application_width(float sketch_width);
+		float sketch_to_application_height(float sketch_height);
 
 	private:
 		DisplayFit mode;

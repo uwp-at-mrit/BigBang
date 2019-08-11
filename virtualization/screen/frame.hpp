@@ -39,6 +39,18 @@ namespace WarGrey::SCADA {
 		bool shown() override;
 
 	public:
+		void begin_update_sequence() override;
+		bool in_update_sequence() override;
+		void end_update_sequence() override;
+		void notify_graphlet_updated(ISprite* g) override;
+
+	public:
+		void enter_critical_section() override;
+		void enter_shared_section() override;
+		void leave_critical_section() override;
+		void leave_shared_section() override;
+
+	public:
 		void refresh(IPlanet* target) override;
 
 	private:

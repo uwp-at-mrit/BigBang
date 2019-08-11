@@ -290,36 +290,6 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 	}
 }
 
-void Planet::notify_graphlet_updated(ISprite* g) { // NOTE: `g` may be `nullptr`
-	if (this->in_update_sequence()) {
-		this->needs_update = true;
-	} else if (this->info != nullptr) {
-		this->info->master->refresh(this);
-		this->needs_update = false;
-	}
-}
-
-void Planet::begin_update_sequence() {
-	this->update_sequence_depth += 1;
-}
-
-bool Planet::in_update_sequence() {
-	return (this->update_sequence_depth > 0);
-}
-
-void Planet::end_update_sequence() {
-	this->update_sequence_depth -= 1;
-
-	if (this->update_sequence_depth < 1) {
-		this->update_sequence_depth = 0;
-
-		if ((this->needs_update) && (this->info != nullptr)) {
-			this->info->master->refresh(this);
-			this->needs_update = false;
-		}
-	}
-}
-
 void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx, float dy) {
 	if (g->info == nullptr) {
 		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g);
@@ -1512,20 +1482,50 @@ Syslog* IPlanet::get_logger() {
 	return logger;
 }
 
+void IPlanet::begin_update_sequence() {
+	if (this->info != nullptr) {
+		this->info->master->begin_update_sequence();
+	}
+}
+
+bool IPlanet::in_update_sequence() {
+	return ((this->info != nullptr) && this->info->master->in_update_sequence());
+}
+
+void IPlanet::end_update_sequence() {
+	if (this->info != nullptr) {
+		this->info->master->end_update_sequence();
+	}
+}
+
+void IPlanet::notify_graphlet_updated(ISprite* g) {
+	if (this->info != nullptr) {
+		this->info->master->notify_graphlet_updated(g);
+	}
+}
+
 void IPlanet::enter_critical_section() {
-	this->section.lock();
+	if (this->info != nullptr) {
+		this->info->master->enter_critical_section();
+	}
 }
 
 void IPlanet::enter_shared_section() {
-	this->section.lock_shared();
+	if (this->info != nullptr) {
+		this->info->master->enter_shared_section();
+	}
 }
 
 void IPlanet::leave_critical_section() {
-	this->section.unlock();
+	if (this->info != nullptr) {
+		this->info->master->leave_critical_section();
+	}
 }
 
 void IPlanet::leave_shared_section() {
-	this->section.unlock_shared();
+	if (this->info != nullptr) {
+		this->info->master->leave_shared_section();
+	}
 }
 
 void IPlanet::collapse() {

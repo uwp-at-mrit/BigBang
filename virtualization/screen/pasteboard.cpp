@@ -78,3 +78,50 @@ Point Pasteboard::global_to_local_point(IPlanet* p, float global_x, float global
 Point Pasteboard::local_to_global_point(IPlanet* p, float local_x, float local_y, float xoff, float yoff) {
 	return this->_display->local_to_global_point(p, local_x, local_y, xoff, yoff);
 }
+
+
+void Pasteboard::begin_update_sequence() {
+	this->update_sequence_depth += 1;
+}
+
+bool Pasteboard::in_update_sequence() {
+	return (this->update_sequence_depth > 0);
+}
+
+void Pasteboard::end_update_sequence() {
+	this->update_sequence_depth -= 1;
+
+	if (this->update_sequence_depth < 1) {
+		this->update_sequence_depth = 0;
+
+		if (this->needs_update) {
+			this->refresh(nullptr);
+			this->needs_update = false;
+		}
+	}
+}
+
+void Pasteboard::notify_graphlet_updated(ISprite* g) { // NOTE: `g` may be `nullptr`
+	if (this->in_update_sequence()) {
+		this->needs_update = true;
+	} else {
+		this->refresh(nullptr);
+		this->needs_update = false;
+	}
+}
+
+void Pasteboard::enter_critical_section() {
+	this->section.lock();
+}
+
+void Pasteboard::enter_shared_section() {
+	this->section.lock_shared();
+}
+
+void Pasteboard::leave_critical_section() {
+	this->section.unlock();
+}
+
+void Pasteboard::leave_shared_section() {
+	this->section.unlock_shared();
+}
