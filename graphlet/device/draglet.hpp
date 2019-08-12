@@ -65,6 +65,9 @@ namespace WarGrey::SCADA {
 		IDraglet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style, bool leftward);
 
 	public:
+		virtual Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& X) = 0;
+
+	public:
 		void update(long long count, long long interval, long long uptime) override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
@@ -82,7 +85,6 @@ namespace WarGrey::SCADA {
 		double get_visor_earth_degrees();
 
 	protected:
-		virtual Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& X) = 0;
 		virtual double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) = 0;
 
 	protected:
@@ -161,11 +163,13 @@ namespace WarGrey::SCADA {
 			float ws_height, float hatchmark_interval = 4.0F, unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
 
 	public:
+		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+
+	public:
 		void construct() override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
 		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
 		
 	protected:
@@ -191,6 +195,9 @@ namespace WarGrey::SCADA {
 			unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
 
 	public:
+		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+
+	public:
 		void construct() override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
@@ -199,7 +206,6 @@ namespace WarGrey::SCADA {
 		void set_design_depth(double target, double tolerance);
 
 	protected:
-		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
 		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
 
 	protected:
@@ -248,6 +254,9 @@ namespace WarGrey::SCADA {
 			float hatchmark_interval = 5.0F, float suction_lowest = -15.0F);
 
 	public:
+		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+
+	public:
 		void construct() override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
@@ -256,7 +265,6 @@ namespace WarGrey::SCADA {
 		void set_design_depth(double target, double tolerance);
 
 	protected:
-		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
 		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
 
 	protected:

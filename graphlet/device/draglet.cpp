@@ -210,6 +210,7 @@ float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info, double max_dept
 /*************************************************************************************************/
 IDraglet::IDraglet(DragInfo& info, DragStyle& style, bool leftward) : info(info), style(style), leftward(leftward) {
 	this->drag_length = this->info.trunnion_length;
+
 	for (unsigned int idx = 0; idx < sizeof(this->info.pipe_lengths) / sizeof(float); idx++) {
 		this->ujoints[idx].x = this->drag_length;
 		this->ujoints[idx].y = this->info.trunnion_gapsize;
