@@ -11,6 +11,7 @@
 #include "datum/box.hpp"
 #include "datum/flonum.hpp"
 
+#include "settings.hxx"
 #include "system.hpp"
 #include "syslog.hpp"
 
@@ -125,9 +126,9 @@ static inline double get_mask_alpha(CanvasSolidColorBrush^ color) {
 	return double(color->Color.A) / 255.0;
 }
 
-static inline void load_mask_alpha(ApplicationDataContainer^ container, CanvasSolidColorBrush^ color) {
-	if (container->Values->HasKey(mask_setting_key)) {
-		set_mask_alpha(color, double(container->Values->Lookup(mask_setting_key)));
+static inline void load_mask_alpha(ApplicationDataContainer^ zone, CanvasSolidColorBrush^ color) {
+	if (has_preference(mask_setting_key, zone)) {
+		set_mask_alpha(color, get_preference(mask_setting_key, 0.0, zone));
 	}
 }
 
@@ -151,9 +152,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 	this->_navigator->push_navigation_listener(this);
 
 	if (setting_name != nullptr) {
-		ApplicationDataCreateDisposition adcd = ApplicationDataCreateDisposition::Always;
-
-		this->universe_settings = ApplicationData::Current->LocalSettings->CreateContainer(setting_name, adcd);
+		this->universe_settings = make_preference_zone(setting_name);
 	}
 
 	this->display = ref new CanvasControl();
@@ -199,7 +198,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 			global_mask_color = make_solid_brush(0x000000, 0.0F);
 		}
 
-		load_mask_alpha(ApplicationData::Current->LocalSettings, global_mask_color);
+		load_mask_alpha(nullptr, global_mask_color);
 
 		if (this->universe_settings != nullptr) {
 			load_mask_alpha(this->universe_settings, this->mask_color);
@@ -261,7 +260,7 @@ float UniverseDisplay::actual_height::get() {
 }
 
 void UniverseDisplay::global_mask_alpha::set(double v) {
-	ApplicationData::Current->LocalSettings->Values->Insert(mask_setting_key, v);
+	put_preference(mask_setting_key, v);
 	set_mask_alpha(global_mask_color, v);
 
 	this->refresh(this->recent_planet);
@@ -275,7 +274,7 @@ void UniverseDisplay::mask_alpha::set(double v) {
 	set_mask_alpha(this->mask_color, v);
 
 	if (this->universe_settings != nullptr) {
-		this->universe_settings->Values->Insert(mask_setting_key, v);
+		put_preference(mask_setting_key, v, this->universe_settings);
 	}
 
 	this->refresh(this->recent_planet);
@@ -374,8 +373,8 @@ void UniverseDisplay::push_planet(IPlanet* planet) {
 		info->next = this->head_planet;
 
 		if (this->universe_settings != nullptr) {
-			if (!this->universe_settings->Values->HasKey(page_setting_key)) {
-				this->universe_settings->Values->Insert(page_setting_key, planet->name());
+			if (!has_preference(page_setting_key, this->universe_settings)) {
+				put_preference(page_setting_key, planet->name(), this->universe_settings);
 			}
 		}
 	}
@@ -405,7 +404,7 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 			this->_navigator->select(this->recent_planet);
 
 			if (this->universe_settings != nullptr) {
-				this->universe_settings->Values->Insert(page_setting_key, this->recent_planet->name());
+				put_preference(page_setting_key, this->recent_planet->name(), this->universe_settings);
 			}
 
 			this->notify_transfer(this->from_planet, this->recent_planet);
@@ -556,7 +555,7 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 
 
 		if (this->universe_settings != nullptr) {
-			this->transfer_to(this->universe_settings->Values->Lookup(page_setting_key)->ToString());
+			this->transfer_to(get_preference(page_setting_key, this->universe_settings)->ToString());
 		}
 
 		if ((this->recent_planet == this->head_planet) && (this->recent_planet != nullptr)) {

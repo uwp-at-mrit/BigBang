@@ -70,7 +70,9 @@ Planetlet::Planetlet(IPlanet* planet, float width, float height, ICanvasBrush^ b
 	}
 
 	this->screen = new Frame(this);
-	this->enable_events(true, true);
+	
+	// Application has the responsibility to make decision
+	// this->enable_events(true, true);
 }
 
 Planetlet::Planetlet(IPlanet* planet, GraphletAnchor anchor, ICanvasBrush^ background)
@@ -98,6 +100,7 @@ void Planetlet::construct() {
 
 	bind_subplanet_owership(this->screen, this->planet);
 	construct_subplanet(this->planet, this->get_logger(), CanvasCreateResourcesReason::FirstTime, this->width, this->height);
+	this->triggle_resize_event_if_need();
 }
 
 void Planetlet::fill_extent(float x, float y, float* width, float* height) {
@@ -109,11 +112,7 @@ void Planetlet::update(long long count, long long interval, long long uptime) {
 	this->planet->on_elapse(count, interval, uptime);
 	this->planet->end_update_sequence();
 
-	if (this->stretchable_width || this->stretchable_height) {
-		// all arguments are null, just for triggling the resizing event
-		this->moor(this->stretching_anchor);
-		this->planet->fill_graphlets_boundary(nullptr, nullptr, nullptr, nullptr);
-	}
+	this->triggle_resize_event_if_need();
 }
 
 void Planetlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -191,4 +190,12 @@ bool Planetlet::on_key(VirtualKey key, bool screen_keyboard) {
 
 bool Planetlet::on_character(unsigned int keycode) {
 	return this->planet->on_character(keycode);
+}
+
+void Planetlet::triggle_resize_event_if_need() {
+	if (this->stretchable_width || this->stretchable_height) {
+		// all arguments are null, just for triggling the resizing event
+		this->moor(this->stretching_anchor);
+		this->planet->fill_graphlets_boundary(nullptr, nullptr, nullptr, nullptr);
+	}
 }

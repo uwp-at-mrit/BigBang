@@ -51,6 +51,9 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IPlanet* planet;
 
 	private:
+		void triggle_resize_event_if_need();
+
+	private:
 		WarGrey::SCADA::IScreen* screen;
 		float width;
 		float height;

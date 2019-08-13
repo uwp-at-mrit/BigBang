@@ -197,14 +197,18 @@ DragLinesStyle WarGrey::SCADA::drag_default_lines_style(CanvasStrokeStyle^ strok
 	return style;
 }
 
-float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees) {
-	float depth = info.trunnion_length + info.pipe_padding + info.head_length;
+float WarGrey::SCADA::drag_length(DragInfo& info) {
+	float length = info.trunnion_length + info.pipe_padding + info.head_length;
 
 	for (unsigned int idx = 0; idx < sizeof(info.pipe_lengths) / sizeof(float); idx++) {
-		depth += info.pipe_lengths[idx];
+		length += info.pipe_lengths[idx];
 	}
 
-	return depth * flsin(degrees_to_radians(max_depth_degrees));
+	return length;
+}
+
+float WarGrey::SCADA::drag_depth(DragInfo& info, double max_depth_degrees) {
+	return drag_length(info) * flsin(degrees_to_radians(max_depth_degrees));
 }
 
 /*************************************************************************************************/

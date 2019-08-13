@@ -49,6 +49,7 @@ namespace WarGrey::SCADA {
 		float thickness;
 	};
 
+	float drag_length(WarGrey::SCADA::DragInfo& info);
 	float drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees = 60.0);
 
 	WarGrey::SCADA::DragStyle drag_default_style(unsigned int color,
