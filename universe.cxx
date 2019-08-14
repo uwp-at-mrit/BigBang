@@ -11,7 +11,7 @@
 #include "datum/box.hpp"
 #include "datum/flonum.hpp"
 
-#include "settings.hxx"
+#include "preference.hxx"
 #include "system.hpp"
 #include "syslog.hpp"
 
