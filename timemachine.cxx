@@ -423,7 +423,7 @@ void ITimeMachine::on_timestream(long long timepoint_ms, size_t addr0, size_t ad
 		dashboard->on_timestream(timepoint_ms, addr0, addrn, data, size, logger);
 	}
 
-	if (keystream) {
+	if (keystream && (this->universe->current_planet != nullptr)) {
 		long long interval = this->get_time_speed() / this->get_speed_shift();
 		long long uptime = this->timepoint - this->departure;
 		long long count = uptime / interval;
