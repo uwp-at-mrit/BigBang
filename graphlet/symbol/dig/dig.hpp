@@ -7,12 +7,17 @@
 
 namespace WarGrey::SCADA {
 	private enum class DigDatumType {
+		Icon, Arc, Circle, Polyline, Rectangle, Line, FontText,
+
+		// TODO
+		Typhoon, Compass,
+		_
+	};
+	
+	private enum class DigIcon {
 		SunkenShip, LightShip, OilWell, PilotStation, ReportSpot, LightHouse, RedFlag,
 		Hoisptal, Tree, Anchor, Chimney, WaterTower, RadarReflector, IslandReef,
 		Aquatic, Buoy, TideStation, Kettle, Light, NavigationMark, Picket, Rock, Text, Number, FishingFloat, Wreck,
-		Typhoon, Compass,
-
-		Arc, Circle, Polyline, Rectangle, Line, FontText,
 		_
 	};
 
@@ -32,6 +37,21 @@ namespace WarGrey::SCADA {
 		double y;
 	};
 
+	private struct IconDig : public WarGrey::SCADA::IDigDatum {
+	public:
+		IconDig(std::filebuf& dig, WarGrey::SCADA::DigIcon type, float size);
+
+	public:
+		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
+		WarGrey::SCADA::IGraphlet* make_graphlet(double* x, double* y) override;
+
+	public:
+		WarGrey::SCADA::DigIcon subtype;
+
+	private:
+		float size;
+	};
+
 	private struct IMultilineDigDatum abstract : public WarGrey::SCADA::IDigDatum {
 	protected:
 		IMultilineDigDatum(WarGrey::SCADA::DigDatumType type) : IDigDatum(type) {}
@@ -42,18 +62,6 @@ namespace WarGrey::SCADA {
 	public:
 		std::deque<double> rest_xs;
 		std::deque<double> rest_ys;
-	};
-
-	private struct IconDig : public WarGrey::SCADA::IDigDatum {
-	public:
-		IconDig(std::filebuf& dig, WarGrey::SCADA::DigDatumType type, float size);
-
-	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
-		WarGrey::SCADA::IGraphlet* make_graphlet(double* x, double* y) override;
-
-	private:
-		float size;
 	};
 
 	private struct CompassDig : public WarGrey::SCADA::IDigDatum {

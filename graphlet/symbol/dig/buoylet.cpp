@@ -27,7 +27,7 @@ namespace {
 
 /*************************************************************************************************/
 BuoyDig::BuoyDig(std::filebuf& dig, BuoyType subtype, float size)
-	: IconDig(dig, DigDatumType::Buoy, size), subtype(subtype), size(size) {}
+	: IconDig(dig, DigIcon::Buoy, size), subtype(subtype), size(size) {}
 
 IGraphlet* BuoyDig::make_graphlet(double* x, double* y) {
 	SET_VALUES(x, this->x, y, this->y);

@@ -43,6 +43,7 @@ namespace WarGrey::SCADA {
 		virtual void begin_update_sequence() = 0;
 		virtual bool in_update_sequence() = 0;
 		virtual void end_update_sequence() = 0;
+		virtual bool needs_update() = 0;
 		virtual void notify_graphlet_updated(ISprite* g) = 0;
 
 	public:

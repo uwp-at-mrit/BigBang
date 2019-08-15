@@ -148,6 +148,7 @@ namespace WarGrey::SCADA {
 		void begin_update_sequence();
 		bool in_update_sequence();
 		void end_update_sequence();
+		bool needs_update();
 		void notify_graphlet_updated(ISprite* g);
 
 	public:
@@ -348,10 +349,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IKeyboard* bucketpad;
 		float keyboard_x;
 		float keyboard_y;
-
-	private:
-		int update_sequence_depth;
-		bool needs_update;
 
 	private:
 		float translate_x;

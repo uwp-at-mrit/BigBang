@@ -6,6 +6,7 @@
 
 #include "graphlet/matrix/diglet.hpp"
 #include "graphlet/symbol/dig/dig.hpp"
+#include "graphlet/symbol/dig/vectorlet.hpp"
 #include "graphlet/textlet.hpp"
 
 #include "datum/flonum.hpp"
@@ -139,14 +140,21 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
 	{ // make graphlets
 		IDigDatum* datum = nullptr;
 		double x, y;
-		
+
+		/** NOTE
+		 *   For the sake of simplicity, non-icon items are organized as a batch.
+		 *   Also, they are drawn before drawing icons.
+		 */
+		this->planet->insert(new DigVectorlet(doc_dig), this->map_x, this->map_y);
+
 		doc_dig->rewind();
-
 		while ((datum = doc_dig->step()) != nullptr) {
-			IGraphlet* g = datum->make_graphlet(&x, &y);
+			if (datum->type == DigDatumType::Icon) {
+				IGraphlet* g = datum->make_graphlet(&x, &y);
 
-			if (g != nullptr) {
-				this->planet->insert(g, float(x), float(y), GraphletAnchor::LT);
+				if (g != nullptr) {
+					this->planet->insert(g, float(x), float(y), GraphletAnchor::LT);
+				}
 			}
 		}
 	}

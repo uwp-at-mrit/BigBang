@@ -109,6 +109,10 @@ void Frame::end_update_sequence() {
 	this->_display->master()->end_update_sequence();
 }
 
+bool Frame::needs_update() {
+	return this->_display->master()->needs_update();
+}
+
 void Frame::notify_graphlet_updated(ISprite* g) {
 	this->_display->master()->notify_graphlet_updated(this->_display);
 }

@@ -43,6 +43,7 @@ namespace WarGrey::SCADA {
 		void begin_update_sequence() override;
 		bool in_update_sequence() override;
 		void end_update_sequence() override;
+		bool needs_update() override;
 		void notify_graphlet_updated(ISprite* g) override;
 
 	public:
@@ -60,6 +61,6 @@ namespace WarGrey::SCADA {
 	private:
 		std::shared_mutex section;
 		int update_sequence_depth;
-		bool needs_update;
+		bool update_is_needed;
     };
 }

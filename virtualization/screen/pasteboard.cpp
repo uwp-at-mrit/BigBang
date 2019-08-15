@@ -94,19 +94,23 @@ void Pasteboard::end_update_sequence() {
 	if (this->update_sequence_depth < 1) {
 		this->update_sequence_depth = 0;
 
-		if (this->needs_update) {
+		if (this->update_is_needed) {
 			this->refresh(nullptr);
-			this->needs_update = false;
+			this->update_is_needed = false;
 		}
 	}
 }
 
+bool Pasteboard::needs_update() {
+	return this->update_is_needed;
+}
+
 void Pasteboard::notify_graphlet_updated(ISprite* g) { // NOTE: `g` may be `nullptr`
 	if (this->in_update_sequence()) {
-		this->needs_update = true;
+		this->update_is_needed = true;
 	} else {
 		this->refresh(nullptr);
-		this->needs_update = false;
+		this->update_is_needed = false;
 	}
 }
 

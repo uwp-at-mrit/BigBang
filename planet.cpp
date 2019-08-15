@@ -228,8 +228,7 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 
 /*************************************************************************************************/
 Planet::Planet(Platform::String^ name, unsigned int initial_mode)
-	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0), background(nullptr)
-	, translate_x(0.0F), translate_y(0.0F), scale_x(1.0F), scale_y(1.0F) {
+	: IPlanet(name), mode(initial_mode), background(nullptr), translate_x(0.0F), translate_y(0.0F), scale_x(1.0F), scale_y(1.0F) {
 	this->numpad = new Numpad(this);
 	this->arrowpad = new Affinepad(this);
 	this->bucketpad = new Bucketpad(this);
@@ -314,10 +313,12 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
 
 		if ((this->scale_x != 1.0F) || (this->scale_y != 1.0F)) {
-			float width, height;
+			if (g->resizable()) {
+				float width, height;
 
-			g->fill_extent(x, y, &width, &height);
-			g->resize(width * this->scale_x, height * this->scale_y);
+				g->fill_extent(x, y, &width, &height);
+				g->resize(width * this->scale_x, height * this->scale_y);
+			}
 		}
 
 		this->end_update_sequence();
@@ -549,7 +550,7 @@ void Planet::scale(float sx, float sy) {
 			this->scale_x = sx;
 			this->scale_y = sy;
 
-			if (this->needs_update) {
+			if (this->needs_update()) {
 				this->size_cache_invalid();
 			}
 
@@ -1496,6 +1497,10 @@ void IPlanet::end_update_sequence() {
 	if (this->info != nullptr) {
 		this->info->master->end_update_sequence();
 	}
+}
+
+bool IPlanet::needs_update() {
+	return ((this->info != nullptr) && this->info->master->needs_update());
 }
 
 void IPlanet::notify_graphlet_updated(ISprite* g) {

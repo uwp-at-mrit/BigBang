@@ -40,33 +40,33 @@ namespace {
 	};
 }
 
-static IGraphlet* create_icon_graphlet(DigDatumType type, float size) {
+static IGraphlet* create_icon_graphlet(DigIcon type, float size) {
 	IGraphlet* icon = nullptr;
 
 	switch (type) {
-	case DigDatumType::LightShip: icon = new LightShiplet(size); break;
-	case DigDatumType::SunkenShip: icon = new SunkenShiplet(size); break;
-	case DigDatumType::Wreck: icon = new Wrecklet(size); break;
-	case DigDatumType::Anchor: icon = new Anchorlet(size); break;
-	case DigDatumType::RadarReflector: icon = new RadarReflectorlet(size); break;
-	case DigDatumType::LightHouse: icon = new LightHouselet(size); break;
-	case DigDatumType::OilWell: icon = new OilWelllet(size); break;
-	case DigDatumType::ReportSpot: icon = new ReportSpotlet(size); break;
-	case DigDatumType::PilotStation: icon = new PilotStationlet(size); break;
-	case DigDatumType::WaterTower: icon = new WaterTowerlet(size); break;
-	case DigDatumType::Chimney: icon = new Chimneylet(size); break;
-	case DigDatumType::Tree: icon = new Treelet(size); break;
-	case DigDatumType::Aquatic: icon = new Aquaticlet(size); break;
-	case DigDatumType::IslandReef: icon = new Reeflet(size); break;
-	case DigDatumType::RedFlag: icon = new Flaglet(size); break;
-	case DigDatumType::Hoisptal: icon = new Hospitallet(size); break;
-	case DigDatumType::Light: icon = new Lightlet(size); break;
-	case DigDatumType::FishingFloat: icon = new Fishlet(size); break;
-	case DigDatumType::NavigationMark: icon = new NavigationMarklet(size); break;
-	case DigDatumType::Picket: icon = new Picketlet(size); break;
-	case DigDatumType::Kettle: icon = new Kettlet(size); break;
-	case DigDatumType::TideStation: icon = new TideStationlet(size); break;
-	case DigDatumType::Rock: icon = new Rocklet(size); break;
+	case DigIcon::LightShip: icon = new LightShiplet(size); break;
+	case DigIcon::SunkenShip: icon = new SunkenShiplet(size); break;
+	case DigIcon::Wreck: icon = new Wrecklet(size); break;
+	case DigIcon::Anchor: icon = new Anchorlet(size); break;
+	case DigIcon::RadarReflector: icon = new RadarReflectorlet(size); break;
+	case DigIcon::LightHouse: icon = new LightHouselet(size); break;
+	case DigIcon::OilWell: icon = new OilWelllet(size); break;
+	case DigIcon::ReportSpot: icon = new ReportSpotlet(size); break;
+	case DigIcon::PilotStation: icon = new PilotStationlet(size); break;
+	case DigIcon::WaterTower: icon = new WaterTowerlet(size); break;
+	case DigIcon::Chimney: icon = new Chimneylet(size); break;
+	case DigIcon::Tree: icon = new Treelet(size); break;
+	case DigIcon::Aquatic: icon = new Aquaticlet(size); break;
+	case DigIcon::IslandReef: icon = new Reeflet(size); break;
+	case DigIcon::RedFlag: icon = new Flaglet(size); break;
+	case DigIcon::Hoisptal: icon = new Hospitallet(size); break;
+	case DigIcon::Light: icon = new Lightlet(size); break;
+	case DigIcon::FishingFloat: icon = new Fishlet(size); break;
+	case DigIcon::NavigationMark: icon = new NavigationMarklet(size); break;
+	case DigIcon::Picket: icon = new Picketlet(size); break;
+	case DigIcon::Kettle: icon = new Kettlet(size); break;
+	case DigIcon::TideStation: icon = new TideStationlet(size); break;
+	case DigIcon::Rock: icon = new Rocklet(size); break;
 	default: icon = new Rectanglet(size, Colours::Azure);
 	}
 
@@ -80,30 +80,30 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 
 	if (ch != EOF) {
 		switch (ch) {
-		case 'a': datum = new IconDig(dig, DigDatumType::LightShip, icon_size); break;
-		case 'b': datum = new IconDig(dig, DigDatumType::SunkenShip, icon_size); break;
-		case 'c': datum = new IconDig(dig, DigDatumType::OilWell, icon_size); break;
-		case 'd': datum = new IconDig(dig, DigDatumType::PilotStation, icon_size); break;
-		case 'e': datum = new IconDig(dig, DigDatumType::ReportSpot, icon_size); break;
-		case 'f': datum = new IconDig(dig, DigDatumType::LightHouse, icon_size); break;
-		case 'g': datum = new IconDig(dig, DigDatumType::RedFlag, icon_size); break;
-		case 'h': datum = new IconDig(dig, DigDatumType::Hoisptal, icon_size); break;
-		case 'i': datum = new IconDig(dig, DigDatumType::Tree, icon_size); break;
-		case 'j': datum = new IconDig(dig, DigDatumType::Anchor, icon_size); break;
-		case 'k': datum = new IconDig(dig, DigDatumType::Chimney, icon_size); break;
-		case 'l': datum = new IconDig(dig, DigDatumType::WaterTower, icon_size); break;
-		case 'm': datum = new IconDig(dig, DigDatumType::RadarReflector, icon_size); break;
-		case 'n': datum = new IconDig(dig, DigDatumType::IslandReef, icon_size); break;
-		case 'o': datum = new IconDig(dig, DigDatumType::Aquatic, icon_size); break;
+		case 'a': datum = new IconDig(dig, DigIcon::LightShip, icon_size); break;
+		case 'b': datum = new IconDig(dig, DigIcon::SunkenShip, icon_size); break;
+		case 'c': datum = new IconDig(dig, DigIcon::OilWell, icon_size); break;
+		case 'd': datum = new IconDig(dig, DigIcon::PilotStation, icon_size); break;
+		case 'e': datum = new IconDig(dig, DigIcon::ReportSpot, icon_size); break;
+		case 'f': datum = new IconDig(dig, DigIcon::LightHouse, icon_size); break;
+		case 'g': datum = new IconDig(dig, DigIcon::RedFlag, icon_size); break;
+		case 'h': datum = new IconDig(dig, DigIcon::Hoisptal, icon_size); break;
+		case 'i': datum = new IconDig(dig, DigIcon::Tree, icon_size); break;
+		case 'j': datum = new IconDig(dig, DigIcon::Anchor, icon_size); break;
+		case 'k': datum = new IconDig(dig, DigIcon::Chimney, icon_size); break;
+		case 'l': datum = new IconDig(dig, DigIcon::WaterTower, icon_size); break;
+		case 'm': datum = new IconDig(dig, DigIcon::RadarReflector, icon_size); break;
+		case 'n': datum = new IconDig(dig, DigIcon::IslandReef, icon_size); break;
+		case 'o': datum = new IconDig(dig, DigIcon::Aquatic, icon_size); break;
 
-		case 'G': datum = new IconDig(dig, DigDatumType::TideStation, icon_size); break;
-		case 'K': datum = new IconDig(dig, DigDatumType::Kettle, icon_size); break;
-		case 'L': datum = new IconDig(dig, DigDatumType::Light, icon_size); break;
-		case 'N': datum = new IconDig(dig, DigDatumType::NavigationMark, icon_size); break;
-		case 'P': datum = new IconDig(dig, DigDatumType::Picket, icon_size); break;
-		case 'R': datum = new IconDig(dig, DigDatumType::Rock, icon_size); break;
-		case 'V': datum = new IconDig(dig, DigDatumType::FishingFloat, icon_size); break;
-		case 'W': datum = new IconDig(dig, DigDatumType::Wreck, icon_size); break;
+		case 'G': datum = new IconDig(dig, DigIcon::TideStation, icon_size); break;
+		case 'K': datum = new IconDig(dig, DigIcon::Kettle, icon_size); break;
+		case 'L': datum = new IconDig(dig, DigIcon::Light, icon_size); break;
+		case 'N': datum = new IconDig(dig, DigIcon::NavigationMark, icon_size); break;
+		case 'P': datum = new IconDig(dig, DigIcon::Picket, icon_size); break;
+		case 'R': datum = new IconDig(dig, DigIcon::Rock, icon_size); break;
+		case 'V': datum = new IconDig(dig, DigIcon::FishingFloat, icon_size); break;
+		case 'W': datum = new IconDig(dig, DigIcon::Wreck, icon_size); break;
 
 		case 'p': datum = new BuoyDig(dig, BuoyType::_1, icon_size); break;
 		case 'q': datum = new BuoyDig(dig, BuoyType::_2, icon_size); break;
@@ -120,8 +120,8 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 		case 'F': datum = new BuoyDig(dig, BuoyType::Red, icon_size); break;
 		case 'Q': datum = new BuoyDig(dig, BuoyType::BlackYellow, icon_size); break;
 
-		case 'T': datum = new IconDig(dig, DigDatumType::Text, icon_size); break;
-		case 'U': datum = new IconDig(dig, DigDatumType::Number, icon_size); break;
+		case 'T': datum = new IconDig(dig, DigIcon::Text, icon_size); break;
+		case 'U': datum = new IconDig(dig, DigIcon::Number, icon_size); break;
 
 		case 'A': datum = new ArcDig(dig); break;
 		case 'C': datum = new CircleDig(dig); break;
@@ -180,7 +180,7 @@ Platform::String^ IDigDatum::to_string() {
 	return description;
 }
 
-IconDig::IconDig(std::filebuf& dig, DigDatumType type, float size) : IDigDatum(type), size(size) {
+IconDig::IconDig(std::filebuf& dig, DigIcon type, float size) : IDigDatum(DigDatumType::Icon), subtype(type), size(size) {
 	this->y = read_flonum(dig);
 	this->x = read_flonum(dig);
 	this->name = read_wtext(dig, char_end_of_line);
@@ -189,7 +189,7 @@ IconDig::IconDig(std::filebuf& dig, DigDatumType type, float size) : IDigDatum(t
 IGraphlet* IconDig::make_graphlet(double* x, double* y) {
 	SET_VALUES(x, this->x, y, this->y);
 
-	return create_icon_graphlet(this->type, this->size);
+	return create_icon_graphlet(this->subtype, this->size);
 }
 
 void IconDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
