@@ -1234,9 +1234,13 @@ void Planet::on_elapse(long long count, long long interval, long long uptime) {
 void Planet::draw(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {
 	CanvasActiveLayer^ layer = nullptr;
 	float3x2 transform = ds->Transform;
+	float dsX = flmax(0.0F, X);
+	float dsY = flmax(0.0F, Y);
+	float dsWidth = flmin(X + Width, monitor.Width);
+	float dsHeight = flmin(Y + Height, monitor.Height);
 
 	if (this->background != nullptr) {
-		ds->FillRoundedRectangle(0.0F, 0.0F, Width, Height,
+		ds->FillRoundedRectangle(X, Y, Width, Height,
 			this->background_corner_radius, this->background_corner_radius,
 			this->background);
 	}
@@ -1255,7 +1259,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float X, float Y, float Width, float
 
 	if (this->head_graphlet != nullptr) {
 		IGraphlet* child = this->head_graphlet;
-		float gx, gy, grx, gby, gwidth, gheight;
+		float gx, gy, gwidth, gheight;
 		
 		do {
 			GraphletInfo* info = GRAPHLET_INFO(child);
@@ -1265,10 +1269,8 @@ void Planet::draw(CanvasDrawingSession^ ds, float X, float Y, float Width, float
 
 				gx = (info->x + this->translate_x) * this->scale_x + X;
 				gy = (info->y + this->translate_y) * this->scale_y + Y;
-				grx = gx + gwidth;
-				gby = gy + gheight;
-
-				if (rectangle_overlay(gx, gy, grx, gby, 0.0F, 0.0F, monitor.Width, monitor.Height)) {
+				
+				if (rectangle_overlay(gx, gy, gx + gwidth, gy + gheight, dsX, dsY, dsWidth, dsHeight)) {
 					if (info->rotation == 0.0F) {
 						layer = ds->CreateLayer(info->alpha, Rect(gx, gy, gwidth, gheight));
 					} else {

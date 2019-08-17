@@ -154,7 +154,7 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
 		 *   For the sake of simplicity, non-icon items are organized as a batch.
 		 *   Also, they are drawn before drawing icons.
 		 */
-		this->planet->insert(new DigVectorlet(doc_dig, dvwidth, dvheight, tx, ty), 0.0F, 0.0F);
+		this->planet->insert(new DigVectorlet(doc_dig, dvwidth, dvheight, tx, ty), -float(tx), -float(ty));
 	}
 
 	{ // make icons
