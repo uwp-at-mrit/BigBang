@@ -18,7 +18,6 @@
 #include "paint.hpp"
 #include "brushes.hxx"
 #include "colorspace.hpp"
-#include "transformation.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -106,11 +105,11 @@ static inline void reflow_planet(IPlanet* planet, float width, float height) {
 	}
 }
 
-static void draw_planet(CanvasDrawingSession^ ds, Platform::String^ type, IPlanet* planet, float width, float height, Syslog* logger) {
+static void draw_planet(CanvasDrawingSession^ ds, Platform::String^ type, IPlanet* planet, float x, float y, float width, float height, Syslog* logger) {
 	planet->enter_shared_section();
 	
 	try {
-		planet->draw(ds, width, height);
+		planet->draw(ds, x, y, width, height);
 	} catch (Platform::Exception^ wte) {
 		logger->log_message(Log::Warning, L"%s[%s]: rendering: %s", type->Data(), planet->name()->Data(), wte->Message->Data());
 	}
@@ -159,8 +158,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 	this->display->Name = this->get_logger()->get_name();
 	this->screen = new Pasteboard(this, mode, dwidth, dheight, swidth, sheight);
 	
-	// CanvasControl uses the shared one by default, while CanvasAnimatedControl is not.
-	// this->display->UseSharedDevice = true;
+	// CanvasControl uses the shared one by default, while CanvasAnimatedControl does not.
 
 	if (heads_up_planet != nullptr) {
 		LinkedPlanetInfo* info = bind_planet_owership(this->screen, heads_up_planet);
@@ -577,33 +575,19 @@ void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args)
 		float height = region.Height - this->hup_top_margin - this->hup_bottom_margin;
 
 		if (this->from_planet == nullptr) {
-			if ((width == region.Width) && (height == region.Height)) {
-				draw_planet(ds, "planet", this->recent_planet, width, height, this->get_logger());
-			} else {
-				float3x2 identity = ds->Transform;
-
-				ds->Transform = make_translation_matrix(this->hup_left_margin, this->hup_top_margin);
-				draw_planet(ds, "planet", this->recent_planet, width, height, this->get_logger());
-				ds->Transform = identity;
-			}
+			draw_planet(ds, "planet", this->recent_planet, this->hup_left_margin, this->hup_top_margin, width, height, this->get_logger());
 		} else {
 			float deltaX = ((this->transferX < 0.0F) ? width : -width);
 			float tx = this->transferX + this->hup_left_margin;
 			float ty = this->hup_top_margin;
-			float3x2 identity = ds->Transform;
-
-			ds->Transform = make_translation_matrix(tx, ty);
-			draw_planet(ds, "planet", this->from_planet, width, height, this->get_logger());
-
-			ds->Transform = make_translation_matrix(tx + deltaX, ty);
-			draw_planet(ds, "planet", this->recent_planet, width, height, this->get_logger());
-
-			ds->Transform = identity;
+			
+			draw_planet(ds, "planet", this->from_planet, tx, ty, width, height, this->get_logger());
+			draw_planet(ds, "planet", this->recent_planet, tx + deltaX, ty, width, height, this->get_logger());
 		}
 	}
 
 	if (this->headup_planet != nullptr) {
-		draw_planet(ds, "heads-up", this->headup_planet, region.Width, region.Height, this->get_logger());
+		draw_planet(ds, "heads-up", this->headup_planet, 0.0F, 0.0F, region.Width, region.Height, this->get_logger());
 	}
 
 	this->leave_critical_section();
@@ -936,15 +920,12 @@ CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
 	if (this->recent_planet != nullptr) {
 		float width = region.Width - this->hup_left_margin - this->hup_right_margin;
 		float height = region.Height - this->hup_top_margin - this->hup_bottom_margin;
-		float3x2 identity = ds->Transform;
-
-		ds->Transform = make_translation_matrix(this->hup_left_margin, this->hup_top_margin);
-		draw_planet(ds, "planet", this->recent_planet, width, height, this->get_logger());
-		ds->Transform = identity;
+		
+		draw_planet(ds, "planet", this->recent_planet, this->hup_left_margin, this->hup_top_margin, width, height, this->get_logger());
 	}
 
 	if (this->headup_planet != nullptr) {
-		draw_planet(ds, "heads-up", this->headup_planet, region.Width, region.Height, this->get_logger());
+		draw_planet(ds, "heads-up", this->headup_planet, 0.0F, 0.0F, region.Width, region.Height, this->get_logger());
 	}
 
 	return snapshot;

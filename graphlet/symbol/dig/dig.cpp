@@ -31,6 +31,9 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::Foundation::Numerics;
+
+/*************************************************************************************************/
 namespace {
 	private struct _Dig : public IDigDatum {
 	public:

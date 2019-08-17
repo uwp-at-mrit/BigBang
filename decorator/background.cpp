@@ -30,9 +30,9 @@ BackgroundDecorator::BackgroundDecorator(ICanvasBrush^ color, float tinset, floa
 	this->left_inset = linset;
 }
 
-void BackgroundDecorator::draw_before(CanvasDrawingSession^ ds, float Width, float Height) {
+void BackgroundDecorator::draw_before(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {
 	float width = Width - this->left_inset - this->right_inset;
 	float height = Height - this->top_inset - this->bottom_inset;
 	
-	ds->FillRectangle(this->left_inset, this->top_inset, width, height, this->color);
+	ds->FillRectangle(this->left_inset + X, this->top_inset + Y, width, height, this->color);
 }

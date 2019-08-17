@@ -19,8 +19,8 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* get_logger();
 
 	public:
-		virtual void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) {}
-		virtual void draw_after(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) {}
+		virtual void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {}
+		virtual void draw_after(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {}
 
 		virtual void draw_before_graphlet(
 			WarGrey::SCADA::IGraphlet* g,

@@ -30,7 +30,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
 DigVectorMap::DigVectorMap() : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {
-	this->items_it = this->items.end();
+	this->cursor = this->items.end();
 }
 
 DigVectorMap::~DigVectorMap() {
@@ -46,7 +46,7 @@ DigVectorMap::~DigVectorMap() {
 void DigVectorMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
 	double x, y, width, height;
 
-	this->items.push_back(item);
+	this->items.push_front(item);
 	this->counters[item->type] = this->counters[item->type] + 1;
 
 	item->fill_enclosing_box(&x, &y, &width, &height);
@@ -57,17 +57,23 @@ void DigVectorMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
 }
 
 void DigVectorMap::rewind() {
-	this->items_it = this->items.end();
+	this->cursor = this->items.end();
 }
 
 IDigDatum* DigVectorMap::step() {
-	if (this->items_it == this->items.end()) {
-		this->items_it = this->items.begin();
+	IDigDatum* datum = nullptr;
+
+	if (this->cursor == this->items.end()) {
+		this->cursor = this->items.begin();
 	} else {
-		this->items_it++;
+		this->cursor++;
 	}
 
-	return ((this->items_it == this->items.end()) ? nullptr : (*this->items_it));
+	if (this->cursor != this->items.end()) {
+		datum = (*this->cursor);
+	}
+
+	return datum;
 }
 
 void DigVectorMap::fill_enclosing_box(double* x, double* y, double* width, double* height) {
@@ -77,11 +83,13 @@ void DigVectorMap::fill_enclosing_box(double* x, double* y, double* width, doubl
 
 IAsyncOperation<DigVectorMap^>^ DigVectorMap::load_async(Platform::String^ _dig) {
 	return create_async([=] {
-		DigVectorMap^ map = ref new DigVectorMap();
+		DigVectorMap^ map = nullptr;
 		IDigDatum* datum;
 		std::filebuf dig;
 
 		if (dig.open(_dig->Data(), std::ios::in)) {
+			map = ref new DigVectorMap();
+
 			while ((datum = read_dig(dig, 1600.0F)) != nullptr) {
 				if (datum->type < DigDatumType::_) {
 					map->push_back_item(datum);
@@ -129,23 +137,29 @@ void Diglet::construct() {
 }
 
 void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
-	doc_dig->fill_enclosing_box(&this->map_x, &this->map_y, &this->map_width, &this->map_height);
+	doc_dig->fill_enclosing_box(&this->map_y, &this->map_x, &this->map_height, &this->map_width);
 	
 	this->planet->begin_update_sequence();
 
-	this->planet->scale(float(this->origin_scale));
-	this->planet->translate(float(this->view_width / this->origin_scale - this->map_width) * 0.5F - float(this->map_x),
-		float(this->view_height / this->origin_scale - this->map_height) * 0.5F - float(this->map_y));
+	{ // affine transformation
+		double dvwidth = double(this->view_width) / this->origin_scale;
+		double dvheight = double(this->view_height) / this->origin_scale;
+		double tx = dvwidth * 0.5;
+		double ty = dvheight * 0.5F;
 
-	{ // make graphlets
-		IDigDatum* datum = nullptr;
-		double x, y;
+		this->planet->scale(float(this->origin_scale));
+		this->planet->translate(float(tx), float(ty));
 
 		/** NOTE
 		 *   For the sake of simplicity, non-icon items are organized as a batch.
 		 *   Also, they are drawn before drawing icons.
 		 */
-		this->planet->insert(new DigVectorlet(doc_dig), this->map_x, this->map_y);
+		this->planet->insert(new DigVectorlet(doc_dig, dvwidth, dvheight, tx, ty), 0.0F, 0.0F);
+	}
+
+	{ // make icons
+		IDigDatum* datum = nullptr;
+		double x, y;
 
 		doc_dig->rewind();
 		while ((datum = doc_dig->step()) != nullptr) {
@@ -153,7 +167,7 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigVectorMap^ doc_dig, int hint) {
 				IGraphlet* g = datum->make_graphlet(&x, &y);
 
 				if (g != nullptr) {
-					this->planet->insert(g, float(x), float(y), GraphletAnchor::LT);
+					this->planet->insert(g, float(y), float(this->map_height - x), GraphletAnchor::LT);
 				}
 			}
 		}

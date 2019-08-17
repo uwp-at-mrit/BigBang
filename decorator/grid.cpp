@@ -49,22 +49,24 @@ void GridDecorator::set_grid_height(float new_height, float start_y) {
 	}
 }
 
-void GridDecorator::draw_before(CanvasDrawingSession^ ds, float Width, float Height) {
+void GridDecorator::draw_before(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {
     static auto grid_color = make_solid_brush(system_color(UIElementType::GrayText));
 	static auto font = make_text_format(fminf(this->gwidth, this->gheight) * 0.42F);
+	float X0 = this->x0 + X;
+	float Y0 = this->y0 + Y;
 	size_t idx = 0;
 
     grid_color->Opacity = 0.64F;
-    for (float x = this->x0; x <= Width; x += this->gwidth) {
-        ds->DrawLine(x, 0.0F, x, Height, grid_color);
-		ds->DrawText(idx.ToString(), x, this->y0, grid_color, font);
+    for (float x = X; x <= Width; x += this->gwidth) {
+		ds->DrawLine(x, Y, x, Height, grid_color);
+		ds->DrawText(idx.ToString(), x, Y0, grid_color, font);
 		idx++;
     }
 
 	idx = 0;
-    for (float y = this->y0; y <= Height; y += this->gheight) {
-        ds->DrawLine(0.0F, y, Width, y, grid_color);
-		ds->DrawText(idx.ToString(), this->x0, y, grid_color, font);
+    for (float y = Y0; y <= Height; y += this->gheight) {
+		ds->DrawLine(X, y, Width, y, grid_color);
+		ds->DrawText(idx.ToString(), X0, y, grid_color, font);
 		idx++;
 	}
 }

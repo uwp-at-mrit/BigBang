@@ -55,7 +55,7 @@ namespace WarGrey::SCADA {
 		virtual bool surface_ready();
 		virtual void notify_surface_ready() {}
 		virtual void update(long long count, long long interval, long long uptime) {}
-		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {}
+		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float X, float Y, float Width, float Height) {}
 		virtual void collapse();
 		
 	public:
@@ -100,7 +100,7 @@ namespace WarGrey::SCADA {
 		virtual void on_transfer(WarGrey::SCADA::IPlanet* from, WarGrey::SCADA::IPlanet* to) {}
 
 	public:
-		virtual void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) = 0;
+		virtual void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float X, float Y, float width, float height) = 0;
 		virtual IGraphlet* find_next_selected_graphlet(IGraphlet* start = nullptr) = 0;
 		virtual void add_selected(IGraphlet* g) = 0;
 		virtual void set_selected(IGraphlet* g) = 0;
@@ -230,7 +230,7 @@ namespace WarGrey::SCADA {
 
     public:
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;
-        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
+        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) override;
 
     public: // learn C++ "Name Hiding"
 		using WarGrey::SCADA::IPlanet::fill_graphlet_location;

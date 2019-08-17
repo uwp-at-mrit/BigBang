@@ -156,10 +156,10 @@ public:
 	NavigationDecorator(float vinset) : vinset(vinset) {}
 
 public:
-	void draw_before(CanvasDrawingSession^ ds, float Width, float Height) override {
+	void draw_before(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) override {
 		Rect box = this->caption->LayoutBounds;
 
-		ds->DrawTextLayout(this->caption, (Width - box.Width) * 0.5F, vinset, Colours::Snow);
+		ds->DrawTextLayout(this->caption, (Width - box.Width) * 0.5F + X, vinset + Y, Colours::Snow);
 	}
 
 	void draw_after_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) override {

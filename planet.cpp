@@ -8,6 +8,8 @@
 #include "syslog.hpp"
 #include "system.hpp"
 #include "tongue.hpp"
+
+#include "math.hpp"
 #include "paint.hpp"
 #include "shape.hpp"
 #include "brushes.hxx"
@@ -226,6 +228,8 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 	return found;
 }
 
+static Size monitor(0.0F, 0.0F);
+
 /*************************************************************************************************/
 Planet::Planet(Platform::String^ name, unsigned int initial_mode)
 	: IPlanet(name), mode(initial_mode), background(nullptr), translate_x(0.0F), translate_y(0.0F), scale_x(1.0F), scale_y(1.0F) {
@@ -234,6 +238,10 @@ Planet::Planet(Platform::String^ name, unsigned int initial_mode)
 	this->bucketpad = new Bucketpad(this);
 
 	this->keyboard = this->numpad;
+
+	if (monitor.Width == 0.0F) {
+		monitor = system_screen_size();
+	}
 }
 
 Planet::~Planet() {
@@ -1223,15 +1231,9 @@ void Planet::on_elapse(long long count, long long interval, long long uptime) {
 	this->update(count, interval, uptime);
 }
 
-void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
+void Planet::draw(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {
 	CanvasActiveLayer^ layer = nullptr;
 	float3x2 transform = ds->Transform;
-	float transformX = transform.m31;
-	float transformY = transform.m32;
-	float dsX = flabs(flmin(0.0F, transformX));
-	float dsY = flabs(flmin(0.0F, transformY));
-	float dsWidth = Width - flmax(transformX, 0.0F);
-	float dsHeight = Height - flmax(transformY, 0.0F);
 
 	if (this->background != nullptr) {
 		ds->FillRoundedRectangle(0.0F, 0.0F, Width, Height,
@@ -1243,7 +1245,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 #ifdef _DEBUG
 		try {
 #endif
-			decorator->draw_before(ds, Width, Height);
+			decorator->draw_before(ds, X, Y, Width, Height);
 #ifdef _DEBUG
 		} catch (Platform::Exception^ e) {
 			this->get_logger()->log_message(Log::Critical, L"%s: predecorating: %s", this->name()->Data(), e->Message->Data());
@@ -1253,33 +1255,35 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 
 	if (this->head_graphlet != nullptr) {
 		IGraphlet* child = this->head_graphlet;
-		float graphlet_x, graphlet_y, width, height;
+		float gx, gy, grx, gby, gwidth, gheight;
 		
 		do {
 			GraphletInfo* info = GRAPHLET_INFO(child);
 
-			graphlet_x = (info->x + this->translate_x) * this->scale_x;
-			graphlet_y = (info->y + this->translate_y) * this->scale_y;
-
 			if (unsafe_graphlet_unmasked(info, this->mode)) {
-				child->fill_extent(info->x, info->y, &width, &height);
+				child->fill_extent(info->x, info->y, &gwidth, &gheight);
 
-				if (((graphlet_x < dsWidth) || ((graphlet_x + width) > dsX)) && ((graphlet_y < dsHeight) || ((graphlet_y + height) > dsY))) {
+				gx = (info->x + this->translate_x) * this->scale_x + X;
+				gy = (info->y + this->translate_y) * this->scale_y + Y;
+				grx = gx + gwidth;
+				gby = gy + gheight;
+
+				if (rectangle_overlay(gx, gy, grx, gby, 0.0F, 0.0F, monitor.Width, monitor.Height)) {
 					if (info->rotation == 0.0F) {
-						layer = ds->CreateLayer(info->alpha, Rect(graphlet_x, graphlet_y, width, height));
+						layer = ds->CreateLayer(info->alpha, Rect(gx, gy, gwidth, gheight));
 					} else {
-						float cx = graphlet_x + width * 0.5F;
-						float cy = graphlet_y + height * 0.5F;
+						float cx = gx + gwidth * 0.5F;
+						float cy = gy + gheight * 0.5F;
 
-						ds->Transform = make_rotation_matrix(info->rotation, cx, cy, transformX, transformY);
-						layer = ds->CreateLayer(info->alpha, Rect(graphlet_x, graphlet_y, width, height));
+						ds->Transform = make_rotation_matrix(info->rotation, cx, cy, X, Y);
+						layer = ds->CreateLayer(info->alpha, Rect(gx, gy, gwidth, gheight));
 					}
 
 					for (IPlanetDecorator* decorator : this->decorators) {
 #ifdef _DEBUG
 						try {
 #endif
-							decorator->draw_before_graphlet(child, ds, graphlet_x, graphlet_y, width, height, info->selected);
+							decorator->draw_before_graphlet(child, ds, gx, gy, gwidth, gheight, info->selected);
 #ifdef _DEBUG
 						} catch (Platform::Exception^ e) {
 							this->get_logger()->log_message(Log::Critical, L"%s: predecorating graphlet: %s",
@@ -1292,9 +1296,9 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 					try {
 #endif
 						if (child->ready()) {
-							child->draw(ds, graphlet_x, graphlet_y, width, height);
+							child->draw(ds, gx, gy, gwidth, gheight);
 						} else {
-							child->draw_progress(ds, graphlet_x, graphlet_y, width, height);
+							child->draw_progress(ds, gx, gy, gwidth, gheight);
 						}
 #ifdef _DEBUG
 					} catch (Platform::Exception^ e) {
@@ -1307,7 +1311,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 #ifdef _DEBUG
 						try {
 #endif
-							decorator->draw_after_graphlet(child, ds, graphlet_x, graphlet_y, width, height, info->selected);
+							decorator->draw_after_graphlet(child, ds, gx, gy, gwidth, gheight, info->selected);
 #ifdef _DEBUG
 						} catch (Platform::Exception^ e) {
 							this->get_logger()->log_message(Log::Critical, L"%s: postdecorating graphlet: %s",
@@ -1317,7 +1321,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 					}
 
 					if (info->selected) {
-						this->draw_visible_selection(ds, graphlet_x, graphlet_y, width, height);
+						this->draw_visible_selection(ds, gx, gy, gwidth, gheight);
 					}
 
 					delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.
@@ -1339,7 +1343,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 #ifdef _DEBUG
 		try {
 #endif
-			decorator->draw_after(ds, Width, Height);
+			decorator->draw_after(ds, X, Y, Width, Height);
 #ifdef _DEBUG
 		} catch (Platform::Exception^ e) {
 			this->get_logger()->log_message(Log::Critical, L"%s: postdecorating: %s", this->name()->Data(), e->Message->Data());
@@ -1351,7 +1355,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 		float width, height;
 
 		this->keyboard->fill_extent(0.0F, 0.0F, &width, &height);
-		this->keyboard->draw(ds, this->keyboard_x, this->keyboard_y, width, height);
+		this->keyboard->draw(ds, this->keyboard_x + X, this->keyboard_y + Y, width, height);
 	}
 }
 
@@ -1553,14 +1557,12 @@ CanvasRenderTarget^ IPlanet::take_snapshot(float x, float y, float width, float 
 	}
 
 	if ((x != 0.0F) || (y != 0.0F)) {
-		ds->Transform = make_translation_matrix(-x, -y);
-
 		width += x;
 		height += y;
 	}
 
 	this->enter_shared_section();
-	this->draw(ds, width, height);
+	this->draw(ds, -x, -y, width, height);
 	this->leave_shared_section();
 
 	return snapshot;

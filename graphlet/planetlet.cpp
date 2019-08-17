@@ -116,19 +116,13 @@ void Planetlet::update(long long count, long long interval, long long uptime) {
 }
 
 void Planetlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float3x2 saved_transform = ds->Transform;
-
-	ds->Transform = make_translation_matrix(x, y);
-
 	try {
-		this->planet->draw(ds, Width, Height);
+		this->planet->draw(ds, x, y, Width, Height);
 	} catch (Platform::Exception^ e) {
 		this->get_logger()->log_message(Log::Critical,
 			L"Planetlet[%s]: rendering: %s",
 			planet->name()->Data(), e->Message->Data());
 	}
-	
-	ds->Transform = saved_transform;
 }
 
 void Planetlet::resize(float width, float height) {

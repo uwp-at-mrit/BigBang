@@ -35,7 +35,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		std::deque<WarGrey::SCADA::IDigDatum*> items;
-		std::deque<WarGrey::SCADA::IDigDatum*>::iterator items_it;
+		std::deque<WarGrey::SCADA::IDigDatum*>::iterator cursor;
 		std::map<WarGrey::SCADA::DigDatumType, unsigned int> counters;
 	};
 

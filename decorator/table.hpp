@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
 		void fill_cell_anchor(unsigned int idx, float fx, float fy, float* x = nullptr, float* y = nullptr);
 
 	public:
-		void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
+		void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) override;
 
 	protected:
 		virtual void draw_cell(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,

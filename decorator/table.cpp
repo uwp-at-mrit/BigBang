@@ -44,12 +44,12 @@ void ITableDecorator::fill_cell_anchor(unsigned int idx, float fx, float fy, flo
 	SET_BOX(y, y0 + height * fy);
 }
 
-void ITableDecorator::draw_before(CanvasDrawingSession^ ds, float Width, float Height) {
+void ITableDecorator::draw_before(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {
 	float x, y, width, height;
 
 	for (unsigned int i = 0; i < this->count; i++) {
 		this->fill_cell_extent(i, &x, &y, &width, &height);
-		this->draw_cell(ds, x, y, width, height, this->radius, this->color);
+		this->draw_cell(ds, x + X, y + Y, width, height, this->radius, this->color);
 	}
 }
 

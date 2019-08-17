@@ -28,18 +28,18 @@ static CanvasStrokeStyle^ vector_strokes[] = {
 	make_dash_stroke(CanvasDashStyle::DashDotDot)
 };
 
-static CanvasSolidColorBrush^ vector_colors_ref(long long gbr) {
-	auto maybe_color = vector_colors.find(gbr);
+static CanvasSolidColorBrush^ vector_colors_ref(long long bgr) {
+	auto maybe_color = vector_colors.find(bgr);
 	CanvasSolidColorBrush^ color = nullptr;
 
 	if (maybe_color == vector_colors.end()) {
-		if (gbr == 0LL) {
+		if (bgr == 0LL) {
 			color = Colours::Foreground;
 		} else {
-			color = make_solid_brush(gbra((unsigned int)gbr));
+			color = make_solid_brush(gbra((unsigned int)bgr));
 		}
 
-		vector_colors.insert(std::pair<long long, CanvasSolidColorBrush^>(gbr, color));
+		vector_colors.insert(std::pair<long long, CanvasSolidColorBrush^>(bgr, color));
 	} else {
 		color = maybe_color->second;
 	}
@@ -48,12 +48,9 @@ static CanvasSolidColorBrush^ vector_colors_ref(long long gbr) {
 }
 
 /*************************************************************************************************/
-DigVectorlet::DigVectorlet(DigVectorMap^ map) : map(map), xscale(1.0), yscale(1.0) {
+DigVectorlet::DigVectorlet(DigVectorMap^ map, double width, double height, double tx, double ty)
+	: map(map), width(float(width)), height(float(height)), xtranslation(tx), ytranslation(ty), xscale(1.0), yscale(1.0) {
 	this->enable_resizing(true);
-}
-
-void DigVectorlet::construct() {
-	this->map->fill_enclosing_box(&this->x, &this->y, &this->width, &this->height);
 }
 
 void DigVectorlet::fill_extent(float x, float y, float* width, float* height) {
@@ -62,15 +59,13 @@ void DigVectorlet::fill_extent(float x, float y, float* width, float* height) {
 
 void DigVectorlet::resize(float width, float height) {
 	if ((this->width != width) || (this->height != height)) {
-		double geox, geoy, geowidth, geoheight;
+		double geowidth, geoheight;
 
-		this->map->fill_enclosing_box(&geox, &geoy, &geowidth, &geoheight);
+		this->map->fill_enclosing_box(nullptr, nullptr, &geoheight, &geowidth);
 
 		this->xscale = double(width) / geowidth;
 		this->yscale = double(height) / geoheight;
 
-		this->x = geox * this->xscale;
-		this->y = geoy * this->yscale;
 		this->width = width;
 		this->height = height;
 
@@ -83,28 +78,28 @@ void DigVectorlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, f
 	float ds_rx = x + Width;
 	float ds_by = y + Height;
 
-	this->map->step();
+	this->map->rewind();
 
 	while ((datum = this->map->step()) != nullptr) {
 		switch (datum->type) {
 		case DigDatumType::Line: {
 			LineDig* l = static_cast<LineDig*>(datum);
-			float x0 = float(l->x * this->xscale - this->x);
-			float y0 = float(l->y * this->yscale - this->y);
-			float x1 = float(l->stop_x * this->xscale - this->x);
-			float y1 = float(l->stop_y * this->yscale - this->y);
+			float y0 = Height - float((l->x + this->xtranslation) * this->xscale);
+			float x0 = float((l->y + this->ytranslation) * this->yscale);
+			float y1 = Height - float((l->stop_x + this->xtranslation) * this->xscale);
+			float x1 = float((l->stop_y + this->ytranslation) * this->yscale);
 			float lwidth = ((l->linewidth > 0) ? float(l->linewidth) : 1.0F);
 
 			if (((x0 <= ds_rx) || (x1 >= x)) && ((y0 <= ds_by) || (y1 >= y))) {
 				ds->DrawLine(x0, y0, x1, y1, vector_colors_ref(l->color), lwidth, vector_strokes[l->style]);
 			} else {
-				//this->get_logger()->log_message(Log::Info, L"(%f, %f, %f, %f)", x0, y0, x1, y1);
+				this->get_logger()->log_message(Log::Info, L"Line: (%f, %f, %f, %f)", x0, y0, x1, y1);
 			}
 		}; break;
 		case DigDatumType::Circle: {
 			CircleDig* c = static_cast<CircleDig*>(datum);
-			float cx = float(c->x * this->xscale - this->x);
-			float cy = float(c->y * this->yscale - this->y);
+			float cy = Height - float((c->x + this->xtranslation) * this->xscale);
+			float cx = float((c->y + this->ytranslation) * this->yscale);
 			float rx = float(c->radius * this->xscale);
 			float ry = float(c->radius * this->yscale);
 
@@ -119,8 +114,9 @@ void DigVectorlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, f
 				ds->DrawEllipse(cx, cy, rx, ry, border_color, 1.0F, border_style);
 			}
 		}; break;
+		default: {
+			this->get_logger()->log_message(Log::Info, datum->type.ToString());
+		}
 		}
 	}
-
-	// this->get_logger()->log_message(Log::Info, L"BOX: (%f, %f, %f, %f)", x, y, rx, by);
 }
