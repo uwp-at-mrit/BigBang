@@ -150,7 +150,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			Size r = this->length_to_local(a->radius);
 			double start_deg = a->start_degree - 90.0; // why -90.0?
 			double stop_deg = a->stop_degree - 90.0;
-			bool visible = circle_visible(cp.x, cp.y, r.Width, r.Height, x, y, ds_rx, ds_by);
+			bool visible = ((start_deg != stop_deg) && circle_visible(cp.x, cp.y, r.Width, r.Height, x, y, ds_rx, ds_by));
 
 #ifdef _DEBUG
 			this->get_logger()->log_message(Log::Debug, L"Arc: (%f, %f, %f, %f, %f, %f)%s",
@@ -158,18 +158,16 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 #endif
 
 			if (visible) {
-				auto apath = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-				float sx, sy, ex, ey;
+				CanvasGeometry^ g = nullptr;
 
-				ellipse_point(r.Width, r.Height, start_deg, &sx, &sy);
-				ellipse_point(r.Width, r.Height, stop_deg, &ex, &ey);
+				// NOTE: the arc is ensured to be drawn counterclockwise
+				if (start_deg > stop_deg) {
+					g = arc(start_deg, stop_deg, r.Width, r.Height);
+				} else {
+					g = arc(start_deg + 360.0, stop_deg, r.Width, r.Height);
+				}
 
-				apath->BeginFigure(sx, sy);
-				apath->AddArc(float2(ex, ey), r.Width, r.Height, 0.0F, CanvasSweepDirection::CounterClockwise, CanvasArcSize::Large);
-				apath->EndFigure(CanvasFigureLoop::Open);
-
-				ds->DrawGeometry(CanvasGeometry::CreatePath(apath), cp.x, cp.y,
-					vector_colors_ref(a->color), 1.0F, vector_stroke_ref(a->style));
+				ds->DrawGeometry(g, cp.x, cp.y, vector_colors_ref(a->color), 1.0F, vector_stroke_ref(a->style));
 			}
 		}; break;
 		case DigDatumType::Rectangle: {
