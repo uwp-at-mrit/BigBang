@@ -268,7 +268,7 @@
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)about.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\vectorlet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\digmaplet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
   </ItemGroup>
@@ -547,7 +547,7 @@
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)about.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\vectorlet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\digmaplet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
   </ItemGroup>

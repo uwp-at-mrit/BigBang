@@ -280,7 +280,7 @@ RectangleDig::RectangleDig(std::filebuf& dig) : IDigDatum(DigDatumType::Rectangl
 }
 
 void RectangleDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	// TODO: compute the real enclosing box
+	// TODO: compute the rotated enclosing box
 	SET_VALUES(x, this->x, y, this->y);
 	SET_VALUES(width, this->width, height, this->height);
 }
