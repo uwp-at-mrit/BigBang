@@ -151,6 +151,7 @@ IDigDatum* WarGrey::SCADA::read_dig_line(std::filebuf& dig, float icon_size) {
 		case 'I': datum = new PolyLineDig(dig); break;
 		case 'J': datum = new CompassDig(dig); break;
 		case 'O': datum = new RectangleDig(dig); break;
+		case 'S': datum = new ShoreLineDig(dig); break;
 		case 'X': datum = new LineDig(dig); break;
 		case 'Z': datum = new FontTextDig(dig); break;
 
@@ -357,6 +358,22 @@ PolyBezierDig::PolyBezierDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumTyp
 Platform::String^ PolyBezierDig::to_string() {
 	return make_wstring(L"%s[%d, %d, %d](%f, %f){+%d}", this->type.ToString()->Data(),
 		this->color, this->style, this->width, this->x, this->y, this->poly_xs.size());
+}
+
+/*************************************************************************************************/
+ShoreLineDig::ShoreLineDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::ShoreLine) {
+	this->y = read_flonum(dig);
+	this->x = read_flonum(dig);
+	
+	this->lx = this->x;
+	this->ty = this->y;
+	this->rx = this->x;
+	this->by = this->y;
+}
+
+Platform::String^ ShoreLineDig::to_string() {
+	return make_wstring(L"%s[%d, %d, %d, %d](%f, %f){+%d}", this->type.ToString()->Data(),
+		this->x, this->y, this->poly_xs.size());
 }
 
 /*************************************************************************************************/

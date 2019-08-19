@@ -7,7 +7,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class DigDatumType {
-		Icon, Arc, Circle, Line, PolyLine, PolyBezier, Rectangle, FontText, Text, Number,
+		Icon, Arc, Circle, Line, PolyLine, PolyBezier, ShoreLine, Rectangle, FontText, Text, Number,
 
 		// TODO
 		Typhoon, Compass,
@@ -148,6 +148,14 @@ namespace WarGrey::SCADA {
 		long long style;
 		long long width;
 		Platform::String^ font_name;
+	};
+
+	private struct ShoreLineDig : public WarGrey::SCADA::IMultilineDigDatum {
+	public:
+		ShoreLineDig(std::filebuf& dig);
+
+	public:
+		Platform::String^ to_string() override;
 	};
 
 	private struct PolyLineDig : public WarGrey::SCADA::IMultilineDigDatum {

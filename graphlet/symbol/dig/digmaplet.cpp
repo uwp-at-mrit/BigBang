@@ -189,6 +189,29 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 					ds->DrawGeometry(g, vector_colors_ref(r->color), StrokeWidth(r->pen_width), vector_stroke_ref(r->style));
 				}
 			}; break;
+			case DigDatumType::ShoreLine: {
+				ShoreLineDig* l = static_cast<ShoreLineDig*>(datum);
+				CanvasPathBuilder^ sl = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+				float2 start = this->position_to_local(datum->x, datum->y, x, ds_by);
+
+#ifdef _DEBUG
+				this->get_logger()->log_message(Log::Debug, L"Shore Line: (%f, %f)", start.x, start.y);
+#endif
+
+				sl->BeginFigure(start);
+				for (size_t idx = 0; idx < l->poly_xs.size(); idx++) {
+					float2 dot = this->position_to_local(l->poly_xs[idx], l->poly_ys[idx], x, ds_by);
+
+#ifdef _DEBUG
+					this->get_logger()->log_message(Log::Debug, L"  joint: (%f, %f)", dot.x, dot.y);
+#endif
+
+					sl->AddLine(dot);
+				}
+				sl->EndFigure(CanvasFigureLoop::Open);
+
+				ds->DrawGeometry(CanvasGeometry::CreatePath(sl), vector_colors_ref(0LL), 1.0F);
+			}; break;
 			case DigDatumType::PolyLine: {
 				PolyLineDig* l = static_cast<PolyLineDig*>(datum);
 				CanvasPathBuilder^ pl = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
