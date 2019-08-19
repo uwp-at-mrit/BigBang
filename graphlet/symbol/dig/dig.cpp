@@ -5,6 +5,9 @@
 #include "datum/flonum.hpp"
 #include "datum/string.hpp"
 
+#include "math.hpp"
+#include "text.hpp"
+
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/dig/shiplet.hpp"
 #include "graphlet/symbol/dig/light_houselet.hpp"
@@ -31,7 +34,10 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
+
+using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
 namespace {
@@ -76,8 +82,20 @@ static IGraphlet* create_icon_graphlet(DigIcon type, float size) {
 	return icon;
 }
 
+static void rotate_endpoints(double* lx, double* ty, double* rx, double* by, double rotation) {
+	if (degrees_normalize(rotation) != 0.0) {
+		CanvasGeometry^ g = rotate_rectangle(float(*lx), float(*ty), float(*rx - *lx), float(*by - *ty), rotation, float(*lx), float(*ty));
+		Rect box = g->ComputeBounds();
+
+		(*lx) = box.X;
+		(*ty) = box.Y;
+		(*rx) = box.X + box.Width;
+		(*by) = box.Y + box.Height;
+	}
+}
+
 /*************************************************************************************************/
-IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
+IDigDatum* WarGrey::SCADA::read_dig_line(std::filebuf& dig, float icon_size) {
 	IDigDatum* datum = nullptr;
 	char ch = read_char(dig);
 
@@ -128,6 +146,7 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 
 		case 'A': datum = new ArcDig(dig); break;
 		case 'C': datum = new CircleDig(dig); break;
+		case 'D': datum = new PolyBezierDig(dig); break;
 		case 'H': datum = new TyphoonDig(dig); break;
 		case 'I': datum = new PolylineDig(dig); break;
 		case 'J': datum = new CompassDig(dig); break;
@@ -138,22 +157,20 @@ IDigDatum* WarGrey::SCADA::read_dig(std::filebuf& dig, float icon_size) {
 		default: datum = new _Dig(ch);
 		}
 
-		{ // read multilines
-			IMultilineDigDatum* mdatum = dynamic_cast<IMultilineDigDatum*>(datum);
+		if (datum->multiline()) {
+			discard_this_line(dig);
 
-			if (mdatum != nullptr) {
-				discard_this_line(dig);
-
-				while ((ch = read_char(dig)) != EOF) {
-					if (ch == 'E') {
-						break;
-					}
-
-					mdatum->append_line(dig);
-					discard_this_line(dig);
+			while ((ch = read_char(dig)) != EOF) {
+				if (ch == 'E') {
+					break;
 				}
+
+				datum->push_line(dig);
+				discard_this_line(dig);
 			}
 		}
+
+		discard_this_line(dig);
 	}
 
 	return datum;
@@ -164,11 +181,6 @@ IGraphlet* IDigDatum::make_graphlet(double* x, double* y) {
 	SET_VALUES(x, this->x, y, this->y);
 
 	return nullptr;
-}
-
-void IDigDatum::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	SET_VALUES(x, this->x, y, this->y);
-	SET_BOXES(width, height, 0.0);
 }
 
 Platform::String^ IDigDatum::to_string() {
@@ -187,6 +199,11 @@ IconDig::IconDig(std::filebuf& dig, DigIcon type, float size) : IDigDatum(DigDat
 	this->y = read_flonum(dig);
 	this->x = read_flonum(dig);
 	this->name = read_wtext(dig, char_end_of_line);
+
+	this->lx = this->x;
+	this->ty = this->y;
+	this->rx = this->x + size;
+	this->by = this->y + size;
 }
 
 IGraphlet* IconDig::make_graphlet(double* x, double* y) {
@@ -195,25 +212,23 @@ IGraphlet* IconDig::make_graphlet(double* x, double* y) {
 	return create_icon_graphlet(this->subtype, this->size);
 }
 
-void IconDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	SET_VALUES(x, this->x, y, this->y);
-	SET_BOXES(width, height, this->size);
+bool IMultilineDigDatum::multiline() {
+	return true;
 }
 
-void IMultilineDigDatum::append_line(std::filebuf& dig) {
-	this->rest_ys.push_back(read_flonum(dig));
-	this->rest_xs.push_back(read_flonum(dig));
-}
+void IMultilineDigDatum::push_line(std::filebuf& dig) {
+	double y = read_flonum(dig);
+	double x = read_flonum(dig);
 
-/*************************************************************************************************/
-CompassDig::CompassDig(std::filebuf& dig) : IDigDatum(DigDatumType::Compass) {
-	this->y = read_flonum(dig);
-	this->x = read_flonum(dig);
-	this->color = read_integer(dig);
-}
+	this->poly_ys.push_back(y);
+	this->poly_xs.push_back(x);
 
-Platform::String^ CompassDig::to_string() {
-	return make_wstring(L"%s[%d](%f, %f)", this->type.ToString()->Data(), this->color, this->x, this->y);
+	this->lx = flmin(this->lx, x);
+	this->rx = flmax(this->rx, x);
+	this->ty = flmin(this->ty, y);
+	this->by = flmax(this->by, y);
+
+	// NOTE: the rest parameters are duplicates of the head-line 
 }
 
 /*************************************************************************************************/
@@ -225,12 +240,12 @@ ArcDig::ArcDig(std::filebuf& dig) : IDigDatum(DigDatumType::Arc) {
 	this->radius = read_flonum(dig);
 	this->style = read_integer(dig);
 	this->color = read_integer(dig);
-}
 
-void ArcDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
 	// TODO: compute the real enclosing box
-	SET_VALUES(x, this->x - this->radius, y, this->y - this->radius);
-	SET_BOXES(width, height, this->radius * 2.0);
+	this->lx = this->x - this->radius;
+	this->ty = this->y - this->radius;
+	this->rx = this->x + this->radius;
+	this->by = this->y + this->radius;
 }
 
 Platform::String^ ArcDig::to_string() {
@@ -248,11 +263,11 @@ CircleDig::CircleDig(std::filebuf& dig) : IDigDatum(DigDatumType::Circle) {
 	this->color = read_integer(dig);
 	this->filled = read_integer(dig);
 	this->fill_color = read_integer(dig);
-}
 
-void CircleDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	SET_VALUES(x, this->x - this->radius, y, this->y - this->radius);
-	SET_BOXES(width, height, this->radius * 2.0);
+	this->lx = this->x - this->radius;
+	this->ty = this->y - this->radius;
+	this->rx = this->x + this->radius;
+	this->by = this->y + this->radius;
 }
 
 Platform::String^ CircleDig::to_string() {
@@ -277,12 +292,13 @@ RectangleDig::RectangleDig(std::filebuf& dig) : IDigDatum(DigDatumType::Rectangl
 	this->style = read_integer(dig);
 	this->color = read_integer(dig);
 	this->pen_width = read_integer(dig);
-}
 
-void RectangleDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	// TODO: compute the rotated enclosing box
-	SET_VALUES(x, this->x, y, this->y);
-	SET_VALUES(width, this->width, height, this->height);
+	this->lx = this->x;
+	this->ty = this->y;
+	this->rx = this->x + this->width;
+	this->by = this->y + this->height;
+
+	rotate_endpoints(&this->lx, &this->ty, &this->rx, &this->by, this->rotation);
 }
 
 Platform::String^ RectangleDig::to_string() {
@@ -300,19 +316,66 @@ LineDig::LineDig(std::filebuf& dig) : IDigDatum(DigDatumType::Line) {
 	this->style = read_integer(dig);
 	this->color = read_integer(dig);
 	this->linewidth = read_integer(dig);
-}
 
-void LineDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	SET_BOX(x, flmin(this->x, this->stop_x));
-	SET_BOX(y, flmin(this->y, this->stop_y));
-	SET_BOX(width, flabs(this->stop_x - this->x));
-	SET_BOX(height, flabs(this->stop_y - this->y));
+	if (this->x < this->stop_x) {
+		this->lx = this->x;
+		this->rx = this->stop_x;
+	} else {
+		this->lx = this->stop_x;
+		this->rx = this->x;
+	}
+
+	if (this->y < this->stop_y) {
+		this->ty = this->y;
+		this->by = this->stop_y;
+	} else {
+		this->ty = this->stop_y;
+		this->by = this->y;
+	}
 }
 
 Platform::String^ LineDig::to_string() {
 	return make_wstring(L"%s[%d, %d, %d](%f, %f, %f, %f)", this->type.ToString()->Data(),
 		this->style, this->color, this->linewidth,
 		this->x, this->y, this->stop_x, this->stop_y);
+}
+
+/*************************************************************************************************/
+PolyBezierDig::PolyBezierDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::PolyBezier) {
+	this->y = read_flonum(dig);
+	this->x = read_flonum(dig);
+	this->color = read_integer(dig);
+	this->style = read_integer(dig);
+	this->line_width = read_integer(dig);
+
+	this->lx = this->x;
+	this->ty = this->y;
+	this->rx = this->x;
+	this->by = this->y;
+}
+
+Platform::String^ PolyBezierDig::to_string() {
+	return make_wstring(L"%s[%d, %d, %d](%f, %f){+%d}", this->type.ToString()->Data(),
+		this->color, this->style, this->line_width,
+		this->x, this->y, this->poly_xs.size());
+}
+
+/*************************************************************************************************/
+PolylineDig::PolylineDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::Polyline) {
+	this->y = read_flonum(dig);
+	this->x = read_flonum(dig);
+	this->color = read_integer(dig);
+	this->style = read_integer(dig);
+	this->subtype = read_integer(dig);
+	this->width = read_integer(dig);
+
+	// TODO: compute the enclosing box endpoints
+}
+
+Platform::String^ PolylineDig::to_string() {
+	return make_wstring(L"%s[%d, %d, %d, %d](%f, %f){+%d}", this->type.ToString()->Data(),
+		this->color, this->style, this->subtype, this->width,
+		this->x, this->y, this->poly_xs.size());
 }
 
 /*************************************************************************************************/
@@ -326,12 +389,17 @@ FontTextDig::FontTextDig(std::filebuf& dig) : IDigDatum(DigDatumType::FontText) 
 	this->width = read_integer(dig);
 	this->name = read_wtext(dig, char_end_of_word);
 	this->font_name = read_wtext(dig, char_end_of_line);
-}
 
-void FontTextDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	// TODO: compute the real enclosing box
-	SET_VALUES(x, this->x, y, this->y);
-	SET_VALUES(width, 1.0, height, 1.0);
+	{ // compute enclosing box endpoints
+		TextExtent te = get_text_extent(this->name, make_text_format(this->font_name), this->font_size);
+
+		this->lx = this->x;
+		this->ty = this->y;
+		this->rx = this->lx + te.width;
+		this->by = this->by + te.height;
+
+		rotate_endpoints(&this->lx, &this->ty, &this->rx, &this->by, this->rotation);
+	}
 }
 
 Platform::String^ FontTextDig::to_string() {
@@ -350,6 +418,16 @@ Platform::String^ FontTextDig::to_string() {
 }
 
 /*************************************************************************************************/
+CompassDig::CompassDig(std::filebuf& dig) : IDigDatum(DigDatumType::Compass) {
+	this->y = read_flonum(dig);
+	this->x = read_flonum(dig);
+	this->color = read_integer(dig);
+}
+
+Platform::String^ CompassDig::to_string() {
+	return make_wstring(L"%s[%d](%f, %f)", this->type.ToString()->Data(), this->color, this->x, this->y);
+}
+
 TyphoonDig::TyphoonDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::Typhoon) {
 	this->style = read_integer(dig);
 	this->linewidth = read_integer(dig);
@@ -358,24 +436,20 @@ TyphoonDig::TyphoonDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::Typ
 	this->name = read_wtext(dig, char_end_of_line);
 }
 
-void TyphoonDig::append_line(std::filebuf& dig) {
+void TyphoonDig::push_line(std::filebuf& dig) {
 	this->datetimes.push_back(read_wtext(dig, char_end_of_word));
-	this->rest_xs.push_back(read_flonum(dig));
-	this->rest_ys.push_back(read_flonum(dig));
+	this->poly_xs.push_back(read_flonum(dig));
+	this->poly_ys.push_back(read_flonum(dig));
 	this->max_wind_speeds.push_back(read_flonum(dig));
 	this->pressures.push_back(read_flonum(dig));
 	this->move_speeds.push_back(read_flonum(dig));
 
-	if (this->rest_xs.size() == 1) {
-		this->x = this->rest_xs[0];
-		this->y = this->rest_ys[0];
+	if (this->poly_xs.size() == 1) {
+		this->x = this->poly_xs[0];
+		this->y = this->poly_ys[0];
 	}
-}
 
-void TyphoonDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	// TODO: compute the real enclosing box
-	SET_VALUES(x, this->x, y, this->y);
-	SET_VALUES(width, 1.0, height, 1.0);
+	// TODO: compute the enclosing box endpoints
 }
 
 Platform::String^ TyphoonDig::to_string() {
@@ -383,26 +457,4 @@ Platform::String^ TyphoonDig::to_string() {
 		this->name->Data(),
 		this->color, this->linewidth, this->color, this->radius,
 		this->x, this->y, this->datetimes.size());
-}
-
-/*************************************************************************************************/
-PolylineDig::PolylineDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::Polyline) {
-	this->y = read_flonum(dig);
-	this->x = read_flonum(dig);
-	this->color = read_integer(dig);
-	this->style = read_integer(dig);
-	this->subtype = read_integer(dig);
-	this->width = read_integer(dig);
-}
-
-void PolylineDig::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	// TODO: compute the real enclosing box
-	SET_VALUES(x, this->x, y, this->y);
-	SET_VALUES(width, 1.0, height, 1.0);
-}
-
-Platform::String^ PolylineDig::to_string() {
-	return make_wstring(L"%s[%d, %d, %d, %d](%f, %f){+%d}", this->type.ToString()->Data(),
-		this->color, this->style, this->subtype, this->width,
-		this->x, this->y, this->rest_xs.size());
 }

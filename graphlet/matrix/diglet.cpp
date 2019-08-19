@@ -44,16 +44,13 @@ DigMap::~DigMap() {
 }
 
 void DigMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
-	double x, y, width, height;
-
 	this->items.push_back(item);
 	this->counters[item->type] = this->counters[item->type] + 1;
 
-	item->fill_enclosing_box(&x, &y, &width, &height);
-	this->lx = flmin(this->lx, x);
-	this->rx = flmax(this->rx, x + width);
-	this->ty = flmin(this->ty, y);
-	this->by = flmax(this->by, y + height);
+	this->lx = flmin(this->lx, item->lx);
+	this->rx = flmax(this->rx, item->rx);
+	this->ty = flmin(this->ty, item->ty);
+	this->by = flmax(this->by, item->by);
 }
 
 void DigMap::rewind() {
@@ -90,12 +87,10 @@ IAsyncOperation<DigMap^>^ DigMap::load_async(Platform::String^ _dig) {
 		if (dig.open(_dig->Data(), std::ios::in)) {
 			map = ref new DigMap();
 
-			while ((datum = read_dig(dig, 1600.0F)) != nullptr) {
+			while ((datum = read_dig_line(dig, 1600.0F)) != nullptr) {
 				if (datum->type < DigDatumType::_) {
 					map->push_back_item(datum);
 				}
-
-				discard_this_line(dig);
 			}
 		}
 

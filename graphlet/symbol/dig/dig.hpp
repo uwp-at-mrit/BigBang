@@ -7,7 +7,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class DigDatumType {
-		Icon, Arc, Circle, Polyline, Rectangle, Line, FontText,
+		Icon, Arc, Circle, Polyline, PolyBezier, Rectangle, Line, FontText,
 
 		// TODO
 		Typhoon, Compass,
@@ -26,15 +26,24 @@ namespace WarGrey::SCADA {
 		IDigDatum(WarGrey::SCADA::DigDatumType type) : type(type), name(nullptr) {}
 
 	public:
-		virtual void fill_enclosing_box(double* x, double* y, double* width = nullptr, double* height = nullptr);
 		virtual WarGrey::SCADA::IGraphlet* make_graphlet(double* x, double* y);
 		virtual Platform::String^ to_string();
+
+	public:
+		virtual bool multiline() { return false; }
+		virtual void push_line(std::filebuf& src) {}
 
 	public:
 		WarGrey::SCADA::DigDatumType type;
 		Platform::String^ name;
 		double x;
 		double y;
+
+	public:
+		double lx;
+		double ty;
+		double rx;
+		double by;
 	};
 
 	private struct IconDig : public WarGrey::SCADA::IDigDatum {
@@ -42,7 +51,6 @@ namespace WarGrey::SCADA {
 		IconDig(std::filebuf& dig, WarGrey::SCADA::DigIcon type, float size);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		WarGrey::SCADA::IGraphlet* make_graphlet(double* x, double* y) override;
 
 	public:
@@ -57,11 +65,12 @@ namespace WarGrey::SCADA {
 		IMultilineDigDatum(WarGrey::SCADA::DigDatumType type) : IDigDatum(type) {}
 
 	public:
-		virtual void append_line(std::filebuf& src);
+		bool multiline() override;
+		void push_line(std::filebuf& src) override;
 
 	public:
-		std::deque<double> rest_xs;
-		std::deque<double> rest_ys;
+		std::deque<double> poly_xs;
+		std::deque<double> poly_ys;
 	};
 
 	private struct CompassDig : public WarGrey::SCADA::IDigDatum {
@@ -80,7 +89,6 @@ namespace WarGrey::SCADA {
 		ArcDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -96,7 +104,6 @@ namespace WarGrey::SCADA {
 		CircleDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -112,7 +119,6 @@ namespace WarGrey::SCADA {
 		RectangleDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -129,7 +135,6 @@ namespace WarGrey::SCADA {
 		LineDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -145,7 +150,6 @@ namespace WarGrey::SCADA {
 		FontTextDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -162,7 +166,6 @@ namespace WarGrey::SCADA {
 		PolylineDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -172,13 +175,25 @@ namespace WarGrey::SCADA {
 		long long width;
 	};
 
+	private struct PolyBezierDig : public WarGrey::SCADA::IMultilineDigDatum {
+	public:
+		PolyBezierDig(std::filebuf& dig);
+
+	public:
+		Platform::String^ to_string() override;
+
+	public:
+		long long color;
+		long long style;
+		long long line_width;
+	};
+
 	private struct TyphoonDig : public WarGrey::SCADA::IMultilineDigDatum {
 	public:
 		TyphoonDig(std::filebuf& dig);
 
 	public:
-		void append_line(std::filebuf& dig) override;
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
+		void push_line(std::filebuf& dig) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -194,5 +209,5 @@ namespace WarGrey::SCADA {
 		std::deque<double> move_speeds;
 	};
 
-	WarGrey::SCADA::IDigDatum* read_dig(std::filebuf& dig, float icon_size);
+	WarGrey::SCADA::IDigDatum* read_dig_line(std::filebuf& dig, float icon_size);
 }
