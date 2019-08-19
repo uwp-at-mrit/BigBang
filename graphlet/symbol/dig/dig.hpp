@@ -7,7 +7,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class DigDatumType {
-		Icon, Arc, Circle, Polyline, PolyBezier, Rectangle, Line, FontText,
+		Icon, Arc, Circle, Line, PolyLine, PolyBezier, Rectangle, FontText, Text, Number,
 
 		// TODO
 		Typhoon, Compass,
@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
 	private enum class DigIcon {
 		SunkenShip, LightShip, OilWell, PilotStation, ReportSpot, LightHouse, RedFlag,
 		Hoisptal, Tree, Anchor, Chimney, WaterTower, RadarReflector, IslandReef,
-		Aquatic, Buoy, TideStation, Kettle, Light, NavigationMark, Picket, Rock, Text, Number, FishingFloat, Wreck,
+		Aquatic, Buoy, TideStation, Kettle, Light, NavigationMark, Picket, Rock, FishingFloat, Wreck,
 		_
 	};
 
@@ -71,17 +71,6 @@ namespace WarGrey::SCADA {
 	public:
 		std::deque<double> poly_xs;
 		std::deque<double> poly_ys;
-	};
-
-	private struct CompassDig : public WarGrey::SCADA::IDigDatum {
-	public:
-		CompassDig(std::filebuf& dig);
-
-	public:
-		Platform::String^ to_string() override;
-
-	public:
-		long long color;
 	};
 
 	private struct ArcDig : public WarGrey::SCADA::IDigDatum {
@@ -161,9 +150,9 @@ namespace WarGrey::SCADA {
 		Platform::String^ font_name;
 	};
 
-	private struct PolylineDig : public WarGrey::SCADA::IMultilineDigDatum {
+	private struct PolyLineDig : public WarGrey::SCADA::IMultilineDigDatum {
 	public:
-		PolylineDig(std::filebuf& dig);
+		PolyLineDig(std::filebuf& dig);
 
 	public:
 		Platform::String^ to_string() override;
@@ -185,7 +174,7 @@ namespace WarGrey::SCADA {
 	public:
 		long long color;
 		long long style;
-		long long line_width;
+		long long width;
 	};
 
 	private struct TyphoonDig : public WarGrey::SCADA::IMultilineDigDatum {
@@ -207,6 +196,17 @@ namespace WarGrey::SCADA {
 		std::deque<double> pressures;
 		std::deque<double> max_wind_speeds;
 		std::deque<double> move_speeds;
+	};
+
+	private struct CompassDig : public WarGrey::SCADA::IDigDatum {
+	public:
+		CompassDig(std::filebuf& dig);
+
+	public:
+		Platform::String^ to_string() override;
+
+	public:
+		long long color;
 	};
 
 	WarGrey::SCADA::IDigDatum* read_dig_line(std::filebuf& dig, float icon_size);

@@ -189,6 +189,30 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 					ds->DrawGeometry(g, vector_colors_ref(r->color), StrokeWidth(r->pen_width), vector_stroke_ref(r->style));
 				}
 			}; break;
+			case DigDatumType::PolyLine: {
+				PolyLineDig* l = static_cast<PolyLineDig*>(datum);
+				CanvasPathBuilder^ pl = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+				float2 start = this->position_to_local(datum->x, datum->y, x, ds_by);
+
+#ifdef _DEBUG
+				this->get_logger()->log_message(Log::Debug, L"Poly Line: (%f, %f)", start.x, start.y);
+#endif
+
+				pl->BeginFigure(start);
+				for (size_t idx = 0; idx < l->poly_xs.size(); idx++) {
+					float2 dot = this->position_to_local(l->poly_xs[idx], l->poly_ys[idx], x, ds_by);
+
+#ifdef _DEBUG
+					this->get_logger()->log_message(Log::Debug, L"  joint: (%f, %f)", dot.x, dot.y);
+#endif
+
+					pl->AddLine(dot);
+				}
+				pl->EndFigure(CanvasFigureLoop::Open);
+
+				ds->DrawGeometry(CanvasGeometry::CreatePath(pl), vector_colors_ref(l->color),
+					StrokeWidth(l->width), vector_stroke_ref(l->style));
+			}; break;
 			case DigDatumType::PolyBezier: {
 				PolyBezierDig* b = static_cast<PolyBezierDig*>(datum);
 				CanvasPathBuilder^ pb = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
@@ -230,8 +254,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				}
 				pb->EndFigure(CanvasFigureLoop::Open);
 
-				ds->DrawGeometry(CanvasGeometry::CreatePath(pb), vector_colors_ref(b->color),
-					StrokeWidth(b->line_width), vector_stroke_ref(b->style));
+				ds->DrawGeometry(CanvasGeometry::CreatePath(pb), vector_colors_ref(b->color), StrokeWidth(b->width), vector_stroke_ref(b->style));
 			}; break;
 			default: {
 				this->get_logger()->log_message(Log::Info, datum->type.ToString());

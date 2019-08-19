@@ -141,14 +141,14 @@ IDigDatum* WarGrey::SCADA::read_dig_line(std::filebuf& dig, float icon_size) {
 		case 'F': datum = new BuoyDig(dig, BuoyType::Red, icon_size); break;
 		case 'Q': datum = new BuoyDig(dig, BuoyType::BlackYellow, icon_size); break;
 
-		case 'T': datum = new IconDig(dig, DigIcon::Text, icon_size); break;
-		case 'U': datum = new IconDig(dig, DigIcon::Number, icon_size); break;
+		//case 'T': datum = new IconDig(dig, DigIcon::Text, icon_size); break;
+		//case 'U': datum = new IconDig(dig, DigIcon::Number, icon_size); break;
 
 		case 'A': datum = new ArcDig(dig); break;
 		case 'C': datum = new CircleDig(dig); break;
 		case 'D': datum = new PolyBezierDig(dig); break;
 		case 'H': datum = new TyphoonDig(dig); break;
-		case 'I': datum = new PolylineDig(dig); break;
+		case 'I': datum = new PolyLineDig(dig); break;
 		case 'J': datum = new CompassDig(dig); break;
 		case 'O': datum = new RectangleDig(dig); break;
 		case 'X': datum = new LineDig(dig); break;
@@ -346,7 +346,7 @@ PolyBezierDig::PolyBezierDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumTyp
 	this->x = read_flonum(dig);
 	this->color = read_integer(dig);
 	this->style = read_integer(dig);
-	this->line_width = read_integer(dig);
+	this->width = read_integer(dig);
 
 	this->lx = this->x;
 	this->ty = this->y;
@@ -356,12 +356,11 @@ PolyBezierDig::PolyBezierDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumTyp
 
 Platform::String^ PolyBezierDig::to_string() {
 	return make_wstring(L"%s[%d, %d, %d](%f, %f){+%d}", this->type.ToString()->Data(),
-		this->color, this->style, this->line_width,
-		this->x, this->y, this->poly_xs.size());
+		this->color, this->style, this->width, this->x, this->y, this->poly_xs.size());
 }
 
 /*************************************************************************************************/
-PolylineDig::PolylineDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::Polyline) {
+PolyLineDig::PolyLineDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::PolyLine) {
 	this->y = read_flonum(dig);
 	this->x = read_flonum(dig);
 	this->color = read_integer(dig);
@@ -369,10 +368,13 @@ PolylineDig::PolylineDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::P
 	this->subtype = read_integer(dig);
 	this->width = read_integer(dig);
 
-	// TODO: compute the enclosing box endpoints
+	this->lx = this->x;
+	this->ty = this->y;
+	this->rx = this->x;
+	this->by = this->y;
 }
 
-Platform::String^ PolylineDig::to_string() {
+Platform::String^ PolyLineDig::to_string() {
 	return make_wstring(L"%s[%d, %d, %d, %d](%f, %f){+%d}", this->type.ToString()->Data(),
 		this->color, this->style, this->subtype, this->width,
 		this->x, this->y, this->poly_xs.size());
