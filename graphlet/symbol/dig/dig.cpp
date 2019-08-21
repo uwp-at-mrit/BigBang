@@ -141,9 +141,6 @@ IDigDatum* WarGrey::SCADA::read_dig_line(std::filebuf& dig, float icon_size) {
 		case 'F': datum = new BuoyDig(dig, BuoyType::Red, icon_size); break;
 		case 'Q': datum = new BuoyDig(dig, BuoyType::BlackYellow, icon_size); break;
 
-		//case 'T': datum = new IconDig(dig, DigIcon::Text, icon_size); break;
-		//case 'U': datum = new IconDig(dig, DigIcon::Number, icon_size); break;
-
 		case 'A': datum = new ArcDig(dig); break;
 		case 'C': datum = new CircleDig(dig); break;
 		case 'D': datum = new PolyBezierDig(dig); break;
@@ -151,7 +148,9 @@ IDigDatum* WarGrey::SCADA::read_dig_line(std::filebuf& dig, float icon_size) {
 		case 'I': datum = new PolyLineDig(dig); break;
 		case 'J': datum = new CompassDig(dig); break;
 		case 'O': datum = new RectangleDig(dig); break;
+		case 'U': datum = new DepthDig(dig); break;
 		case 'S': datum = new ShoreLineDig(dig); break;
+		case 'T': datum = new TextDig(dig); break;
 		case 'X': datum = new LineDig(dig); break;
 		case 'Z': datum = new FontTextDig(dig); break;
 
@@ -199,7 +198,7 @@ Platform::String^ IDigDatum::to_string() {
 IconDig::IconDig(std::filebuf& dig, DigIcon type, float size) : IDigDatum(DigDatumType::Icon), subtype(type), size(size) {
 	this->y = read_flonum(dig);
 	this->x = read_flonum(dig);
-	this->name = read_wtext(dig, char_end_of_line);
+	this->name = read_wgb18030(dig, char_end_of_line);
 
 	this->lx = this->x;
 	this->ty = this->y;
@@ -398,42 +397,71 @@ Platform::String^ PolyLineDig::to_string() {
 }
 
 /*************************************************************************************************/
+DepthDig::DepthDig(std::filebuf& dig) : IDigDatum(DigDatumType::Depth) {
+	this->y = read_flonum(dig);
+	this->x = read_flonum(dig);
+	this->name = read_wgb18030(dig, char_end_of_line);
+	
+	this->lx = this->x;
+	this->ty = this->y;
+
+	/* auto-resolve when drawing */
+	this->rx = this->lx;
+	this->by = this->ty;
+}
+
+Platform::String^ DepthDig::to_string() {
+	return make_wstring(L"%s[%s](%f, %f)", this->type.ToString()->Data(), this->name->Data());
+}
+
+TextDig::TextDig(std::filebuf& dig) : IDigDatum(DigDatumType::Text) {
+	this->y = read_flonum(dig);
+	this->x = read_flonum(dig);
+	this->name = read_wgb18030(dig, char_end_of_line);
+
+	this->lx = this->x;
+	this->ty = this->y;
+
+	/* auto-resolve when drawing */
+	this->rx = this->lx;
+	this->by = this->ty;
+}
+
+Platform::String^ TextDig::to_string() {
+	return make_wstring(L"%s[%s](%f, %f)", this->type.ToString()->Data(), this->name->Data());
+}
+
 FontTextDig::FontTextDig(std::filebuf& dig) : IDigDatum(DigDatumType::FontText) {
 	this->y = read_flonum(dig);
 	this->x = read_flonum(dig);
 	this->rotation = read_flonum(dig);
 	this->color = read_integer(dig);
 	this->font_size = read_integer(dig);
-	this->style = read_integer(dig);
+	this->resizable = (read_integer(dig) > 0);
 	this->width = read_integer(dig);
-	this->name = read_wtext(dig, char_end_of_word);
-	this->font_name = read_wtext(dig, char_end_of_line);
+	this->name = read_wgb18030(dig, char_end_of_word);
+	this->font_name = read_wgb18030(dig, char_end_of_line);
 
-	{ // compute enclosing box endpoints
-		TextExtent te = get_text_extent(this->name, make_text_format(this->font_name), this->font_size);
+	this->lx = this->x;
+	this->ty = this->y;
 
-		this->lx = this->x;
-		this->ty = this->y;
-		this->rx = this->lx + te.width;
-		this->by = this->by + te.height;
-
-		rotate_endpoints(&this->lx, &this->ty, &this->rx, &this->by, this->rotation);
-	}
+	/* auto-resolve when drawing */
+	this->rx = this->lx;
+	this->by = this->ty;
 }
 
 Platform::String^ FontTextDig::to_string() {
 	Platform::String^ attributes = nullptr;
 
 	if (this->font_name != nullptr) {
-		attributes = make_wstring(L"%s, %d, %d, %d", this->font_name->Data(), this->color, this->font_size, this->style, this->width);
+		attributes = make_wstring(L"%s, %d, %d, %d", this->font_name->Data(), this->color, this->font_size, this->width);
 	} else {
-		attributes = make_wstring(L"%d, %d, %d", this->color, this->font_size, this->style, this->width);
+		attributes = make_wstring(L"%d, %d, %d", this->color, this->font_size, this->width);
 	}
 
 	return make_wstring(L"%s[%s][%s](%f, %f, %f)", this->type.ToString()->Data(),
 		this->name->Data(), attributes->Data(),
-		this->color, this->font_size, this->style, this->width,
-		this->x, this->y, this->width, this->rotation);
+		this->x, this->y, this->rotation);
 }
 
 /*************************************************************************************************/
@@ -452,11 +480,11 @@ TyphoonDig::TyphoonDig(std::filebuf& dig) : IMultilineDigDatum(DigDatumType::Typ
 	this->linewidth = read_integer(dig);
 	this->color = read_integer(dig);
 	this->radius = read_integer(dig);
-	this->name = read_wtext(dig, char_end_of_line);
+	this->name = read_wgb18030(dig, char_end_of_line);
 }
 
 void TyphoonDig::push_line(std::filebuf& dig) {
-	this->datetimes.push_back(read_wtext(dig, char_end_of_word));
+	this->datetimes.push_back(read_wgb18030(dig, char_end_of_word));
 	this->poly_xs.push_back(read_flonum(dig));
 	this->poly_ys.push_back(read_flonum(dig));
 	this->max_wind_speeds.push_back(read_flonum(dig));

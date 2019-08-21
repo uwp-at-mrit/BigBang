@@ -6,6 +6,7 @@
 #include "datum/flonum.hpp"
 
 #include "colorspace.hpp"
+#include "geometry.hpp"
 #include "brushes.hxx"
 #include "paint.hpp"
 #include "shape.hpp"
@@ -19,6 +20,7 @@ using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
@@ -103,7 +105,8 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 		float2 lrb = this->position_to_local(datum->rx, datum->by, x, ds_by);
 
 		// NOTE the y-axis has been flipped
-		bool visible = rectangle_overlay(llt.x, lrb.y, lrb.x, llt.y, x, y, ds_rx, ds_by);
+		bool visible = ((datum->lx == datum->rx) && (datum->ty == datum->by)) // for texts
+			|| rectangle_overlay(llt.x, lrb.y, lrb.x, llt.y, x, y, ds_rx, ds_by);
 
 		if (visible) {
 			switch (datum->type) {
@@ -147,7 +150,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 					double start_deg = a->start_degree - 90.0;
 					double stop_deg = a->stop_degree - 90.0;
 
-					// NOTE the modifyDIG uses the lefthand coordinate system
+					// NOTE that modifyDIG uses the lefthand coordinate system
 					//   the degrees therefore should sweep 90.0 degrees counterclockwise
 					// Stupid design, and/or stupid referenced codebase for its lack of explanation
 
@@ -170,6 +173,19 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				float2 tl = this->position_to_local(r->x, r->y, x, ds_by);
 				Size s = this->length_to_local(r->width, r->height);
 				double deg = degrees_normalize(r->rotation);
+
+				/** WARNING
+				 * The modifyDIG does not handle rectangles accurately, DigMaplet follows it for the sake of compatibility.
+				 * Nevertheless, rectangles should be translated vertically since modifyDIG uses the lefthand coordinate system.
+				 * Rotation makes it even harder since its center point is the left-top one which is actually indicating the left-bottom one.
+				 *
+				 * By the way, this bug is not a big deal since rectangles are less used in real world projects.
+				 * Designers and users have no chance to do investigating on the spot directly as well,
+				 *   modifyDIG will transform and restore raw geodesy data for them,
+				 *   the bug is concealed unconsciously.
+				 *
+				 * Also see Diglet::on_appdata, how the location in screen of rectangles should be adjusted.
+				 */
 
 				if (deg == 0.0) {
 #ifdef _DEBUG
@@ -279,13 +295,60 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 
 				ds->DrawGeometry(CanvasGeometry::CreatePath(pb), vector_colors_ref(b->color), StrokeWidth(b->width), vector_stroke_ref(b->style));
 			}; break;
-			default: {
-				this->get_logger()->log_message(Log::Info, datum->type.ToString());
-			}
+			case DigDatumType::Text: {
+				float2 tp = this->position_to_local(datum->x, datum->y, x, ds_by);
+				CanvasTextLayout^ tl = nullptr;
+
+				if (this->plaintexts.find(datum->name) == this->plaintexts.end()) {
+					CanvasGeometry^ tlt = paragraph(datum->name, make_text_format());
+
+					this->plaintexts.insert(std::pair<Platform::String^, CanvasGeometry^>(datum->name, tlt));
+				}
+
+				ds->FillGeometry(this->plaintexts[datum->name], tp, vector_colors_ref(0));
+			}; break;
+			case DigDatumType::Depth: {
+				float2 tp = this->position_to_local(datum->x, datum->y, x, ds_by);
+				CanvasTextLayout^ tl = nullptr;
+
+				if (this->plaintexts.find(datum->name) == this->plaintexts.end()) {
+					CanvasTextLayout^ tlt = make_text_layout(datum->name, make_text_format());
+					CanvasGeometry^ dp = paragraph(tlt);
+					CanvasPathBuilder^ bp = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+					Rect b = tlt->LayoutBounds;
+					float bhy = b.Height * 0.5F;
+					
+					bp->BeginFigure(0.0F, bhy);
+					bp->AddLine(0.0F, b.Height);
+					bp->AddLine(b.Width, b.Height);
+					bp->AddLine(b.Width, bhy);
+					bp->EndFigure(CanvasFigureLoop::Open);
+
+					this->plaintexts.insert(std::pair<Platform::String^, CanvasGeometry^>(datum->name,
+						geometry_union(dp, geometry_stroke(CanvasGeometry::CreatePath(bp), 1.0F))));
+				}
+
+				ds->FillGeometry(this->plaintexts[datum->name], tp, vector_colors_ref(0));
+			}; break;
+			case DigDatumType::FontText: {
+				FontTextDig* td = static_cast<FontTextDig*>(datum);
+				if (td->font_size > 0LL) {
+					float2 tp = this->position_to_local(datum->x, datum->y, x, ds_by);
+					CanvasTextLayout^ tl = nullptr;
+
+					if (this->plaintexts.find(datum->name) == this->plaintexts.end()) {
+						CanvasGeometry^ tlt = paragraph(datum->name, make_text_format(float(td->font_size)));
+
+						this->plaintexts.insert(std::pair<Platform::String^, CanvasGeometry^>(datum->name, tlt));
+					}
+
+					ds->FillGeometry(this->plaintexts[datum->name], tp, vector_colors_ref(td->color));
+				}
+			}; break;
 			}
 		} else {
 #ifdef _DEBUG
-			this->get_logger()->log_message(Log::Debug, datum->to_string());
+			this->get_logger()->log_message(Log::Debug, L"invisible: %s", datum->to_string()->Data());
 #endif
 		}
 	}
@@ -295,7 +358,7 @@ float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) 
 	float local_y = -float((x + this->ytranslation) * this->xscale) + yoff;
 	float local_x = float((y + this->xtranslation) * this->yscale) + xoff;
 
-	// NOTE the modifyDIG uses lefthand coordinate system
+	// NOTE that modifyDIG uses lefthand coordinate system
 	//   the x and y therefore should be interchanged before drawing
 	// Stupid design, and/or stupid referenced codebase for its lack of explanation
 
@@ -306,7 +369,7 @@ Size DigMaplet::length_to_local(double width, double height) {
 	float local_w = float(((height <= 0.0) ? width : height) * this->yscale);
 	float local_h = float(width * this->xscale);
 
-	// NOTE the modifyDIG uses lefthand coordinate system
+	// NOTE that modifyDIG uses lefthand coordinate system
 	//   the width and height therefore should be interchanged before drawing
 	// Stupid design, and/or stupid referenced codebase for its lack of explanation
 

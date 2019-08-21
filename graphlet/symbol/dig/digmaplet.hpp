@@ -1,3 +1,5 @@
+#pragma once
+
 #include "graphlet/matrix/diglet.hpp"
 
 namespace WarGrey::SCADA {
@@ -15,6 +17,10 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float2 local_to_position(float x, float y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Numerics::float2 position_to_local(double x, double y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Size length_to_local(double width, double height = 0.0);
+
+	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ plainfont;
+		std::map<Platform::String^, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> plaintexts;
 
 	private:
 		WarGrey::SCADA::DigMap^ map;
