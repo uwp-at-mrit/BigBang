@@ -60,36 +60,9 @@ static CanvasStrokeStyle^ vector_stroke_ref(long long idx) {
 
 	if (idx < sizeof(vector_strokes) / sizeof(CanvasStrokeStyle^)) {
 		style = vector_strokes[idx];
-	} 
+	}
 
 	return style;
-}
-
-namespace {
-	private ref class VectorText sealed {
-	internal:
-		VectorText(CanvasGeometry^ g, Rect& box) : g(g) {
-			this->x = box.X;
-			this->y = box.Y;
-			this->width = box.Width;
-			this->height = box.Height;
-		}
-
-	public:
-		CanvasGeometry^ shape(float* x, float* y, float* width, float* height) {
-			SET_VALUES(x, this->x, y, this->y);
-			SET_VALUES(width, this->width, height, this->height);
-
-			return g;
-		}
-
-	private:
-		CanvasGeometry^ g;
-		float x;
-		float y;
-		float width;
-		float height;
-	};
 }
 
 /*************************************************************************************************/
@@ -99,6 +72,8 @@ DigMaplet::DigMaplet(DigMap^ map, double width, double height, double tx, double
 }
 
 void DigMaplet::construct() {
+	this->plainfont = make_text_format();
+
 	this->width = float(this->initial_width * this->xscale);
 	this->height = float(this->initial_height * this->yscale);
 }
@@ -121,31 +96,34 @@ void DigMaplet::resize(float new_width, float new_height) {
 }
 
 void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	IDigDatum* datum = nullptr;
+	IDigDatum* dig = nullptr;
 	float ds_rx = x + Width;
 	float ds_by = y + Height;
 
 	this->map->rewind();
 
-	while ((datum = this->map->step()) != nullptr) {
-		float2 llt = this->position_to_local(datum->lx, datum->ty, x, ds_by);
-		float2 lrb = this->position_to_local(datum->rx, datum->by, x, ds_by);
+	while ((dig = this->map->step()) != nullptr) {
+		if ((dig->lx == dig->rx) && (dig->ty == dig->by)) {
+			this->preshape(dig);
+		}
+
+		float2 llt = this->position_to_local(dig->lx, dig->ty, x, ds_by);
+		float2 lrb = this->position_to_local(dig->rx, dig->by, x, ds_by);
 
 		// NOTE the y-axis has been flipped
-		bool visible = ((datum->lx == datum->rx) && (datum->ty == datum->by)) // for texts
-			|| rectangle_overlay(llt.x, lrb.y, lrb.x, llt.y, x, y, ds_rx, ds_by);
+		bool visible = rectangle_overlay(llt.x, lrb.y, lrb.x, llt.y, x, y, ds_rx, ds_by);
 
 		if (visible) {
-			switch (datum->type) {
+			switch (dig->type) {
 			case DigDatumType::Line: {
-				LineDig* l = static_cast<LineDig*>(datum);
+				LineDig* l = static_cast<LineDig*>(dig);
 				float2 ep0 = this->position_to_local(l->x, l->y, x, ds_by);
 				float2 ep1 = this->position_to_local(l->stop_x, l->stop_y, x, ds_by);
 				
 				ds->DrawLine(ep0, ep1, vector_colors_ref(l->color), StrokeWidth(l->linewidth), vector_stroke_ref(l->style));
 			}; break;
 			case DigDatumType::Circle: {
-				CircleDig* c = static_cast<CircleDig*>(datum);
+				CircleDig* c = static_cast<CircleDig*>(dig);
 				float2 cp = this->position_to_local(c->x, c->y, x, ds_by);
 				Size r = this->length_to_local(c->radius);
 				
@@ -156,7 +134,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				ds->DrawEllipse(cp, r.Width, r.Height, vector_colors_ref(c->color), 1.0F, vector_stroke_ref(c->style));
 			}; break;
 			case DigDatumType::Arc: {
-				ArcDig* a = static_cast<ArcDig*>(datum);
+				ArcDig* a = static_cast<ArcDig*>(dig);
 				float2 cp = this->position_to_local(a->x, a->y, x, ds_by);
 				Size r = this->length_to_local(a->radius);
 				CanvasGeometry^ g = nullptr;
@@ -180,7 +158,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				}
 			}; break;
 			case DigDatumType::Rectangle: {
-				RectangleDig* r = static_cast<RectangleDig*>(datum);
+				RectangleDig* r = static_cast<RectangleDig*>(dig);
 				float2 tl = this->position_to_local(r->x, r->y, x, ds_by);
 				Size s = this->length_to_local(r->width, r->height);
 				double deg = degrees_normalize(r->rotation);
@@ -209,9 +187,9 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				}
 			}; break;
 			case DigDatumType::ShoreLine: {
-				ShoreLineDig* l = static_cast<ShoreLineDig*>(datum);
+				ShoreLineDig* l = static_cast<ShoreLineDig*>(dig);
 				CanvasPathBuilder^ sl = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-				float2 start = this->position_to_local(datum->x, datum->y, x, ds_by);
+				float2 start = this->position_to_local(dig->x, dig->y, x, ds_by);
 
 				sl->BeginFigure(start);
 				for (size_t idx = 0; idx < l->poly_xs.size(); idx++) {
@@ -224,9 +202,9 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				ds->DrawGeometry(CanvasGeometry::CreatePath(sl), vector_colors_ref(0LL), 1.0F);
 			}; break;
 			case DigDatumType::PolyLine: {
-				PolyLineDig* l = static_cast<PolyLineDig*>(datum);
+				PolyLineDig* l = static_cast<PolyLineDig*>(dig);
 				CanvasPathBuilder^ pl = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-				float2 start = this->position_to_local(datum->x, datum->y, x, ds_by);
+				float2 start = this->position_to_local(dig->x, dig->y, x, ds_by);
 
 				pl->BeginFigure(start);
 				for (size_t idx = 0; idx < l->poly_xs.size(); idx++) {
@@ -240,9 +218,9 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 					StrokeWidth(l->width), vector_stroke_ref(l->style));
 			}; break;
 			case DigDatumType::PolyBezier: {
-				PolyBezierDig* b = static_cast<PolyBezierDig*>(datum);
+				PolyBezierDig* b = static_cast<PolyBezierDig*>(dig);
 				CanvasPathBuilder^ pb = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-				float2 start = this->position_to_local(datum->x, datum->y, x, ds_by);
+				float2 start = this->position_to_local(dig->x, dig->y, x, ds_by);
 				size_t idxmax = b->poly_xs.size() - 2;
 				size_t idx = 0;
 
@@ -269,58 +247,29 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 
 				ds->DrawGeometry(CanvasGeometry::CreatePath(pb), vector_colors_ref(b->color), StrokeWidth(b->width), vector_stroke_ref(b->style));
 			}; break;
-			case DigDatumType::Text: case DigDatumType::Depth: { // also see DigDatumType::Rectangle
-				float2 tp = this->position_to_local(datum->x, datum->y, x, ds_by);
-				CanvasTextLayout^ tl = nullptr;
+			case DigDatumType::Text: { // also see DigDatumType::Rectangle
+				float2 tp = this->position_to_local(dig->x, dig->y, x, ds_by);
+				
+				ds->FillGeometry(this->plaintexts[dig->name], tp, vector_colors_ref(0LL));
+			}; break;
+			case DigDatumType::Depth: { // also see DigDatumType::Rectangle
+				float2 tp = this->position_to_local(dig->x, dig->y, x, ds_by);
 
-				if (this->plaintexts.find(datum->name) == this->plaintexts.end()) {
-					CanvasTextLayout^ tlt = make_text_layout(datum->name, make_text_format());
-					CanvasGeometry^ g = paragraph(tlt);
-					Rect tbx = tlt->LayoutBounds;
-
-					if (datum->type == DigDatumType::Depth) {
-						CanvasPathBuilder^ bp = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-						float bhy = tbx.Height * 0.5F;
-
-						bp->BeginFigure(0.0F, bhy);
-						bp->AddLine(0.0F, tbx.Height);
-						bp->AddLine(tbx.Width, tbx.Height);
-						bp->AddLine(tbx.Width, bhy);
-						bp->EndFigure(CanvasFigureLoop::Open);
-
-						g = geometry_union(g, geometry_stroke(CanvasGeometry::CreatePath(bp), 1.0F));
-					}
-					
-					this->plaintexts.insert(std::pair<Platform::String^, Platform::Object^>(datum->name, ref new VectorText(g, tbx)));
-				}
-
-				this->draw_text(ds, this->plaintexts[datum->name], tp, 0LL, datum, x, y, ds_rx, ds_by);
+				ds->FillGeometry(this->depthtexts[dig->name], tp, vector_colors_ref(0LL));
 			}; break;
 			case DigDatumType::FontText: { // also see DigDatumType::Rectangle
-				FontTextDig* td = static_cast<FontTextDig*>(datum);
+				FontTextDig* td = static_cast<FontTextDig*>(dig);
 
 				if (td->font_size > 0LL) {
-					float2 tp = this->position_to_local(datum->x, datum->y, x, ds_by);
-					CanvasTextLayout^ tl = nullptr;
-
-					if (this->plaintexts.find(datum->name) == this->plaintexts.end()) {
-						CanvasGeometry^ tlt = paragraph(datum->name, make_text_format(td->font_name, float(td->font_size)));
-
-						if (degrees_normalize(td->rotation) != 0.0) {
-							tlt = geometry_rotate(tlt, td->rotation, 0.0F, 0.0F);
-						}
-
-						this->fonttexts.insert(std::pair<FontTextDig*, Platform::Object^>(td,
-							ref new VectorText(tlt, tlt->ComputeBounds())));
-					}
-
-					this->draw_text(ds, this->fonttexts[td], tp, td->color, datum, x, y, ds_rx, ds_by);
+					float2 tp = this->position_to_local(dig->x, dig->y, x, ds_by);
+					
+					ds->FillGeometry(this->fonttexts[td], tp, vector_colors_ref(td->color));
 				}
 			}; break;
 			}
 		} else {
 #ifdef _DEBUG
-			this->get_logger()->log_message(Log::Debug, L"invisible: %s", datum->to_string()->Data());
+			this->get_logger()->log_message(Log::Debug, L"invisible: %s", dig->to_string()->Data());
 #endif
 		}
 	}
@@ -353,19 +302,67 @@ float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
 	return float2(x, y);
 }
 
-void DigMaplet::draw_text(CanvasDrawingSession^ ds, Platform::Object^ vtobj, float2& tp, long long color
-	, IDigDatum* dig, float lx, float ty, float rx, float by) {
-	float vtx, vty, vtwidth, vtheight;
-	CanvasGeometry^ shape = static_cast<VectorText^>(vtobj)->shape(&vtx, &vty, &vtwidth, &vtheight);
+void DigMaplet::preshape(IDigDatum* dig) {
+	Rect tbx(0.0F, 0.0F, 1.0F, 1.0F); // for FontText which font size is invalid
 
-	vtx += tp.x;
-	vty += tp.y;
-	
-	if (rectangle_overlay(vtx, vty, vtx + vtwidth, vty + vtheight, lx, ty, rx, by)) {
-		ds->FillGeometry(shape, tp, vector_colors_ref(color));
-	} else {
-#ifdef _DEBUG
-		this->get_logger()->log_message(Log::Debug, L"invisible: %s", dig->to_string()->Data());
-#endif
+	switch (dig->type) {
+	case DigDatumType::Text: {
+		if (this->plaintexts.find(dig->name) == this->plaintexts.end()) {
+			CanvasTextLayout^ tlt = make_text_layout(dig->name, this->plainfont);
+			CanvasGeometry^ g = paragraph(tlt);
+			
+			tbx = tlt->LayoutBounds;
+			this->plaintexts.insert(std::pair<Platform::String^, CanvasGeometry^>(dig->name, g));
+		} else {
+			tbx = this->plaintexts[dig->name]->ComputeBounds();
+		}
+	}; break;
+	case DigDatumType::Depth: {
+		if (this->depthtexts.find(dig->name) == this->depthtexts.end()) {
+			CanvasTextLayout^ tlt = make_text_layout(dig->name, this->plainfont);
+			CanvasGeometry^ g = paragraph(tlt);
+			CanvasPathBuilder^ bp = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+			
+			tbx = tlt->LayoutBounds;
+			
+			{ // decorate depth
+				float bhy = tbx.Height * 0.5F;
+
+				bp->BeginFigure(0.0F, bhy);
+				bp->AddLine(0.0F, tbx.Height);
+				bp->AddLine(tbx.Width, tbx.Height);
+				bp->AddLine(tbx.Width, bhy);
+				bp->EndFigure(CanvasFigureLoop::Open);
+
+				this->depthtexts.insert(std::pair<Platform::String^, CanvasGeometry^>(dig->name,
+					geometry_union(g, geometry_stroke(CanvasGeometry::CreatePath(bp), 1.0F))));
+			}
+		} else {
+			tbx = this->depthtexts[dig->name]->ComputeBounds();
+		}
+	}; break;
+	case DigDatumType::FontText: { // also see DigDatumType::Rectangle
+		FontTextDig* td = static_cast<FontTextDig*>(dig);
+
+		if (td->font_size > 0LL) {
+			if (this->fonttexts.find(td) == this->fonttexts.end()) {
+				CanvasGeometry^ tlt = paragraph(dig->name, make_text_format(td->font_name, float(td->font_size)));
+
+				if (degrees_normalize(td->rotation) != 0.0) {
+					tlt = geometry_rotate(tlt, td->rotation, 0.0F, 0.0F);
+				}
+
+				tbx = tlt->ComputeBounds();
+				this->fonttexts.insert(std::pair<FontTextDig*, CanvasGeometry^>(td, tlt));
+			} else {
+				tbx = this->fonttexts[td]->ComputeBounds();
+			}
+		}
+	}; break;
 	}
+
+	dig->lx = dig->x + tbx.X;
+	dig->ty = dig->y + tbx.Y;
+	dig->rx = dig->lx + tbx.Width;
+	dig->by = dig->by + tbx.Height;
 }
