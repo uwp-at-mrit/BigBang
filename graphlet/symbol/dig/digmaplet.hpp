@@ -21,6 +21,7 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ plainfont;
 		std::map<Platform::String^, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> plaintexts;
+		std::map<WarGrey::SCADA::FontTextDig*, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> fonttexts;
 
 	private:
 		WarGrey::SCADA::DigMap^ map;

@@ -176,7 +176,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 
 				/** WARNING
 				 * The modifyDIG does not handle rectangles accurately, DigMaplet follows it for the sake of compatibility.
-				 * Nevertheless, rectangles should be translated vertically since modifyDIG uses the lefthand coordinate system.
+				 * Nevertheless, rectangles should be translated or flipped vertically since modifyDIG uses the lefthand coordinate system.
 				 * Rotation makes it even harder since its center point is the left-top one which is actually indicating the left-bottom one.
 				 *
 				 * By the way, this bug is not a big deal since rectangles are less used in real world projects.
@@ -295,7 +295,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 
 				ds->DrawGeometry(CanvasGeometry::CreatePath(pb), vector_colors_ref(b->color), StrokeWidth(b->width), vector_stroke_ref(b->style));
 			}; break;
-			case DigDatumType::Text: {
+			case DigDatumType::Text: { // also see DigDatumType::Rectangle
 				float2 tp = this->position_to_local(datum->x, datum->y, x, ds_by);
 				CanvasTextLayout^ tl = nullptr;
 
@@ -307,7 +307,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 
 				ds->FillGeometry(this->plaintexts[datum->name], tp, vector_colors_ref(0));
 			}; break;
-			case DigDatumType::Depth: {
+			case DigDatumType::Depth: { // also see DigDatumType::Rectangle
 				float2 tp = this->position_to_local(datum->x, datum->y, x, ds_by);
 				CanvasTextLayout^ tl = nullptr;
 
@@ -330,19 +330,23 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 
 				ds->FillGeometry(this->plaintexts[datum->name], tp, vector_colors_ref(0));
 			}; break;
-			case DigDatumType::FontText: {
+			case DigDatumType::FontText: { // also see DigDatumType::Rectangle
 				FontTextDig* td = static_cast<FontTextDig*>(datum);
 				if (td->font_size > 0LL) {
 					float2 tp = this->position_to_local(datum->x, datum->y, x, ds_by);
 					CanvasTextLayout^ tl = nullptr;
 
 					if (this->plaintexts.find(datum->name) == this->plaintexts.end()) {
-						CanvasGeometry^ tlt = paragraph(datum->name, make_text_format(float(td->font_size)));
+						CanvasGeometry^ tlt = paragraph(datum->name, make_text_format(td->font_name, float(td->font_size)));
 
-						this->plaintexts.insert(std::pair<Platform::String^, CanvasGeometry^>(datum->name, tlt));
+						if (degrees_normalize(td->rotation) != 0.0) {
+							tlt = geometry_rotate(tlt, td->rotation, 0.0F, 0.0F);
+						}
+
+						this->fonttexts.insert(std::pair<FontTextDig*, CanvasGeometry^>(td, tlt));
 					}
 
-					ds->FillGeometry(this->plaintexts[datum->name], tp, vector_colors_ref(td->color));
+					ds->FillGeometry(this->fonttexts[td], tp, vector_colors_ref(td->color));
 				}
 			}; break;
 			}
