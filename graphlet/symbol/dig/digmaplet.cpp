@@ -247,19 +247,21 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 
 				ds->DrawGeometry(CanvasGeometry::CreatePath(pb), vector_colors_ref(b->color), StrokeWidth(b->width), vector_stroke_ref(b->style));
 			}; break;
-			case DigDatumType::Text: { // also see DigDatumType::Rectangle
+			case DigDatumType::Text: { // also see DigDatumType::Rectangle, but modifyDIG handles normal texts accurately.
 				float2 tp = this->position_to_local(dig->x, dig->y, x, ds_by);
+				float text_height = float(dig->by - dig->ty);
 				
-				ds->FillGeometry(this->plaintexts[dig->name], tp, vector_colors_ref(0LL));
+				ds->FillGeometry(this->plaintexts[dig->name], tp.x, tp.y - text_height, vector_colors_ref(0LL));
 			}; break;
-			case DigDatumType::Depth: { // also see DigDatumType::Rectangle
+			case DigDatumType::Depth: { // also see DigDatumType::Rectangle, but modifyDIG handles depth accurately.
 				float2 tp = this->position_to_local(dig->x, dig->y, x, ds_by);
+				float depth_height = float(dig->by - dig->ty);
 
-				ds->FillGeometry(this->depthtexts[dig->name], tp, vector_colors_ref(0LL));
+				ds->FillGeometry(this->depthtexts[dig->name], tp.x, tp.y - depth_height, vector_colors_ref(0LL));
 			}; break;
 			case DigDatumType::FontText: { // also see DigDatumType::Rectangle
 				FontTextDig* td = static_cast<FontTextDig*>(dig);
-
+				
 				if (td->font_size > 0LL) {
 					float2 tp = this->position_to_local(dig->x, dig->y, x, ds_by);
 					

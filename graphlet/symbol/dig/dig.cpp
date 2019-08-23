@@ -49,10 +49,10 @@ namespace {
 	};
 }
 
-static IGraphlet* create_icon_graphlet(DigIcon type, float size) {
+static IGraphlet* create_icon_graphlet(DigIcon subtype, float size) { // Buoys are created by BuoyDig
 	IGraphlet* icon = nullptr;
 
-	switch (type) {
+	switch (subtype) {
 	case DigIcon::LightShip: icon = new LightShiplet(size); break;
 	case DigIcon::SunkenShip: icon = new SunkenShiplet(size); break;
 	case DigIcon::Wreck: icon = new Wrecklet(size); break;
