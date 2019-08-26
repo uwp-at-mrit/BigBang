@@ -43,7 +43,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~Diglet() noexcept;
 
-		Diglet(Platform::String^ file_bmp, float view_width, float view_height, double scale = 0.01,
+		Diglet(Platform::String^ file_bmp, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "dig");
 
@@ -54,23 +54,22 @@ namespace WarGrey::SCADA {
 		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		bool ready() override;
 
+	public:
+		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
+		bool on_character(unsigned int keycode) override;
+
 	protected:
 		void on_appdata(Windows::Foundation::Uri^ ms_appdata_dig, WarGrey::SCADA::DigMap^ doc_dig, int hint) override;
 		void on_appdata_not_found(Windows::Foundation::Uri^ ms_appdata_dig, int hint) override {}
 
 	private:
 		WarGrey::SCADA::DigMap^ graph_dig;
-
+		
 	private:
 		Windows::Foundation::Uri^ ms_appdata_dig;
-		double map_x;
-		double map_y;
-		double map_width;
-		double map_height;
 
 	private:
 		float view_width;
 		float view_height;
-		double origin_scale;
 	};
 }

@@ -5,21 +5,28 @@
 namespace WarGrey::SCADA {
 	private class DigMaplet : public WarGrey::SCADA::IGraphlet {
 	public:
-		DigMaplet(WarGrey::SCADA::DigMap^ map, double width, double height, double tx, double ty);
+		DigMaplet(WarGrey::SCADA::DigMap^ map, double width, double height, double fontsize_times = 24.0);
 
 	public:
 		void construct() override;
 		void fill_extent(float x, float y, float* width, float* height) override;
-		void resize(float width, float height) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
+		bool on_character(unsigned int keycode) override;
 
 	public:
 		Windows::Foundation::Numerics::float2 local_to_position(float x, float y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Numerics::float2 position_to_local(double x, double y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Size length_to_local(double width, double height = 0.0);
 
+	public:
+		double scale();
+
 	private:
 		void preshape(WarGrey::SCADA::IDigDatum* dig);
+		void scale_transform(double stimes, double anchor_x, double anchor_y);
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ plainfont;
@@ -29,15 +36,18 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::DigMap^ map;
-		double initial_width;
-		double initial_height;
+		double geo_x;
+		double geo_y;
+		double geo_width;
+		double geo_height;
 		float width;
 		float height;
 
 	private:
-		double xscale;
-		double yscale;
-		double xtranslation;
-		double ytranslation;
+		float xtranslation;
+		float ytranslation;
+		double stimes;
+		double fstimes;
+		double _scale;
 	};
 }

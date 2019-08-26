@@ -10,7 +10,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 BorderDecorator::BorderDecorator(CanvasSolidColorBrush^ border_color, CanvasSolidColorBrush^ enclosing_color)
 	: border_color(border_color), enclosing_color(enclosing_color) {}
 
-void BorderDecorator::draw_before(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {
+void BorderDecorator::draw_after(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {
 	if (this->border_color != nullptr) {
 		ds->DrawRectangle(X, Y, Width, Height, this->border_color);
 	}

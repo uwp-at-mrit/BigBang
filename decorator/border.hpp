@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ enclosing_color = WarGrey::SCADA::Colours::GrayText);
 
 	public:
-		void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) override;
+		void draw_after(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color;

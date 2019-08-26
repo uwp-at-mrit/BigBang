@@ -321,7 +321,9 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
 
 		if ((this->scale_x != 1.0F) || (this->scale_y != 1.0F)) {
-			if (g->resizable()) {
+			GraphletAnchor resize_anchor;
+			
+			if (g->resizable(&resize_anchor)) {
 				float width, height;
 
 				g->fill_extent(x, y, &width, &height);
@@ -525,29 +527,30 @@ void Planet::translate(float x, float y) {
 	}
 }
 
-void Planet::scale(float sx, float sy) {
+void Planet::scale(float xscale, float yscale) {
 	// TODO: implement flipping
-	if (sx > 0.0F) {
-		if (sy <= 0.0F) {
-			sy = sx;
+	if (xscale > 0.0F) {
+		if (yscale <= 0.0F) {
+			yscale = xscale;
 		}
 
-		if ((this->scale_x != sx) || (this->scale_y != sy)) {
+		if ((this->scale_x != xscale) || (this->scale_y != yscale)) {
 			this->begin_update_sequence();
 
 			if (this->head_graphlet != nullptr) {
 				GraphletInfo* head_info = GRAPHLET_INFO(this->head_graphlet);
 				IGraphlet* child = head_info->prev;
+				GraphletAnchor resize_anchor;
 
 				do {
 					GraphletInfo* info = GRAPHLET_INFO(child);
 
 					if (unsafe_graphlet_unmasked(info, this->mode)) {
-						if (child->resizable()) {
+						if (child->resizable(&resize_anchor)) {
 							float sx, sy, sw, sh;
 
 							unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
-							child->resize((sw / this->scale_x) * sx, (sh / this->scale_y) * sy);
+							child->resize((sw / this->scale_x) * xscale, (sh / this->scale_y) * yscale);
 						}
 					}
 
@@ -555,8 +558,8 @@ void Planet::scale(float sx, float sy) {
 				} while (child != head_info->prev);
 			}
 
-			this->scale_x = sx;
-			this->scale_y = sy;
+			this->scale_x = xscale;
+			this->scale_y = yscale;
 
 			if (this->needs_update()) {
 				this->size_cache_invalid();
@@ -890,7 +893,6 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
 		this->keyboard->show(false);
-		
 		this->set_caret_owner(unmasked_graphlet);
 		this->no_selected();
 

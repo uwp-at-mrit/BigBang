@@ -16,6 +16,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
+using namespace Windows::System;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
@@ -66,33 +67,21 @@ static CanvasStrokeStyle^ vector_stroke_ref(long long idx) {
 }
 
 /*************************************************************************************************/
-DigMaplet::DigMaplet(DigMap^ map, double width, double height, double tx, double ty)
-	: map(map), initial_width(width), initial_height(height), xscale(1.0), yscale(1.0), xtranslation(tx), ytranslation(ty) {
-	this->enable_resizing(true);
+DigMaplet::DigMaplet(DigMap^ map, double width, double height, double fontsize_times)
+	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0) {
+	this->enable_resizing(false);
+	this->enable_events(true, false);
 }
 
 void DigMaplet::construct() {
 	this->plainfont = make_text_format();
-
-	this->width = float(this->initial_width * this->xscale);
-	this->height = float(this->initial_height * this->yscale);
+	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
+	this->_scale = flmax(this->width / this->geo_height, this->height / this->geo_width);
 }
 
 void DigMaplet::fill_extent(float x, float y, float* width, float* height) {
 	SET_BOX(width, this->width);
 	SET_BOX(height, this->height);
-}
-
-void DigMaplet::resize(float new_width, float new_height) {
-	if ((this->width != new_width) || (this->height != new_height)) {
-		this->xscale = double(new_width / this->initial_width);
-		this->yscale = double(new_height / this->initial_height);
-
-		this->width = new_width;
-		this->height = new_height;
-
-		this->notify_updated();
-	}
 }
 
 void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -103,7 +92,8 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 	this->map->rewind();
 
 	while ((dig = this->map->step()) != nullptr) {
-		if ((dig->lx == dig->rx) && (dig->ty == dig->by)) {
+		if (((dig->lx == dig->rx) && (dig->ty == dig->by))
+			|| (dig->type == DigDatumType::FontText)) {
 			this->preshape(dig);
 		}
 
@@ -271,15 +261,17 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			}
 		} else {
 #ifdef _DEBUG
-			this->get_logger()->log_message(Log::Debug, L"invisible: %s", dig->to_string()->Data());
+			this->get_logger()->log_message(Log::Debug,
+				L"invisible: %s; view window: (%f, %f), (%f, %f); scale: [%f, %f]; translation: [%f, %f]",
+				dig->to_string()->Data(), x, y, ds_rx, ds_by, this->xscale, this->yscale, this->xtranslation, this->ytranslation);
 #endif
 		}
 	}
 }
 
 float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) {
-	float local_y = -float((x + this->ytranslation) * this->xscale) + yoff;
-	float local_x = float((y + this->xtranslation) * this->yscale) + xoff;
+	float local_y = -float((x - this->geo_x) * this->_scale * this->stimes) + yoff + this->ytranslation;
+	float local_x = float((y - this->geo_y) * this->_scale * this->stimes) + xoff + this->xtranslation;
 
 	// NOTE that modifyDIG uses lefthand coordinate system
 	//   the x and y therefore should be interchanged before drawing
@@ -289,8 +281,8 @@ float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) 
 }
 
 Size DigMaplet::length_to_local(double width, double height) {
-	float local_w = float(((height <= 0.0) ? width : height) * this->yscale);
-	float local_h = float(width * this->xscale);
+	float local_w = float(((height <= 0.0) ? width : height) * this->_scale * this->stimes);
+	float local_h = float(width * this->_scale * this->stimes);
 
 	// NOTE that modifyDIG uses lefthand coordinate system
 	//   the width and height therefore should be interchanged before drawing
@@ -302,6 +294,78 @@ Size DigMaplet::length_to_local(double width, double height) {
 float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
 	// TODO
 	return float2(x, y);
+}
+
+bool DigMaplet::on_key(VirtualKey key, bool screen_keyboard) {
+	bool handled = false;
+
+	switch (key) {
+	case VirtualKey::Left: {
+		this->xtranslation -= 64.0F;
+		handled = true;
+	}; break;
+	case VirtualKey::Right: {
+		this->xtranslation += 64.0F;
+		handled = true;
+	}; break;
+
+	case VirtualKey::Up: {
+		this->ytranslation -= 64.0F;
+		handled = true;
+	}; break;
+	case VirtualKey::Down: {
+		this->ytranslation += 64.0F;
+		handled = true;
+	}; break;
+
+	case VirtualKey::Delete: case VirtualKey::Home: {
+		this->scale_transform(1.0, this->geo_x + this->geo_width * 0.5, this->geo_y + this->geo_height * 0.5);
+		handled = true;
+	}; break;
+	}
+
+	if (handled) {
+		this->notify_updated();
+	}
+
+	return handled;
+}
+
+bool DigMaplet::on_character(unsigned int keycode) {
+	double posttimes = this->stimes;
+	bool handled = false;
+
+	switch (keycode) {
+	case 61 /* = */: case 43 /* + */: {
+		if (this->stimes >= 1.0) {
+			posttimes = this->stimes + 1.0;
+		} else {
+			posttimes = this->stimes * 2.0;
+		}
+
+		handled = true;
+	}; break;
+	case 45 /* - */: case 95 /* _ */: {
+		if (this->stimes > 1.0) {
+			posttimes = this->stimes - 1.0;
+		} else {
+			posttimes = this->stimes * 0.5;
+		}
+
+		handled = true;
+	}; break;
+	}
+
+	if (handled) {
+		this->scale_transform(posttimes, this->geo_x + this->geo_width * 0.5, this->geo_y + this->geo_height * 0.5);
+		this->notify_updated();
+	}
+
+	return handled;
+}
+
+double DigMaplet::scale() {
+	return this->_scale;
 }
 
 void DigMaplet::preshape(IDigDatum* dig) {
@@ -348,7 +412,8 @@ void DigMaplet::preshape(IDigDatum* dig) {
 
 		if (td->font_size > 0LL) {
 			if (this->fonttexts.find(td) == this->fonttexts.end()) {
-				CanvasGeometry^ tlt = paragraph(dig->name, make_text_format(td->font_name, float(td->font_size)));
+				float font_size = float(td->font_size * this->fstimes * this->_scale * this->stimes);
+				CanvasGeometry^ tlt = paragraph(dig->name, make_text_format(td->font_name, font_size));
 
 				if (degrees_normalize(td->rotation) != 0.0) {
 					tlt = geometry_rotate(tlt, td->rotation, 0.0F, 0.0F);
@@ -367,4 +432,11 @@ void DigMaplet::preshape(IDigDatum* dig) {
 	dig->ty = dig->y + tbx.Y;
 	dig->rx = dig->lx + tbx.Width;
 	dig->by = dig->by + tbx.Height;
+}
+
+void DigMaplet::scale_transform(double stimes, double anchor_x, double anchor_y) {
+	float2 local_anchor = this->position_to_local(anchor_x, anchor_y, 0.0F, this->height);
+
+	this->stimes = stimes;
+	this->fonttexts.clear();
 }
