@@ -76,7 +76,8 @@ DigMaplet::DigMaplet(DigMap^ map, double width, double height, double fontsize_t
 void DigMaplet::construct() {
 	this->plainfont = make_text_format();
 	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
-	this->_scale = flmax(this->width / this->geo_height, this->height / this->geo_width);
+	this->_scale = flmin(this->width / this->geo_height, this->height / this->geo_width);
+	this->center();
 }
 
 void DigMaplet::fill_extent(float x, float y, float* width, float* height) {
@@ -97,8 +98,8 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			this->preshape(dig);
 		}
 
-		float2 llt = this->position_to_local(dig->lx, dig->ty, x, ds_by);
-		float2 lrb = this->position_to_local(dig->rx, dig->by, x, ds_by);
+		float2 llt = this->position_to_local(dig->lx, dig->ty, x, y);
+		float2 lrb = this->position_to_local(dig->rx, dig->by, x, y);
 
 		// NOTE the y-axis has been flipped
 		bool visible = rectangle_overlay(llt.x, lrb.y, lrb.x, llt.y, x, y, ds_rx, ds_by);
@@ -107,14 +108,14 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			switch (dig->type) {
 			case DigDatumType::Line: {
 				LineDig* l = static_cast<LineDig*>(dig);
-				float2 ep0 = this->position_to_local(l->x, l->y, x, ds_by);
-				float2 ep1 = this->position_to_local(l->stop_x, l->stop_y, x, ds_by);
+				float2 ep0 = this->position_to_local(l->x, l->y, x, y);
+				float2 ep1 = this->position_to_local(l->stop_x, l->stop_y, x, y);
 				
 				ds->DrawLine(ep0, ep1, vector_colors_ref(l->color), StrokeWidth(l->linewidth), vector_stroke_ref(l->style));
 			}; break;
 			case DigDatumType::Circle: {
 				CircleDig* c = static_cast<CircleDig*>(dig);
-				float2 cp = this->position_to_local(c->x, c->y, x, ds_by);
+				float2 cp = this->position_to_local(c->x, c->y, x, y);
 				Size r = this->length_to_local(c->radius);
 				
 				if (c->filled) {
@@ -125,7 +126,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			}; break;
 			case DigDatumType::Arc: {
 				ArcDig* a = static_cast<ArcDig*>(dig);
-				float2 cp = this->position_to_local(a->x, a->y, x, ds_by);
+				float2 cp = this->position_to_local(a->x, a->y, x, y);
 				Size r = this->length_to_local(a->radius);
 				CanvasGeometry^ g = nullptr;
 				
@@ -149,7 +150,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			}; break;
 			case DigDatumType::Rectangle: {
 				RectangleDig* r = static_cast<RectangleDig*>(dig);
-				float2 tl = this->position_to_local(r->x, r->y, x, ds_by);
+				float2 tl = this->position_to_local(r->x, r->y, x, y);
 				Size s = this->length_to_local(r->width, r->height);
 				double deg = degrees_normalize(r->rotation);
 
@@ -179,11 +180,11 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			case DigDatumType::ShoreLine: {
 				ShoreLineDig* l = static_cast<ShoreLineDig*>(dig);
 				CanvasPathBuilder^ sl = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-				float2 start = this->position_to_local(dig->x, dig->y, x, ds_by);
+				float2 start = this->position_to_local(dig->x, dig->y, x, y);
 
 				sl->BeginFigure(start);
 				for (size_t idx = 0; idx < l->poly_xs.size(); idx++) {
-					float2 dot = this->position_to_local(l->poly_xs[idx], l->poly_ys[idx], x, ds_by);
+					float2 dot = this->position_to_local(l->poly_xs[idx], l->poly_ys[idx], x, y);
 
 					sl->AddLine(dot);
 				}
@@ -194,11 +195,11 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			case DigDatumType::PolyLine: {
 				PolyLineDig* l = static_cast<PolyLineDig*>(dig);
 				CanvasPathBuilder^ pl = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-				float2 start = this->position_to_local(dig->x, dig->y, x, ds_by);
+				float2 start = this->position_to_local(dig->x, dig->y, x, y);
 
 				pl->BeginFigure(start);
 				for (size_t idx = 0; idx < l->poly_xs.size(); idx++) {
-					float2 dot = this->position_to_local(l->poly_xs[idx], l->poly_ys[idx], x, ds_by);
+					float2 dot = this->position_to_local(l->poly_xs[idx], l->poly_ys[idx], x, y);
 
 					pl->AddLine(dot);
 				}
@@ -210,22 +211,22 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			case DigDatumType::PolyBezier: {
 				PolyBezierDig* b = static_cast<PolyBezierDig*>(dig);
 				CanvasPathBuilder^ pb = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-				float2 start = this->position_to_local(dig->x, dig->y, x, ds_by);
+				float2 start = this->position_to_local(dig->x, dig->y, x, y);
 				size_t idxmax = b->poly_xs.size() - 2;
 				size_t idx = 0;
 
 				pb->BeginFigure(start);
 				while (1) {
 					if (idx < idxmax) {
-						float2 cp1 = this->position_to_local(b->poly_xs[idx + 0], b->poly_ys[idx + 0], x, ds_by);
-						float2 cp2 = this->position_to_local(b->poly_xs[idx + 1], b->poly_ys[idx + 1], x, ds_by);
-						float2 cp3 = this->position_to_local(b->poly_xs[idx + 2], b->poly_ys[idx + 2], x, ds_by);
+						float2 cp1 = this->position_to_local(b->poly_xs[idx + 0], b->poly_ys[idx + 0], x, y);
+						float2 cp2 = this->position_to_local(b->poly_xs[idx + 1], b->poly_ys[idx + 1], x, y);
+						float2 cp3 = this->position_to_local(b->poly_xs[idx + 2], b->poly_ys[idx + 2], x, y);
 		
 						pb->AddCubicBezier(cp1, cp2, cp3);
 						idx += 3;
 					} else if (idx == idxmax) {
-						float2 cp1 = this->position_to_local(b->poly_xs[idx + 0], b->poly_ys[idx + 0], x, ds_by);
-						float2 cp2 = this->position_to_local(b->poly_xs[idx + 1], b->poly_ys[idx + 1], x, ds_by);
+						float2 cp1 = this->position_to_local(b->poly_xs[idx + 0], b->poly_ys[idx + 0], x, y);
+						float2 cp2 = this->position_to_local(b->poly_xs[idx + 1], b->poly_ys[idx + 1], x, y);
 
 						pb->AddQuadraticBezier(cp1, cp2);
 						idx += 2;
@@ -238,13 +239,13 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				ds->DrawGeometry(CanvasGeometry::CreatePath(pb), vector_colors_ref(b->color), StrokeWidth(b->width), vector_stroke_ref(b->style));
 			}; break;
 			case DigDatumType::Text: { // also see DigDatumType::Rectangle, but modifyDIG handles normal texts accurately.
-				float2 tp = this->position_to_local(dig->x, dig->y, x, ds_by);
+				float2 tp = this->position_to_local(dig->x, dig->y, x, y);
 				float text_height = float(dig->by - dig->ty);
 				
 				ds->FillGeometry(this->plaintexts[dig->name], tp.x, tp.y - text_height, vector_colors_ref(0LL));
 			}; break;
 			case DigDatumType::Depth: { // also see DigDatumType::Rectangle, but modifyDIG handles depth accurately.
-				float2 tp = this->position_to_local(dig->x, dig->y, x, ds_by);
+				float2 tp = this->position_to_local(dig->x, dig->y, x, y);
 				float depth_height = float(dig->by - dig->ty);
 
 				ds->FillGeometry(this->depthtexts[dig->name], tp.x, tp.y - depth_height, vector_colors_ref(0LL));
@@ -253,7 +254,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				FontTextDig* td = static_cast<FontTextDig*>(dig);
 				
 				if (td->font_size > 0LL) {
-					float2 tp = this->position_to_local(dig->x, dig->y, x, ds_by);
+					float2 tp = this->position_to_local(dig->x, dig->y, x, y);
 					
 					ds->FillGeometry(this->fonttexts[td], tp, vector_colors_ref(td->color));
 				}
@@ -270,8 +271,11 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 }
 
 float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) {
-	float local_y = -float((x - this->geo_x) * this->_scale * this->stimes) + yoff + this->ytranslation;
-	float local_x = float((y - this->geo_y) * this->_scale * this->stimes) + xoff + this->xtranslation;
+	double ss = this->_scale * this->stimes;
+	float ty = yoff + this->height + this->ytranslation;
+	float tx = xoff + this->xtranslation;
+	float local_y = -float((x - this->geo_x) * ss) + ty;
+	float local_x = float((y - this->geo_y) * ss) + tx;
 
 	// NOTE that modifyDIG uses lefthand coordinate system
 	//   the x and y therefore should be interchanged before drawing
@@ -280,20 +284,30 @@ float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) 
 	return float2(local_x, local_y);
 }
 
+float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
+	double ss = this->_scale * this->stimes;
+	float ty = yoff + this->height + this->ytranslation;
+	float tx = xoff + this->xtranslation;
+	float gy = float((x - tx) / ss + this->geo_y);
+	float gx = float((ty - y) / ss + this->geo_x);
+
+	// NOTE that modifyDIG uses lefthand coordinate system
+	//   the x and y therefore should be interchanged before drawing
+	// Stupid design, and/or stupid referenced codebase for its lack of explanation
+
+	return float2(gx, gy);
+}
+
 Size DigMaplet::length_to_local(double width, double height) {
-	float local_w = float(((height <= 0.0) ? width : height) * this->_scale * this->stimes);
-	float local_h = float(width * this->_scale * this->stimes);
+	double ss = this->_scale * this->stimes;
+	float local_w = float(((height <= 0.0) ? width : height) * ss);
+	float local_h = float(width * ss);
 
 	// NOTE that modifyDIG uses lefthand coordinate system
 	//   the width and height therefore should be interchanged before drawing
 	// Stupid design, and/or stupid referenced codebase for its lack of explanation
 
 	return Size(local_w, local_h);
-}
-
-float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
-	// TODO
-	return float2(x, y);
 }
 
 bool DigMaplet::on_key(VirtualKey key, bool screen_keyboard) {
@@ -317,11 +331,6 @@ bool DigMaplet::on_key(VirtualKey key, bool screen_keyboard) {
 		this->ytranslation += 64.0F;
 		handled = true;
 	}; break;
-
-	case VirtualKey::Delete: case VirtualKey::Home: {
-		this->scale_transform(1.0, this->geo_x + this->geo_width * 0.5, this->geo_y + this->geo_height * 0.5);
-		handled = true;
-	}; break;
 	}
 
 	if (handled) {
@@ -334,6 +343,7 @@ bool DigMaplet::on_key(VirtualKey key, bool screen_keyboard) {
 bool DigMaplet::on_character(unsigned int keycode) {
 	double posttimes = this->stimes;
 	bool handled = false;
+	bool center = false;
 
 	switch (keycode) {
 	case 61 /* = */: case 43 /* + */: {
@@ -354,14 +364,45 @@ bool DigMaplet::on_character(unsigned int keycode) {
 
 		handled = true;
 	}; break;
+	case 8 /* back */: {
+		posttimes = 1.0;
+		center = true;
+		handled = true;
+	}; break;
 	}
 
 	if (handled) {
-		this->scale_transform(posttimes, this->geo_x + this->geo_width * 0.5, this->geo_y + this->geo_height * 0.5);
+		this->scale_transform(posttimes, this->width * 0.5F, this->height * 0.5F);
+		
+		if (center) {
+			this->center();
+		}
+
 		this->notify_updated();
 	}
 
 	return handled;
+}
+
+void DigMaplet::scale_transform(double stimes, float anchor_x, float anchor_y) {
+	if (this->stimes != stimes) {
+		float2 anchor = this->local_to_position(anchor_x, anchor_y, 0.0F, 0.0F);
+
+		this->stimes = stimes;
+		anchor = this->position_to_local(anchor.x, anchor.y, 0.0F, 0.0F);
+
+		this->xtranslation -= (anchor.x - anchor_x);
+		this->ytranslation -= (anchor.y - anchor_y);
+
+		this->fonttexts.clear();
+	}
+}
+
+void DigMaplet::center() {
+	Size view = this->length_to_local(this->geo_width, this->geo_height);
+
+	this->xtranslation = (this->width - view.Width) * 0.5F;
+	this->ytranslation = (this->height - view.Height) * 0.5F;
 }
 
 double DigMaplet::scale() {
@@ -392,7 +433,7 @@ void DigMaplet::preshape(IDigDatum* dig) {
 			tbx = tlt->LayoutBounds;
 			
 			{ // decorate depth
-				float bhy = tbx.Height * 0.5F;
+				float bhy = tbx.Height * 0.75F;
 
 				bp->BeginFigure(0.0F, bhy);
 				bp->AddLine(0.0F, tbx.Height);
@@ -432,11 +473,4 @@ void DigMaplet::preshape(IDigDatum* dig) {
 	dig->ty = dig->y + tbx.Y;
 	dig->rx = dig->lx + tbx.Width;
 	dig->by = dig->by + tbx.Height;
-}
-
-void DigMaplet::scale_transform(double stimes, double anchor_x, double anchor_y) {
-	float2 local_anchor = this->position_to_local(anchor_x, anchor_y, 0.0F, this->height);
-
-	this->stimes = stimes;
-	this->fonttexts.clear();
 }

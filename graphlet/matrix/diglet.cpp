@@ -132,9 +132,10 @@ void Diglet::construct() {
 
 void Diglet::on_appdata(Uri^ ms_appdata, DigMap^ doc_dig, int hint) {
 	DigMaplet* map = new DigMaplet(doc_dig, this->view_width, this->view_height);
+	float initial_scale = float(map->scale());
 	
 	this->planet->begin_update_sequence();
-	this->planet->scale(float(map->scale()));
+	this->planet->scale(initial_scale);
 		
 	/** NOTE
 	 * For the sake of simplicity, non-icon items are organized as a batch.
@@ -156,6 +157,8 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigMap^ doc_dig, int hint) {
 
 				if (icon != nullptr) {
 					float2 ipos = map->position_to_local(x, y);
+					float canvas_x = ipos.x / initial_scale;
+					float canvas_y = ipos.y / initial_scale;
 
 					/** WARNING
 					 * The modifyDIG does not handle rectangular items accurately.
@@ -171,8 +174,8 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigMap^ doc_dig, int hint) {
 					 * Also see DigMaplet::draw for DigDatumType::Rectangle.
 					 */
 
-					icon->fill_extent(ipos.x, ipos.y, &icon_width, &icon_height);
-					this->planet->insert(icon, ipos.x - icon_width * 0.5F, ipos.y - icon_height, GraphletAnchor::LT);
+					icon->fill_extent(canvas_x, canvas_y, &icon_width, &icon_height);
+					this->planet->insert(icon, canvas_x - icon_width * 0.5F, canvas_y - icon_height, GraphletAnchor::LT);
 				}
 			}
 		}

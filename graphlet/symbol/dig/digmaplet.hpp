@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
 	private class DigMaplet : public WarGrey::SCADA::IGraphlet {
 	public:
-		DigMaplet(WarGrey::SCADA::DigMap^ map, double width, double height, double fontsize_times = 24.0);
+		DigMaplet(WarGrey::SCADA::DigMap^ map, double width, double height, double fontsize_times = 150.0);
 
 	public:
 		void construct() override;
@@ -26,7 +26,8 @@ namespace WarGrey::SCADA {
 
 	private:
 		void preshape(WarGrey::SCADA::IDigDatum* dig);
-		void scale_transform(double stimes, double anchor_x, double anchor_y);
+		void scale_transform(double stimes, float anchor_x, float anchor_y);
+		void center();
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ plainfont;
