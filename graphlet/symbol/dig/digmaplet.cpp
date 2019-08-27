@@ -68,7 +68,7 @@ static CanvasStrokeStyle^ vector_stroke_ref(long long idx) {
 
 /*************************************************************************************************/
 DigMaplet::DigMaplet(DigMap^ map, double width, double height, double fontsize_times)
-	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0) {
+	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0), tstep(32.0F) {
 	this->enable_resizing(false);
 	this->enable_events(true, false);
 
@@ -98,16 +98,29 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 	this->map->rewind();
 
 	while ((dig = this->map->step()) != nullptr) {
-		if (((dig->lx == dig->rx) && (dig->ty == dig->by))
-			|| (dig->type == DigDatumType::FontText)) {
-			this->preshape(dig);
+		bool visible = false;
+
+		if ((dig->lx < dig->rx) || (dig->ty < dig->by)) { // Lines may be zero-width or zero-height
+			float2 loc_lt = this->position_to_local(dig->lx, dig->ty, x, y);
+			float2 loc_rb = this->position_to_local(dig->rx, dig->by, x, y);
+
+			// NOTE the y-axis has been flipped
+			visible = rectangle_overlay(loc_lt.x, loc_rb.y, loc_rb.x, loc_lt.y, x, y, ds_rx, ds_by);
+		} else {
+			if (((dig->lx == dig->rx) && (dig->ty == dig->by)) || (dig->type == DigDatumType::FontText)) {
+				this->preshape(dig);
+			}
+			
+			if ((dig->lx > dig->rx) && (dig->ty > dig->by)) { // also see this::preshape
+				float2 pos = this->position_to_local(dig->x, dig->y, x, y);
+				float loc_lx = pos.x + float(dig->lx);
+				float loc_ty = pos.y + float(dig->ty);
+				float loc_rx = loc_lx + float(dig->lx - dig->rx);
+				float loc_by = loc_ty + float(dig->ty - dig->by);
+
+				visible = rectangle_overlay(loc_lx, loc_ty, loc_rx, loc_by, x, y, ds_rx, ds_by);
+			}
 		}
-
-		float2 llt = this->position_to_local(dig->lx, dig->ty, x, y);
-		float2 lrb = this->position_to_local(dig->rx, dig->by, x, y);
-
-		// NOTE the y-axis has been flipped
-		bool visible = rectangle_overlay(llt.x, lrb.y, lrb.x, llt.y, x, y, ds_rx, ds_by);
 
 		if (visible) {
 			switch (dig->type) {
@@ -245,13 +258,13 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			}; break;
 			case DigDatumType::Text: { // also see DigDatumType::Rectangle, but modifyDIG handles normal texts accurately.
 				float2 tp = this->position_to_local(dig->x, dig->y, x, y);
-				float text_height = float(dig->by - dig->ty);
+				float text_height = float(dig->ty - dig->by); // see this::preshape
 				
 				ds->FillGeometry(this->plaintexts[dig->name], tp.x, tp.y - text_height, vector_colors_ref(0LL));
 			}; break;
 			case DigDatumType::Depth: { // also see DigDatumType::Rectangle, but modifyDIG handles depth accurately.
 				float2 tp = this->position_to_local(dig->x, dig->y, x, y);
-				float depth_height = float(dig->by - dig->ty);
+				float depth_height = float(dig->ty - dig->by); // see this::preshape
 
 				ds->FillGeometry(this->depthtexts[dig->name], tp.x, tp.y - depth_height, vector_colors_ref(0LL));
 			}; break;
@@ -320,20 +333,20 @@ bool DigMaplet::on_key(VirtualKey key, bool screen_keyboard) {
 
 	switch (key) {
 	case VirtualKey::Left: {
-		this->xtranslation -= 64.0F;
+		this->xtranslation -= this->tstep;
 		handled = true;
 	}; break;
 	case VirtualKey::Right: {
-		this->xtranslation += 64.0F;
+		this->xtranslation += this->tstep;
 		handled = true;
 	}; break;
 
 	case VirtualKey::Up: {
-		this->ytranslation -= 64.0F;
+		this->ytranslation -= this->tstep;
 		handled = true;
 	}; break;
 	case VirtualKey::Down: {
-		this->ytranslation += 64.0F;
+		this->ytranslation += this->tstep;
 		handled = true;
 	}; break;
 	}
@@ -415,7 +428,7 @@ double DigMaplet::scale() {
 }
 
 void DigMaplet::preshape(IDigDatum* dig) {
-	Rect tbx(0.0F, 0.0F, 1.0F, 1.0F); // for FontText which font size is invalid
+	Rect tbx(0.0F, 0.0F, 0.0F, 0.0F);
 
 	switch (dig->type) {
 	case DigDatumType::Text: {
@@ -474,8 +487,15 @@ void DigMaplet::preshape(IDigDatum* dig) {
 	}; break;
 	}
 
-	dig->lx = dig->x + tbx.X;
-	dig->ty = dig->y + tbx.Y;
-	dig->rx = dig->lx + tbx.Width;
-	dig->by = dig->by + tbx.Height;
+	dig->lx = tbx.X;
+	dig->ty = tbx.Y;
+
+	/** NOTE
+	 * Dig items handled here are not dot-based, and their sizes might be computed dynamcally,
+	 * thus, the `rx` and `by` are deliberately set to less than their counterparts.
+	 *
+	 * see this::draw
+	 */
+	dig->rx = dig->lx - tbx.Width;
+	dig->by = dig->ty - tbx.Height;
 }

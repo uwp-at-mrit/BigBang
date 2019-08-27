@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
 	private class DigMaplet : public WarGrey::SCADA::IGraphlet {
 	public:
-		DigMaplet(WarGrey::SCADA::DigMap^ map, double width, double height, double fontsize_times = 150.0);
+		DigMaplet(WarGrey::SCADA::DigMap^ map, double width, double height, double fontsize_times = 2.0);
 
 	public:
 		void construct() override;
@@ -47,6 +47,7 @@ namespace WarGrey::SCADA {
 	private:
 		float xtranslation;
 		float ytranslation;
+		float tstep;
 		double stimes;
 		double fstimes;
 		double _scale;
