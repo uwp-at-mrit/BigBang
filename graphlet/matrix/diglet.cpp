@@ -195,11 +195,16 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigMap^ doc_dig, int hint) {
 
 				if (icon != nullptr) {
 					icon->fill_extent(0.0F, 0.0F, &icon_width, &icon_height);
-					DigIconEntity^ entity = ref new DigIconEntity(icon, x, y, icon_width, icon_height);
-					float2 ipos = icon_location(entity, map, initial_scale);
-					
-					this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::LT);
-					this->icons.push_back(entity);
+
+					{ // TODO: find out the reason why some icons do not like their locations?
+					  // Nonetheless, icons will be relocated when the map is translated or scaled. 
+
+						DigIconEntity^ entity = ref new DigIconEntity(icon, x, y, icon_width, icon_height);
+						float2 ipos = icon_location(entity, map, initial_scale);
+
+						this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::LT);
+						this->icons.push_back(entity);
+					}
 				}
 			}
 		}

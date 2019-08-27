@@ -55,8 +55,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 class GraphletInfo : public WarGrey::SCADA::IGraphletInfo {
 public:
-    GraphletInfo(IPlanet* master, unsigned int mode)
-		: IGraphletInfo(master), mode(mode), alpha(1.0F) {};
+    GraphletInfo(IPlanet* master, unsigned int mode) : IGraphletInfo(master), mode(mode), alpha(1.0F) {};
 
 public:
     float x;
