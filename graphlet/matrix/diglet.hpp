@@ -63,12 +63,17 @@ namespace WarGrey::SCADA {
 		void on_appdata_not_found(Windows::Foundation::Uri^ ms_appdata_dig, int hint) override {}
 
 	private:
+		void relocate_icons();
+
+	private:
 		WarGrey::SCADA::DigMap^ graph_dig;
 		
 	private:
 		Windows::Foundation::Uri^ ms_appdata_dig;
 
 	private:
+		WarGrey::SCADA::IGraphlet* map;
+		std::deque<Platform::Object^> icons;
 		float view_width;
 		float view_height;
 	};

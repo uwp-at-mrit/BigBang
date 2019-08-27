@@ -29,6 +29,56 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+namespace {
+	private class DigFrame : public Planet {
+	public:
+		virtual ~DigFrame() noexcept {}
+
+		DigFrame(Platform::String^ name) : Planet(name) {}
+
+	public:
+		bool can_select(IGraphlet* g) override {
+			return true;
+		}
+	};
+
+	private ref struct DigIconEntity sealed {
+	internal:
+		DigIconEntity(IGraphlet* icon, double x, double y, float width, float height)
+			: icon(icon), x(x), y(y), width(width), height(height) {}
+
+	internal:
+		IGraphlet* icon;
+		double x;
+		double y;
+		float width;
+		float height;
+	};
+
+
+	static float2 icon_location(DigIconEntity^ icon, DigMaplet* map, float scale) {
+		float2 ipos = map->position_to_local(icon->x, icon->y);
+		float canvas_x = ipos.x / scale;
+		float canvas_y = ipos.y / scale;
+		
+		/** WARNING
+		* The modifyDIG does not handle rectangular items accurately.
+		* Icons as well as rectangles should be translated vertically
+		*   since modifyDIG uses the lefthand coordinate system.
+		*/
+
+		/** NOTE
+		* Unlike Diglet, modifyDIG draws icons on the air,
+		*   which means icons are technically dot-based items,
+		*   thus, icons in modifyDIG are not affected by that bug.
+		*
+		* Also see DigMaplet::draw for DigDatumType::Rectangle.
+		*/
+
+		return float2(canvas_x - icon->width * 0.5F, canvas_y - icon->height);
+	}
+}
+
 /*************************************************************************************************/
 DigMap::DigMap() : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {
 	this->cursor = this->items.end();
@@ -100,21 +150,8 @@ IAsyncOperation<DigMap^>^ DigMap::load_async(Platform::String^ _dig) {
 }
 
 /*************************************************************************************************/
-private class DigFrame : public Planet {
-public:
-	virtual ~DigFrame() noexcept {}
-
-	DigFrame(Platform::String^ name) : Planet(name) {}
-
-public:
-	bool can_select(IGraphlet* g) override {
-		return true;
-	}
-};
-
-/*************************************************************************************************/
 Diglet::Diglet(Platform::String^ file, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Planetlet(new DigFrame(file), GraphletAnchor::LT, background), view_width(view_width), view_height(view_height) {
+	: Planetlet(new DigFrame(file), GraphletAnchor::LT, background), view_width(view_width), view_height(view_height), map(nullptr) {
 	this->ms_appdata_dig = ms_appdata_file(file, ".DIG", rootdir);
 	this->enable_stretch(false, false);
 	this->enable_events(true, true);
@@ -134,6 +171,7 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigMap^ doc_dig, int hint) {
 	DigMaplet* map = new DigMaplet(doc_dig, this->view_width, this->view_height);
 	float initial_scale = float(map->scale());
 	
+	this->map = map;
 	this->planet->begin_update_sequence();
 	this->planet->scale(initial_scale);
 		
@@ -156,26 +194,12 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigMap^ doc_dig, int hint) {
 				IGraphlet* icon = dig->make_graphlet(&x, &y);
 
 				if (icon != nullptr) {
-					float2 ipos = map->position_to_local(x, y);
-					float canvas_x = ipos.x / initial_scale;
-					float canvas_y = ipos.y / initial_scale;
-
-					/** WARNING
-					 * The modifyDIG does not handle rectangular items accurately.
-					 * Icons as well as rectangles should be translated vertically
-					 *   since modifyDIG uses the lefthand coordinate system.
-					 */
-						 
-					/** NOTE
-					 * Unlike Diglet, modifyDIG draws icons on the air,
-					 *   which means icons are technically dot-based items,
-					 *   thus, icons in modifyDIG are not affected by that bug.
-					 *
-					 * Also see DigMaplet::draw for DigDatumType::Rectangle.
-					 */
-
-					icon->fill_extent(canvas_x, canvas_y, &icon_width, &icon_height);
-					this->planet->insert(icon, canvas_x - icon_width * 0.5F, canvas_y - icon_height, GraphletAnchor::LT);
+					icon->fill_extent(0.0F, 0.0F, &icon_width, &icon_height);
+					DigIconEntity^ entity = ref new DigIconEntity(icon, x, y, icon_width, icon_height);
+					float2 ipos = icon_location(entity, map, initial_scale);
+					
+					this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::LT);
+					this->icons.push_back(entity);
 				}
 			}
 		}
@@ -212,29 +236,16 @@ void Diglet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Wid
 bool Diglet::on_key(VirtualKey key, bool screen_keyboard) {
 	bool handled = false;
 
-	Planetlet::on_key(key, screen_keyboard);
+	if (this->map != nullptr) {
+		this->planet->begin_update_sequence();
 
-	switch (key) {
-	case VirtualKey::Left: {
-		//this->tx -= 10000.0F;
-		handled = true;
-	}; break;
-	case VirtualKey::Right: {
-		//this->tx += 10000.0F;
-		handled = true;
-	}; break;
-	case VirtualKey::Up: {
-		//this->ty -= 10000.0F;
-		handled = true;
-	}; break;
-	case VirtualKey::Down: {
-		//this->ty += 10000.0F;
-		handled = true;
-	}; break;
-	}
+		handled = Planetlet::on_key(key, screen_keyboard);
 
-	if (handled) {
-		//this->planet->translate(tx, ty);
+		if (handled) {
+			this->relocate_icons();
+		}
+
+		this->planet->end_update_sequence();
 	}
 
 	return handled;
@@ -242,17 +253,34 @@ bool Diglet::on_key(VirtualKey key, bool screen_keyboard) {
 
 bool Diglet::on_character(unsigned int keycode) {
 	bool handled = false;
+	
+	if (this->map != nullptr) {
+		this->planet->begin_update_sequence();
 
-	Planetlet::on_character(keycode);
+		handled = Planetlet::on_character(keycode);
 
-	switch (keycode) {
-	case 61 /* = */: case 43 /* + */: {
-		handled = true;
-	}; break;
-	case 45 /* - */: case 95 /* _ */: {
-		handled = true;
-	}; break;
+		if (handled) {
+			this->relocate_icons();
+		}
+
+		this->planet->end_update_sequence();
 	}
 
 	return handled;
+}
+
+void Diglet::relocate_icons() {
+	DigMaplet* map = static_cast<DigMaplet*>(this->map);
+	float new_scale = float(map->scale());
+
+	this->planet->scale(new_scale);
+
+	for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
+		DigIconEntity^ ent = static_cast<DigIconEntity^>((*it));
+		float2 ipos = icon_location(ent, map, new_scale);
+
+		this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::LT);
+	}
+
+	this->notify_updated();
 }

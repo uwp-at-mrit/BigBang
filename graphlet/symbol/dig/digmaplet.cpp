@@ -71,12 +71,17 @@ DigMaplet::DigMaplet(DigMap^ map, double width, double height, double fontsize_t
 	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0) {
 	this->enable_resizing(false);
 	this->enable_events(true, false);
+
+	/** NOTE
+	 * Do not move these lines to DigMaplet::construct(),
+	 * Diglet::on_appdata() requires the scale to locate icons.
+	 */
+	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
+	this->_scale = flmin(this->width / this->geo_height, this->height / this->geo_width);
 }
 
 void DigMaplet::construct() {
 	this->plainfont = make_text_format();
-	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
-	this->_scale = flmin(this->width / this->geo_height, this->height / this->geo_width);
 	this->center();
 }
 
@@ -123,59 +128,6 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				}
 
 				ds->DrawEllipse(cp, r.Width, r.Height, vector_colors_ref(c->color), 1.0F, vector_stroke_ref(c->style));
-			}; break;
-			case DigDatumType::Arc: {
-				ArcDig* a = static_cast<ArcDig*>(dig);
-				float2 cp = this->position_to_local(a->x, a->y, x, y);
-				Size r = this->length_to_local(a->radius);
-				CanvasGeometry^ g = nullptr;
-				
-				{ // draw arc
-					double start_deg = a->start_degree - 90.0;
-					double stop_deg = a->stop_degree - 90.0;
-
-					// NOTE that modifyDIG uses the lefthand coordinate system
-					//   the degrees therefore should sweep 90.0 degrees counterclockwise
-					// Stupid design, and/or stupid referenced codebase for its lack of explanation
-
-				    // NOTE: the arc is ensured to be drawn counterclockwise
-					if (start_deg > stop_deg) {
-						g = arc(start_deg, stop_deg, r.Width, r.Height);
-					} else {
-						g = arc(start_deg + 360.0, stop_deg, r.Width, r.Height);
-					}
-
-					ds->DrawGeometry(g, cp.x, cp.y, vector_colors_ref(a->color), 1.0F, vector_stroke_ref(a->style));
-				}
-			}; break;
-			case DigDatumType::Rectangle: {
-				RectangleDig* r = static_cast<RectangleDig*>(dig);
-				float2 tl = this->position_to_local(r->x, r->y, x, y);
-				Size s = this->length_to_local(r->width, r->height);
-				double deg = degrees_normalize(r->rotation);
-
-				/** WARNING
-				 * The modifyDIG does not handle rectangles accurately, DigMaplet follows it for the sake of compatibility.
-				 * Nevertheless, rectangles should be translated or flipped vertically since modifyDIG uses the lefthand coordinate system.
-				 * Rotation makes it even harder since its center point is the left-top one which is actually indicating the left-bottom one.
-				 *
-				 * By the way, this bug is not a big deal since rectangles are less used in real world projects.
-				 * Designers and users have no chance to do investigating on the spot directly as well,
-				 *   modifyDIG will transform and restore raw geodesy data for them,
-				 *   the bug is concealed unconsciously.
-				 *
-				 * Also see Diglet::on_appdata, how the location in screen of rectangles should be adjusted.
-				 */
-
-				if (deg == 0.0) {
-					ds->DrawRectangle(tl.x, tl.y, s.Width, s.Height, vector_colors_ref(r->color),
-						StrokeWidth(r->pen_width), vector_stroke_ref(r->style));
-				} else {
-					CanvasGeometry^ g = rotate_rectangle(tl.x, tl.y, s.Width, s.Height, deg, tl.x, tl.y);
-					Rect box = g->ComputeBounds();
-
-					ds->DrawGeometry(g, vector_colors_ref(r->color), StrokeWidth(r->pen_width), vector_stroke_ref(r->style));
-				}
 			}; break;
 			case DigDatumType::ShoreLine: {
 				ShoreLineDig* l = static_cast<ShoreLineDig*>(dig);
@@ -237,6 +189,59 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				pb->EndFigure(CanvasFigureLoop::Open);
 
 				ds->DrawGeometry(CanvasGeometry::CreatePath(pb), vector_colors_ref(b->color), StrokeWidth(b->width), vector_stroke_ref(b->style));
+			}; break;
+			case DigDatumType::Arc: {
+				ArcDig* a = static_cast<ArcDig*>(dig);
+				float2 cp = this->position_to_local(a->x, a->y, x, y);
+				Size r = this->length_to_local(a->radius);
+				CanvasGeometry^ g = nullptr;
+				
+				{ // draw arc
+					double start_deg = a->start_degree - 90.0;
+					double stop_deg = a->stop_degree - 90.0;
+
+					// NOTE that modifyDIG uses the lefthand coordinate system
+					//   the degrees therefore should sweep 90.0 degrees counterclockwise
+					// Stupid design, and/or stupid referenced codebase for its lack of explanation
+
+				    // NOTE: the arc is ensured to be drawn counterclockwise
+					if (start_deg > stop_deg) {
+						g = arc(start_deg, stop_deg, r.Width, r.Height);
+					} else {
+						g = arc(start_deg + 360.0, stop_deg, r.Width, r.Height);
+					}
+
+					ds->DrawGeometry(g, cp.x, cp.y, vector_colors_ref(a->color), 1.0F, vector_stroke_ref(a->style));
+				}
+			}; break;
+			case DigDatumType::Rectangle: {
+				RectangleDig* r = static_cast<RectangleDig*>(dig);
+				float2 tl = this->position_to_local(r->x, r->y, x, y);
+				Size s = this->length_to_local(r->width, r->height);
+				double deg = degrees_normalize(r->rotation);
+
+				/** WARNING
+				 * The modifyDIG does not handle rectangles accurately, DigMaplet follows it for the sake of compatibility.
+				 * Nevertheless, rectangles should be translated or flipped vertically since modifyDIG uses the lefthand coordinate system.
+				 * Rotation makes it even harder since its center point is the left-top one which is actually indicating the left-bottom one.
+				 *
+				 * By the way, this bug is not a big deal since rectangles are less used in real world projects.
+				 * Designers and users have no chance to do investigating on the spot directly as well,
+				 *   modifyDIG will transform and restore raw geodesy data for them,
+				 *   the bug is concealed unconsciously.
+				 *
+				 * Also see Diglet::on_appdata, how the location in screen of rectangles should be adjusted.
+				 */
+
+				if (deg == 0.0) {
+					ds->DrawRectangle(tl.x, tl.y, s.Width, s.Height, vector_colors_ref(r->color),
+						StrokeWidth(r->pen_width), vector_stroke_ref(r->style));
+				} else {
+					CanvasGeometry^ g = rotate_rectangle(tl.x, tl.y, s.Width, s.Height, deg, tl.x, tl.y);
+					Rect box = g->ComputeBounds();
+
+					ds->DrawGeometry(g, vector_colors_ref(r->color), StrokeWidth(r->pen_width), vector_stroke_ref(r->style));
+				}
 			}; break;
 			case DigDatumType::Text: { // also see DigDatumType::Rectangle, but modifyDIG handles normal texts accurately.
 				float2 tp = this->position_to_local(dig->x, dig->y, x, y);
@@ -406,7 +411,7 @@ void DigMaplet::center() {
 }
 
 double DigMaplet::scale() {
-	return this->_scale;
+	return this->_scale * this->stimes;
 }
 
 void DigMaplet::preshape(IDigDatum* dig) {
