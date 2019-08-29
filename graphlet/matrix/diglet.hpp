@@ -9,12 +9,12 @@
 #include "graphlet/symbol/dig/dig.hpp"
 
 namespace WarGrey::SCADA {
-	private ref class DigVectorMap sealed {
+	private ref class DigMap sealed {
 	public:
-		static Windows::Foundation::IAsyncOperation<WarGrey::SCADA::DigVectorMap^>^ load_async(Platform::String^ dig);
+		static Windows::Foundation::IAsyncOperation<WarGrey::SCADA::DigMap^>^ load_async(Platform::String^ dig);
 
 	public:
-		virtual ~DigVectorMap();
+		virtual ~DigMap();
 
 	public:
 		void fill_enclosing_box(double* x, double* y, double* width, double* height);
@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IDigDatum* step();
 		
 	private:
-		DigVectorMap();
+		DigMap();
 
 	private:
 		double lx;
@@ -39,11 +39,11 @@ namespace WarGrey::SCADA {
 		std::map<WarGrey::SCADA::DigDatumType, unsigned int> counters;
 	};
 
-	private class Diglet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::DigVectorMap, WarGrey::SCADA::Planetlet, int> {
+	private class Diglet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::DigMap, WarGrey::SCADA::Planetlet, int> {
 	public:
 		virtual ~Diglet() noexcept;
 
-		Diglet(Platform::String^ file_bmp, float view_width, float view_height, double scale = 0.01,
+		Diglet(Platform::String^ file_bmp, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "dig");
 
@@ -54,23 +54,27 @@ namespace WarGrey::SCADA {
 		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		bool ready() override;
 
+	public:
+		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
+		bool on_character(unsigned int keycode) override;
+
 	protected:
-		void on_appdata(Windows::Foundation::Uri^ ms_appdata_dig, WarGrey::SCADA::DigVectorMap^ doc_dig, int hint) override;
+		void on_appdata(Windows::Foundation::Uri^ ms_appdata_dig, WarGrey::SCADA::DigMap^ doc_dig, int hint) override;
 		void on_appdata_not_found(Windows::Foundation::Uri^ ms_appdata_dig, int hint) override {}
 
 	private:
-		WarGrey::SCADA::DigVectorMap^ graph_dig;
+		void relocate_icons();
 
+	private:
+		WarGrey::SCADA::DigMap^ graph_dig;
+		
 	private:
 		Windows::Foundation::Uri^ ms_appdata_dig;
-		double map_x;
-		double map_y;
-		double map_width;
-		double map_height;
 
 	private:
+		WarGrey::SCADA::IGraphlet* map;
+		std::deque<Platform::Object^> icons;
 		float view_width;
 		float view_height;
-		double origin_scale;
 	};
 }

@@ -28,7 +28,9 @@ float Frame::actual_height(IPlanet* p) {
 }
 
 void Frame::min_resize(float width, float height) {
-	if (this->_display->resizable()) {
+	GraphletAnchor resize_anchor;
+
+	if (this->_display->resizable(&resize_anchor)) {
 		this->_display->resize(width, height);
 	}
 }

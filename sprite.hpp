@@ -51,8 +51,8 @@ namespace WarGrey::SCADA {
 		{ return false; }
 
 	public:
-		void enable_resizing(bool yes_no) { this->can_resize = yes_no; }
-		bool resizable() { return this->can_resize; }
+		void enable_resizing(bool yes_no, WarGrey::SCADA::GraphletAnchor anchor = GraphletAnchor::CC) { this->can_resize = yes_no; this->resize_anchor = anchor; }
+		bool resizable(WarGrey::SCADA::GraphletAnchor* anchor) { (*anchor) = this->resize_anchor; return this->can_resize; }
 
 	public:
 		void enable_events(bool yes_no, bool low_level = false) { this->deal_with_events = yes_no; this->deal_with_low_level_events = low_level; }
@@ -64,6 +64,7 @@ namespace WarGrey::SCADA {
 		void save(Platform::String^ path, float dpi = 96.0F);
 
 	private:
+		WarGrey::SCADA::GraphletAnchor resize_anchor;
 		bool can_resize = false;
 		bool deal_with_events = false;
 		bool deal_with_low_level_events = false;

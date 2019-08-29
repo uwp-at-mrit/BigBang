@@ -7,7 +7,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class DigDatumType {
-		Icon, Arc, Circle, Polyline, Rectangle, Line, FontText,
+		Icon, Arc, Circle, Line, PolyLine, PolyBezier, ShoreLine, Rectangle, Text, Depth, FontText,
 
 		// TODO
 		Typhoon, Compass,
@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
 	private enum class DigIcon {
 		SunkenShip, LightShip, OilWell, PilotStation, ReportSpot, LightHouse, RedFlag,
 		Hoisptal, Tree, Anchor, Chimney, WaterTower, RadarReflector, IslandReef,
-		Aquatic, Buoy, TideStation, Kettle, Light, NavigationMark, Picket, Rock, Text, Number, FishingFloat, Wreck,
+		Aquatic, Buoy, TideStation, Kettle, Light, NavigationMark, Picket, Rock, FishingFloat, Wreck,
 		_
 	};
 
@@ -26,15 +26,24 @@ namespace WarGrey::SCADA {
 		IDigDatum(WarGrey::SCADA::DigDatumType type) : type(type), name(nullptr) {}
 
 	public:
-		virtual void fill_enclosing_box(double* x, double* y, double* width = nullptr, double* height = nullptr);
 		virtual WarGrey::SCADA::IGraphlet* make_graphlet(double* x, double* y);
 		virtual Platform::String^ to_string();
+
+	public:
+		virtual bool multiline() { return false; }
+		virtual void push_line(std::filebuf& src) {}
 
 	public:
 		WarGrey::SCADA::DigDatumType type;
 		Platform::String^ name;
 		double x;
 		double y;
+
+	public:
+		double lx;
+		double ty;
+		double rx;
+		double by;
 	};
 
 	private struct IconDig : public WarGrey::SCADA::IDigDatum {
@@ -42,7 +51,6 @@ namespace WarGrey::SCADA {
 		IconDig(std::filebuf& dig, WarGrey::SCADA::DigIcon type, float size);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		WarGrey::SCADA::IGraphlet* make_graphlet(double* x, double* y) override;
 
 	public:
@@ -57,22 +65,12 @@ namespace WarGrey::SCADA {
 		IMultilineDigDatum(WarGrey::SCADA::DigDatumType type) : IDigDatum(type) {}
 
 	public:
-		virtual void append_line(std::filebuf& src);
+		bool multiline() override;
+		void push_line(std::filebuf& src) override;
 
 	public:
-		std::deque<double> rest_xs;
-		std::deque<double> rest_ys;
-	};
-
-	private struct CompassDig : public WarGrey::SCADA::IDigDatum {
-	public:
-		CompassDig(std::filebuf& dig);
-
-	public:
-		Platform::String^ to_string() override;
-
-	public:
-		long long color;
+		std::deque<double> poly_xs;
+		std::deque<double> poly_ys;
 	};
 
 	private struct ArcDig : public WarGrey::SCADA::IDigDatum {
@@ -80,7 +78,6 @@ namespace WarGrey::SCADA {
 		ArcDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -96,7 +93,6 @@ namespace WarGrey::SCADA {
 		CircleDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -112,7 +108,6 @@ namespace WarGrey::SCADA {
 		RectangleDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -129,7 +124,6 @@ namespace WarGrey::SCADA {
 		LineDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -140,29 +134,51 @@ namespace WarGrey::SCADA {
 		long long linewidth;
 	};
 
+	private struct DepthDig : public WarGrey::SCADA::IDigDatum {
+	public:
+		DepthDig(std::filebuf& dig);
+
+	public:
+		Platform::String^ to_string() override;
+	};
+
+	private struct TextDig : public WarGrey::SCADA::IDigDatum {
+	public:
+		TextDig(std::filebuf& dig);
+
+	public:
+		Platform::String^ to_string() override;
+	};
+
 	private struct FontTextDig : public WarGrey::SCADA::IDigDatum {
 	public:
 		FontTextDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
 		Platform::String^ to_string() override;
 
 	public:
 		double rotation;
 		long long color;
 		long long font_size;
-		long long style;
+		long long resizable;
 		long long width;
 		Platform::String^ font_name;
 	};
 
-	private struct PolylineDig : public WarGrey::SCADA::IMultilineDigDatum {
+	private struct ShoreLineDig : public WarGrey::SCADA::IMultilineDigDatum {
 	public:
-		PolylineDig(std::filebuf& dig);
+		ShoreLineDig(std::filebuf& dig);
 
 	public:
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
+		Platform::String^ to_string() override;
+	};
+
+	private struct PolyLineDig : public WarGrey::SCADA::IMultilineDigDatum {
+	public:
+		PolyLineDig(std::filebuf& dig);
+
+	public:
 		Platform::String^ to_string() override;
 
 	public:
@@ -172,13 +188,25 @@ namespace WarGrey::SCADA {
 		long long width;
 	};
 
+	private struct PolyBezierDig : public WarGrey::SCADA::IMultilineDigDatum {
+	public:
+		PolyBezierDig(std::filebuf& dig);
+
+	public:
+		Platform::String^ to_string() override;
+
+	public:
+		long long color;
+		long long style;
+		long long width;
+	};
+
 	private struct TyphoonDig : public WarGrey::SCADA::IMultilineDigDatum {
 	public:
 		TyphoonDig(std::filebuf& dig);
 
 	public:
-		void append_line(std::filebuf& dig) override;
-		void fill_enclosing_box(double* x, double* y, double* width, double* height) override;
+		void push_line(std::filebuf& dig) override;
 		Platform::String^ to_string() override;
 
 	public:
@@ -194,5 +222,16 @@ namespace WarGrey::SCADA {
 		std::deque<double> move_speeds;
 	};
 
-	WarGrey::SCADA::IDigDatum* read_dig(std::filebuf& dig, float icon_size);
+	private struct CompassDig : public WarGrey::SCADA::IDigDatum {
+	public:
+		CompassDig(std::filebuf& dig);
+
+	public:
+		Platform::String^ to_string() override;
+
+	public:
+		long long color;
+	};
+
+	WarGrey::SCADA::IDigDatum* read_dig_line(std::filebuf& dig, float icon_size);
 }
