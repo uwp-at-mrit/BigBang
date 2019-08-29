@@ -1236,7 +1236,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float X, float Y, float Width, float
 	float3x2 transform = ds->Transform;
 
 	if (this->background != nullptr) {
-		ds->FillRoundedRectangle(0.0F, 0.0F, Width, Height,
+		ds->FillRoundedRectangle(X, Y, Width, Height,
 			this->background_corner_radius, this->background_corner_radius,
 			this->background);
 	}

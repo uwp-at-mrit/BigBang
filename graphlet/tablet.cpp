@@ -448,7 +448,7 @@ void ITablet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 			float xcol = x + border_off * 2.0F;
 
 			if (row != nullptr) {
-				if ((n >= n_start) && ((!this->filter_actived) || (this->filter == nullptr) || (this->filter->filter(row->salt)))) {
+				if ((ridx >= n_start) && ((!this->filter_actived) || (this->filter == nullptr) || (this->filter->filter(row->salt)))) {
 					for (unsigned int cidx = 0; cidx < this->table->column_count; cidx++) {
 						if (row->cells[cidx].outdated) {
 							TableCellStyle cell_style;
