@@ -15,8 +15,8 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ cylinder_default_border_color = Colours::make(0xBBBBBB);
-static unsigned int cylinder_default_colors[] = { 0x00BFFF, 0xB3F000, 0xFFB03A, 0xFFB03A };
-static float cylinder_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
+static unsigned int cylinder_default_colors[] = { 0x87CEFA, 0x00BFFF, 0xADFF2F, 0xFFB03A, 0xFF6347 };
+static float cylinder_default_color_positions[] = { 0.0F, 0.25F, 0.5F, 0.75F, 1.0F };
 
 /*************************************************************************************************/
 Cylinderlet::Cylinderlet(double range, float base_width, float height, float thickness
