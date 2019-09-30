@@ -1,4 +1,4 @@
-#include "graphlet/bitmaplet.hpp"
+#include "graphlet/filesystem/bitmaplet.hpp"
 
 using namespace WarGrey::SCADA;
 

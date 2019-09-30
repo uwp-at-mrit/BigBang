@@ -36,17 +36,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\togglet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp">
-      <Filter>graphlet</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp">
       <Filter>graphlet\dashboard</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp">
-      <Filter>graphlet</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\background.cpp">
       <Filter>decorator</Filter>
@@ -195,9 +189,6 @@
       <Filter>graphlet</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)display.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\matrix\diglet.cpp">
-      <Filter>graphlet\matrix</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
@@ -274,6 +265,15 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\digmaplet.cpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\bitmaplet.cpp">
+      <Filter>graphlet\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.cpp">
+      <Filter>graphlet\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\diglet.cpp">
+      <Filter>graphlet\filesystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -312,17 +312,11 @@
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp">
-      <Filter>graphlet</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp">
       <Filter>graphlet\dashboard</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp">
       <Filter>graphlet\dashboard</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp">
-      <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp">
       <Filter>decorator</Filter>
@@ -471,12 +465,6 @@
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)display.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\matrix\diglet.hpp">
-      <Filter>graphlet\matrix</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappdatalet.hxx">
-      <Filter>graphlet</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\dig.hpp">
       <Filter>graphlet\symbol\dig</Filter>
     </ClInclude>
@@ -491,9 +479,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\buoylet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx">
-      <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\welllet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
@@ -555,6 +540,21 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\digmaplet.hpp">
       <Filter>graphlet\symbol\dig</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdatalet.hxx">
+      <Filter>graphlet\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappxlet.hxx">
+      <Filter>graphlet\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\bitmaplet.hpp">
+      <Filter>graphlet\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.hpp">
+      <Filter>graphlet\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\diglet.hpp">
+      <Filter>graphlet\filesystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -618,11 +618,11 @@
     <Filter Include="virtualization\screen">
       <UniqueIdentifier>{dbd45099-a9c5-45ef-9070-e018f5424d8b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphlet\matrix">
-      <UniqueIdentifier>{c3683d4d-c151-4016-817c-19fe614641fc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="graphlet\symbol\dig">
       <UniqueIdentifier>{35373403-f2b7-4e2e-bcf4-82ebcdd63892}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\filesystem">
+      <UniqueIdentifier>{981cd8ef-3e51-4b16-b1dd-e26608e0d2bf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

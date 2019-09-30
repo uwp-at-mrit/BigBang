@@ -1,12 +1,12 @@
 #pragma once
 
-#include "msappx.hxx"
+#include "filesystem/msappdata.hxx"
 
 namespace WarGrey::SCADA {
 	template<class FileType, class Graphlet, typename Hint>
-	private class IMsAppxlet abstract : public virtual WarGrey::SCADA::IMsAppx<FileType, Hint>, public virtual Graphlet {
+	private class IMsAppdatalet abstract : public virtual WarGrey::SCADA::IMsAppdata<FileType, Hint>, public virtual Graphlet {
 	protected:
-		void on_appx_notify(Windows::Foundation::Uri^ ms_appx, FileType^ instance, Hint hint) override {
+		void on_appdata_notify(Windows::Foundation::Uri^ ms_appdata, FileType^ instance, Hint hint) override {
 			this->notify_ready();
 		}
 

@@ -1,4 +1,4 @@
-#include "graphlet/svglet.hpp"
+#include "graphlet/filesystem/svglet.hpp"
 #include "planet.hpp"
 
 #include "datum/path.hpp"

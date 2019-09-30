@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include "graphlet/msappxlet.hxx"
+#include "graphlet/filesystem/msappxlet.hxx"
 #include "graphlet/primitive.hpp"
 
 #include "datum/path.hpp"

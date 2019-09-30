@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "graphlet/matrix/diglet.hpp"
+#include "graphlet/filesystem/diglet.hpp"
 #include "graphlet/textlet.hpp"
 
 #include "graphlet/symbol/dig/dig.hpp"

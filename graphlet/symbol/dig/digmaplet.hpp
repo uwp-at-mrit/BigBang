@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphlet/matrix/diglet.hpp"
+#include "graphlet/filesystem/diglet.hpp"
 
 namespace WarGrey::SCADA {
 	private class DigMaplet : public WarGrey::SCADA::IGraphlet {
