@@ -138,7 +138,8 @@ IAsyncOperation<DigMap^>^ DigMap::load_async(Platform::String^ _dig) {
 		if (dig.open(_dig->Data(), std::ios::in)) {
 			map = ref new DigMap();
 
-			while ((datum = read_dig_line(dig, 1600.0F)) != nullptr) {
+			// Lucky, 160.0F for icon size works perfectly
+			while ((datum = read_dig_line(dig, 160.0F)) != nullptr) {
 				if (datum->type < DigDatumType::_) {
 					map->push_back_item(datum);
 				}
