@@ -40,6 +40,10 @@ namespace WarGrey::SCADA {
 		void on_appdata_not_found(Platform::String^ file, ProjectDoctype type) override {}
 
 	private:
+		void on_dig_logue(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
+		void on_dig(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
+
+	private:
 		void relocate_icons();
 
 	private:

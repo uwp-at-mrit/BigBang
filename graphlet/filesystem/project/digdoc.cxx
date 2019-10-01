@@ -1,12 +1,31 @@
 #include "graphlet/filesystem/project/digdoc.hxx"
 
 #include "datum/flonum.hpp"
+#include "datum/file.hpp"
 #include "datum/box.hpp"
 
 using namespace WarGrey::SCADA;
 
 /*************************************************************************************************/
-DigMap::DigMap(std::filebuf& dig) : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {
+DigLog::DigLog(std::filebuf& log) {
+	unsigned long long max_count = read_integer(log);
+	
+	discard_this_line(log);
+
+	for (unsigned int c = 0; c < max_count; c++) {
+		if (peek_char(log) == EOF) {
+			break;
+		}
+
+		this->digs.push_back(read_wgb18030(log, char_end_of_field));
+		read_char(log);
+		this->visibles.push_back(read_integer(log) == 1);
+		discard_this_line(log);
+	}
+}
+
+/*************************************************************************************************/
+DigDoc::DigDoc(std::filebuf& dig) : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {
 	IDigDatum* datum;
 	
 	// Lucky, 160.0F for icon size works perfectly
@@ -19,7 +38,7 @@ DigMap::DigMap(std::filebuf& dig) : lx(infinity), ty(infinity), rx(-infinity), b
 	this->cursor = this->items.end();
 }
 
-DigMap::~DigMap() {
+DigDoc::~DigDoc() {
 	while (!this->items.empty()) {
 		auto it = this->items.begin();
 		
@@ -29,7 +48,7 @@ DigMap::~DigMap() {
 	}
 }
 
-void DigMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
+void DigDoc::push_back_item(WarGrey::SCADA::IDigDatum* item) {
 	this->items.push_back(item);
 	this->counters[item->type] = this->counters[item->type] + 1;
 
@@ -39,11 +58,11 @@ void DigMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
 	this->by = flmax(this->by, item->by);
 }
 
-void DigMap::rewind() {
+void DigDoc::rewind() {
 	this->cursor = this->items.end();
 }
 
-IDigDatum* DigMap::step() {
+IDigDatum* DigDoc::step() {
 	IDigDatum* datum = nullptr;
 
 	if (this->cursor == this->items.end()) {
@@ -59,7 +78,7 @@ IDigDatum* DigMap::step() {
 	return datum;
 }
 
-void DigMap::fill_enclosing_box(double* x, double* y, double* width, double* height) {
+void DigDoc::fill_enclosing_box(double* x, double* y, double* width, double* height) {
 	SET_VALUES(x, this->lx, y, this->ty);
 	SET_VALUES(width, this->rx - this->lx, height, this->by - this->ty);
 }

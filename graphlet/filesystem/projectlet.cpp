@@ -90,8 +90,23 @@ void Projectlet::construct() {
 	this->cd(this->ms_appdata_rootdir);
 }
 
-void Projectlet::on_appdata(Platform::String^ ms_appdata, ProjectDocument^ doc, ProjectDoctype type) {
-	DigMap^ doc_dig = static_cast<DigMap^>(doc);
+void Projectlet::on_dig_logue(Platform::String^ ms_appdata, ProjectDocument^ doc) {
+	DigLog^ dig_log = static_cast<DigLog^>(doc);
+
+	for (size_t idx = 0; idx < dig_log->digs.size(); idx++) {
+		if (dig_log->visibles[idx]) {
+			Platform::String^ dig = dig_log->digs[idx];
+			Platform::String^ ext = file_extension_from_path(dig);
+
+			if (ext->Equals(".DIG")) {
+				this->load_file(dig, ProjectDoctype::DIG);
+			}
+		}
+	}
+}
+
+void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
+	DigDoc^ doc_dig = static_cast<DigDoc^>(doc);
 	DigMaplet* map = new DigMaplet(doc_dig, this->view_width, this->view_height);
 	float initial_scale = float(map->scale());
 
@@ -217,9 +232,16 @@ void Projectlet::relocate_icons() {
 ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::String^ _ext) {
 	ProjectDoctype ft = ProjectDoctype::_;
 
-	if (filename->Equals("20130304.DIG")) {
-		ft = ProjectDoctype::DIG;
+	if (filename->Equals("Back.LOG")) {
+		ft = ProjectDoctype::DIG_LOG;
 	}
 
 	return ft;
+}
+
+void Projectlet::on_appdata(Platform::String^ ms_appdata, ProjectDocument^ doc, ProjectDoctype type) {
+	switch (type) {
+	case ProjectDoctype::DIG_LOG: this->on_dig_logue(ms_appdata, doc); break;
+	case ProjectDoctype::DIG: this->on_dig(ms_appdata, doc); break;
+	}
 }

@@ -6,7 +6,7 @@
 namespace WarGrey::SCADA {
 	private class DigMaplet : public WarGrey::SCADA::IGraphlet {
 	public:
-		DigMaplet(WarGrey::SCADA::DigMap^ map, double width, double height, double fontsize_times = 2.0);
+		DigMaplet(WarGrey::SCADA::DigDoc^ map, double width, double height, double fontsize_times = 2.0);
 
 	public:
 		void construct() override;
@@ -37,7 +37,7 @@ namespace WarGrey::SCADA {
 		std::map<WarGrey::SCADA::FontTextDig*, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> fonttexts;
 
 	private:
-		WarGrey::SCADA::DigMap^ map;
+		WarGrey::SCADA::DigDoc^ map;
 		double geo_x;
 		double geo_y;
 		double geo_width;

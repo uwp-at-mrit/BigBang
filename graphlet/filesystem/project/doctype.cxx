@@ -17,7 +17,8 @@ IAsyncOperation<ProjectDocument^>^ ProjectDocument::load_async(Platform::String^
 
 		if (dig.open(filename->Data(), std::ios::in)) {
 			switch (type) {
-			case ProjectDoctype::DIG: doc = ref new DigMap(dig); break;
+			case ProjectDoctype::DIG_LOG: doc = ref new DigLog(dig); break;
+			case ProjectDoctype::DIG: doc = ref new DigDoc(dig); break;
 			}
 		}
 

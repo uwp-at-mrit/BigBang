@@ -67,7 +67,7 @@ static CanvasStrokeStyle^ vector_stroke_ref(long long idx) {
 }
 
 /*************************************************************************************************/
-DigMaplet::DigMaplet(DigMap^ map, double width, double height, double fontsize_times)
+DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_times)
 	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0), tstep(32.0F) {
 	this->enable_resizing(false);
 	this->enable_events(true, false);
