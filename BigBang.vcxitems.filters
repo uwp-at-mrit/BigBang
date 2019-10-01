@@ -567,10 +567,10 @@
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digdoc.hxx">
-      <Filter>graphlet\filesystem</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\doctype.hxx">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digdoc.hxx">
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
   </ItemGroup>
