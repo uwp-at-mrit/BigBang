@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "graphlet/filesystem/diglet.hpp"
+#include "graphlet/filesystem/projectlet.hpp"
 #include "graphlet/textlet.hpp"
 
 #include "graphlet/symbol/dig/dig.hpp"
@@ -22,6 +22,8 @@ using namespace WarGrey::SCADA;
 using namespace Concurrency;
 
 using namespace Windows::System;
+using namespace Windows::Storage;
+
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
@@ -129,7 +131,7 @@ void DigMap::fill_enclosing_box(double* x, double* y, double* width, double* hei
 	SET_VALUES(width, this->rx - this->lx, height, this->by - this->ty);
 }
 
-IAsyncOperation<DigMap^>^ DigMap::load_async(Platform::String^ _dig) {
+IAsyncOperation<DigMap^>^ DigMap::load_async(Platform::String^ _dig, ProjectFileType type) {
 	return create_async([=] {
 		DigMap^ map = nullptr;
 		IDigDatum* datum;
@@ -151,37 +153,36 @@ IAsyncOperation<DigMap^>^ DigMap::load_async(Platform::String^ _dig) {
 }
 
 /*************************************************************************************************/
-Diglet::Diglet(Platform::String^ file, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Planetlet(new DigFrame(file), GraphletAnchor::LT, background), view_width(view_width), view_height(view_height), map(nullptr) {
-	this->ms_appdata_dig = ms_appdata_file(file, ".DIG", rootdir);
+Projectlet::Projectlet(Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
+	: Planetlet(new DigFrame(project), GraphletAnchor::LT, background), view_width(view_width), view_height(view_height), map(nullptr) {
+	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
 	this->enable_stretch(false, false);
 	this->enable_events(true, true);
 }
 
-Diglet::~Diglet() {
-	this->unload(this->ms_appdata_dig);
+Projectlet::~Projectlet() {
 }
 
-void Diglet::construct() {
+void Projectlet::construct() {
 	Planetlet::construct();
 
-	this->load(this->ms_appdata_dig, 0);
+	this->cd(this->ms_appdata_rootdir);
 }
 
-void Diglet::on_appdata(Uri^ ms_appdata, DigMap^ doc_dig, int hint) {
+void Projectlet::on_appdata(Platform::String^ ms_appdata, DigMap^ doc_dig, ProjectFileType type) {
 	DigMaplet* map = new DigMaplet(doc_dig, this->view_width, this->view_height);
 	float initial_scale = float(map->scale());
-	
+
 	this->map = map;
 	this->planet->begin_update_sequence();
 	this->planet->scale(initial_scale);
-		
+
 	/** NOTE
-	 * For the sake of simplicity, non-icon items are organized as a batch.
-	 * Also, they are drawn before drawing icons.
-	 *
-	 * The modifyDIG draw icons firstly.
-	 */
+	* For the sake of simplicity, non-icon items are organized as a batch.
+	* Also, they are drawn before drawing icons.
+	*
+	* The modifyDIG draw icons firstly.
+	*/
 	this->planet->insert(map, 0.0F, 0.0F);
 
 	{ // make icons
@@ -216,15 +217,15 @@ void Diglet::on_appdata(Uri^ ms_appdata, DigMap^ doc_dig, int hint) {
 	this->graph_dig = doc_dig;
 }
 
-bool Diglet::ready() {
+bool Projectlet::ready() {
 	return (this->graph_dig != nullptr);
 }
 
-void Diglet::fill_extent(float x, float y, float* w, float* h) {
+void Projectlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->view_width, h, this->view_height);
 }
 
-void Diglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Projectlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	double time0 = current_inexact_milliseconds();
 	Planetlet::draw(ds, x, y, Width, Height);
 
@@ -233,13 +234,13 @@ void Diglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float
 		2.0F);
 }
 
-void Diglet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	Platform::String^ hint = file_name_from_path(this->ms_appdata_dig);
+void Projectlet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	Platform::String^ hint = file_name_from_path(this->ms_appdata_rootdir);
 
 	draw_invalid_bitmap(hint, ds, x, y, Width, Height);
 }
 
-bool Diglet::on_key(VirtualKey key, bool screen_keyboard) {
+bool Projectlet::on_key(VirtualKey key, bool screen_keyboard) {
 	bool handled = false;
 
 	if (this->map != nullptr) {
@@ -257,9 +258,9 @@ bool Diglet::on_key(VirtualKey key, bool screen_keyboard) {
 	return handled;
 }
 
-bool Diglet::on_character(unsigned int keycode) {
+bool Projectlet::on_character(unsigned int keycode) {
 	bool handled = false;
-	
+
 	if (this->map != nullptr) {
 		this->planet->begin_update_sequence();
 
@@ -275,7 +276,7 @@ bool Diglet::on_character(unsigned int keycode) {
 	return handled;
 }
 
-void Diglet::relocate_icons() {
+void Projectlet::relocate_icons() {
 	DigMaplet* map = static_cast<DigMaplet*>(this->map);
 	float new_scale = float(map->scale());
 
@@ -289,4 +290,14 @@ void Diglet::relocate_icons() {
 	}
 
 	this->notify_updated();
+}
+
+ProjectFileType Projectlet::filter_file(Platform::String^ filename, Platform::String^ _ext) {
+	ProjectFileType ft = ProjectFileType::_;
+
+	if (filename->Equals("20130304.DIG")) {
+		ft = ProjectFileType::DIG;
+	}
+
+	return ft;
 }

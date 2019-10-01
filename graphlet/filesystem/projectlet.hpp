@@ -4,14 +4,17 @@
 #include <map>
 
 #include "graphlet/filesystem/msappdatalet.hxx"
+#include "graphlet/filesystem/msappdataloguelet.hxx"
 #include "graphlet/planetlet.hpp"
 
 #include "graphlet/symbol/dig/dig.hpp"
 
 namespace WarGrey::SCADA {
+	private enum class ProjectFileType { DIG, _ };
+
 	private ref class DigMap sealed {
 	public:
-		static Windows::Foundation::IAsyncOperation<WarGrey::SCADA::DigMap^>^ load_async(Platform::String^ dig);
+		static Windows::Foundation::IAsyncOperation<WarGrey::SCADA::DigMap^>^ load_async(Platform::String^ dig, WarGrey::SCADA::ProjectFileType type);
 
 	public:
 		virtual ~DigMap();
@@ -39,13 +42,13 @@ namespace WarGrey::SCADA {
 		std::map<WarGrey::SCADA::DigDatumType, unsigned int> counters;
 	};
 
-	private class Diglet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::DigMap, WarGrey::SCADA::Planetlet, int> {
+	private class Projectlet : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::SCADA::DigMap, WarGrey::SCADA::Planetlet, WarGrey::SCADA::ProjectFileType> {
 	public:
-		virtual ~Diglet() noexcept;
+		virtual ~Projectlet() noexcept;
 
-		Diglet(Platform::String^ file_bmp, float view_width, float view_height,
+		Projectlet(Platform::String^ project, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
-			Platform::String^ rootdir = "dig");
+			Platform::String^ rootdir = "projects");
 
 	public:
 		void construct() override;
@@ -59,17 +62,18 @@ namespace WarGrey::SCADA {
 		bool on_character(unsigned int keycode) override;
 
 	protected:
-		void on_appdata(Windows::Foundation::Uri^ ms_appdata_dig, WarGrey::SCADA::DigMap^ doc_dig, int hint) override;
-		void on_appdata_not_found(Windows::Foundation::Uri^ ms_appdata_dig, int hint) override {}
+		WarGrey::SCADA::ProjectFileType filter_file(Platform::String^ file, Platform::String^ _ext) override;
+		void on_appdata(Platform::String^ file, WarGrey::SCADA::DigMap^ doc_dig, WarGrey::SCADA::ProjectFileType type) override;
+		void on_appdata_not_found(Platform::String^ file, ProjectFileType type) override {}
 
 	private:
 		void relocate_icons();
 
 	private:
 		WarGrey::SCADA::DigMap^ graph_dig;
-		
+
 	private:
-		Windows::Foundation::Uri^ ms_appdata_dig;
+		Platform::String^ ms_appdata_rootdir;
 
 	private:
 		WarGrey::SCADA::IGraphlet* map;

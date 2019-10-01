@@ -271,7 +271,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.cpp">
       <Filter>graphlet\filesystem</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\diglet.cpp">
+    <ClCompile Include="F:\DredgerConstruction\BigBang\graphlet\filesystem\projectlet.cpp">
       <Filter>graphlet\filesystem</Filter>
     </ClCompile>
   </ItemGroup>
@@ -553,7 +553,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.hpp">
       <Filter>graphlet\filesystem</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\diglet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdataloguelet.hxx">
+      <Filter>graphlet\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\DredgerConstruction\BigBang\graphlet\filesystem\projectlet.hpp">
       <Filter>graphlet\filesystem</Filter>
     </ClInclude>
   </ItemGroup>

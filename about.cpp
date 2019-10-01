@@ -9,7 +9,7 @@
 
 #include "decorator/background.hpp"
 #include "graphlet/textlet.hpp"
-#include "graphlet/bitmaplet.hpp"
+#include "graphlet/filesystem/bitmaplet.hpp"
 
 using namespace WarGrey::SCADA;
 
