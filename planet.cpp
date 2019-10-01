@@ -1338,7 +1338,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float X, float Y, float Width, float
 
 #ifdef _DEBUG
 	if (this->figure_track != nullptr) {
-		ds->DrawGeometry(this->figure_track, Colours::Highlight, this->track_thickness);
+		ds->DrawGeometry(this->figure_track, X, Y, Colours::Highlight, this->track_thickness);
 	}
 #endif
 
