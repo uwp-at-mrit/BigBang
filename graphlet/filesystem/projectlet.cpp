@@ -35,6 +35,15 @@ namespace {
 		bool can_select(IGraphlet* g) override {
 			return true;
 		}
+
+		bool can_select_multiple() override {
+			return true;
+		}
+
+	public:
+		void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float x, float y) override {
+			this->get_logger()->log_message(Log::Info, L"%d", anchors.size());
+		}
 	};
 
 	private ref struct DigIconEntity sealed {
