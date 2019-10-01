@@ -31,6 +31,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\radarlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\bitmaplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digdoc.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digmaplet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\doctype.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\planetlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\anchorlet.cpp" />
@@ -54,7 +57,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\shiplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\tide_stationlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\digmaplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\welllet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\tablet.cpp" />
@@ -132,6 +134,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdatalet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdataloguelet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappxlet.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digdoc.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digmaplet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\doctype.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\planetlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\anchorlet.hpp" />
@@ -155,7 +160,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\shiplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\tide_stationlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\digmaplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\welllet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\tablet.hpp" />

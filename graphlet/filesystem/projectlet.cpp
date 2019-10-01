@@ -1,12 +1,8 @@
-#include <ppltasks.h>
-#include <iostream>
-#include <fstream>
-
 #include "graphlet/filesystem/projectlet.hpp"
+#include "graphlet/filesystem/project/digmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
 #include "graphlet/symbol/dig/dig.hpp"
-#include "graphlet/symbol/dig/digmaplet.hpp"
 
 #include "datum/flonum.hpp"
 #include "datum/time.hpp"
@@ -19,12 +15,8 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Concurrency;
-
 using namespace Windows::System;
-using namespace Windows::Storage;
 
-using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -82,77 +74,6 @@ namespace {
 }
 
 /*************************************************************************************************/
-DigMap::DigMap() : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {
-	this->cursor = this->items.end();
-}
-
-DigMap::~DigMap() {
-	while (!this->items.empty()) {
-		auto it = this->items.begin();
-		
-		delete (*it);
-		
-		this->items.erase(it);
-	}
-}
-
-void DigMap::push_back_item(WarGrey::SCADA::IDigDatum* item) {
-	this->items.push_back(item);
-	this->counters[item->type] = this->counters[item->type] + 1;
-
-	this->lx = flmin(this->lx, item->lx);
-	this->rx = flmax(this->rx, item->rx);
-	this->ty = flmin(this->ty, item->ty);
-	this->by = flmax(this->by, item->by);
-}
-
-void DigMap::rewind() {
-	this->cursor = this->items.end();
-}
-
-IDigDatum* DigMap::step() {
-	IDigDatum* datum = nullptr;
-
-	if (this->cursor == this->items.end()) {
-		this->cursor = this->items.begin();
-	} else {
-		this->cursor++;
-	}
-
-	if (this->cursor != this->items.end()) {
-		datum = (*this->cursor);
-	}
-
-	return datum;
-}
-
-void DigMap::fill_enclosing_box(double* x, double* y, double* width, double* height) {
-	SET_VALUES(x, this->lx, y, this->ty);
-	SET_VALUES(width, this->rx - this->lx, height, this->by - this->ty);
-}
-
-IAsyncOperation<DigMap^>^ DigMap::load_async(Platform::String^ _dig, ProjectFileType type) {
-	return create_async([=] {
-		DigMap^ map = nullptr;
-		IDigDatum* datum;
-		std::filebuf dig;
-
-		if (dig.open(_dig->Data(), std::ios::in)) {
-			map = ref new DigMap();
-
-			// Lucky, 160.0F for icon size works perfectly
-			while ((datum = read_dig_line(dig, 160.0F)) != nullptr) {
-				if (datum->type < DigDatumType::_) {
-					map->push_back_item(datum);
-				}
-			}
-		}
-
-		return map;
-	});
-}
-
-/*************************************************************************************************/
 Projectlet::Projectlet(Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
 	: Planetlet(new DigFrame(project), GraphletAnchor::LT, background), view_width(view_width), view_height(view_height), map(nullptr) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
@@ -169,7 +90,8 @@ void Projectlet::construct() {
 	this->cd(this->ms_appdata_rootdir);
 }
 
-void Projectlet::on_appdata(Platform::String^ ms_appdata, DigMap^ doc_dig, ProjectFileType type) {
+void Projectlet::on_appdata(Platform::String^ ms_appdata, ProjectDocument^ doc, ProjectDoctype type) {
+	DigMap^ doc_dig = static_cast<DigMap^>(doc);
 	DigMaplet* map = new DigMaplet(doc_dig, this->view_width, this->view_height);
 	float initial_scale = float(map->scale());
 
@@ -292,11 +214,11 @@ void Projectlet::relocate_icons() {
 	this->notify_updated();
 }
 
-ProjectFileType Projectlet::filter_file(Platform::String^ filename, Platform::String^ _ext) {
-	ProjectFileType ft = ProjectFileType::_;
+ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::String^ _ext) {
+	ProjectDoctype ft = ProjectDoctype::_;
 
 	if (filename->Equals("20130304.DIG")) {
-		ft = ProjectFileType::DIG;
+		ft = ProjectDoctype::DIG;
 	}
 
 	return ft;

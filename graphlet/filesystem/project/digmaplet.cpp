@@ -1,6 +1,6 @@
 #include <map>
 
-#include "graphlet/symbol/dig/digmaplet.hpp"
+#include "graphlet/filesystem/project/digmaplet.hpp"
 
 #include "datum/string.hpp"
 #include "datum/flonum.hpp"
