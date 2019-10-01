@@ -5,7 +5,7 @@
 #include <fstream>
 
 namespace WarGrey::SCADA {
-	private enum class ProjectDoctype { DIG, DIG_LOG, _ };
+	private enum class ProjectDoctype { DIG, DIG_LOG, XYZ, XYZ_LOG, _ };
 
 	private ref class ProjectDocument abstract {
 	public:

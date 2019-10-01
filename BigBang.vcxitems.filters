@@ -280,6 +280,9 @@
     <ClCompile Include="F:\DredgerConstruction\BigBang\graphlet\filesystem\project\doctype.cxx">
       <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzdoc.cxx">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -569,6 +572,9 @@
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
     <ClInclude Include="F:\DredgerConstruction\BigBang\graphlet\filesystem\project\doctype.hxx">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzdoc.hxx">
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
   </ItemGroup>

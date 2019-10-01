@@ -42,6 +42,8 @@ namespace WarGrey::SCADA {
 	private:
 		void on_dig_logue(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
 		void on_dig(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
+		void on_xyz_logue(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
+		void on_xyz(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
 
 	private:
 		void relocate_icons();

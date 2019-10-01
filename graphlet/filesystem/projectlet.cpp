@@ -1,5 +1,6 @@
 #include "graphlet/filesystem/projectlet.hpp"
 #include "graphlet/filesystem/project/digmaplet.hpp"
+#include "graphlet/filesystem/project/xyzdoc.hxx"
 #include "graphlet/textlet.hpp"
 
 #include "graphlet/symbol/dig/dig.hpp"
@@ -105,6 +106,16 @@ void Projectlet::on_dig_logue(Platform::String^ ms_appdata, ProjectDocument^ doc
 	}
 }
 
+void Projectlet::on_xyz_logue(Platform::String^ ms_appdata, ProjectDocument^ doc) {
+	XyzLog^ xyz_log = static_cast<XyzLog^>(doc);
+
+	for (size_t idx = 0; idx < xyz_log->xyzs.size(); idx++) {
+		if (xyz_log->visibles[idx]) {
+			this->load_file(xyz_log->xyzs[idx], ProjectDoctype::XYZ);
+		}
+	}
+}
+
 void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	DigDoc^ doc_dig = static_cast<DigDoc^>(doc);
 	DigMaplet* map = new DigMaplet(doc_dig, this->view_width, this->view_height);
@@ -152,6 +163,10 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	this->planet->end_update_sequence();
 
 	this->graph_dig = doc_dig;
+}
+
+void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
+
 }
 
 bool Projectlet::ready() {
@@ -234,6 +249,8 @@ ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::Str
 
 	if (filename->Equals("Back.LOG")) {
 		ft = ProjectDoctype::DIG_LOG;
+	} else if (filename->Equals("Deep.LOG")) {
+		ft = ProjectDoctype::XYZ_LOG;
 	}
 
 	return ft;
@@ -243,5 +260,7 @@ void Projectlet::on_appdata(Platform::String^ ms_appdata, ProjectDocument^ doc, 
 	switch (type) {
 	case ProjectDoctype::DIG_LOG: this->on_dig_logue(ms_appdata, doc); break;
 	case ProjectDoctype::DIG: this->on_dig(ms_appdata, doc); break;
+	case ProjectDoctype::XYZ_LOG: this->on_xyz_logue(ms_appdata, doc); break;
+	case ProjectDoctype::XYZ: this->on_xyz(ms_appdata, doc); break;
 	}
 }
