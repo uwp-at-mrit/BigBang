@@ -281,7 +281,7 @@
       <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp">
-      <Filter>graphlet\filesystem\project</Filter>
+      <Filter>graphlet\filesystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
