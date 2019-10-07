@@ -280,9 +280,9 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 			}
 		} else {
 #ifdef _DEBUG
-			this->get_logger()->log_message(Log::Debug,
-				L"invisible: %s; view window: (%f, %f), (%f, %f); scale: %f; translation: [%f, %f]",
-				dig->to_string()->Data(), x, y, ds_rx, ds_by, this->_scale * this->stimes, this->xtranslation, this->ytranslation);
+		this->get_logger()->log_message(Log::Debug,
+			L"invisible: %s; view window: (%f, %f), (%f, %f); scale: %f; translation: [%f, %f]",
+			dig->to_string()->Data(), x, y, ds_rx, ds_by, this->_scale* this->stimes, this->xtranslation, this->ytranslation);
 #endif
 		}
 	}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "decorator/pipeline.hpp"
-#include "graphlet/primitive.hpp"
+#include "graphlet/pipelet.hpp"
 
 #include "paint.hpp"
 #include "brushes.hxx"

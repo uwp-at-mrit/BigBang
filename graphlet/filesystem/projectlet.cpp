@@ -1,9 +1,9 @@
 #include "graphlet/filesystem/projectlet.hpp"
 #include "graphlet/filesystem/project/digmaplet.hpp"
 #include "graphlet/filesystem/project/xyzdoc.hxx"
-#include "graphlet/textlet.hpp"
 
-#include "graphlet/symbol/dig/dig.hpp"
+#include "graphlet/textlet.hpp"
+#include "graphlet/shapelet.hpp"
 
 #include "datum/flonum.hpp"
 #include "datum/time.hpp"
@@ -18,6 +18,7 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::System;
 
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -49,22 +50,20 @@ namespace {
 	private ref struct DigIconEntity sealed {
 	internal:
 		DigIconEntity(IGraphlet* icon, double x, double y, float width, float height)
-			: icon(icon), x(x), y(y), width(width), height(height) {}
+			: icon(icon), x(x), y(y), size(Size(width, height)) {}
 
 	internal:
 		IGraphlet* icon;
 		double x;
 		double y;
-		float width;
-		float height;
+		Size size;
 	};
 
-
-	static float2 icon_location(DigIconEntity^ icon, DigMaplet* map, float scale) {
-		float2 ipos = map->position_to_local(icon->x, icon->y);
+	static float2 graphlet_location(DigMaplet* map, double x, double y, Size& size, float scale) {
+		float2 ipos = map->position_to_local(x, y);
 		float canvas_x = ipos.x / scale;
 		float canvas_y = ipos.y / scale;
-		
+
 		/** WARNING
 		* The modifyDIG does not handle rectangular items accurately.
 		* Icons as well as rectangles should be translated vertically
@@ -79,13 +78,13 @@ namespace {
 		* Also see DigMaplet::draw for DigDatumType::Rectangle.
 		*/
 
-		return float2(canvas_x - icon->width * 0.5F, canvas_y - icon->height);
+		return float2(canvas_x - size.Width * 0.5F, canvas_y - size.Height);
 	}
 }
 
 /*************************************************************************************************/
-Projectlet::Projectlet(Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Planetlet(new DigFrame(project), GraphletAnchor::LT, background), view_width(view_width), view_height(view_height), map(nullptr) {
+Projectlet::Projectlet(IVessellet* vessel, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
+	: Planetlet(new DigFrame(project), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)), vessel(vessel), map(nullptr) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
 	this->enable_stretch(false, false);
 	this->enable_events(true, true);
@@ -127,7 +126,7 @@ void Projectlet::on_xyz_logue(Platform::String^ ms_appdata, ProjectDocument^ doc
 
 void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	DigDoc^ doc_dig = static_cast<DigDoc^>(doc);
-	DigMaplet* map = new DigMaplet(doc_dig, this->view_width, this->view_height);
+	DigMaplet* map = new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height);
 	float initial_scale = float(map->scale());
 
 	this->map = map;
@@ -155,11 +154,13 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 				if (icon != nullptr) {
 					icon->fill_extent(0.0F, 0.0F, &icon_width, &icon_height);
 
-					{ // TODO: find out the reason why some icons do not like their locations?
-					  // Nonetheless, icons will be relocated when the map is translated or scaled. 
+					{ /** TODO
+					   * Find out the reason why some icons do not like their locations?
+					   * Nonetheless, icons will be relocated when the map is translated or scaled.
+					   */
 
 						DigIconEntity^ entity = ref new DigIconEntity(icon, x, y, icon_width, icon_height);
-						float2 ipos = icon_location(entity, map, initial_scale);
+						float2 ipos = graphlet_location(map, x, y, entity->size, initial_scale);
 
 						this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::LT);
 						this->icons.push_back(entity);
@@ -167,6 +168,11 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 				}
 			}
 		}
+	}
+
+	if (this->vessel != nullptr) {
+		this->vessel->fill_extent(0.0F, 0.0F, &this->vessel_size.Width, &this->vessel_size.Height);
+		this->planet->insert(this->vessel, 0.0F, 0.0F, GraphletAnchor::LT);
 	}
 
 	this->planet->end_update_sequence();
@@ -183,13 +189,16 @@ bool Projectlet::ready() {
 }
 
 void Projectlet::fill_extent(float x, float y, float* w, float* h) {
-	SET_VALUES(w, this->view_width, h, this->view_height);
+	SET_VALUES(w, this->view_size.Width, h, this->view_size.Height);
 }
 
 void Projectlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	double time0 = current_inexact_milliseconds();
+	Platform::String^ location = make_wstring(L"X: %lf; Y: %lf.  B: %lf; L: %lf; H: %lf",
+		this->vessel_x, this->vessel_y, this->latitude, this->longitude, this->altitude);
+
 	Planetlet::draw(ds, x, y, Width, Height);
 
+	ds->DrawText(location, x, y, Colours::GrayText, make_bold_text_format());
 	ds->DrawRectangle(x, y, Width, Height,
 		(this->has_caret() ? Colours::AccentDark : Colours::GrayText),
 		2.0F);
@@ -238,21 +247,37 @@ bool Projectlet::on_character(unsigned int keycode) {
 }
 
 void Projectlet::relocate_icons() {
-	DigMaplet* map = static_cast<DigMaplet*>(this->map);
-	float new_scale = float(map->scale());
+	if (this->map != nullptr) {
+		DigMaplet* map = static_cast<DigMaplet*>(this->map);
+		float new_scale = float(map->scale());
+		float2 ship_pos = graphlet_location(map, this->vessel_x, this->vessel_y, this->vessel_size, new_scale);
 
-	this->planet->scale(new_scale);
+		this->planet->move_to(this->vessel, ship_pos.x, ship_pos.y, GraphletAnchor::CC);
+		
+		this->planet->scale(new_scale);
 
-	for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
-		DigIconEntity^ ent = static_cast<DigIconEntity^>((*it));
-		float2 ipos = icon_location(ent, map, new_scale);
+		for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
+			DigIconEntity^ ent = static_cast<DigIconEntity^>((*it));
+			float2 ipos = graphlet_location(map, ent->x, ent->y, ent->size, new_scale);
 
-		this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::LT);
+			this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::LT);
+		}
+
+		this->notify_updated();
 	}
-
-	this->notify_updated();
 }
 
+void Projectlet::on_location_changed(double latitude, double longitude, double altitude, double x, double y) {
+	this->latitude = latitude;
+	this->longitude = longitude;
+	this->altitude = altitude;
+	this->vessel_x = x;
+	this->vessel_y = y;
+
+	this->relocate_icons();
+}
+
+/*************************************************************************************************/
 ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::String^ _ext) {
 	ProjectDoctype ft = ProjectDoctype::_;
 

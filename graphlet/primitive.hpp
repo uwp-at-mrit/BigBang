@@ -51,12 +51,6 @@ namespace WarGrey::SCADA {
 		float anchor_y;
 	};
 
-	private class IPipelet abstract : public virtual WarGrey::SCADA::IGraphlet {
-	public:
-		virtual Windows::Foundation::Rect get_input_port() = 0;
-		virtual Windows::Foundation::Rect get_output_port() = 0;
-	};
-
 	template<typename T>
 	private class IValuelet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
@@ -316,12 +310,4 @@ namespace WarGrey::SCADA {
 	Windows::Foundation::Rect graphlet_enclosing_box(
 		WarGrey::SCADA::IGraphlet* g, float x, float y,
 		Windows::Foundation::Numerics::float3x2 tf);
-
-	void pipe_connecting_position(
-		WarGrey::SCADA::IPipelet* prev, WarGrey::SCADA::IPipelet* pipe,
-		float* x, float* y, double factor_x = 0.5, double factor_y = 0.5);
-
-	Windows::Foundation::Numerics::float2 pipe_connecting_position(
-		WarGrey::SCADA::IPipelet* prev, WarGrey::SCADA::IPipelet* pipe,
-		float x = 0.0F, float y = 0.0F, double factor_x = 0.5, double factor_y = 0.5);
 }

@@ -36,6 +36,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\doctype.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\vessel\trailing_suction_dredgerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\pipelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\planetlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\anchorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\aquaticlet.cpp" />
@@ -140,6 +142,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\doctype.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\vessel\trailing_suction_dredgerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\pipelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\planetlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\anchorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\aquaticlet.hpp" />
@@ -189,6 +193,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\tagged_valvelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\gate_valvelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\vessellet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp">
       <FileType>Document</FileType>
     </ClInclude>

@@ -1,16 +1,13 @@
 #pragma once
 
-#include <fstream>
-#include <iostream>
-
 #include <deque>
-#include <map>
 
 #include "graphlet/filesystem/msappdatalet.hxx"
 #include "graphlet/filesystem/msappdataloguelet.hxx"
 #include "graphlet/filesystem/project/doctype.hxx"
 
 #include "graphlet/planetlet.hpp"
+#include "graphlet/vessellet.hpp"
 
 #include "graphlet/symbol/dig/dig.hpp"
 
@@ -19,9 +16,13 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~Projectlet() noexcept;
 
-		Projectlet(Platform::String^ project, float view_width, float view_height,
+		Projectlet(WarGrey::SCADA::IVessellet* vessel,
+			Platform::String^ project, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "projects");
+
+	public:
+		void on_location_changed(double latitude, double longitude, double altitude, double x, double y);
 
 	public:
 		void construct() override;
@@ -54,10 +55,18 @@ namespace WarGrey::SCADA {
 	private:
 		Platform::String^ ms_appdata_rootdir;
 
-	private:
+	private: // graphlets are managed by the Planetlet
 		WarGrey::SCADA::IGraphlet* map;
+		WarGrey::SCADA::IVessellet* vessel;
 		std::deque<Platform::Object^> icons;
-		float view_width;
-		float view_height;
+		Windows::Foundation::Size vessel_size;
+		Windows::Foundation::Size view_size;
+
+	private:
+		double latitude;
+		double longitude;
+		double altitude;
+		double vessel_x;
+		double vessel_y;
 	};
 }
