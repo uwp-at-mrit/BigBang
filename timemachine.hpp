@@ -25,7 +25,6 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::RotationPeriod period, unsigned int period_count);
 
 	public:
-		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason) = 0;
 		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size) = 0;
 		virtual uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0) = 0;
 		virtual void step();
@@ -75,7 +74,6 @@ namespace WarGrey::SCADA {
 			unsigned int period_count = 1);
 
 	public:
-		void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason) override {}
 		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size) override;
 		uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0) override;
 

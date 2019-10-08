@@ -20,6 +20,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\margin.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)device\vessel\trailing_suction_dredger.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)display.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\margin.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)device\vessel\trailing_suction_dredger.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)display.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.hpp" />

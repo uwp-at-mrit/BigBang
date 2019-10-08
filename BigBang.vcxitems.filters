@@ -283,11 +283,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp">
       <Filter>graphlet\filesystem</Filter>
     </ClCompile>
-    <ClCompile Include="F:\DredgerConstruction\BigBang\graphlet\filesystem\vessel\trailing_suction_dredgerlet.cpp">
-      <Filter>graphlet\filesystem\vessel</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\pipelet.cpp">
       <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\vessel\trailing_suction_dredgerlet.cpp">
+      <Filter>graphlet\filesystem\vessel</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)device\vessel\trailing_suction_dredger.cpp">
+      <Filter>device\vessel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -583,14 +586,17 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.hpp">
       <Filter>graphlet\filesystem</Filter>
     </ClInclude>
-    <ClInclude Include="F:\DredgerConstruction\BigBang\graphlet\filesystem\vessel\trailing_suction_dredgerlet.hpp">
-      <Filter>graphlet\filesystem\vessel</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\pipelet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\vessellet.hpp">
       <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\vessel\trailing_suction_dredgerlet.hpp">
+      <Filter>graphlet\filesystem\vessel</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)device\vessel\trailing_suction_dredger.hpp">
+      <Filter>device\vessel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -665,6 +671,12 @@
     </Filter>
     <Filter Include="graphlet\filesystem\vessel">
       <UniqueIdentifier>{9ab9cc11-74d3-495c-ab82-48a25a6f1bf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="device">
+      <UniqueIdentifier>{9ae2d796-c077-4dfa-af11-91f071ea52fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="device\vessel">
+      <UniqueIdentifier>{844a4e7e-c0cb-4b46-b981-34cdbcd4e964}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

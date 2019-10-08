@@ -631,6 +631,10 @@ IGraphlet* Planet::find_next_selected_graphlet(IGraphlet* start) {
 	return found;
 }
 
+IGraphlet* Planet::thumbnail_graphlet() {
+	return nullptr;
+}
+
 bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, float fx, float fy) {
 	bool okay = false;
 	GraphletInfo* info = planet_graphlet_info(this, g);

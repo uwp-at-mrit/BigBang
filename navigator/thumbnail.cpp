@@ -75,10 +75,15 @@ public:
 
 		if (this->master != nullptr) {
 			Point pt = this->master->local_to_global_point(this->entity, 0.0F, 0.0F);
+			IGraphlet* thumblet = this->entity->thumbnail_graphlet();
 
-			this->thumbnail = this->entity->take_snapshot(-pt.X, -pt.Y,
-				this->master->view_width(), this->master->view_height(),
-				Colours::Transparent);
+			if (thumblet == nullptr) {
+				this->thumbnail = this->entity->take_snapshot(-pt.X, -pt.Y,
+					this->master->view_width(), this->master->view_height(),
+					Colours::Transparent);
+			} else {
+				this->thumbnail = thumblet->take_snapshot();
+			}
 		}
 	}
 
