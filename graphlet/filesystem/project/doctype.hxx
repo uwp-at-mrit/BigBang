@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 
 	private ref class ProjectDocument abstract {
 	public:
-		static Windows::Foundation::IAsyncOperation<WarGrey::SCADA::ProjectDocument^>^ load_async(Platform::String^ filename, WarGrey::SCADA::ProjectDoctype type);
+		static WarGrey::SCADA::ProjectDocument^ load(Platform::String^ filename, WarGrey::SCADA::ProjectDoctype type);
 
 	public:
 		virtual ~ProjectDocument() {}

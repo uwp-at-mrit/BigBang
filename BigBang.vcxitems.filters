@@ -292,6 +292,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)device\vessel\trailing_suction_dredger.cpp">
       <Filter>device\vessel</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)device\editor.cpp">
+      <Filter>device</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -598,6 +601,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)device\vessel\trailing_suction_dredger.hpp">
       <Filter>device\vessel</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)device\editor.hpp">
+      <Filter>device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -696,6 +702,24 @@
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\timemachine.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\trailing_suction_dredger.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\trailing_suction_dredger.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\menu.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\menu.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\tongue.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\tongue.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

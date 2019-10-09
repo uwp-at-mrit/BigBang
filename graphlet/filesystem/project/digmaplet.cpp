@@ -262,7 +262,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				
 				ds->FillGeometry(this->plaintexts[dig->name], tp.x, tp.y - text_height, vector_colors_ref(0LL));
 			}; break;
-			case DigDatumType::Depth: { // also see DigDatumType::Rectangle, but modifyDIG handles depth accurately.
+			case DigDatumType::Number: { // also see DigDatumType::Rectangle, but modifyDIG handles depth accurately.
 				float2 tp = this->position_to_local(dig->x, dig->y, x, y);
 				float depth_height = float(dig->ty - dig->by); // see this::preshape
 
@@ -442,7 +442,7 @@ void DigMaplet::preshape(IDigDatum* dig) {
 			tbx = this->plaintexts[dig->name]->ComputeBounds();
 		}
 	}; break;
-	case DigDatumType::Depth: {
+	case DigDatumType::Number: {
 		if (this->depthtexts.find(dig->name) == this->depthtexts.end()) {
 			CanvasTextLayout^ tlt = make_text_layout(dig->name, this->plainfont);
 			CanvasGeometry^ g = paragraph(tlt);

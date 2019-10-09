@@ -3,10 +3,10 @@
 #include "filesystem/msappdata.hxx"
 
 namespace WarGrey::SCADA {
-	template<class FileType, class Graphlet, typename Hint>
-	private class IMsAppdatalet abstract : public virtual WarGrey::SCADA::IMsAppdata<FileType, Hint>, public virtual Graphlet {
+	template<class FileType, class Graphlet>
+	private class IMsAppdatalet abstract : public virtual WarGrey::SCADA::IMsAppdata<FileType>, public virtual Graphlet {
 	protected:
-		void on_appdata_notify(Windows::Foundation::Uri^ ms_appdata, FileType^ instance, Hint hint) override {
+		void on_appdata_notify(Windows::Foundation::Uri^ ms_appdata, FileType^ instance) override {
 			this->notify_ready();
 		}
 

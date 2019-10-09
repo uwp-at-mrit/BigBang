@@ -7,7 +7,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class DigDatumType {
-		Icon, Arc, Circle, Line, PolyLine, PolyBezier, ShoreLine, Rectangle, Text, Depth, FontText,
+		Icon, Arc, Circle, Line, PolyLine, PolyBezier, ShoreLine, Rectangle, Text, Number, FontText,
 
 		// TODO
 		Typhoon, Compass,
@@ -134,9 +134,9 @@ namespace WarGrey::SCADA {
 		long long linewidth;
 	};
 
-	private struct DepthDig : public WarGrey::SCADA::IDigDatum {
+	private struct NumberDig : public WarGrey::SCADA::IDigDatum {
 	public:
-		DepthDig(std::filebuf& dig);
+		NumberDig(std::filebuf& dig);
 
 	public:
 		Platform::String^ to_string() override;

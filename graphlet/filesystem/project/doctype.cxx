@@ -11,20 +11,18 @@ using namespace Concurrency;
 using namespace Windows::Foundation;
 
 /*************************************************************************************************/
-IAsyncOperation<ProjectDocument^>^ ProjectDocument::load_async(Platform::String^ filename, WarGrey::SCADA::ProjectDoctype type) {
-	return create_async([=] {
-		ProjectDocument^ doc = nullptr;
-		std::filebuf src;
+ProjectDocument^ ProjectDocument::load(Platform::String^ filename, WarGrey::SCADA::ProjectDoctype type) {
+	ProjectDocument^ doc = nullptr;
+	std::filebuf src;
 
-		if (src.open(filename->Data(), std::ios::in)) {
-			switch (type) {
-			case ProjectDoctype::DIG_LOG: doc = ref new DigLog(src); break;
-			case ProjectDoctype::DIG:     doc = ref new DigDoc(src); break;
-			case ProjectDoctype::XYZ_LOG: doc = ref new XyzLog(src); break;
-			case ProjectDoctype::XYZ:     doc = ref new XyzDoc(src); break;
-			}
+	if (src.open(filename->Data(), std::ios::in)) {
+		switch (type) {
+		case ProjectDoctype::DIG_LOG: doc = ref new DigLog(src); break;
+		case ProjectDoctype::DIG:     doc = ref new DigDoc(src); break;
+		case ProjectDoctype::XYZ_LOG: doc = ref new XyzLog(src); break;
+		case ProjectDoctype::XYZ:     doc = ref new XyzDoc(src); break;
 		}
+	}
 
-		return doc;
-	});
+	return doc;
 }

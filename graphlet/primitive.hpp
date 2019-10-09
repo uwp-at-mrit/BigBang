@@ -66,10 +66,15 @@ namespace WarGrey::SCADA {
 			T value = this->guarded_value(value0);
 
 			if ((this->value != value) || force_update) {
-				this->moor(anchor);
-				this->value = value;
-				this->on_value_changed(value);
-				this->notify_updated();
+				if (this->info == nullptr) {
+					// NOTE: It is recommand that `set_value()`ing after the graphlet is inserted into a planet
+					this->value = value;
+				} else {
+					this->moor(anchor);
+					this->value = value;
+					this->on_value_changed(value);
+					this->notify_updated();
+				}
 			}
 		}
 		

@@ -28,164 +28,183 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static CanvasTextFormat^ caption_font = make_bold_text_format("Microsoft YaHei", 20.0F);
 static CanvasTextFormat^ label_font = make_bold_text_format("Consolas", 14.0F);
 
+static CanvasSolidColorBrush^ caption_color = Colours::GhostWhite;
+static CanvasSolidColorBrush^ label_color = Colours::Snow;
+static CanvasSolidColorBrush^ border_color = Colours::DimGray;
+static CanvasSolidColorBrush^ border_hicolor = Colours::RoyalBlue;
+
 /*************************************************************************************************/
-private class Navigationlet : public IGraphlet {
-public:
-	Navigationlet(unsigned int id, IPlanet* entity, float width, float height)
-		: entity(entity), master(nullptr), id(id), width(width), height(height) {}
+namespace {
+	private class Navigationlet : public IGraphlet {
+	public:
+		Navigationlet(unsigned int id, IPlanet* entity, float width, float height)
+			: entity(entity), master(nullptr), id(id), width(width), height(height) {}
 
-public:
-	void construct() override {
-		this->label = make_text_layout(entity->display_name(), label_font);
-		this->mask_color = Colours::make(0x000000, 0.72);
-	}
+	public:
+		void construct() override {
+			Platform::String^ label = entity->display_name();
+			TextExtent te = get_text_extent(label, label_font);
 
-	void fill_extent(float x, float y, float* w, float* h) override {
-		SET_VALUES(w, this->width, h, this->height);
-	};
-
-	void draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {
-		Rect box = this->label->LayoutBounds;
-		float cx = x + this->width * 0.5F;
-		float mask_height = box.Height * 1.618F;
-		float mask_y = y + this->height - mask_height;
-		float label_y = y + this->height - box.Height;
-		
-		if (this->thumbnail == nullptr) {
-			this->refresh();
-		}
-
-		if (this->thumbnail != nullptr) {
-			ds->DrawImage(this->thumbnail, Rect(x, y, this->width, this->height));
-		}
-
-		ds->FillRectangle(x, mask_y, this->width, mask_height, this->mask_color);
-		ds->DrawTextLayout(this->label, cx - box.Width * 0.5F - box.X, label_y, Colours::White);
-	};
-
-public:
-	int index() {
-		return this->id;
-	}
-
-	void refresh() {
-		if (this->master != this->entity->master()) {
-			this->master = dynamic_cast<Pasteboard*>(this->entity->master());
-		}
-
-		if (this->master != nullptr) {
-			Point pt = this->master->local_to_global_point(this->entity, 0.0F, 0.0F);
-			IGraphlet* thumblet = this->entity->thumbnail_graphlet();
-
-			if (thumblet == nullptr) {
-				this->thumbnail = this->entity->take_snapshot(-pt.X, -pt.Y,
-					this->master->view_width(), this->master->view_height(),
-					Colours::Transparent);
+			if (te.width <= this->width) {
+				this->label = make_text_layout(label, label_font);
 			} else {
-				this->thumbnail = thumblet->take_snapshot();
+				float origin_font_size = label_font->FontSize;
+
+				label_font->FontSize = origin_font_size * (this->width / te.width);
+				this->label = make_text_layout(label, label_font);
+				label_font->FontSize = origin_font_size;
 			}
+
+			this->mask_color = Colours::make(0x000000, 0.72);
 		}
-	}
 
-private:
-	CanvasRenderTarget^ thumbnail;
-	CanvasTextLayout^ label;
-	ICanvasBrush^ mask_color;
+		void fill_extent(float x, float y, float* w, float* h) override {
+			SET_VALUES(w, this->width, h, this->height);
+		};
 
-private:
-	float width;
-	float height;
+		void draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {
+			Rect box = this->label->LayoutBounds;
+			float cx = x + this->width * 0.5F;
+			float mask_height = box.Height * 1.618F;
+			float mask_y = y + this->height - mask_height;
+			float label_y = y + this->height - box.Height;
 
-private:
-	IPlanet* entity; // managed by its original `UniverseDisplay`.
-	Pasteboard* master;
-	unsigned int id;
-};
+			if (this->thumbnail == nullptr) {
+				this->refresh();
+			}
 
-private class NavigationPlanet : public IHeadUpPlanet {
-public:
-	NavigationPlanet(IUniverseNavigator* navigator, Platform::String^ title) : IHeadUpPlanet(title), master(navigator) {}
+			if (this->thumbnail != nullptr) {
+				ds->DrawImage(this->thumbnail, Rect(x, y, this->width, this->height));
+			}
 
-public:
-	bool can_select(IGraphlet* g) override {
-		return true;
-	}
+			ds->FillRectangle(x, mask_y, this->width, mask_height, this->mask_color);
+			ds->DrawTextLayout(this->label, cx - box.Width * 0.5F - box.X, label_y, label_color);
+		};
 
-	void draw_visible_selection(CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
-		// do nothing
-		// The decorator does it.
-	}
+	public:
+		int index() {
+			return this->id;
+		}
 
-	bool on_pointer_pressed(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) override {
-		return true;
-	}
+		void refresh() {
+			if (this->master != this->entity->master()) {
+				this->master = dynamic_cast<Pasteboard*>(this->entity->master());
+			}
 
-	bool on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) override {
-		return true;
-	}
+			if (this->master != nullptr) {
+				Point pt = this->master->local_to_global_point(this->entity, 0.0F, 0.0F);
+				IGraphlet* thumblet = this->entity->thumbnail_graphlet();
 
-	bool on_pointer_released(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) override {
-		bool handled = false;
-
-		switch (puk) {
-		case PointerUpdateKind::LeftButtonReleased:
-		case PointerUpdateKind::LeftButtonPressed: {
-			auto this_graphlet = dynamic_cast<Navigationlet*>(this->find_graphlet(x, y));
-			auto last_graphlet = dynamic_cast<Navigationlet*>(this->find_next_selected_graphlet());
-
-			if ((this_graphlet != nullptr) && (last_graphlet != nullptr)) {
-				if (this_graphlet != last_graphlet) {
-					this->master->navigate(last_graphlet->index(), this_graphlet->index());
-					this->last_thumbnail = this_graphlet;
+				if (thumblet == nullptr) {
+					this->thumbnail = this->entity->take_snapshot(-pt.X, -pt.Y,
+						this->master->view_width(), this->master->view_height(),
+						Colours::Transparent);
+				} else {
+					this->thumbnail = thumblet->take_snapshot();
 				}
-
-				this_graphlet->refresh();
-				last_graphlet->refresh();
-
-				handled = true;
 			}
-		}; break;
 		}
 
-		return handled;
-	}
+	private:
+		CanvasRenderTarget^ thumbnail;
+		CanvasTextLayout^ label;
+		ICanvasBrush^ mask_color;
 
-private:
-	IUniverseNavigator* master;
-	Navigationlet* last_thumbnail;
-};
+	private:
+		float width;
+		float height;
 
+	private:
+		IPlanet* entity; // managed by its original `UniverseDisplay`.
+		Pasteboard* master;
+		unsigned int id;
+	};
 
-private class NavigationDecorator : public IPlanetDecorator {
-public:
-	NavigationDecorator(float vinset) : vinset(vinset) {}
+	private class NavigationPlanet : public IHeadUpPlanet {
+	public:
+		NavigationPlanet(IUniverseNavigator* navigator, Platform::String^ title) : IHeadUpPlanet(title), master(navigator) {}
 
-public:
-	void draw_before(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) override {
-		Rect box = this->caption->LayoutBounds;
+	public:
+		bool can_select(IGraphlet* g) override {
+			return true;
+		}
 
-		ds->DrawTextLayout(this->caption, (Width - box.Width) * 0.5F + X, vinset + Y, Colours::Snow);
-	}
+		void draw_visible_selection(CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
+			// do nothing
+			// The decorator does it.
+		}
 
-	void draw_after_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) override {
-		ds->DrawRectangle(x, y, width, height, (selected ? Colours::RoyalBlue : Colours::DimGray), 2.0F);
-	}
+		bool on_pointer_pressed(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) override {
+			return true;
+		}
 
-public:
-	void on_active_planet_changed(IPlanet* master) override {
-		this->caption = make_text_layout(master->display_name(), caption_font);
-	}
+		bool on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) override {
+			return true;
+		}
 
-public:
-	float reserved_height() {
-		return this->vinset + this->caption->LayoutBounds.Height;
-	}
+		bool on_pointer_released(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) override {
+			bool handled = false;
 
-private:
-	CanvasTextLayout^ caption;
-	float vinset;
-};
+			switch (puk) {
+			case PointerUpdateKind::LeftButtonReleased:
+			case PointerUpdateKind::LeftButtonPressed: {
+				auto this_graphlet = dynamic_cast<Navigationlet*>(this->find_graphlet(x, y));
+				auto last_graphlet = dynamic_cast<Navigationlet*>(this->find_next_selected_graphlet());
 
+				if ((this_graphlet != nullptr) && (last_graphlet != nullptr)) {
+					if (this_graphlet != last_graphlet) {
+						this->master->navigate(last_graphlet->index(), this_graphlet->index());
+						this->last_thumbnail = this_graphlet;
+					}
+
+					this_graphlet->refresh();
+					last_graphlet->refresh();
+
+					handled = true;
+				}
+			}; break;
+			}
+
+			return handled;
+		}
+
+	private:
+		IUniverseNavigator* master;
+		Navigationlet* last_thumbnail;
+	};
+
+	private class NavigationDecorator : public IPlanetDecorator {
+	public:
+		NavigationDecorator(float vinset) : vinset(vinset) {}
+
+	public:
+		void draw_before(CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) override {
+			Rect box = this->caption->LayoutBounds;
+
+			ds->DrawTextLayout(this->caption, (Width - box.Width) * 0.5F + X, vinset + Y, caption_color);
+		}
+
+		void draw_after_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) override {
+			ds->DrawRectangle(x, y, width, height, (selected ? border_hicolor : border_color), 2.0F);
+		}
+
+	public:
+		void on_active_planet_changed(IPlanet* master) override {
+			this->caption = make_text_layout(master->display_name(), caption_font);
+		}
+
+	public:
+		float reserved_height() {
+			return this->vinset + this->caption->LayoutBounds.Height;
+		}
+
+	private:
+		CanvasTextLayout^ caption;
+		float vinset;
+	};
+}
+
+/*************************************************************************************************/
 private ref class WarGrey::SCADA::NavigationDisplay : public UniverseDisplay {
 internal:
 	NavigationDisplay(IUniverseNavigator* navigator, Log level, Platform::String^ title

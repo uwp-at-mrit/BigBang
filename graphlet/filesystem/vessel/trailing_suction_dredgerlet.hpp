@@ -7,28 +7,39 @@
 
 #include "graphlet/vessellet.hpp"
 
+#include "datum/flonum.hpp"
+
 namespace WarGrey::SCADA {
-	private ref struct TrailingSuctionDredger abstract {
+	private ref class TrailingSuctionDredger sealed : public WarGrey::SCADA::IVessel {
 	public:
-		static Windows::Foundation::IAsyncOperation<WarGrey::SCADA::TrailingSuctionDredger^>^ load_async(Platform::String^ path);
+		static WarGrey::SCADA::TrailingSuctionDredger^ load(Platform::String^ path);
+		static bool save(WarGrey::SCADA::TrailingSuctionDredger^ self, Platform::String^ path);
+
+	public:
+		TrailingSuctionDredger(TrailingSuctionDredger^ src = nullptr);
 		
+	public:
+		void refresh(TrailingSuctionDredger^ src);
+
+	public:
+		void fill_boundary(double* x = nullptr, double* y = nullptr, double* width = nullptr, double* height = nullptr) override;
+
 	internal:
-		Windows::Foundation::Numerics::float2 gps[2];
-		Windows::Foundation::Numerics::float2 ps_suction;
-		Windows::Foundation::Numerics::float2 sb_suction;
-		Windows::Foundation::Numerics::float2 hopper_vertexes[4];
-		Windows::Foundation::Numerics::float2 body_vertexes[7];
-		Windows::Foundation::Numerics::float2 bridge_vertexes[10];
-		Windows::Foundation::Numerics::float2 trunnion;
-		Windows::Foundation::Numerics::float2 barge;
+		WarGrey::SCADA::double2 gps[2];
+		WarGrey::SCADA::double2 ps_suction;
+		WarGrey::SCADA::double2 sb_suction;
+		WarGrey::SCADA::double2 hopper_vertexes[4];
+		WarGrey::SCADA::double2 body_vertexes[7];
+		WarGrey::SCADA::double2 bridge_vertexes[10];
+		WarGrey::SCADA::double2 trunnion;
+		WarGrey::SCADA::double2 barge;
 	};
 
-	private class TrailingSuctionDredgerlet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::TrailingSuctionDredger, WarGrey::SCADA::IVessellet, int> {
+	private class TrailingSuctionDredgerlet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::TrailingSuctionDredger, WarGrey::SCADA::IVessellet> {
 	public:
 		virtual ~TrailingSuctionDredgerlet() noexcept;
 
-		TrailingSuctionDredgerlet(Platform::String^ vessel, float real_width, float real_height,
-			Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
+		TrailingSuctionDredgerlet(Platform::String^ vessel, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
 
 	public:
 		void construct() override;
@@ -37,16 +48,21 @@ namespace WarGrey::SCADA {
 		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		bool ready() override;
 
+	public:
+		void preview(TrailingSuctionDredger^ src);
+		void refresh(TrailingSuctionDredger^ src);
+
 	protected:
-		void on_appdata(Windows::Foundation::Uri^ vessel, WarGrey::SCADA::TrailingSuctionDredger^ vessel_config, int hint) override;
-		void on_appdata_not_found(Windows::Foundation::Uri^ file, int hint) override {}
+		void on_appdata(Windows::Foundation::Uri^ vessel, WarGrey::SCADA::TrailingSuctionDredger^ vessel_config) override;
+		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
 
 	private:
 		WarGrey::SCADA::TrailingSuctionDredger^ vessel_config;
+		WarGrey::SCADA::TrailingSuctionDredger^ preview_config;
 		Windows::Foundation::Uri^ ms_appdata_config;
 
 	private:
-		float real_width;
-		float real_height;
+		double real_width;
+		double real_height;
 	};
 }

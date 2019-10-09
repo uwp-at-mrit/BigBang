@@ -295,7 +295,7 @@ IEditorlet::IEditorlet(DimensionState status, Platform::String^ unit, Platform::
 }
 
 void IEditorlet::construct() {
-	this->set_value(0.0, true);
+	this->set_value(this->get_value(), true);
 }
 
 void IEditorlet::update(long long count, long long interval, long long uptime) {

@@ -20,6 +20,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\margin.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)device\editor.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)device\vessel\trailing_suction_dredger.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)display.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.cpp" />
@@ -124,6 +125,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\margin.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)device\editor.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)device\vessel\trailing_suction_dredger.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)display.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.hpp" />
@@ -234,17 +236,23 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\menu.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\timemachine.resw" />
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\tongue.resw" />
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\trailing_suction_dredger.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\unit.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\menu.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\timemachine.resw" />
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\tongue.resw" />
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\trailing_suction_dredger.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\unit.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>

@@ -148,7 +148,7 @@ IDigDatum* WarGrey::SCADA::read_dig_line(std::filebuf& dig, float icon_size) {
 		case 'I': datum = new PolyLineDig(dig); break;
 		case 'J': datum = new CompassDig(dig); break;
 		case 'O': datum = new RectangleDig(dig); break;
-		case 'U': datum = new DepthDig(dig); break;
+		case 'U': datum = new NumberDig(dig); break;
 		case 'S': datum = new ShoreLineDig(dig); break;
 		case 'T': datum = new TextDig(dig); break;
 		case 'X': datum = new LineDig(dig); break;
@@ -397,7 +397,7 @@ Platform::String^ PolyLineDig::to_string() {
 }
 
 /*************************************************************************************************/
-DepthDig::DepthDig(std::filebuf& dig) : IDigDatum(DigDatumType::Depth) {
+NumberDig::NumberDig(std::filebuf& dig) : IDigDatum(DigDatumType::Number) {
 	this->y = read_flonum(dig);
 	this->x = read_flonum(dig);
 	this->name = read_wgb18030(dig, char_end_of_line);
@@ -410,7 +410,7 @@ DepthDig::DepthDig(std::filebuf& dig) : IDigDatum(DigDatumType::Depth) {
 	this->by = this->ty;
 }
 
-Platform::String^ DepthDig::to_string() {
+Platform::String^ NumberDig::to_string() {
 	return make_wstring(L"%s[%s](%f, %f)", this->type.ToString()->Data(), this->name->Data());
 }
 
