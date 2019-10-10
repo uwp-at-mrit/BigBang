@@ -18,8 +18,8 @@ static CanvasTextFormat^ label_font = make_bold_text_format("Microsoft Yahei", 1
 
 static CanvasSolidColorBrush^ label_color = Colours::DarkGray;
 
-#define Vessel_XY(v, ref, def_x, def_y) ((v == nullptr) ? double2(def_x, def_y) : v->ref)
-#define Vessel_Vertex(v, ref, xs, ys, id) v->ref = double2(xs[id]->get_input_number(), ys[id]->get_input_number())
+#define Vessel_Display_Vertex(v, ref, xs, ys, id) xs[id]->set_value(v->ref.x); ys[id]->set_value(v->ref.y)
+#define Vessel_Refresh_Vertex(v, ref, xs, ys, id) v->ref = double2(xs[id]->get_value(), ys[id]->get_value())
 
 /*************************************************************************************************/
 namespace {
@@ -52,44 +52,9 @@ public:
 		this->Y[1] = this->master->insert_one(new Labellet("Y", label_font, label_color));
 
 		for (TSD id = _E0(TSD); id < TSD::_; id++) {
-			double2 pt;
-
-			switch (id) {
-			case TSD::GPS1:       pt = Vessel_XY(this->entity, gps[0],     23.43, 19.88); break;
-			case TSD::GPS2:       pt = Vessel_XY(this->entity, gps[1],     26.37, 13.50); break;
-			case TSD::PS_Suction: pt = Vessel_XY(this->entity, ps_suction, 90.17, 0.00); break;
-			case TSD::SB_Suction: pt = Vessel_XY(this->entity, sb_suction, 90.17, 24.80); break;
-			case TSD::Trunnion:   pt = Vessel_XY(this->entity, trunnion,   0.00, 0.00); break;
-			case TSD::Barge:      pt = Vessel_XY(this->entity, barge,      51.00, 2.20); break;
-
-			case TSD::Body1: pt = Vessel_XY(this->entity, body_vertexes[0], 121.20, 12.40); break;
-			case TSD::Body2: pt = Vessel_XY(this->entity, body_vertexes[1], 99.00, 0.00); break;
-			case TSD::Body3: pt = Vessel_XY(this->entity, body_vertexes[2], 7.70, 0.00); break;
-			case TSD::Body4: pt = Vessel_XY(this->entity, body_vertexes[3], 0.00, 2.60); break;
-			case TSD::Body5: pt = Vessel_XY(this->entity, body_vertexes[4], 0.00, 22.20); break;
-			case TSD::Body6: pt = Vessel_XY(this->entity, body_vertexes[5], 7.70, 24.80); break;
-			case TSD::Body7: pt = Vessel_XY(this->entity, body_vertexes[6], 99.0, 24.80); break;
-
-			case TSD::Hopper1: pt = Vessel_XY(this->entity, hopper_vertexes[0], 88.00, 4.20); break;
-			case TSD::Hopper2: pt = Vessel_XY(this->entity, hopper_vertexes[1], 37.00, 4.20); break;
-			case TSD::Hopper3: pt = Vessel_XY(this->entity, hopper_vertexes[2], 37.00, 20.60); break;
-			case TSD::Hopper4: pt = Vessel_XY(this->entity, hopper_vertexes[3], 88.00, 20.60); break;
-
-			case TSD::Bridge1:  pt = Vessel_XY(this->entity, bridge_vertexes[0], 28.00, 1.00); break;
-			case TSD::Bridge2:  pt = Vessel_XY(this->entity, bridge_vertexes[1], 24.00, 1.00); break;
-			case TSD::Bridge3:  pt = Vessel_XY(this->entity, bridge_vertexes[2], 24.00, 23.80); break;
-			case TSD::Bridge4:  pt = Vessel_XY(this->entity, bridge_vertexes[3], 28.00, 23.80); break;
-			case TSD::Bridge5:  pt = Vessel_XY(this->entity, bridge_vertexes[4], 19.00, 6.80); break;
-			case TSD::Bridge6:  pt = Vessel_XY(this->entity, bridge_vertexes[5], 19.00, 18.00); break;
-			case TSD::Bridge7:  pt = Vessel_XY(this->entity, bridge_vertexes[6], 29.00, 17.80); break;
-			case TSD::Bridge8:  pt = Vessel_XY(this->entity, bridge_vertexes[7], 32.00, 14.00); break;
-			case TSD::Bridge9:  pt = Vessel_XY(this->entity, bridge_vertexes[8], 32.00, 10.80); break;
-			case TSD::Bridge10: pt = Vessel_XY(this->entity, bridge_vertexes[9], 29.00, 7.00); break;
-			}
-
 			this->labels[id] = this->insert_label(id);
-			this->xs[id] = this->insert_input_field(id, pt.x);
-			this->ys[id] = this->insert_input_field(id, pt.y);
+			this->xs[id] = this->insert_input_field(id, 0.0);
+			this->ys[id] = this->insert_input_field(id, 0.0);
 		}
 
 		this->dredger = this->master->insert_one(new TrailingSuctionDredgerlet("vessel"));
@@ -111,14 +76,30 @@ public:
 		this->master->move_to(this->dredger, frame, GraphletAnchor::RT, GraphletAnchor::RT, -inset, inset);
 	}
 
-public:
-	void on_edit(Credit<Dimensionlet, TSD>* dim) {
-		this->up_to_date = false;
-		this->refresh_entity();
+	void on_graphlet_ready(IGraphlet* g) {
+		if (this->dredger == g) {
+			this->entity = this->dredger->clone_vessel(this->entity);
+			this->refresh_input_fields();
+		}
+	}
 
-		this->dredger->moor(GraphletAnchor::RB);
-		this->dredger->preview(this->entity);
-		this->dredger->notify_updated();
+public:
+	bool on_edit(Credit<Dimensionlet, TSD>* dim) {
+		long double new_value = dim->get_input_number();
+		bool modified = (new_value != dim->get_value());
+
+		if (modified) {
+			dim->set_value(new_value);
+
+			this->up_to_date = false;
+			this->refresh_entity();
+
+			this->dredger->moor(GraphletAnchor::RB);
+			this->dredger->preview(this->entity);
+			this->dredger->notify_updated();
+		}
+
+		return modified;
 	}
 
 	void on_apply() {
@@ -140,36 +121,73 @@ private:
 		if (!this->up_to_date) {
 			this->up_to_date = true;
 
-			Vessel_Vertex(this->entity, gps[0], this->xs, this->ys, TSD::GPS1);
-			Vessel_Vertex(this->entity, gps[1], this->xs, this->ys, TSD::GPS2);
-			Vessel_Vertex(this->entity, ps_suction, this->xs, this->ys, TSD::PS_Suction);
-			Vessel_Vertex(this->entity, sb_suction, this->xs, this->ys, TSD::SB_Suction);
-			Vessel_Vertex(this->entity, trunnion, this->xs, this->ys, TSD::Trunnion);
-			Vessel_Vertex(this->entity, barge, this->xs, this->ys, TSD::Barge);
+			Vessel_Refresh_Vertex(this->entity, gps[0], this->xs, this->ys, TSD::GPS1);
+			Vessel_Refresh_Vertex(this->entity, gps[1], this->xs, this->ys, TSD::GPS2);
+			Vessel_Refresh_Vertex(this->entity, ps_suction, this->xs, this->ys, TSD::PS_Suction);
+			Vessel_Refresh_Vertex(this->entity, sb_suction, this->xs, this->ys, TSD::SB_Suction);
+			Vessel_Refresh_Vertex(this->entity, trunnion, this->xs, this->ys, TSD::Trunnion);
+			Vessel_Refresh_Vertex(this->entity, barge, this->xs, this->ys, TSD::Barge);
 
-			Vessel_Vertex(this->entity, body_vertexes[0], this->xs, this->ys, TSD::Body1);
-			Vessel_Vertex(this->entity, body_vertexes[1], this->xs, this->ys, TSD::Body2);
-			Vessel_Vertex(this->entity, body_vertexes[2], this->xs, this->ys, TSD::Body3);
-			Vessel_Vertex(this->entity, body_vertexes[3], this->xs, this->ys, TSD::Body4);
-			Vessel_Vertex(this->entity, body_vertexes[4], this->xs, this->ys, TSD::Body5);
-			Vessel_Vertex(this->entity, body_vertexes[5], this->xs, this->ys, TSD::Body6);
-			Vessel_Vertex(this->entity, body_vertexes[6], this->xs, this->ys, TSD::Body7);
+			Vessel_Refresh_Vertex(this->entity, body_vertexes[0], this->xs, this->ys, TSD::Body1);
+			Vessel_Refresh_Vertex(this->entity, body_vertexes[1], this->xs, this->ys, TSD::Body2);
+			Vessel_Refresh_Vertex(this->entity, body_vertexes[2], this->xs, this->ys, TSD::Body3);
+			Vessel_Refresh_Vertex(this->entity, body_vertexes[3], this->xs, this->ys, TSD::Body4);
+			Vessel_Refresh_Vertex(this->entity, body_vertexes[4], this->xs, this->ys, TSD::Body5);
+			Vessel_Refresh_Vertex(this->entity, body_vertexes[5], this->xs, this->ys, TSD::Body6);
+			Vessel_Refresh_Vertex(this->entity, body_vertexes[6], this->xs, this->ys, TSD::Body7);
 
-			Vessel_Vertex(this->entity, hopper_vertexes[0], this->xs, this->ys, TSD::Hopper1);
-			Vessel_Vertex(this->entity, hopper_vertexes[1], this->xs, this->ys, TSD::Hopper2);
-			Vessel_Vertex(this->entity, hopper_vertexes[2], this->xs, this->ys, TSD::Hopper3);
-			Vessel_Vertex(this->entity, hopper_vertexes[3], this->xs, this->ys, TSD::Hopper4);
+			Vessel_Refresh_Vertex(this->entity, hopper_vertexes[0], this->xs, this->ys, TSD::Hopper1);
+			Vessel_Refresh_Vertex(this->entity, hopper_vertexes[1], this->xs, this->ys, TSD::Hopper2);
+			Vessel_Refresh_Vertex(this->entity, hopper_vertexes[2], this->xs, this->ys, TSD::Hopper3);
+			Vessel_Refresh_Vertex(this->entity, hopper_vertexes[3], this->xs, this->ys, TSD::Hopper4);
 
-			Vessel_Vertex(this->entity, bridge_vertexes[0], this->xs, this->ys, TSD::Bridge1);
-			Vessel_Vertex(this->entity, bridge_vertexes[1], this->xs, this->ys, TSD::Bridge2);
-			Vessel_Vertex(this->entity, bridge_vertexes[2], this->xs, this->ys, TSD::Bridge3);
-			Vessel_Vertex(this->entity, bridge_vertexes[3], this->xs, this->ys, TSD::Bridge4);
-			Vessel_Vertex(this->entity, bridge_vertexes[4], this->xs, this->ys, TSD::Bridge5);
-			Vessel_Vertex(this->entity, bridge_vertexes[5], this->xs, this->ys, TSD::Bridge6);
-			Vessel_Vertex(this->entity, bridge_vertexes[6], this->xs, this->ys, TSD::Bridge7);
-			Vessel_Vertex(this->entity, bridge_vertexes[7], this->xs, this->ys, TSD::Bridge8);
-			Vessel_Vertex(this->entity, bridge_vertexes[8], this->xs, this->ys, TSD::Bridge9);
-			Vessel_Vertex(this->entity, bridge_vertexes[9], this->xs, this->ys, TSD::Bridge10);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[0], this->xs, this->ys, TSD::Bridge1);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[1], this->xs, this->ys, TSD::Bridge2);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[2], this->xs, this->ys, TSD::Bridge3);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[3], this->xs, this->ys, TSD::Bridge4);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[4], this->xs, this->ys, TSD::Bridge5);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[5], this->xs, this->ys, TSD::Bridge6);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[6], this->xs, this->ys, TSD::Bridge7);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[7], this->xs, this->ys, TSD::Bridge8);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[8], this->xs, this->ys, TSD::Bridge9);
+			Vessel_Refresh_Vertex(this->entity, bridge_vertexes[9], this->xs, this->ys, TSD::Bridge10);
+		}
+	}
+
+	void refresh_input_fields() {
+		if (this->entity != nullptr) {
+			this->up_to_date = true;
+
+			Vessel_Display_Vertex(this->entity, gps[0], this->xs, this->ys, TSD::GPS1);
+			Vessel_Display_Vertex(this->entity, gps[1], this->xs, this->ys, TSD::GPS2);
+			Vessel_Display_Vertex(this->entity, ps_suction, this->xs, this->ys, TSD::PS_Suction);
+			Vessel_Display_Vertex(this->entity, sb_suction, this->xs, this->ys, TSD::SB_Suction);
+			Vessel_Display_Vertex(this->entity, trunnion, this->xs, this->ys, TSD::Trunnion);
+			Vessel_Display_Vertex(this->entity, barge, this->xs, this->ys, TSD::Barge);
+
+			Vessel_Display_Vertex(this->entity, body_vertexes[0], this->xs, this->ys, TSD::Body1);
+			Vessel_Display_Vertex(this->entity, body_vertexes[1], this->xs, this->ys, TSD::Body2);
+			Vessel_Display_Vertex(this->entity, body_vertexes[2], this->xs, this->ys, TSD::Body3);
+			Vessel_Display_Vertex(this->entity, body_vertexes[3], this->xs, this->ys, TSD::Body4);
+			Vessel_Display_Vertex(this->entity, body_vertexes[4], this->xs, this->ys, TSD::Body5);
+			Vessel_Display_Vertex(this->entity, body_vertexes[5], this->xs, this->ys, TSD::Body6);
+			Vessel_Display_Vertex(this->entity, body_vertexes[6], this->xs, this->ys, TSD::Body7);
+
+			Vessel_Display_Vertex(this->entity, hopper_vertexes[0], this->xs, this->ys, TSD::Hopper1);
+			Vessel_Display_Vertex(this->entity, hopper_vertexes[1], this->xs, this->ys, TSD::Hopper2);
+			Vessel_Display_Vertex(this->entity, hopper_vertexes[2], this->xs, this->ys, TSD::Hopper3);
+			Vessel_Display_Vertex(this->entity, hopper_vertexes[3], this->xs, this->ys, TSD::Hopper4);
+
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[0], this->xs, this->ys, TSD::Bridge1);
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[1], this->xs, this->ys, TSD::Bridge2);
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[2], this->xs, this->ys, TSD::Bridge3);
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[3], this->xs, this->ys, TSD::Bridge4);
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[4], this->xs, this->ys, TSD::Bridge5);
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[5], this->xs, this->ys, TSD::Bridge6);
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[6], this->xs, this->ys, TSD::Bridge7);
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[7], this->xs, this->ys, TSD::Bridge8);
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[8], this->xs, this->ys, TSD::Bridge9);
+			Vessel_Display_Vertex(this->entity, bridge_vertexes[9], this->xs, this->ys, TSD::Bridge10);
 		}
 	}
 
@@ -256,6 +274,10 @@ void TrailingSuctionDredgerPlanet::reflow(float width, float height) {
 	this->self->reflow(this->background, width, height, (width - bg_width) * 0.5F);
 }
 
+void TrailingSuctionDredgerPlanet::on_graphlet_ready(IGraphlet* g) {
+	this->self->on_graphlet_ready(g);
+}
+
 IGraphlet* TrailingSuctionDredgerPlanet::thumbnail_graphlet() {
 	return this->self->thumbnail();
 }
@@ -264,6 +286,6 @@ void TrailingSuctionDredgerPlanet::on_apply() {
 	this->self->on_apply();
 }
 
-void TrailingSuctionDredgerPlanet::on_edit(Dimensionlet* dim) {
-	this->self->on_edit(static_cast<Credit<Dimensionlet, TSD>*>(dim));
+bool TrailingSuctionDredgerPlanet::on_edit(Dimensionlet* dim) {
+	return this->self->on_edit(static_cast<Credit<Dimensionlet, TSD>*>(dim));
 }

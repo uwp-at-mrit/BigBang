@@ -1,7 +1,7 @@
 #include "graphlet/filesystem/vessel/trailing_suction_dredgerlet.hpp"
 
 #include "datum/flonum.hpp"
-#include "datum/time.hpp"
+#include "datum/fixnum.hpp"
 #include "datum/path.hpp"
 #include "datum/file.hpp"
 
@@ -18,6 +18,10 @@ using namespace Windows::Foundation;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+
+namespace {
+	private enum class TSD { TrailingSuctionHopperDredger, GPS, Body, Bridge, Hopper, Suction, Trunnion, Barge };
+}
 
 /*************************************************************************************************/
 TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, Platform::String^ ext, Platform::String^ rootdir) {
@@ -36,10 +40,10 @@ void TrailingSuctionDredgerlet::construct() {
 }
 
 void TrailingSuctionDredgerlet::on_appdata(Uri^ vessel, TrailingSuctionDredger^ vessel_config) {
-	this->preview_config->fill_boundary(nullptr, nullptr, &this->real_width, &this->real_height);
-
 	this->vessel_config = vessel_config;
 	this->preview_config = this->vessel_config;
+
+	this->preview_config->fill_boundary(nullptr, nullptr, &this->real_width, &this->real_height);
 }
 
 bool TrailingSuctionDredgerlet::ready() {
@@ -64,6 +68,14 @@ void TrailingSuctionDredgerlet::draw_progress(CanvasDrawingSession^ ds, float x,
 }
 
 /*************************************************************************************************/
+TrailingSuctionDredger^ TrailingSuctionDredgerlet::clone_vessel(TrailingSuctionDredger^ dest) {
+	TrailingSuctionDredger^ clone = ((dest == nullptr) ? ref new TrailingSuctionDredger() : dest);
+
+	clone->refresh(this->vessel_config);
+
+	return clone;
+}
+
 void TrailingSuctionDredgerlet::preview(TrailingSuctionDredger^ src) {
 	if (this->preview_config == nullptr) {
 		this->preview_config = ref new TrailingSuctionDredger(src);
@@ -81,12 +93,124 @@ void TrailingSuctionDredgerlet::refresh(TrailingSuctionDredger^ src) {
 /*************************************************************************************************/
 TrailingSuctionDredger^ TrailingSuctionDredger::load(Platform::String^ path) {
 	TrailingSuctionDredger^ dredger = nullptr;
+	size_t ptsize = sizeof(double2);
+	Platform::String^ wtype;
+	std::filebuf src;
+
+	if (src.open(path->Data(), std::ios::in)) {
+		dredger = ref new TrailingSuctionDredger();
+		wtype = read_wtext(src);
+		discard_this_line(src);
+
+		if (TSD::TrailingSuctionHopperDredger.ToString()->Equals(wtype)) {
+			while (peek_char(src) != EOF) {
+				wtype = read_wtext(src, char_end_of_word);
+
+				if (TSD::GPS.ToString()->Equals(wtype)) {
+					unsigned long long n = read_natural(src);
+					size_t size = sizeof(dredger->gps) / ptsize;
+
+					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
+						dredger->gps[idx].x = read_flonum(src);
+						dredger->gps[idx].y = read_flonum(src);
+					}
+				} else if (TSD::Body.ToString()->Equals(wtype)) {
+					unsigned long long n = read_natural(src);
+					size_t size = sizeof(dredger->body_vertexes) / ptsize;
+
+					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
+						dredger->body_vertexes[idx].x = read_flonum(src);
+						dredger->body_vertexes[idx].y = read_flonum(src);
+					}
+				} else if (TSD::Hopper.ToString()->Equals(wtype)) {
+					unsigned long long n = read_natural(src);
+					size_t size = sizeof(dredger->hopper_vertexes) / ptsize;
+
+					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
+						dredger->hopper_vertexes[idx].x = read_flonum(src);
+						dredger->hopper_vertexes[idx].y = read_flonum(src);
+					}
+				} else if (TSD::Bridge.ToString()->Equals(wtype)) {
+					unsigned long long n = read_natural(src);
+					size_t size = sizeof(dredger->bridge_vertexes) / ptsize;
+
+					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
+						dredger->bridge_vertexes[idx].x = read_flonum(src);
+						dredger->bridge_vertexes[idx].y = read_flonum(src);
+					}
+				} else if (TSD::Suction.ToString()->Equals(wtype)) {
+					dredger->ps_suction.x = read_flonum(src);
+					dredger->ps_suction.y = read_flonum(src);
+					dredger->sb_suction.x = read_flonum(src);
+					dredger->sb_suction.y = read_flonum(src);
+				} else if (TSD::Trunnion.ToString()->Equals(wtype)) {
+					dredger->trunnion.x = read_flonum(src);
+					dredger->trunnion.y = read_flonum(src);
+				} else if (TSD::Barge.ToString()->Equals(wtype)) {
+					dredger->barge.x = read_flonum(src);
+					dredger->barge.y = read_flonum(src);
+				}
+
+				discard_this_line(src);
+			}
+		}
+	}
 
 	return dredger;
 }
 
 bool TrailingSuctionDredger::save(TrailingSuctionDredger^ self, Platform::String^ path) {
-	return true;
+	std::wofstream v_config;
+	bool okay = false;
+	size_t ptsize = sizeof(double2);
+
+	v_config.open(path->Data(), std::ios::out | std::ios::binary);
+	if (v_config.is_open()) {
+		write_wtext(v_config, TSD::TrailingSuctionHopperDredger) << "\n\r" << std::endl;
+
+		write_wtext(v_config, TSD::Body) << " " << sizeof(self->body_vertexes) / ptsize;
+		for (size_t idx = 0; idx < sizeof(self->body_vertexes) / ptsize; idx++) {
+			write_position(v_config, self->body_vertexes[idx]);
+		}
+		write_newline(v_config);
+
+		write_wtext(v_config, TSD::Bridge) << " " << sizeof(self->bridge_vertexes) / ptsize;
+		for (size_t idx = 0; idx < sizeof(self->bridge_vertexes) / ptsize; idx++) {
+			write_position(v_config, self->bridge_vertexes[idx]);
+		}
+		write_newline(v_config);
+
+		write_wtext(v_config, TSD::Hopper) << " " << sizeof(self->hopper_vertexes) / ptsize;
+		for (size_t idx = 0; idx < sizeof(self->hopper_vertexes) / ptsize; idx++) {
+			write_position(v_config, self->hopper_vertexes[idx]);
+		}
+		write_newline(v_config);
+
+		write_wtext(v_config, TSD::GPS) << " " << sizeof(self->gps) / ptsize;
+		for (size_t idx = 0; idx < sizeof(self->gps) / ptsize; idx++) {
+			write_position(v_config, self->gps[idx]);
+		}
+		write_newline(v_config);
+
+		write_wtext(v_config, TSD::Suction);
+		write_position(v_config, self->ps_suction);
+		write_position(v_config, self->sb_suction);
+		write_newline(v_config);
+
+		write_wtext(v_config, TSD::Trunnion);
+		write_position(v_config, self->trunnion);
+		write_newline(v_config);
+
+		write_wtext(v_config, TSD::Barge);
+		write_position(v_config, self->barge);
+		write_newline(v_config);
+
+		v_config.flush();
+
+		okay = true;
+	}
+
+	return okay;
 }
 
 TrailingSuctionDredger::TrailingSuctionDredger(TrailingSuctionDredger^ src) {

@@ -263,7 +263,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void notify_graphlet_ready(IGraphlet* g) override;
-		void on_graphlet_ready(IGraphlet* g) {}
+		void on_graphlet_ready(IGraphlet* g) override {}
 		
 	public:
 		using WarGrey::SCADA::IPlanet::on_elapse;

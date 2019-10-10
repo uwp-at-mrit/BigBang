@@ -49,6 +49,7 @@ namespace WarGrey::SCADA {
 		bool ready() override;
 
 	public:
+		WarGrey::SCADA::TrailingSuctionDredger^ clone_vessel(WarGrey::SCADA::TrailingSuctionDredger^ dest = nullptr);
 		void preview(TrailingSuctionDredger^ src);
 		void refresh(TrailingSuctionDredger^ src);
 

@@ -66,10 +66,12 @@ bool EditorPlanet::on_key(VirtualKey key, bool wargrey_keyboard) {
 			auto editor = dynamic_cast<Dimensionlet*>(this->get_focus_graphlet());
 
 			if (editor != nullptr) {
-				this->on_edit(editor);
 				this->hide_virtual_keyboard();
 				this->set_caret_owner(nullptr);
-				this->notify_modification();
+
+				if (this->on_edit(editor)) {
+					this->notify_modification();
+				}
 
 				handled = true;
 			}

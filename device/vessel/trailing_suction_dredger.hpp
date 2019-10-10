@@ -15,11 +15,12 @@ namespace WarGrey::SCADA {
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
+		void on_graphlet_ready(WarGrey::SCADA::IGraphlet* g) override;
 		IGraphlet* thumbnail_graphlet() override;
 
 	protected:
 		void on_apply() override;
-		void on_edit(WarGrey::SCADA::Dimensionlet* dim) override;
+		bool on_edit(WarGrey::SCADA::Dimensionlet* dim) override;
 
 	private:
 		WarGrey::SCADA::TrailingSuctionDredgerSelf* self;

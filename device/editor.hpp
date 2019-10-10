@@ -24,9 +24,9 @@ namespace WarGrey::SCADA {
 	protected:
 		virtual void on_apply() = 0;
 		virtual bool on_discard();
-		virtual void on_edit(WarGrey::SCADA::Dimensionlet* dim) {}
+		virtual bool on_edit(WarGrey::SCADA::Dimensionlet* dim) { return true; }
 
-	private:
+	protected:
 		void notify_modification();
 
 	protected: // never delete these graphlets manually
