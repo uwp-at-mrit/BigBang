@@ -14,22 +14,27 @@ using namespace WarGrey::SCADA;
 using namespace Windows::System;
 
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+using namespace Microsoft::Graphics::Canvas::Geometry;
 
 namespace {
 	private enum class TSD { TrailingSuctionHopperDredger, GPS, Body, Bridge, Hopper, Suction, Trunnion, Barge };
 }
 
 /*************************************************************************************************/
-TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, Platform::String^ ext, Platform::String^ rootdir) {
+TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, float s, Platform::String^ ext, Platform::String^ rootdir) : original_scale(s) {
 	if (vessel != nullptr) {
 		this->ms_appdata_config = ms_appdata_file(vessel, ext, rootdir);
 	} else {
 		this->ms_appdata_config = ref new Uri(ms_apptemp_file("trailing_suction_dredger", ext));
 	}
+
+	this->xscale = 1.0F;
+	this->yscale = 1.0F;
 }
 
 TrailingSuctionDredgerlet::~TrailingSuctionDredgerlet() {
@@ -40,10 +45,16 @@ void TrailingSuctionDredgerlet::construct() {
 }
 
 void TrailingSuctionDredgerlet::on_appdata(Uri^ vessel, TrailingSuctionDredger^ vessel_config) {
+	float2 lt(+infinity_f, +infinity_f);
+	float2 rb(-infinity_f, -infinity_f);
+	
 	this->vessel_config = vessel_config;
 	this->preview_config = this->vessel_config;
+	
+	this->reconstruct(&lt, &rb);
 
-	this->preview_config->fill_boundary(nullptr, nullptr, &this->real_width, &this->real_height);
+	this->xradius = vessel_radius(lt, rb);
+	this->yradius = this->xradius;
 }
 
 bool TrailingSuctionDredgerlet::ready() {
@@ -51,20 +62,68 @@ bool TrailingSuctionDredgerlet::ready() {
 }
 
 void TrailingSuctionDredgerlet::fill_extent(float x, float y, float* w, float* h) {
-	SET_BOX(w, float(this->real_width));
-	SET_BOX(h, float(this->real_height));
+	SET_BOX(w, this->xradius * this->xscale * 2.0F);
+	SET_BOX(h, this->yradius * this->yscale * 2.0F);
+}
+
+Size TrailingSuctionDredgerlet::original_size() {
+	return Size(this->xradius * 2.0F, this->yradius * 2.0F);
+}
+
+void TrailingSuctionDredgerlet::reconstruct(float2* lt, float2* rb) {
+	size_t ptsize = sizeof(double2);
+	size_t bodies = sizeof(this->preview_config->body_vertexes) / ptsize;
+	size_t hoppers = sizeof(this->preview_config->hopper_vertexes) / ptsize;
+	size_t bridges = sizeof(this->preview_config->bridge_vertexes) / ptsize;
+	double2 gps_pos = this->preview_config->gps[0];
+	float2 scale = float2(this->xscale * this->original_scale, this->yscale * this->original_scale);
+	
+	this->body = vessel_polygon(this->preview_config->body_vertexes, bodies, gps_pos, scale, lt, rb);
+	this->hopper = vessel_polygon(this->preview_config->hopper_vertexes, hoppers, gps_pos, scale, lt, rb);
+	this->bridge = vessel_polygon(this->preview_config->bridge_vertexes, bridges, gps_pos, scale, lt, rb);
 }
 
 void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	ds->DrawRectangle(x, y, Width, Height,
-		(this->has_caret() ? Colours::AccentDark : Colours::GrayText),
-		2.0F);
+	float cx = x + this->xradius * this->xscale;
+	float cy = y + this->yradius * this->yscale;
+
+	if (this->body != nullptr) {
+		ds->DrawGeometry(this->body, cx, cy, Colours::GhostWhite);
+		ds->DrawGeometry(this->hopper, cx, cy, Colours::Khaki);
+		ds->DrawGeometry(this->bridge, cx, cy, Colours::RoyalBlue);
+	}
+
+	ds->DrawRectangle(x, y, Width, Height, Colours::Gold, 2.0F);
 }
 
 void TrailingSuctionDredgerlet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	//Platform::String^ hint = file_name_from_path(this->ms_appdata_rootdir);
+	// do nothing
+}
 
-	//draw_invalid_bitmap(hint, ds, x, y, Width, Height);
+void TrailingSuctionDredgerlet::resize(float width, float height) {
+	bool resized = false;
+
+	if ((width > 0.0F) && (height > 0.0F)) {
+		float sx = width * 0.5F / this->xradius;
+		float sy = height * 0.5F / this->yradius;
+
+		this->get_logger()->log_message(Log::Info, L"scale: (%f, %f)", sx, sy);
+
+		if (this->xscale != sx) {
+			this->xscale = sx;
+			resized |= true;
+		}
+
+		if (this->yscale != sy) {
+			this->yscale = sy;
+			resized |= true;
+		}
+	}
+
+	if (resized) {
+		this->reconstruct();
+		this->notify_updated();
+	}
 }
 
 /*************************************************************************************************/
@@ -83,7 +142,7 @@ void TrailingSuctionDredgerlet::preview(TrailingSuctionDredger^ src) {
 		this->preview_config->refresh(src);
 	}
 
-	this->preview_config->fill_boundary(nullptr, nullptr, &this->real_width, &this->real_height);
+	this->reconstruct();
 }
 
 void TrailingSuctionDredgerlet::refresh(TrailingSuctionDredger^ src) {
@@ -244,27 +303,4 @@ void TrailingSuctionDredger::refresh(TrailingSuctionDredger^ src) {
 			this->bridge_vertexes[idx] = src->bridge_vertexes[idx];
 		}
 	}
-}
-
-void TrailingSuctionDredger::fill_boundary(double* x, double* y, double* width, double* height) {
-	size_t ptsize = sizeof(double2);
-	double lx = this->ps_suction.x;
-	double ty = this->ps_suction.y;
-	double rx = this->ps_suction.x;
-	double by = this->ps_suction.y;
-
-	region_fuse_point(&lx, &ty, &rx, &by, this->sb_suction.x, this->sb_suction.y);
-	region_fuse_point(&lx, &ty, &rx, &by, this->trunnion.x, this->trunnion.y);
-	region_fuse_point(&lx, &ty, &rx, &by, this->barge.x, this->barge.y);
-
-	for (size_t idx = 0; idx < sizeof(this->body_vertexes) / ptsize; idx++) {
-		region_fuse_point(&lx, &ty, &rx, &by, this->body_vertexes[idx].x, this->body_vertexes[idx].y);
-	}
-
-	for (size_t idx = 0; idx < sizeof(this->bridge_vertexes) / ptsize; idx++) {
-		region_fuse_point(&lx, &ty, &rx, &by, this->bridge_vertexes[idx].x, this->bridge_vertexes[idx].y);
-	}
-
-	SET_VALUES(x, lx, y, ty);
-	SET_VALUES(width, rx - lx, height, by - ty);
 }

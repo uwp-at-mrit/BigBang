@@ -23,6 +23,7 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Size length_to_local(double width, double height = 0.0);
 
 	public:
+		void fill_anchor_position(double fx, double fy, double* x = nullptr, double* y = nullptr);
 		double scale();
 
 	private:

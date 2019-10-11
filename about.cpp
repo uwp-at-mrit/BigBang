@@ -62,7 +62,7 @@ namespace {
 
 	private:
 		Labellet* make_label(Platform::String^ text, CanvasTextFormat^ font = nullptr) {
-			return this->insert_one(new Labellet(text, font, this->fgcolor));
+			return new Labellet(text, font, this->fgcolor);
 		}
 
 	private: // never delete these graphlets manually.

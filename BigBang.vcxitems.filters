@@ -295,6 +295,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)device\editor.cpp">
       <Filter>device</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\vessellet.cxx">
+      <Filter>graphlet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />

@@ -288,20 +288,6 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 	}
 }
 
-float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) {
-	double ss = this->_scale * this->stimes;
-	float ty = yoff + this->height + this->ytranslation;
-	float tx = xoff + this->xtranslation;
-	float local_y = -float((x - this->geo_x) * ss) + ty;
-	float local_x = float((y - this->geo_y) * ss) + tx;
-
-	// NOTE that modifyDIG uses lefthand coordinate system
-	//   the x and y therefore should be interchanged before drawing
-	// Stupid design, and/or stupid referenced codebase for its lack of explanation
-
-	return float2(local_x, local_y);
-}
-
 float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
 	double ss = this->_scale * this->stimes;
 	float ty = yoff + this->height + this->ytranslation;
@@ -314,6 +300,20 @@ float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
 	// Stupid design, and/or stupid referenced codebase for its lack of explanation
 
 	return float2(gx, gy);
+}
+
+float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) {
+	double ss = this->_scale * this->stimes;
+	float ty = yoff + this->height + this->ytranslation;
+	float tx = xoff + this->xtranslation;
+	float local_y = -float((x - this->geo_x) * ss) + ty;
+	float local_x = float((y - this->geo_y) * ss) + tx;
+
+	// NOTE that modifyDIG uses lefthand coordinate system
+	//   the x and y therefore should be interchanged before drawing
+	// Stupid design, and/or stupid referenced codebase for its lack of explanation
+
+	return float2(local_x, local_y);
 }
 
 Size DigMaplet::length_to_local(double width, double height) {
@@ -425,6 +425,11 @@ void DigMaplet::center() {
 
 double DigMaplet::scale() {
 	return this->_scale * this->stimes;
+}
+
+void DigMaplet::fill_anchor_position(double fx, double fy, double* x, double* y) {
+	SET_BOX(x, this->geo_x + this->geo_width * fx);
+	SET_BOX(y, this->geo_y + this->geo_height * fy);
 }
 
 void DigMaplet::preshape(IDigDatum* dig) {

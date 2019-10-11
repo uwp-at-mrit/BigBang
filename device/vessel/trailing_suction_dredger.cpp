@@ -57,7 +57,19 @@ public:
 			this->ys[id] = this->insert_input_field(id, 0.0);
 		}
 
-		this->dredger = this->master->insert_one(new TrailingSuctionDredgerlet("vessel"));
+		{ /** WARNING
+		   * Although TrailingSuctionDredgerlet is an asynchronouse graphlet, it has probably been loaded already,
+		   *  thus, the `Planet::on_graghlet_ready()` might be invoked before `Planet::insert()` returns
+		   *  in which case `this->dredger` is still `nullptr` if these two statements are combined.
+		   *
+		   * Also see `this->on_graphlet_ready()`, it checks the graphlet type with `this->dredger == g` instead of dynamic casting.
+		   */
+			
+			this->master->get_logger()->log_message(Log::Info, "load");
+
+			this->dredger = new TrailingSuctionDredgerlet("vessel", 2.0F);
+			this->master->insert(this->dredger);
+		}
 	}
 
 	void reflow(IGraphlet* frame, float width, float height, float inset) {
@@ -77,7 +89,9 @@ public:
 	}
 
 	void on_graphlet_ready(IGraphlet* g) {
-		if (this->dredger == g) {
+		this->master->get_logger()->log_message(Log::Info, "on_graphlet_ready");
+
+		if (this->dredger == g) { // also see `this->load()`
 			this->entity = this->dredger->clone_vessel(this->entity);
 			this->refresh_input_fields();
 		}

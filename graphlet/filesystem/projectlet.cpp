@@ -1,5 +1,4 @@
 #include "graphlet/filesystem/projectlet.hpp"
-#include "graphlet/filesystem/project/digmaplet.hpp"
 #include "graphlet/filesystem/project/xyzdoc.hxx"
 
 #include "graphlet/textlet.hpp"
@@ -26,11 +25,11 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 namespace {
-	private class DigFrame : public Planet {
+	private class ProjectFrame : public Planet {
 	public:
-		virtual ~DigFrame() noexcept {}
+		virtual ~ProjectFrame() noexcept {}
 
-		DigFrame(Platform::String^ name) : Planet(name) {}
+		ProjectFrame(Platform::String^ name) : Planet(name) {}
 
 	public:
 		bool can_select(IGraphlet* g) override {
@@ -39,6 +38,11 @@ namespace {
 
 		bool can_select_multiple() override {
 			return true;
+		}
+
+	public:
+		void on_graphlet_ready(IGraphlet* g) override {
+			this->get_logger()->log_message(Log::Info, "ProjectFrame");
 		}
 
 	public:
@@ -84,7 +88,7 @@ namespace {
 
 /*************************************************************************************************/
 Projectlet::Projectlet(IVessellet* vessel, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Planetlet(new DigFrame(project), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)), vessel(vessel), map(nullptr) {
+	: Planetlet(new ProjectFrame(project), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)), vessel(vessel), map(nullptr) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
 	this->enable_stretch(false, false);
 	this->enable_events(true, true);
@@ -171,8 +175,8 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	}
 
 	if (this->vessel != nullptr) {
-		this->vessel->fill_extent(0.0F, 0.0F, &this->vessel_size.Width, &this->vessel_size.Height);
-		this->planet->insert(this->vessel, 0.0F, 0.0F, GraphletAnchor::LT);
+		this->map->fill_anchor_position(0.5, 0.5, &this->vessel_x, &this->vessel_y);
+		this->planet->insert(this->vessel, float(this->vessel_x), float(this->vessel_y), GraphletAnchor::CC);
 	}
 
 	this->planet->end_update_sequence();
@@ -248,9 +252,8 @@ bool Projectlet::on_character(unsigned int keycode) {
 
 void Projectlet::relocate_icons() {
 	if (this->map != nullptr) {
-		DigMaplet* map = static_cast<DigMaplet*>(this->map);
-		float new_scale = float(map->scale());
-		float2 ship_pos = graphlet_location(map, this->vessel_x, this->vessel_y, this->vessel_size, new_scale);
+		float new_scale = float(this->map->scale());
+		float2 ship_pos = graphlet_location(this->map, this->vessel_x, this->vessel_y, this->vessel->original_size(), new_scale);
 
 		this->planet->move_to(this->vessel, ship_pos.x, ship_pos.y, GraphletAnchor::CC);
 		
@@ -258,7 +261,7 @@ void Projectlet::relocate_icons() {
 
 		for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
 			DigIconEntity^ ent = static_cast<DigIconEntity^>((*it));
-			float2 ipos = graphlet_location(map, ent->x, ent->y, ent->size, new_scale);
+			float2 ipos = graphlet_location(this->map, ent->x, ent->y, ent->size, new_scale);
 
 			this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::LT);
 		}

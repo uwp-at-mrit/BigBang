@@ -5,6 +5,7 @@
 #include "graphlet/filesystem/msappdatalet.hxx"
 #include "graphlet/filesystem/msappdataloguelet.hxx"
 #include "graphlet/filesystem/project/doctype.hxx"
+#include "graphlet/filesystem/project/digmaplet.hpp"
 
 #include "graphlet/planetlet.hpp"
 #include "graphlet/vessellet.hpp"
@@ -56,10 +57,9 @@ namespace WarGrey::SCADA {
 		Platform::String^ ms_appdata_rootdir;
 
 	private: // graphlets are managed by the Planetlet
-		WarGrey::SCADA::IGraphlet* map;
+		WarGrey::SCADA::DigMaplet* map;
 		WarGrey::SCADA::IVessellet* vessel;
 		std::deque<Platform::Object^> icons;
-		Windows::Foundation::Size vessel_size;
 		Windows::Foundation::Size view_size;
 
 	private:

@@ -53,32 +53,39 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 #define GRAPHLET_INFO(g) (static_cast<GraphletInfo*>(g->info))
 
-class GraphletInfo : public WarGrey::SCADA::IGraphletInfo {
-public:
-    GraphletInfo(IPlanet* master, unsigned int mode) : IGraphletInfo(master), mode(mode), alpha(1.0F) {};
+namespace {
+	private struct AsyncInfo {
+		float x0;
+		float y0;
+		float fx0;
+		float fy0;
+		float dx0;
+		float dy0;
+	};
 
-public:
-    float x;
-    float y;
-	float alpha;
-    float rotation;
-    bool selected;
+	private class GraphletInfo : public WarGrey::SCADA::IGraphletInfo {
+	public:
+		GraphletInfo(IPlanet* master, unsigned int mode)
+			: IGraphletInfo(master), mode(mode), alpha(1.0F), async(nullptr) {};
 
-public:
-	unsigned int mode;
+	public:
+		float x;
+		float y;
+		float alpha;
+		float rotation;
+		bool selected;
 
-public: // for asynchronously loaded graphlets
-	float x0;
-	float y0;
-	float fx0;
-	float fy0;
-	float dx0;
-	float dy0;
-	
-public:
-	IGraphlet* next;
-	IGraphlet* prev;
-};
+	public:
+		unsigned int mode;
+
+	public: // for asynchronously loaded graphlets
+		AsyncInfo* async;
+
+	public:
+		IGraphlet* next;
+		IGraphlet* prev;
+	};
+}
 
 static inline GraphletInfo* bind_graphlet_owership(IPlanet* master, unsigned int mode, IGraphlet* g) {
     auto info = new GraphletInfo(master, mode);
@@ -198,12 +205,14 @@ static bool unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, Graphlet
 		ax = (sw * fx);
 		ay = (sh * fy);
 	} else {
-		info->x0 = x;
-		info->y0 = y;
-		info->fx0 = fx;
-		info->fy0 = fy;
-		info->dx0 = dx;
-		info->dy0 = dy;
+		info->async = new AsyncInfo();
+
+		info->async->x0 = x;
+		info->async->y0 = y;
+		info->async->fx0 = fx;
+		info->async->fy0 = fy;
+		info->async->dx0 = dx;
+		info->async->dy0 = dy;
 	}
 	
 	return unsafe_move_graphlet_via_info(master, info, x - ax + dx, y - ay + dy, true);
@@ -225,6 +234,28 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 	} while (child != terminator);
 	
 	return found;
+}
+
+static void do_resize(IGraphlet* g, float x, float y, float scale_x, float scale_y) {
+	GraphletAnchor resize_anchor;
+
+	if (g->resizable(&resize_anchor)) {
+		float width, height;
+
+		g->fill_extent(x, y, &width, &height);
+		g->resize(width * scale_x, height * scale_y);
+	}
+}
+
+static void do_resize(IGraphlet* g, GraphletInfo* info, float scale_x, float scale_y, float prev_scale_x, float prev_scale_y) {
+	GraphletAnchor resize_anchor;
+
+	if (g->resizable(&resize_anchor)) {
+		float sx, sy, sw, sh;
+
+		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
+		g->resize((sw / prev_scale_x) * scale_x, (sh / prev_scale_y) * scale_y);
+	}
 }
 
 static Size monitor(0.0F, 0.0F);
@@ -279,20 +310,25 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 
 	if (info != nullptr) {
-		this->size_cache_invalid();
-		this->begin_update_sequence();
+		if (info->async != nullptr) {
+			this->size_cache_invalid();
+			this->begin_update_sequence();
 
-		/** TODO
-		 * The moving may occur more than once in or not in the same thread,
-		 *  do we need a mechanism to avoid the redundant ones?
-		 */
-		unsafe_move_graphlet_via_info(this, g, info,
-			info->x0, info->y0, info->fx0, info->fy0, info->dx0, info->dy0,
-			true);
-		
-		this->notify_graphlet_updated(g);
-		this->on_graphlet_ready(g);
-		this->end_update_sequence();
+			unsafe_move_graphlet_via_info(this, g, info,
+				info->async->x0, info->async->y0, info->async->fx0, info->async->fy0, info->async->dx0, info->async->dy0,
+				true);
+
+			if ((this->scale_x != 1.0F) || (this->scale_y != 1.0F)) {
+				do_resize(g, info->async->x0, info->async->y0, this->scale_x, this->scale_y);
+			}
+
+			delete info->async;
+			info->async = nullptr;
+
+			this->notify_graphlet_updated(g);
+			this->on_graphlet_ready(g);
+			this->end_update_sequence();
+		}
 	}
 }
 
@@ -319,20 +355,22 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 		g->sprite_construct();
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
 
-		if ((this->scale_x != 1.0F) || (this->scale_y != 1.0F)) {
-			GraphletAnchor resize_anchor;
-			
-			if (g->resizable(&resize_anchor)) {
-				float width, height;
+		if (g->ready()) {
+			this->get_logger()->log_message(Log::Info, "ready");
 
-				g->fill_extent(x, y, &width, &height);
-				g->resize(width * this->scale_x, height * this->scale_y);
+			if ((this->scale_x != 1.0F) || (this->scale_y != 1.0F)) {
+				do_resize(g, x, y, this->scale_x, this->scale_y);
 			}
+
+			this->notify_graphlet_updated(g);
+			this->on_graphlet_ready(g);
+			this->end_update_sequence();
+		} else {
+			this->notify_graphlet_updated(g); // is it necessary?
+			this->end_update_sequence();
 		}
 
-		this->end_update_sequence();
 
-		this->notify_graphlet_updated(g);
 #if _DEBUG
 	} else {
 		this->get_logger()->log_message(Log::Warning,
@@ -539,18 +577,12 @@ void Planet::scale(float xscale, float yscale) {
 			if (this->head_graphlet != nullptr) {
 				GraphletInfo* head_info = GRAPHLET_INFO(this->head_graphlet);
 				IGraphlet* child = head_info->prev;
-				GraphletAnchor resize_anchor;
-
+				
 				do {
 					GraphletInfo* info = GRAPHLET_INFO(child);
-
+					
 					if (unsafe_graphlet_unmasked(info, this->mode)) {
-						if (child->resizable(&resize_anchor)) {
-							float sx, sy, sw, sh;
-
-							unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
-							child->resize((sw / this->scale_x) * xscale, (sh / this->scale_y) * yscale);
-						}
+						do_resize(child, info, xscale, yscale, this->scale_x, this->scale_y);
 					}
 
 					child = info->prev;
