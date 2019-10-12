@@ -189,6 +189,9 @@
   <data name="Hopper4" xml:space="preserve">
     <value>Hopper4</value>
   </data>
+  <data name="origin" xml:space="preserve">
+    <value>(0,0)</value>
+  </data>
   <data name="PS_Suction" xml:space="preserve">
     <value>PS Suction</value>
   </data>
@@ -197,5 +200,11 @@
   </data>
   <data name="Trunnion" xml:space="preserve">
     <value>Trunion</value>
+  </data>
+  <data name="x" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="y" xml:space="preserve">
+    <value>Y</value>
   </data>
 </root>

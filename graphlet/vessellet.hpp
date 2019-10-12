@@ -15,6 +15,10 @@ namespace WarGrey::SCADA {
 		virtual Windows::Foundation::Size original_size() = 0;
 	};
 
+	Windows::Foundation::Numerics::float2 vessel_point(WarGrey::SCADA::double2 src,
+		WarGrey::SCADA::double2& gps_pos, Windows::Foundation::Numerics::float2 scale,
+		Windows::Foundation::Numerics::float2* lt = nullptr, Windows::Foundation::Numerics::float2* rb = nullptr);
+
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vessel_polygon(WarGrey::SCADA::double2 src[], size_t count,
 		WarGrey::SCADA::double2& gps_pos, Windows::Foundation::Numerics::float2 scale,
 		Windows::Foundation::Numerics::float2* lt = nullptr, Windows::Foundation::Numerics::float2* rb = nullptr);

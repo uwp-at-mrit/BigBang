@@ -32,11 +32,36 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::double2 barge;
 	};
 
+	private struct TrailingSuctionDredgerStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_border;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bridge_border;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bridge_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hopper_border;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hopper_color;
+
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ps_suction_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ sb_suction_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ gps_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ trunnion_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ barge_color;
+
+		float gps_radius = -1.0;
+		float suction_radius = -1.0;
+		float barge_radius = -1.0;
+	};
+
+	WarGrey::SCADA::TrailingSuctionDredgerStyle default_trailing_suction_dredger_style(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bridge_border_color = nullptr,
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hopper_border_color = nullptr);
+
 	private class TrailingSuctionDredgerlet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::TrailingSuctionDredger, WarGrey::SCADA::IVessellet> {
 	public:
 		virtual ~TrailingSuctionDredgerlet() noexcept;
 
 		TrailingSuctionDredgerlet(Platform::String^ vessel, float scale = 1.0F, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
+		TrailingSuctionDredgerlet(Platform::String^ vessel, WarGrey::SCADA::TrailingSuctionDredgerStyle& style,
+			float scale = 1.0F, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
 
 	public:
 		void construct() override;
@@ -65,6 +90,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hopper;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ bridge;
+		WarGrey::SCADA::TrailingSuctionDredgerStyle style;
 
 	private:
 		WarGrey::SCADA::TrailingSuctionDredger^ vessel_config;
@@ -77,5 +103,11 @@ namespace WarGrey::SCADA {
 		float yscale;
 		float xradius;
 		float yradius;
+
+	private:
+		Windows::Foundation::Numerics::float2 gps[2];
+		Windows::Foundation::Numerics::float2 ps_suction;
+		Windows::Foundation::Numerics::float2 sb_suction;
+		Windows::Foundation::Numerics::float2 barge;
 	};
 }

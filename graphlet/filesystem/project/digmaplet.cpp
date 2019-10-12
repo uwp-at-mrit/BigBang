@@ -215,7 +215,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 
 					// NOTE that modifyDIG uses the lefthand coordinate system
 					//   the degrees therefore should sweep 90.0 degrees counterclockwise
-					// Stupid design, and/or stupid referenced codebase for its lack of explanation
+					// Stupid design, and/or stupid referenced codebase for lacking of explanation
 
 				    // NOTE: the arc is ensured to be drawn counterclockwise
 					if (start_deg > stop_deg) {
@@ -297,7 +297,7 @@ float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
 
 	// NOTE that modifyDIG uses lefthand coordinate system
 	//   the x and y therefore should be interchanged before drawing
-	// Stupid design, and/or stupid referenced codebase for its lack of explanation
+	// Stupid design, and/or stupid referenced codebase for lacking of explanation
 
 	return float2(gx, gy);
 }
@@ -311,7 +311,7 @@ float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) 
 
 	// NOTE that modifyDIG uses lefthand coordinate system
 	//   the x and y therefore should be interchanged before drawing
-	// Stupid design, and/or stupid referenced codebase for its lack of explanation
+	// Stupid design, and/or stupid referenced codebase for lacking of explanation
 
 	return float2(local_x, local_y);
 }

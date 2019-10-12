@@ -42,7 +42,6 @@ namespace {
 
 	public:
 		void on_graphlet_ready(IGraphlet* g) override {
-			this->get_logger()->log_message(Log::Info, "ProjectFrame");
 		}
 
 	public:

@@ -5,9 +5,9 @@
 #include "datum/path.hpp"
 #include "datum/file.hpp"
 
-#include "transformation.hpp"
 #include "brushes.hxx"
 #include "math.hpp"
+#include "draw.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -25,13 +25,49 @@ namespace {
 	private enum class TSD { TrailingSuctionHopperDredger, GPS, Body, Bridge, Hopper, Suction, Trunnion, Barge };
 }
 
+static void prepare_vessel_style(TrailingSuctionDredgerStyle* style) {
+	CAS_SLOT(style->body_color, Colours::SkyBlue);
+	CAS_SLOT(style->hopper_border, Colours::Khaki);
+	CAS_SLOT(style->bridge_border, Colours::RoyalBlue);
+	CAS_SLOT(style->gps_color, style->bridge_border);
+
+	CAS_SLOT(style->ps_suction_color, Colours::Red);
+	CAS_SLOT(style->sb_suction_color, Colours::Green);
+	CAS_SLOT(style->barge_color, Colours::WhiteSmoke);
+
+	FLCAS_SLOT(style->gps_radius, 1.0F);
+	FLCAS_SLOT(style->suction_radius, 1.5F);
+	FLCAS_SLOT(style->barge_radius, 2.0F);
+}
+
 /*************************************************************************************************/
-TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, float s, Platform::String^ ext, Platform::String^ rootdir) : original_scale(s) {
+TrailingSuctionDredgerStyle WarGrey::SCADA::default_trailing_suction_dredger_style(ICanvasBrush^ body_color
+	, ICanvasBrush^ bridge_border_color, ICanvasBrush^ hopper_border_color) {
+	TrailingSuctionDredgerStyle style;
+
+	style.body_color = body_color;
+	style.bridge_border = bridge_border_color;
+	style.hopper_border = hopper_border_color;
+
+	prepare_vessel_style(&style);
+
+	return style;
+}
+
+/*************************************************************************************************/
+TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, float scale, Platform::String^ ext, Platform::String^ rootdir)
+	: TrailingSuctionDredgerlet(vessel, default_trailing_suction_dredger_style(), scale, ext, rootdir) {}
+
+TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, TrailingSuctionDredgerStyle& style, float scale, Platform::String^ ext, Platform::String^ rootdir)
+	: original_scale(scale), style(style) {
 	if (vessel != nullptr) {
 		this->ms_appdata_config = ms_appdata_file(vessel, ext, rootdir);
 	} else {
+		// TODO: meanwhile it's useless and easy to be used incorrectly
 		this->ms_appdata_config = ref new Uri(ms_apptemp_file("trailing_suction_dredger", ext));
 	}
+
+	prepare_vessel_style(&this->style);
 
 	this->xscale = 1.0F;
 	this->yscale = 1.0F;
@@ -75,12 +111,18 @@ void TrailingSuctionDredgerlet::reconstruct(float2* lt, float2* rb) {
 	size_t bodies = sizeof(this->preview_config->body_vertexes) / ptsize;
 	size_t hoppers = sizeof(this->preview_config->hopper_vertexes) / ptsize;
 	size_t bridges = sizeof(this->preview_config->bridge_vertexes) / ptsize;
-	double2 gps_pos = this->preview_config->gps[0];
 	float2 scale = float2(this->xscale * this->original_scale, this->yscale * this->original_scale);
-	
+	double2 gps_pos = this->preview_config->gps[0];
+
 	this->body = vessel_polygon(this->preview_config->body_vertexes, bodies, gps_pos, scale, lt, rb);
 	this->hopper = vessel_polygon(this->preview_config->hopper_vertexes, hoppers, gps_pos, scale, lt, rb);
 	this->bridge = vessel_polygon(this->preview_config->bridge_vertexes, bridges, gps_pos, scale, lt, rb);
+
+	this->gps[0] = vessel_point(this->preview_config->gps[0], gps_pos, scale);
+	this->gps[1] = vessel_point(this->preview_config->gps[1], gps_pos, scale);
+	this->ps_suction = vessel_point(this->preview_config->ps_suction, gps_pos, scale);
+	this->sb_suction = vessel_point(this->preview_config->sb_suction, gps_pos, scale);
+	this->barge = vessel_point(this->preview_config->barge, gps_pos, scale);
 }
 
 void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -88,9 +130,32 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 	float cy = y + this->yradius * this->yscale;
 
 	if (this->body != nullptr) {
-		ds->DrawGeometry(this->body, cx, cy, Colours::GhostWhite);
-		ds->DrawGeometry(this->hopper, cx, cy, Colours::Khaki);
-		ds->DrawGeometry(this->bridge, cx, cy, Colours::RoyalBlue);
+		// NOTE that the map uses lefthand coordinate system, the xscale and yscale therefore should be interchanged
+		// Stupid design, and/or stupid referenced codebase for lacking of explanation
+		float rsx = this->yscale * this->original_scale;
+		float rsy = this->xscale * this->original_scale;
+		
+		draw_geometry(ds, this->body, cx, cy, this->style.body_color, this->style.body_border);
+		draw_geometry(ds, this->hopper, cx, cy, this->style.hopper_color, this->style.hopper_border);
+		draw_geometry(ds, this->bridge, cx, cy, this->style.bridge_color, this->style.bridge_border);
+
+		for (unsigned int idx = 0; idx < sizeof(this->gps) / sizeof(float2); idx++) {
+			ds->DrawEllipse(this->gps[idx].x + cx, this->gps[idx].y + cy,
+				this->style.gps_radius * rsx, this->style.gps_radius * rsy,
+				this->style.gps_color);
+		}
+
+		ds->DrawEllipse(this->ps_suction.x + cx, this->ps_suction.y + cy,
+			this->style.suction_radius * rsx, this->style.suction_radius * rsy,
+			this->style.ps_suction_color);
+
+		ds->DrawEllipse(this->sb_suction.x + cx, this->sb_suction.y + cy,
+			this->style.suction_radius * rsx, this->style.suction_radius * rsy,
+			this->style.sb_suction_color);
+
+		ds->DrawEllipse(this->barge.x + cx, this->barge.y + cy,
+			this->style.barge_radius * rsx, this->style.barge_radius * rsy,
+			this->style.barge_color);
 	}
 
 	ds->DrawRectangle(x, y, Width, Height, Colours::Gold, 2.0F);
@@ -106,8 +171,6 @@ void TrailingSuctionDredgerlet::resize(float width, float height) {
 	if ((width > 0.0F) && (height > 0.0F)) {
 		float sx = width * 0.5F / this->xradius;
 		float sy = height * 0.5F / this->yradius;
-
-		this->get_logger()->log_message(Log::Info, L"scale: (%f, %f)", sx, sy);
 
 		if (this->xscale != sx) {
 			this->xscale = sx;

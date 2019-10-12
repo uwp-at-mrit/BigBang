@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 	private class TrailingSuctionDredgerPlanet : public WarGrey::SCADA::EditorPlanet {
 	public:
 		virtual ~TrailingSuctionDredgerPlanet() noexcept;
-		TrailingSuctionDredgerPlanet(WarGrey::SCADA::TrailingSuctionDredger^ default_vessel = nullptr);
+		TrailingSuctionDredgerPlanet(Platform::String^ default_vessel = "vessel");
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

@@ -356,8 +356,6 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
 
 		if (g->ready()) {
-			this->get_logger()->log_message(Log::Info, "ready");
-
 			if ((this->scale_x != 1.0F) || (this->scale_y != 1.0F)) {
 				do_resize(g, x, y, this->scale_x, this->scale_y);
 			}
@@ -369,7 +367,6 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 			this->notify_graphlet_updated(g); // is it necessary?
 			this->end_update_sequence();
 		}
-
 
 #if _DEBUG
 	} else {
