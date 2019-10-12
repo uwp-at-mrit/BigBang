@@ -20,6 +20,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void on_apply() override;
+		void on_reset() override;
 		bool on_edit(WarGrey::SCADA::Dimensionlet* dim) override;
 
 	private:

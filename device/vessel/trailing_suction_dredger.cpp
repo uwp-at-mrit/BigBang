@@ -96,7 +96,7 @@ namespace {
 				body->move_down(3.0F, TSD::PS_Suction)->move_down(1.0F, TSD::Barge)->move_down(2.0F, TSD::Body3);
 				body->move_right_down(1.0F, 0.5F, TSD::Body4)->move_right(1.0F, TSD::tail)->move_right(1.0F, TSD::Body5);
 				body->move_right_up(1.0F, 0.5F, TSD::Body6)->move_up(3.0F, TSD::SB_Suction)->move_up(3.0F, TSD::Body7);
-				body->move_to(TSD::Body1)->move_down(0.5F, TSD::bridge)->move_down(1.5F, TSD::GPS1)->move_down(0.5F, TSD::GPS2);
+				body->move_to(TSD::Body1)->move_down(0.5F, TSD::bridge)->move_down(1.5F, TSD::GPS1)->move_down(3.5F, TSD::GPS2);
 				body->move_to(TSD::tail)->move_down(1.0F);
 
 				body->jump_left_up(1.2F, 5.0F, TSD::Hopper1)->move_down(3.0F, TSD::Hopper2)->move_right(2.4F, TSD::Hopper3);
@@ -246,7 +246,7 @@ public:
 
 	void on_graphlet_ready(IGraphlet* g) {
 		if (this->dredger == g) { // also see `this->load()`
-			this->entity = this->dredger->clone_vessel(this->entity);
+			this->entity = this->dredger->clone_vessel(this->entity, true);
 			this->refresh_input_fields();
 		}
 	}
@@ -273,6 +273,16 @@ public:
 	void on_apply() {
 		this->refresh_entity();
 		this->dredger->refresh(this->entity);
+	}
+
+	void on_reset() {
+		if (this->dredger != nullptr) {
+			this->dredger->preview(nullptr);
+			this->dredger->notify_updated();
+
+			this->entity = this->dredger->clone_vessel(this->entity, true);
+			this->refresh_input_fields();
+		}
 	}
 
 public:
@@ -326,6 +336,8 @@ private:
 		if (this->entity != nullptr) {
 			this->up_to_date = true;
 
+			this->master->begin_update_sequence();
+
 			Vessel_Display_Vertex(this->entity, gps[0], this->xs, this->ys, TSD::GPS1);
 			Vessel_Display_Vertex(this->entity, gps[1], this->xs, this->ys, TSD::GPS2);
 			Vessel_Display_Vertex(this->entity, ps_suction, this->xs, this->ys, TSD::PS_Suction);
@@ -356,6 +368,8 @@ private:
 			Vessel_Display_Vertex(this->entity, bridge_vertexes[7], this->xs, this->ys, TSD::Bridge8);
 			Vessel_Display_Vertex(this->entity, bridge_vertexes[8], this->xs, this->ys, TSD::Bridge9);
 			Vessel_Display_Vertex(this->entity, bridge_vertexes[9], this->xs, this->ys, TSD::Bridge10);
+
+			this->master->end_update_sequence();
 		}
 	}
 
@@ -454,6 +468,10 @@ IGraphlet* TrailingSuctionDredgerPlanet::thumbnail_graphlet() {
 
 void TrailingSuctionDredgerPlanet::on_apply() {
 	this->self->on_apply();
+}
+
+void TrailingSuctionDredgerPlanet::on_reset() {
+	this->self->on_reset();
 }
 
 bool TrailingSuctionDredgerPlanet::on_edit(Dimensionlet* dim) {

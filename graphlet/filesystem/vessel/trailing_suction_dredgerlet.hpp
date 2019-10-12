@@ -66,6 +66,7 @@ namespace WarGrey::SCADA {
 	public:
 		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		void resize(float width, float height) override;
@@ -75,7 +76,7 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Size original_size() override;
 
 	public:
-		WarGrey::SCADA::TrailingSuctionDredger^ clone_vessel(WarGrey::SCADA::TrailingSuctionDredger^ dest = nullptr);
+		WarGrey::SCADA::TrailingSuctionDredger^ clone_vessel(WarGrey::SCADA::TrailingSuctionDredger^ dest = nullptr, bool real_vessel = true);
 		void preview(TrailingSuctionDredger^ src);
 		void refresh(TrailingSuctionDredger^ src);
 
@@ -98,6 +99,8 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Uri^ ms_appdata_config;
 
 	private:
+		Windows::Foundation::Numerics::float2 lt;
+		Windows::Foundation::Numerics::float2 rb;
 		float original_scale;
 		float xscale;
 		float yscale;
@@ -108,6 +111,7 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float2 gps[2];
 		Windows::Foundation::Numerics::float2 ps_suction;
 		Windows::Foundation::Numerics::float2 sb_suction;
+		Windows::Foundation::Numerics::float2 trunnion;
 		Windows::Foundation::Numerics::float2 barge;
 	};
 }

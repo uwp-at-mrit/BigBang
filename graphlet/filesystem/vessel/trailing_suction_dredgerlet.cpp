@@ -81,15 +81,19 @@ void TrailingSuctionDredgerlet::construct() {
 }
 
 void TrailingSuctionDredgerlet::on_appdata(Uri^ vessel, TrailingSuctionDredger^ vessel_config) {
-	float2 lt(+infinity_f, +infinity_f);
-	float2 rb(-infinity_f, -infinity_f);
+	this->lt.x = +infinity_f;
+	this->lt.y = +infinity_f;
+	this->rb.x = -infinity_f;
+	this->rb.y = -infinity_f;
 	
 	this->vessel_config = vessel_config;
-	this->preview_config = this->vessel_config;
+
+	// avoid updating the raw instance accidently
+	this->preview_config = ref new TrailingSuctionDredger(this->vessel_config);
 	
 	this->reconstruct(&lt, &rb);
 
-	this->xradius = vessel_radius(lt, rb);
+	this->xradius = vessel_radius(this->lt, this->rb);
 	this->yradius = this->xradius;
 }
 
@@ -100,6 +104,16 @@ bool TrailingSuctionDredgerlet::ready() {
 void TrailingSuctionDredgerlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_BOX(w, this->xradius * this->xscale * 2.0F);
 	SET_BOX(h, this->yradius * this->yscale * 2.0F);
+}
+
+void TrailingSuctionDredgerlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
+	float rx = this->xradius * this->xscale;
+	float ry = this->yradius * this->yscale;
+
+	SET_BOX(l, rx + this->lt.x);
+	SET_BOX(r, rx - this->rb.x);
+	SET_BOX(t, ry + this->lt.y);
+	SET_BOX(b, ry - this->rb.y);
 }
 
 Size TrailingSuctionDredgerlet::original_size() {
@@ -122,6 +136,7 @@ void TrailingSuctionDredgerlet::reconstruct(float2* lt, float2* rb) {
 	this->gps[1] = vessel_point(this->preview_config->gps[1], gps_pos, scale);
 	this->ps_suction = vessel_point(this->preview_config->ps_suction, gps_pos, scale);
 	this->sb_suction = vessel_point(this->preview_config->sb_suction, gps_pos, scale);
+	this->trunnion = vessel_point(this->preview_config->trunnion, gps_pos, scale);
 	this->barge = vessel_point(this->preview_config->barge, gps_pos, scale);
 }
 
@@ -140,25 +155,31 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 		draw_geometry(ds, this->bridge, cx, cy, this->style.bridge_color, this->style.bridge_border);
 
 		for (unsigned int idx = 0; idx < sizeof(this->gps) / sizeof(float2); idx++) {
-			ds->DrawEllipse(this->gps[idx].x + cx, this->gps[idx].y + cy,
-				this->style.gps_radius * rsx, this->style.gps_radius * rsy,
-				this->style.gps_color);
+			if (this->bridge->FillContainsPoint(this->gps[idx]) || this->body->FillContainsPoint(this->gps[idx])) {
+				ds->DrawEllipse(this->gps[idx].x + cx, this->gps[idx].y + cy,
+					this->style.gps_radius * rsx, this->style.gps_radius * rsy,
+					this->style.gps_color);
+			}
 		}
 
-		ds->DrawEllipse(this->ps_suction.x + cx, this->ps_suction.y + cy,
-			this->style.suction_radius * rsx, this->style.suction_radius * rsy,
-			this->style.ps_suction_color);
+		if (this->body->FillContainsPoint(this->ps_suction)) {
+			ds->DrawEllipse(this->ps_suction.x + cx, this->ps_suction.y + cy,
+				this->style.suction_radius * rsx, this->style.suction_radius * rsy,
+				this->style.ps_suction_color);
+		}
 
-		ds->DrawEllipse(this->sb_suction.x + cx, this->sb_suction.y + cy,
-			this->style.suction_radius * rsx, this->style.suction_radius * rsy,
-			this->style.sb_suction_color);
+		if (this->body->FillContainsPoint(this->sb_suction)) {
+			ds->DrawEllipse(this->sb_suction.x + cx, this->sb_suction.y + cy,
+				this->style.suction_radius * rsx, this->style.suction_radius * rsy,
+				this->style.sb_suction_color);
+		}
 
-		ds->DrawEllipse(this->barge.x + cx, this->barge.y + cy,
-			this->style.barge_radius * rsx, this->style.barge_radius * rsy,
-			this->style.barge_color);
+		if (this->body->FillContainsPoint(this->barge)) {
+			ds->DrawEllipse(this->barge.x + cx, this->barge.y + cy,
+				this->style.barge_radius * rsx, this->style.barge_radius * rsy,
+				this->style.barge_color);
+		}
 	}
-
-	ds->DrawRectangle(x, y, Width, Height, Colours::Gold, 2.0F);
 }
 
 void TrailingSuctionDredgerlet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -190,16 +211,18 @@ void TrailingSuctionDredgerlet::resize(float width, float height) {
 }
 
 /*************************************************************************************************/
-TrailingSuctionDredger^ TrailingSuctionDredgerlet::clone_vessel(TrailingSuctionDredger^ dest) {
+TrailingSuctionDredger^ TrailingSuctionDredgerlet::clone_vessel(TrailingSuctionDredger^ dest, bool real_vessel) {
 	TrailingSuctionDredger^ clone = ((dest == nullptr) ? ref new TrailingSuctionDredger() : dest);
 
-	clone->refresh(this->vessel_config);
+	clone->refresh(real_vessel ? this->vessel_config : this->preview_config);
 
 	return clone;
 }
 
 void TrailingSuctionDredgerlet::preview(TrailingSuctionDredger^ src) {
-	if (this->preview_config == nullptr) {
+	if (src == nullptr) {
+		this->preview_config->refresh(this->vessel_config);
+	} else if (this->preview_config == nullptr) {
 		this->preview_config = ref new TrailingSuctionDredger(src);
 	} else {
 		this->preview_config->refresh(src);
@@ -342,7 +365,7 @@ TrailingSuctionDredger::TrailingSuctionDredger(TrailingSuctionDredger^ src) {
 }
 
 void TrailingSuctionDredger::refresh(TrailingSuctionDredger^ src) {
-	if (src != nullptr) {
+	if ((src != nullptr) && (this != src)) {
 		size_t ptsize = sizeof(double2);
 
 		this->ps_suction = src->ps_suction;

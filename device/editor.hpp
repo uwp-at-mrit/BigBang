@@ -23,7 +23,8 @@ namespace WarGrey::SCADA {
 
 	protected:
 		virtual void on_apply() = 0;
-		virtual bool on_discard();
+		virtual void on_reset() = 0;
+		virtual bool on_discard() { return true; }
 		virtual bool on_edit(WarGrey::SCADA::Dimensionlet* dim) { return true; }
 
 	protected:
@@ -32,6 +33,7 @@ namespace WarGrey::SCADA {
 	protected: // never delete these graphlets manually
 		WarGrey::SCADA::Labellet* caption;
 		WarGrey::SCADA::Buttonlet* apply;
+		WarGrey::SCADA::Buttonlet* reset;
 		WarGrey::SCADA::Buttonlet* discard;
 		WarGrey::SCADA::Shapelet* background;
 	};
