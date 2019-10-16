@@ -1,5 +1,4 @@
 #include "graphlet/filesystem/projectlet.hpp"
-#include "graphlet/filesystem/project/xyzdoc.hxx"
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/shapelet.hpp"
@@ -129,23 +128,22 @@ void Projectlet::on_xyz_logue(Platform::String^ ms_appdata, ProjectDocument^ doc
 
 void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	DigDoc^ doc_dig = static_cast<DigDoc^>(doc);
-	DigMaplet* map = new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height);
-	float initial_scale = float(map->scale());
 
-	this->map = map;
-	this->planet->begin_update_sequence();
-	this->planet->scale(initial_scale);
-
+	this->planet->begin_update_sequence();;
+	
 	/** NOTE
 	 * For the sake of simplicity, non-icon items are organized as a batch.
 	 * Also, they are drawn before drawing icons.
 	 *
 	 * The modifyDIG draw icons firstly.
 	 */
-	this->planet->insert(map, 0.0F, 0.0F);
+	
+	this->map = this->planet->insert_one(new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height));
+	this->planet->scale(float(this->map->scale()));
 
 	{ // make icons
 		IDigDatum* dig = nullptr;
+		float initial_scale = float(this->map->scale());
 		float icon_width, icon_height;
 		double x, y;
 
@@ -184,7 +182,9 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 }
 
 void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
-
+	XyzDoc^ doc_xyz = static_cast<XyzDoc^>(doc);
+	
+	this->depth = this->planet->insert_one(new Depthlet(doc_xyz, this->view_size.Width, this->view_size.Height));
 }
 
 bool Projectlet::ready() {

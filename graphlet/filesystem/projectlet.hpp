@@ -3,8 +3,9 @@
 #include <deque>
 
 #include "graphlet/filesystem/msappdataloguelet.hxx"
-#include "graphlet/filesystem/project/doctype.hxx"
+#include "graphlet/filesystem/project/reader/doctype.hxx"
 #include "graphlet/filesystem/project/digmaplet.hpp"
+#include "graphlet/filesystem/project/depthlet.hpp"
 
 #include "graphlet/planetlet.hpp"
 #include "graphlet/vessellet.hpp"
@@ -58,6 +59,7 @@ namespace WarGrey::SCADA {
 	private: // graphlets are managed by the Planetlet
 		WarGrey::SCADA::DigMaplet* map;
 		WarGrey::SCADA::IVessellet* vessel;
+		WarGrey::SCADA::Depthlet* depth;
 		std::deque<Platform::Object^> icons;
 		Windows::Foundation::Size view_size;
 

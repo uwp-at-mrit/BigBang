@@ -271,15 +271,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digmaplet.cpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzdoc.cxx">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digdoc.cxx">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\doctype.cxx">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp">
       <Filter>graphlet\filesystem</Filter>
     </ClCompile>
@@ -294,6 +285,18 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.cpp">
       <Filter>graphlet\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.cxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.cxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.cxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\depthlet.cpp">
+      <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -577,15 +580,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digmaplet.hpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzdoc.hxx">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\doctype.hxx">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digdoc.hxx">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.hpp">
       <Filter>graphlet\filesystem</Filter>
     </ClInclude>
@@ -600,6 +594,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.hpp">
       <Filter>graphlet\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.hxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.hxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.hxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\depthlet.hpp">
+      <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -674,6 +680,9 @@
     </Filter>
     <Filter Include="graphlet\filesystem\vessel">
       <UniqueIdentifier>{9ab9cc11-74d3-495c-ab82-48a25a6f1bf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\filesystem\project\reader">
+      <UniqueIdentifier>{d33904f3-f828-48c7-b14f-b22512967db1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

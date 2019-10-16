@@ -2,7 +2,7 @@
 
 #include <deque>
 
-#include "graphlet/filesystem/project/doctype.hxx"
+#include "graphlet/filesystem/project/reader/doctype.hxx"
 
 #include "graphlet/symbol/dig/dig.hpp"
 

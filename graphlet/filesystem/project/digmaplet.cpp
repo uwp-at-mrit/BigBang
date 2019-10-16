@@ -266,7 +266,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				float2 tp = this->position_to_local(dig->x, dig->y, x, y);
 				float depth_height = float(dig->ty - dig->by); // see this::preshape
 
-				ds->FillGeometry(this->depthtexts[dig->name], tp.x, tp.y - depth_height, vector_colors_ref(0LL));
+				ds->FillGeometry(this->numtexts[dig->name], tp.x, tp.y - depth_height, vector_colors_ref(0LL));
 			}; break;
 			case DigDatumType::FontText: { // also see DigDatumType::Rectangle
 				FontTextDig* td = static_cast<FontTextDig*>(dig);
@@ -448,7 +448,7 @@ void DigMaplet::preshape(IDigDatum* dig) {
 		}
 	}; break;
 	case DigDatumType::Number: {
-		if (this->depthtexts.find(dig->name) == this->depthtexts.end()) {
+		if (this->numtexts.find(dig->name) == this->numtexts.end()) {
 			CanvasTextLayout^ tlt = make_text_layout(dig->name, this->plainfont);
 			CanvasGeometry^ g = paragraph(tlt);
 			CanvasPathBuilder^ bp = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
@@ -464,11 +464,11 @@ void DigMaplet::preshape(IDigDatum* dig) {
 				bp->AddLine(tbx.Width, bhy);
 				bp->EndFigure(CanvasFigureLoop::Open);
 
-				this->depthtexts.insert(std::pair<Platform::String^, CanvasGeometry^>(dig->name,
+				this->numtexts.insert(std::pair<Platform::String^, CanvasGeometry^>(dig->name,
 					geometry_union(g, geometry_stroke(CanvasGeometry::CreatePath(bp), 1.0F))));
 			}
 		} else {
-			tbx = this->depthtexts[dig->name]->ComputeBounds();
+			tbx = this->numtexts[dig->name]->ComputeBounds();
 		}
 	}; break;
 	case DigDatumType::FontText: { // also see DigDatumType::Rectangle

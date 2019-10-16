@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphlet/primitive.hpp"
-#include "graphlet/filesystem/project/digdoc.hxx"
+#include "graphlet/filesystem/project/reader/digdoc.hxx"
 
 namespace WarGrey::SCADA {
 	private class DigMaplet : public WarGrey::SCADA::IGraphlet {
@@ -34,7 +34,7 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ plainfont;
 		std::map<Platform::String^, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> plaintexts;
-		std::map<Platform::String^, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> depthtexts;
+		std::map<Platform::String^, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> numtexts;
 		std::map<WarGrey::SCADA::FontTextDig*, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> fonttexts;
 
 	private:

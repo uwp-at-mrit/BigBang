@@ -1,8 +1,8 @@
 #include <ppltasks.h>
 
-#include "graphlet/filesystem/project/doctype.hxx"
-#include "graphlet/filesystem/project/digdoc.hxx"
-#include "graphlet/filesystem/project/xyzdoc.hxx"
+#include "graphlet/filesystem/project/reader/doctype.hxx"
+#include "graphlet/filesystem/project/reader/digdoc.hxx"
+#include "graphlet/filesystem/project/reader/xyzdoc.hxx"
 
 using namespace WarGrey::SCADA;
 
