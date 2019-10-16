@@ -472,13 +472,11 @@ void IEditorlet::prepare_style(DimensionState status, DimensionStyle& style) {
 		FLCAS_SLOT(style.minimize_number_width, get_text_extent("-123456.7890", style.number_font).width);
 		FLCAS_SLOT(style.number_xfraction, 0.0F);
 		FLCAS_SLOT(style.number_trailing_space, 0.0F);
-		ICAS_SLOT(style.precision, 0);
 	}; break;
 	case DimensionState::Default: case DimensionState::Highlight: {
 		FLCAS_SLOT(style.minimize_number_width, 0.0F);
 		FLCAS_SLOT(style.number_xfraction, 0.5F);
 		FLCAS_SLOT(style.number_trailing_space, 0.0F);
-		ICAS_SLOT(style.precision, 1);
 	}; break;
 	}
 

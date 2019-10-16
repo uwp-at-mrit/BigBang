@@ -60,7 +60,7 @@ void Shapelet::set_color(unsigned int color) {
 }
 
 void Shapelet::set_color(ICanvasBrush^ color) {
-	this->color = ((color == nullptr) ? Colours::Background : color);
+	this->color = ((color == nullptr) ? Colours::Transparent : color);
 }
 
 ICanvasBrush^ Shapelet::get_color() {

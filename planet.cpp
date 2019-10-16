@@ -622,16 +622,18 @@ IGraphlet* Planet::find_graphlet(float x, float y) {
             GraphletInfo* info = GRAPHLET_INFO(child);
 
 			if (unsafe_graphlet_unmasked(info, this->mode)) {
-				float sx, sy, sw, sh;
+				if (!child->concealled()) {
+					float sx, sy, sw, sh;
 
-				unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
+					unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
 
-				sx += (this->translate_x * this->scale_x);
-				sy += (this->translate_y * this->scale_y);
+					sx += (this->translate_x * this->scale_x);
+					sy += (this->translate_y * this->scale_y);
 
-				if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
-					found = child;
-					break;
+					if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
+						found = child;
+						break;
+					}
 				}
 			}
 

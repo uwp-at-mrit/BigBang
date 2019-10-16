@@ -28,7 +28,12 @@ CanvasRenderTarget^ ISprite::take_snapshot(float dpi) {
 		CanvasDrawingSession^ ds = snapshot->CreateDrawingSession();
 
 		ds->Clear(ColorHelper::FromArgb(0, 255, 255, 255));
-		this->draw(ds, 0.0F, 0.0F, width, height);
+
+		if (this->ready()) {
+			this->draw(ds, 0.0F, 0.0F, width, height);
+		} else {
+			this->draw_progress(ds, 0.0F, 0.0F, width, height);
+		}
 
 		return snapshot;
 	}

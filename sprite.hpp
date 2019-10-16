@@ -60,6 +60,10 @@ namespace WarGrey::SCADA {
 		bool handles_low_level_events() { return (this->handles_events() && this->deal_with_low_level_events); }
 
 	public:
+		void camouflage(bool yes_no) { this->findable = !yes_no; }
+		bool concealled() { return !this->findable; }
+
+	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 		void save(Platform::String^ path, float dpi = 96.0F);
 
@@ -68,5 +72,6 @@ namespace WarGrey::SCADA {
 		bool can_resize = false;
 		bool deal_with_events = false;
 		bool deal_with_low_level_events = false;
+		bool findable = true;
 	};
 }

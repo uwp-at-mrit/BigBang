@@ -292,6 +292,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\vessellet.cxx">
       <Filter>graphlet</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.cpp">
+      <Filter>graphlet\filesystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -594,6 +597,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\vessel\trailing_suction_dredgerlet.hpp">
       <Filter>graphlet\filesystem\vessel</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.hpp">
+      <Filter>graphlet\filesystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

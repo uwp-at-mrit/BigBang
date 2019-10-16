@@ -74,6 +74,7 @@ TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, T
 }
 
 TrailingSuctionDredgerlet::~TrailingSuctionDredgerlet() {
+	this->unload(this->ms_appdata_config);
 }
 
 void TrailingSuctionDredgerlet::construct() {
@@ -182,10 +183,6 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 	}
 }
 
-void TrailingSuctionDredgerlet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	// do nothing
-}
-
 void TrailingSuctionDredgerlet::resize(float width, float height) {
 	bool resized = false;
 
@@ -242,7 +239,7 @@ TrailingSuctionDredger^ TrailingSuctionDredger::load(Platform::String^ path) {
 	Platform::String^ wtype;
 	std::filebuf src;
 
-	if (src.open(path->Data(), std::ios::in)) {
+	if (open_input_binary(src, path)) {
 		dredger = ref new TrailingSuctionDredger();
 		wtype = read_wtext(src);
 		discard_this_line(src);
@@ -309,8 +306,7 @@ bool TrailingSuctionDredger::save(TrailingSuctionDredger^ self, Platform::String
 	bool okay = false;
 	size_t ptsize = sizeof(double2);
 
-	v_config.open(path->Data(), std::ios::out | std::ios::binary);
-	if (v_config.is_open()) {
+	if (open_output_binary(v_config, path)) {
 		write_wtext(v_config, TSD::TrailingSuctionHopperDredger) << "\n\r" << std::endl;
 
 		write_wtext(v_config, TSD::Body) << " " << sizeof(self->body_vertexes) / ptsize;
@@ -359,9 +355,7 @@ bool TrailingSuctionDredger::save(TrailingSuctionDredger^ self, Platform::String
 }
 
 TrailingSuctionDredger::TrailingSuctionDredger(TrailingSuctionDredger^ src) {
-	if (src != nullptr) {
-		this->refresh(src);
-	}
+	this->refresh(src);
 }
 
 void TrailingSuctionDredger::refresh(TrailingSuctionDredger^ src) {

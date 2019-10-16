@@ -1,10 +1,6 @@
 #pragma once
 
-#include <deque>
-
 #include "graphlet/filesystem/msappdatalet.hxx"
-#include "graphlet/filesystem/msappdataloguelet.hxx"
-
 #include "graphlet/vessellet.hpp"
 
 #include "datum/flonum.hpp"
@@ -68,7 +64,7 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {}
 		void resize(float width, float height) override;
 		bool ready() override;
 
