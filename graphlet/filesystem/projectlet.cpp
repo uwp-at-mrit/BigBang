@@ -68,18 +68,18 @@ namespace {
 		float canvas_y = ipos.y / scale;
 
 		/** WARNING
-		* The modifyDIG does not handle rectangular items accurately.
-		* Icons as well as rectangles should be translated vertically
-		*   since modifyDIG uses the lefthand coordinate system.
-		*/
+		 * The modifyDIG does not handle rectangular items accurately.
+		 * Icons as well as rectangles should be translated vertically
+		 *   since modifyDIG uses the lefthand coordinate system.
+		 */
 
 		/** NOTE
-		* Unlike Diglet, modifyDIG draws icons on the air,
-		*   which means icons are technically dot-based items,
-		*   thus, icons in modifyDIG are not affected by that bug.
-		*
-		* Also see DigMaplet::draw for DigDatumType::Rectangle.
-		*/
+		 * Unlike Diglet, modifyDIG draws icons on the air,
+		 *   which means icons are technically dot-based items,
+		 *   thus, icons in modifyDIG are not affected by that bug.
+		 *
+		 * Also see DigMaplet::draw for DigDatumType::Rectangle.
+		 */
 
 		return float2(canvas_x - size.Width * 0.5F, canvas_y - size.Height);
 	}
@@ -137,11 +137,11 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	this->planet->scale(initial_scale);
 
 	/** NOTE
-	* For the sake of simplicity, non-icon items are organized as a batch.
-	* Also, they are drawn before drawing icons.
-	*
-	* The modifyDIG draw icons firstly.
-	*/
+	 * For the sake of simplicity, non-icon items are organized as a batch.
+	 * Also, they are drawn before drawing icons.
+	 *
+	 * The modifyDIG draw icons firstly.
+	 */
 	this->planet->insert(map, 0.0F, 0.0F);
 
 	{ // make icons
@@ -196,12 +196,8 @@ void Projectlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Projectlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	Platform::String^ location = make_wstring(L"X: %lf; Y: %lf.  B: %lf; L: %lf; H: %lf",
-		this->vessel_x, this->vessel_y, this->latitude, this->longitude, this->altitude);
-
 	Planetlet::draw(ds, x, y, Width, Height);
 
-	ds->DrawText(location, x, y, Colours::GrayText, make_bold_text_format());
 	ds->DrawRectangle(x, y, Width, Height,
 		(this->has_caret() ? Colours::AccentDark : Colours::GrayText),
 		2.0F);

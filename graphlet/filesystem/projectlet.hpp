@@ -2,7 +2,6 @@
 
 #include <deque>
 
-#include "graphlet/filesystem/msappdatalet.hxx"
 #include "graphlet/filesystem/msappdataloguelet.hxx"
 #include "graphlet/filesystem/project/doctype.hxx"
 #include "graphlet/filesystem/project/digmaplet.hpp"
