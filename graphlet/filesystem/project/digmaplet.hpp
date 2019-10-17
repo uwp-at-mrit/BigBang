@@ -6,7 +6,7 @@
 namespace WarGrey::SCADA {
 	private class DigMaplet : public WarGrey::SCADA::IGraphlet {
 	public:
-		DigMaplet(WarGrey::SCADA::DigDoc^ map, double width, double height, double fontsize_times = 2.0);
+		DigMaplet(WarGrey::SCADA::DigDoc^ map, double width, double height, double fontsize_times = 2.0, float plain_fontsize = 14.0F);
 
 	public:
 		void construct() override;
@@ -24,6 +24,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		void fill_anchor_position(double fx, double fy, double* x = nullptr, double* y = nullptr);
+		float scaled_font_size(long long origin_fontsize);
+		float plain_font_size();
 		double scale();
 
 	private:

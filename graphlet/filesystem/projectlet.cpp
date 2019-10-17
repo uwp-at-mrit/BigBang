@@ -1,14 +1,12 @@
 #include "graphlet/filesystem/projectlet.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/shapelet.hpp"
+#include "graphlet/filesystem/project/reader/depthlog.hxx"
+#include "graphlet/filesystem/project/reader/maplog.hxx"
 
 #include "datum/flonum.hpp"
-#include "datum/time.hpp"
 #include "datum/path.hpp"
 #include "datum/file.hpp"
 
-#include "transformation.hpp"
 #include "planet.hpp"
 #include "draw.hpp"
 
@@ -101,8 +99,8 @@ void Projectlet::construct() {
 	this->cd(this->ms_appdata_rootdir);
 }
 
-void Projectlet::on_dig_logue(Platform::String^ ms_appdata, ProjectDocument^ doc) {
-	DigLog^ dig_log = static_cast<DigLog^>(doc);
+void Projectlet::on_map_logue(Platform::String^ ms_appdata, ProjectDocument^ doc) {
+	MapLog^ dig_log = static_cast<MapLog^>(doc);
 
 	for (size_t idx = 0; idx < dig_log->digs.size(); idx++) {
 		if (dig_log->visibles[idx]) {
@@ -116,12 +114,17 @@ void Projectlet::on_dig_logue(Platform::String^ ms_appdata, ProjectDocument^ doc
 	}
 }
 
-void Projectlet::on_xyz_logue(Platform::String^ ms_appdata, ProjectDocument^ doc) {
-	XyzLog^ xyz_log = static_cast<XyzLog^>(doc);
+void Projectlet::on_depth_logue(Platform::String^ ms_appdata, ProjectDocument^ doc) {
+	DepthLog^ depth_log = static_cast<DepthLog^>(doc);
 
-	for (size_t idx = 0; idx < xyz_log->xyzs.size(); idx++) {
-		if (xyz_log->visibles[idx]) {
-			this->load_file(xyz_log->xyzs[idx], ProjectDoctype::XYZ);
+	for (size_t idx = 0; idx < depth_log->depths.size(); idx++) {
+		if (depth_log->visibles[idx]) {
+			Platform::String^ depth = depth_log->depths[idx];
+			Platform::String^ ext = file_extension_from_path(depth);
+
+			if (ext->Equals(".XYZ")) {
+				this->load_file(depth, ProjectDoctype::XYZ);
+			}
 		}
 	}
 }
@@ -172,8 +175,12 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	}
 
 	if (this->vessel != nullptr) {
-		this->map->fill_anchor_position(0.5, 0.5, &this->vessel_x, &this->vessel_y);
+		this->map->fill_anchor_position(0.5, 0.4, &this->vessel_x, &this->vessel_y);
 		this->planet->insert(this->vessel, float(this->vessel_x), float(this->vessel_y), GraphletAnchor::CC);
+	}
+
+	if (this->depth_xyz != nullptr) {
+		this->depth_xyz->attach_to_map(this->map);
 	}
 
 	this->planet->end_update_sequence();
@@ -184,7 +191,15 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	XyzDoc^ doc_xyz = static_cast<XyzDoc^>(doc);
 	
-	this->depth = this->planet->insert_one(new Depthlet(doc_xyz, this->view_size.Width, this->view_size.Height));
+	this->planet->begin_update_sequence();
+
+	this->depth_xyz = this->planet->insert_one(new Xyzlet(doc_xyz, this->view_size.Width, this->view_size.Height));
+	
+	if (this->map != nullptr) {
+		this->depth_xyz->attach_to_map(this->map);
+	}
+
+	this->planet->end_update_sequence();
 }
 
 bool Projectlet::ready() {
@@ -280,9 +295,9 @@ ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::Str
 	ProjectDoctype ft = ProjectDoctype::_;
 
 	if (filename->Equals("Back.LOG")) {
-		ft = ProjectDoctype::DIG_LOG;
+		ft = ProjectDoctype::Map_LOG;
 	} else if (filename->Equals("Deep.LOG")) {
-		ft = ProjectDoctype::XYZ_LOG;
+		ft = ProjectDoctype::Depth_LOG;
 	}
 
 	return ft;
@@ -290,9 +305,9 @@ ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::Str
 
 void Projectlet::on_appdata(Platform::String^ ms_appdata, ProjectDocument^ doc, ProjectDoctype type) {
 	switch (type) {
-	case ProjectDoctype::DIG_LOG: this->on_dig_logue(ms_appdata, doc); break;
-	case ProjectDoctype::DIG: this->on_dig(ms_appdata, doc); break;
-	case ProjectDoctype::XYZ_LOG: this->on_xyz_logue(ms_appdata, doc); break;
-	case ProjectDoctype::XYZ: this->on_xyz(ms_appdata, doc); break;
+	case ProjectDoctype::DIG:       this->on_dig(ms_appdata, doc); break;
+	case ProjectDoctype::XYZ:       this->on_xyz(ms_appdata, doc); break;
+	case ProjectDoctype::Map_LOG:   this->on_map_logue(ms_appdata, doc); break;
+	case ProjectDoctype::Depth_LOG: this->on_depth_logue(ms_appdata, doc); break;
 	}
 }

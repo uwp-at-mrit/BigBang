@@ -129,7 +129,7 @@ void GPSlet::set_north(double degrees, bool force) {
 
 		this->degrees = degrees;
 
-		this->style.N_font->FontSize = (this->radius - this->arrow_radius);
+		this->style.N_font->FontSize = (this->radius - this->arrow_radius) * 0.85F;
 		this->arrow = polar_arrowhead(this->arrow_radius, degrees);
 		this->N = paragraph("N", degrees, n_r, this->style.N_font);
 		this->set_speed(this->speed, true);

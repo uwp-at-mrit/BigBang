@@ -7,24 +7,6 @@
 using namespace WarGrey::SCADA;
 
 /*************************************************************************************************/
-DigLog::DigLog(std::filebuf& log) {
-	unsigned long long max_count = read_integer(log);
-	
-	discard_this_line(log);
-
-	for (unsigned int c = 0; c < max_count; c++) {
-		if (peek_char(log) == EOF) {
-			break;
-		}
-
-		this->digs.push_back(read_wgb18030(log, char_end_of_field));
-		read_char(log);
-		this->visibles.push_back(read_integer(log) == 1);
-		discard_this_line(log);
-	}
-}
-
-/*************************************************************************************************/
 DigDoc::DigDoc(std::filebuf& dig) : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {
 	IDigDatum* datum;
 	

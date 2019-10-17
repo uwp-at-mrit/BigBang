@@ -8,15 +8,6 @@
 #include "graphlet/symbol/dig/dig.hpp"
 
 namespace WarGrey::SCADA {
-	private ref class DigLog sealed : public WarGrey::SCADA::ProjectDocument {
-	internal:
-		DigLog(std::filebuf& dig);
-
-	internal:
-		std::deque<Platform::String^> digs;
-		std::deque<bool> visibles;
-	};
-
 	private ref class DigDoc sealed : public WarGrey::SCADA::ProjectDocument {
 	internal:
 		DigDoc(std::filebuf& dig);

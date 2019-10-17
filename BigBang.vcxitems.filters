@@ -292,11 +292,17 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.cxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzlet.cpp">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.cxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\depthlet.cpp">
-      <Filter>graphlet\filesystem\project</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.cxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.cxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -601,11 +607,17 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.hxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzlet.hpp">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.hxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\depthlet.hpp">
-      <Filter>graphlet\filesystem\project</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.hxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.hxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

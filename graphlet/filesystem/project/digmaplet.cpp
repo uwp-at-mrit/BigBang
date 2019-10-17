@@ -1,5 +1,3 @@
-#include <map>
-
 #include "graphlet/filesystem/project/digmaplet.hpp"
 
 #include "datum/string.hpp"
@@ -67,7 +65,7 @@ static CanvasStrokeStyle^ vector_stroke_ref(long long idx) {
 }
 
 /*************************************************************************************************/
-DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_times)
+DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_times, float plain_fontsize)
 	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0), tstep(32.0F) {
 	this->enable_resizing(false);
 	this->enable_events(true, false);
@@ -78,10 +76,10 @@ DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_t
 	 */
 	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
 	this->_scale = flmin(this->width / this->geo_height, this->height / this->geo_width);
+	this->plainfont = make_text_format(plain_fontsize);
 }
 
 void DigMaplet::construct() {
-	this->plainfont = make_text_format();
 	this->center();
 }
 
@@ -282,14 +280,14 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 #ifdef _DEBUG
 		this->get_logger()->log_message(Log::Debug,
 			L"invisible: %s; view window: (%f, %f), (%f, %f); scale: %f; translation: [%f, %f]",
-			dig->to_string()->Data(), x, y, ds_rx, ds_by, this->_scale* this->stimes, this->xtranslation, this->ytranslation);
+			dig->to_string()->Data(), x, y, ds_rx, ds_by, this->scale(), this->xtranslation, this->ytranslation);
 #endif
 		}
 	}
 }
 
 float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
-	double ss = this->_scale * this->stimes;
+	double ss = this->scale();
 	float ty = yoff + this->height + this->ytranslation;
 	float tx = xoff + this->xtranslation;
 	float gy = float((x - tx) / ss + this->geo_y);
@@ -303,7 +301,7 @@ float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
 }
 
 float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) {
-	double ss = this->_scale * this->stimes;
+	double ss = this->scale();
 	float ty = yoff + this->height + this->ytranslation;
 	float tx = xoff + this->xtranslation;
 	float local_y = -float((x - this->geo_x) * ss) + ty;
@@ -317,7 +315,7 @@ float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) 
 }
 
 Size DigMaplet::length_to_local(double width, double height) {
-	double ss = this->_scale * this->stimes;
+	double ss = this->scale();
 	float local_w = float(((height <= 0.0) ? width : height) * ss);
 	float local_h = float(width * ss);
 
@@ -423,6 +421,14 @@ void DigMaplet::center() {
 	this->ytranslation = (this->height - view.Height) * 0.5F;
 }
 
+float DigMaplet::scaled_font_size(long long fontsize) {
+	return float(double(fontsize) * this->fstimes * this->scale());
+}
+
+float DigMaplet::plain_font_size() {
+	return this->plainfont->FontSize;
+}
+
 double DigMaplet::scale() {
 	return this->_scale * this->stimes;
 }
@@ -476,7 +482,7 @@ void DigMaplet::preshape(IDigDatum* dig) {
 
 		if (td->font_size > 0LL) {
 			if (this->fonttexts.find(td) == this->fonttexts.end()) {
-				float font_size = float(td->font_size * this->fstimes * this->_scale * this->stimes);
+				float font_size = this->scaled_font_size(td->font_size);
 				CanvasGeometry^ tlt = paragraph(dig->name, make_text_format(td->font_name, font_size));
 
 				if (degrees_normalize(td->rotation) != 0.0) {

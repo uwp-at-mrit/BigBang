@@ -5,7 +5,7 @@
 #include "graphlet/filesystem/msappdataloguelet.hxx"
 #include "graphlet/filesystem/project/reader/doctype.hxx"
 #include "graphlet/filesystem/project/digmaplet.hpp"
-#include "graphlet/filesystem/project/depthlet.hpp"
+#include "graphlet/filesystem/project/xyzlet.hpp"
 
 #include "graphlet/planetlet.hpp"
 #include "graphlet/vessellet.hpp"
@@ -42,10 +42,10 @@ namespace WarGrey::SCADA {
 		void on_appdata_not_found(Platform::String^ file, ProjectDoctype type) override {}
 
 	private:
-		void on_dig_logue(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
 		void on_dig(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
-		void on_xyz_logue(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
 		void on_xyz(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
+		void on_map_logue(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
+		void on_depth_logue(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
 
 	private:
 		void relocate_icons();
@@ -59,7 +59,7 @@ namespace WarGrey::SCADA {
 	private: // graphlets are managed by the Planetlet
 		WarGrey::SCADA::DigMaplet* map;
 		WarGrey::SCADA::IVessellet* vessel;
-		WarGrey::SCADA::Depthlet* depth;
+		WarGrey::SCADA::Xyzlet* depth_xyz;
 		std::deque<Platform::Object^> icons;
 		Windows::Foundation::Size view_size;
 

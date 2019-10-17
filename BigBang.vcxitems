@@ -32,7 +32,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\bitmaplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\depthlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digmaplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.cxx" />
@@ -141,7 +143,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdatalet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdataloguelet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappxlet.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\depthlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\digmaplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.hxx" />
