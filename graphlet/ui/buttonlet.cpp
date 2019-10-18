@@ -1,4 +1,4 @@
-#include "graphlet/buttonlet.hpp"
+#include "graphlet/ui/buttonlet.hpp"
 
 #include "text.hpp"
 #include "tongue.hpp"

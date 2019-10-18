@@ -1,7 +1,8 @@
 ﻿#include <shared_mutex>
 #include <map>
 
-#include "graphlet/statuslet.hpp"
+#include "graphlet/ui/statuslet.hpp"
+
 #include "datum/string.hpp"
 #include "datum/flonum.hpp"
 
