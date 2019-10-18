@@ -29,9 +29,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\radarlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\bitmaplet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\colorplotlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzlet.cpp" />
@@ -40,7 +41,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\vessel\trailing_suction_dredgerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\pipelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\planetlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\anchorlet.cpp" />
@@ -91,6 +91,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\gate_valvelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\colorpickerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\tablet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\textlet.cpp" />
@@ -138,12 +139,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\radarlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\bitmaplet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdatalet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdataloguelet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappxlet.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\colorplotlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzlet.hpp" />
@@ -152,7 +154,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\vessel\trailing_suction_dredgerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\pipelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\planetlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\anchorlet.hpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\gate_valvelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\colorpickerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\statuslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\tablet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\textlet.hpp" />
@@ -243,7 +245,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\menu.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -251,7 +252,6 @@
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\unit.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\menu.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>

@@ -262,14 +262,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\pipelet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\vessel\trailing_suction_dredgerlet.cpp">
-      <Filter>graphlet\filesystem\vessel</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\vessellet.cxx">
       <Filter>graphlet</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.cpp">
-      <Filter>graphlet\filesystem</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.cxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
@@ -289,9 +283,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.cxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\colorplotlet.cpp">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.cpp">
       <Filter>graphlet\ui</Filter>
     </ClCompile>
@@ -306,6 +297,18 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\togglet.cpp">
       <Filter>graphlet\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\colorpickerlet.cpp">
+      <Filter>graphlet\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.cpp">
+      <Filter>graphlet\filesystem\configuration\vessel</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.cpp">
+      <Filter>graphlet\filesystem\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.cpp">
+      <Filter>graphlet\filesystem\configuration</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -583,12 +586,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\vessellet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\vessel\trailing_suction_dredgerlet.hpp">
-      <Filter>graphlet\filesystem\vessel</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.hpp">
-      <Filter>graphlet\filesystem</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.hxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClInclude>
@@ -607,9 +604,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.hxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\colorplotlet.hpp">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.hpp">
       <Filter>graphlet\ui</Filter>
     </ClInclude>
@@ -624,6 +618,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\togglet.hpp">
       <Filter>graphlet\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\colorpickerlet.hpp">
+      <Filter>graphlet\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.hpp">
+      <Filter>graphlet\filesystem\configuration\vessel</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.hpp">
+      <Filter>graphlet\filesystem\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.hpp">
+      <Filter>graphlet\filesystem\configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -696,14 +702,17 @@
     <Filter Include="graphlet\filesystem\project">
       <UniqueIdentifier>{7f8328fe-70bd-4b9b-8969-3a6a282cba7f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphlet\filesystem\vessel">
-      <UniqueIdentifier>{9ab9cc11-74d3-495c-ab82-48a25a6f1bf6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="graphlet\filesystem\project\reader">
       <UniqueIdentifier>{d33904f3-f828-48c7-b14f-b22512967db1}</UniqueIdentifier>
     </Filter>
     <Filter Include="graphlet\ui">
       <UniqueIdentifier>{2798956c-14b2-40e7-af41-cc5c3f29696e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\filesystem\configuration">
+      <UniqueIdentifier>{229e522d-64b4-47e8-9577-26ed44c4c9d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\filesystem\configuration\vessel">
+      <UniqueIdentifier>{9ab9cc11-74d3-495c-ab82-48a25a6f1bf6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -723,12 +732,6 @@
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\timemachine.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\menu.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\menu.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

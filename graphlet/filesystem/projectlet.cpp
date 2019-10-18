@@ -83,8 +83,12 @@ namespace {
 }
 
 /*************************************************************************************************/
-Projectlet::Projectlet(IVessellet* vessel, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Planetlet(new ProjectFrame(project), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)), vessel(vessel), map(nullptr) {
+Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
+	, Platform::String^ project, float view_width, float view_height
+	, ICanvasBrush^ background, Platform::String^ rootdir)
+	: Planetlet(new ProjectFrame(project), GraphletAnchor::LT, background)
+	, view_size(Size(view_width, view_height))
+	, vessel(vessel), plot(plot), map(nullptr) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
 	this->enable_stretch(false, false);
 	this->enable_events(true, true);
@@ -194,6 +198,7 @@ void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	this->planet->begin_update_sequence();
 
 	this->depth_xyz = this->planet->insert_one(new Xyzlet(doc_xyz, this->view_size.Width, this->view_size.Height));
+	this->depth_xyz->set_color_schema(this->plot);
 	
 	if (this->map != nullptr) {
 		this->depth_xyz->attach_to_map(this->map);

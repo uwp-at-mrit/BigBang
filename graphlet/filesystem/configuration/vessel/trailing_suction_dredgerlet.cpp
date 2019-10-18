@@ -1,4 +1,4 @@
-#include "graphlet/filesystem/vessel/trailing_suction_dredgerlet.hpp"
+#include "graphlet/filesystem/configuration/vessel/trailing_suction_dredgerlet.hpp"
 
 #include "datum/flonum.hpp"
 #include "datum/fixnum.hpp"
@@ -307,7 +307,7 @@ bool TrailingSuctionDredger::save(TrailingSuctionDredger^ self, Platform::String
 	size_t ptsize = sizeof(double2);
 
 	if (open_output_binary(v_config, path)) {
-		write_wtext(v_config, TSD::TrailingSuctionHopperDredger) << "\n\r" << std::endl;
+		write_wtext(v_config, TSD::TrailingSuctionHopperDredger, true);
 
 		write_wtext(v_config, TSD::Body) << " " << sizeof(self->body_vertexes) / ptsize;
 		for (size_t idx = 0; idx < sizeof(self->body_vertexes) / ptsize; idx++) {

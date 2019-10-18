@@ -23,7 +23,8 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
 Xyzlet::Xyzlet(XyzDoc^ depths, double width, double height, float diff_ft_times)
-	: doc_xyz(depths), width(float(width)), height(float(height)), master(nullptr), diff_multiple(diff_ft_times) {
+	: doc_xyz(depths), width(float(width)), height(float(height)), master(nullptr), diff_multiple(diff_ft_times)
+	, default_color(Colours::GhostWhite) {
 	this->enable_resizing(false);
 	this->enable_events(false, false);
 	this->camouflage(true);
@@ -50,12 +51,22 @@ void Xyzlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 			
 			if (flin(ds_x, pos.x, ds_rx) && flin(ds_y, pos.y, ds_by)) {
 				float distance = points_distance(last_pos, pos);
-				if (distance >= delta) {
-					this->find_or_create_depth_geometry(it->z, gs, &whole_width);
 
-					ds->DrawCachedGeometry(this->location, pos.x - this->loc_xoff, pos.y - this->loc_yoff, Colours::SeaGreen);
-					ds->DrawCachedGeometry(gs[0], pos.x - whole_width - this->loc_xoff, pos.y - this->num_size * 0.8F, Colours::SeaGreen);
-					ds->DrawCachedGeometry(gs[1], pos.x + this->loc_xoff, pos.y - this->num_size * 0.382F, Colours::SeaGreen);
+				if (distance >= delta) {
+					CanvasSolidColorBrush^ color = this->default_color;
+
+					if (this->plot != nullptr) {
+						color = this->plot->depth_color(it->z, color);
+					}
+
+					if (color->Color.A > 0) {
+						this->find_or_create_depth_geometry(it->z, gs, &whole_width);
+
+						ds->DrawCachedGeometry(this->location, pos.x - this->loc_xoff, pos.y - this->loc_yoff, color);
+						ds->DrawCachedGeometry(gs[0], pos.x - whole_width - this->loc_xoff, pos.y - this->num_size * 0.8F, color);
+						ds->DrawCachedGeometry(gs[1], pos.x + this->loc_xoff, pos.y - this->num_size * 0.382F, color);
+					}
+
 					last_pos = pos;
 				} else {
 #ifdef _DEBUG
@@ -91,6 +102,18 @@ void Xyzlet::attach_to_map(DigMaplet* master, bool force) {
 	}
 
 	this->master = master;
+}
+
+void Xyzlet::set_color_schema(ColorPlotlet* plot, CanvasSolidColorBrush^ fallback) {
+	if (this->plot != plot) {
+		this->plot = plot;
+		this->notify_updated();
+	}
+
+	if ((this->default_color != fallback) && (fallback != nullptr)) {
+		this->default_color = fallback;
+		this->notify_updated();
+	}
 }
 
 void Xyzlet::find_or_create_depth_geometry(double depth, CanvasCachedGeometry^ gs[], float* whole_width) {

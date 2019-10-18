@@ -22,7 +22,7 @@ DepthLog::DepthLog(std::filebuf& log) {
 
 		this->depths.push_back(read_wgb18030(log, char_end_of_field));
 		read_char(log);
-		this->visibles.push_back(read_integer(log) == 1);
+		this->visibles.push_back(read_bool(log));
 		discard_this_line(log);
 	}
 }

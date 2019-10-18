@@ -6,6 +6,8 @@
 #include "datum/flonum.hpp"
 
 namespace WarGrey::SCADA {
+#define ColorPlotSize 20
+
 	private ref class ColorPlot sealed {
 	public:
 		static WarGrey::SCADA::ColorPlot^ load(Platform::String^ path);
@@ -16,12 +18,21 @@ namespace WarGrey::SCADA {
 		
 	public:
 		void refresh(ColorPlot^ src);
+
+	internal:
+		double depths[ColorPlotSize];
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ colors[ColorPlotSize];
+		bool enableds[ColorPlotSize];
+
+	internal:
+		double min_depth;
+		double max_depth;
 	};
 
 	private class ColorPlotlet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::ColorPlot, WarGrey::SCADA::IGraphlet> {
 	public:
 		virtual ~ColorPlotlet() noexcept;
-		ColorPlotlet(Platform::String^ plot, float size, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
+		ColorPlotlet(Platform::String^ plot, float width, float height = 0.0F, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
 		
 	public:
 		void construct() override;
@@ -31,23 +42,27 @@ namespace WarGrey::SCADA {
 		bool ready() override;
 
 	public:
+		bool in_range(double depth);
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ depth_color(double depth,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback);
+
+	public:
 		WarGrey::SCADA::ColorPlot^ clone_plot(WarGrey::SCADA::ColorPlot^ dest = nullptr);
 		void refresh(ColorPlot^ src);
 
 	protected:
-		void on_appdata(Windows::Foundation::Uri^ plot, WarGrey::SCADA::ColorPlot^ gps_config) override;
+		void on_appdata(Windows::Foundation::Uri^ plot, WarGrey::SCADA::ColorPlot^ plot_config) override;
 		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
 
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ arrow;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ N;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ knot;
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
 
 	private:
 		WarGrey::SCADA::ColorPlot^ plot_config;
 		Windows::Foundation::Uri^ ms_appdata_config;
 
 	private:
-		float size;
+		float width;
+		float height;
 	};
 }

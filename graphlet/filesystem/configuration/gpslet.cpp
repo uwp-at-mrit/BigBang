@@ -1,4 +1,4 @@
-#include "graphlet/filesystem/gpslet.hpp"
+#include "graphlet/filesystem/configuration/gpslet.hpp"
 
 #include "datum/path.hpp"
 #include "datum/file.hpp"
@@ -208,7 +208,7 @@ bool GPSCS::save(GPSCS^ self, Platform::String^ path) {
 	size_t ptsize = sizeof(double2);
 
 	if (open_output_binary(v_config, path)) {
-		write_wtext(v_config, CS::GPS) << "\n\r" << std::endl;
+		write_wtext(v_config, CS::GPS, true);
 
 		write_wtext(v_config, CS::Ellipsoid);
 		v_config << " " << self->parameter.a << " " << self->parameter.f << " " << self->parameter.cm;

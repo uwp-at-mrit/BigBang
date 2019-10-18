@@ -3,6 +3,7 @@
 #include <deque>
 
 #include "graphlet/filesystem/msappdataloguelet.hxx"
+#include "graphlet/filesystem/configuration/colorplotlet.hpp"
 #include "graphlet/filesystem/project/reader/doctype.hxx"
 #include "graphlet/filesystem/project/digmaplet.hpp"
 #include "graphlet/filesystem/project/xyzlet.hpp"
@@ -17,7 +18,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~Projectlet() noexcept;
 
-		Projectlet(WarGrey::SCADA::IVessellet* vessel,
+		Projectlet(WarGrey::SCADA::IVessellet* vessel, WarGrey::SCADA::ColorPlotlet* plot,
 			Platform::String^ project, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "projects");
@@ -58,10 +59,13 @@ namespace WarGrey::SCADA {
 
 	private: // graphlets are managed by the Planetlet
 		WarGrey::SCADA::DigMaplet* map;
-		WarGrey::SCADA::IVessellet* vessel;
 		WarGrey::SCADA::Xyzlet* depth_xyz;
 		std::deque<Platform::Object^> icons;
 		Windows::Foundation::Size view_size;
+
+	private:
+		WarGrey::SCADA::IVessellet* vessel;
+		WarGrey::SCADA::ColorPlotlet* plot;
 
 	private:
 		double latitude;
