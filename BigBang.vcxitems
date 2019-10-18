@@ -21,7 +21,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)display.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.cpp" />
@@ -32,6 +31,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\bitmaplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\gpslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\colorplotlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzlet.cpp" />
@@ -66,7 +66,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\welllet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\tablet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp" />
@@ -91,6 +90,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\tagged_valvelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\gate_valvelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\statuslet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\tablet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\textlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\togglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\vessellet.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\shapelet.cpp" />
@@ -107,15 +111,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\bucketpad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\primitive.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\togglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sprite.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\statuslet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\textlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\alarmlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\numpad.cpp" />
@@ -129,7 +130,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\margin.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)display.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.hpp" />
@@ -143,6 +143,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdatalet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdataloguelet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappxlet.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\colorplotlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\xyzlet.hpp" />
@@ -177,7 +178,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\treelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\water_towerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\dig\welllet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\tablet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timelinelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.hpp" />
@@ -202,6 +202,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\tagged_valvelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\gate_valvelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\statuslet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\tablet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\textlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\togglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\vessellet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp">
       <FileType>Document</FileType>
@@ -222,17 +227,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\bucketpad.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sprite.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\togglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\grid.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\statuslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\primitive.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\textlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\alarmlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\numpad.hpp" />

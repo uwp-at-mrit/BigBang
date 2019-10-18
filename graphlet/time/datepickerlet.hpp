@@ -1,7 +1,7 @@
 #pragma once
 #pragma warning (disable: 4250)
 
-#include "graphlet/textlet.hpp"
+#include "graphlet/ui/textlet.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class DatePickerState { Default, Input, _ };

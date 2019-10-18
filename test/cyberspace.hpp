@@ -1,7 +1,7 @@
 #pragma once
 
 #include "planet.hpp"
-#include "graphlet/textlet.hpp"
+#include "graphlet/ui/textlet.hpp"
 
 namespace WarGrey::SCADA {
 	private class CyberSpace : public WarGrey::SCADA::Planet {

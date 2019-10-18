@@ -1,7 +1,7 @@
 ﻿#include "test/cyberspace.hpp"
 
 #include "decorator/border.hpp"
-#include "graphlet/textlet.hpp"
+#include "graphlet/ui/textlet.hpp"
 
 #include "datum/string.hpp"
 #include "datum/flonum.hpp"

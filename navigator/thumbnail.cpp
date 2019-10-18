@@ -4,7 +4,7 @@
 
 #include "virtualization/screen/pasteboard.hpp"
 #include "decorator/decorator.hpp"
-#include "graphlet/textlet.hpp"
+#include "graphlet/ui/textlet.hpp"
 
 #include "datum/box.hpp"
 

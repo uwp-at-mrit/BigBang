@@ -8,7 +8,7 @@
 #include "datum/time.hpp"
 
 #include "decorator/background.hpp"
-#include "graphlet/textlet.hpp"
+#include "graphlet/ui/textlet.hpp"
 #include "graphlet/filesystem/bitmaplet.hpp"
 
 using namespace WarGrey::SCADA;

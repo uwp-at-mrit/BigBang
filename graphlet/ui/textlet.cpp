@@ -1,6 +1,7 @@
 #include <cwchar>
 
-#include "graphlet/textlet.hpp"
+#include "graphlet/ui/textlet.hpp"
+
 #include "datum/string.hpp"
 #include "datum/flonum.hpp"
 

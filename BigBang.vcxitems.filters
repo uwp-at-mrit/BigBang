@@ -27,15 +27,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\shapelet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\statuslet.cpp">
-      <Filter>graphlet</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\textlet.cpp">
-      <Filter>graphlet</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\togglet.cpp">
-      <Filter>graphlet</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
@@ -127,9 +118,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.cpp">
       <Filter>graphlet\device</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.cpp">
-      <Filter>graphlet</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.cpp">
       <Filter>graphlet\cylinder</Filter>
     </ClCompile>
@@ -160,9 +148,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.cpp">
       <Filter>graphlet\time</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\tablet.cpp">
-      <Filter>graphlet</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.cpp">
       <Filter>virtualization\screen</Filter>
@@ -304,6 +289,24 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.cxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\colorplotlet.cpp">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.cpp">
+      <Filter>graphlet\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\statuslet.cpp">
+      <Filter>graphlet\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\tablet.cpp">
+      <Filter>graphlet\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\textlet.cpp">
+      <Filter>graphlet\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\togglet.cpp">
+      <Filter>graphlet\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -330,15 +333,6 @@
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\shapelet.hpp">
-      <Filter>graphlet</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\statuslet.hpp">
-      <Filter>graphlet</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\textlet.hpp">
-      <Filter>graphlet</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\togglet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp" />
@@ -433,9 +427,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.hpp">
       <Filter>graphlet\device</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\buttonlet.hpp">
-      <Filter>graphlet</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.hpp">
       <Filter>graphlet\cylinder</Filter>
     </ClInclude>
@@ -466,9 +457,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\time\timeserieslet.hpp">
       <Filter>graphlet\time</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\tablet.hpp">
-      <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\frame.hpp">
       <Filter>virtualization\screen</Filter>
@@ -619,6 +607,24 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.hxx">
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\colorplotlet.hpp">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.hpp">
+      <Filter>graphlet\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\statuslet.hpp">
+      <Filter>graphlet\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\tablet.hpp">
+      <Filter>graphlet\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\textlet.hpp">
+      <Filter>graphlet\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\togglet.hpp">
+      <Filter>graphlet\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -695,6 +701,9 @@
     </Filter>
     <Filter Include="graphlet\filesystem\project\reader">
       <UniqueIdentifier>{d33904f3-f828-48c7-b14f-b22512967db1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\ui">
+      <UniqueIdentifier>{2798956c-14b2-40e7-af41-cc5c3f29696e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

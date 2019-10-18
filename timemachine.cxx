@@ -5,8 +5,8 @@
 
 #include "navigator/listview.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
+#include "graphlet/ui/textlet.hpp"
+#include "graphlet/ui/statuslet.hpp"
 #include "graphlet/time/datepickerlet.hpp"
 #include "graphlet/time/timelinelet.hpp"
 
