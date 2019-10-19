@@ -8,29 +8,51 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+static void vessel_bow_transform(double bow, float* cosbow, float* sinbow) {
+	float radians = degrees_to_radians(bow);
+
+	(*cosbow) = flcos(radians);
+	(*sinbow) = flsin(radians);
+}
+
+static float2 vessel_point_on_screen(double2& src, double2& gps, float2 s, float cosbow, float sinbow, float2* lt, float2* rb) {
+	float geo_x = float(src.x - gps.x) * s.x;
+	float geo_y = float(src.y - gps.y) * s.y;
+	float x0 = geo_y;
+	float y0 = -geo_x;
+	float x = x0 * cosbow - y0 * sinbow;
+	float y = x0 * sinbow + y0 * cosbow;
+
+	// NOTE that the map uses lefthand coordinate system, the xscale and yscale therefore should be interchanged
+	// Stupid design, and/or stupid referenced codebase for lacking of explanation
+
+	region_fuse_point(lt, rb, x, y);
+
+	return float2(x, y);
+}
+
 /*************************************************************************************************/
 IVessellet::IVessellet() {
 	this->enable_resizing(true);
 }
 
 /*************************************************************************************************/
-float2 WarGrey::SCADA::vessel_point(double2 src, double2& gps, float2 s, float2* lt, float2* rb) {
-	float x = float(src.x - gps.x) * s.x;
-	float y = float(src.y - gps.y) * s.y;
+float2 WarGrey::SCADA::vessel_point(double2& src, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
+	float cosbow, sinbow;
 
-	// NOTE that the map uses lefthand coordinate system, the xscale and yscale therefore should be interchanged
-	// Stupid design, and/or stupid referenced codebase for lacking of explanation
+	vessel_bow_transform(bow, &cosbow, &sinbow);
 
-	region_fuse_point(lt, rb, y, -x);
-
-	return float2(y, -x);
+	return vessel_point_on_screen(src, gps, s, cosbow, sinbow, lt, rb);
 }
 
-CanvasGeometry^ WarGrey::SCADA::vessel_polygon(double2 src[], size_t count, double2& gps, float2 s, float2* lt, float2* rb) {
+CanvasGeometry^ WarGrey::SCADA::vessel_polygon(double2 src[], size_t count, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
 	Platform::Array<float2>^ vertexes = ref new Platform::Array<float2>((unsigned int)count);
-	
+	float cosbow, sinbow;
+
+	vessel_bow_transform(bow, &cosbow, &sinbow);
+
 	for (unsigned int idx = 0; idx < vertexes->Length; idx++) {
-		vertexes->set(idx, vessel_point(src[idx], gps, s, lt, rb));
+		vertexes->set(idx, vessel_point_on_screen(src[idx], gps, s, cosbow, sinbow, lt, rb));
 	}
 
 	return CanvasGeometry::CreatePolygon(CanvasDevice::GetSharedDevice(), vertexes);

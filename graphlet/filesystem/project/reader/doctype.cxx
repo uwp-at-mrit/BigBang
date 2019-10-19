@@ -5,6 +5,7 @@
 #include "graphlet/filesystem/project/reader/depthlog.hxx"
 #include "graphlet/filesystem/project/reader/digdoc.hxx"
 #include "graphlet/filesystem/project/reader/xyzdoc.hxx"
+#include "graphlet/filesystem/project/reader/jobdoc.hxx"
 
 using namespace WarGrey::SCADA;
 
@@ -21,6 +22,7 @@ ProjectDocument^ ProjectDocument::load(Platform::String^ filename, WarGrey::SCAD
 		switch (type) {
 		case ProjectDoctype::DIG:       doc = ref new DigDoc(src); break;
 		case ProjectDoctype::XYZ:       doc = ref new XyzDoc(src); break;
+		case ProjectDoctype::Traceline: doc = ref new JobDoc(src); break;
 		case ProjectDoctype::Map_LOG:   doc = ref new MapLog(src); break;
 		case ProjectDoctype::Depth_LOG: doc = ref new DepthLog(src); break;
 		}

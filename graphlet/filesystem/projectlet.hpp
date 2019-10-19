@@ -16,8 +16,6 @@
 namespace WarGrey::SCADA {
 	private class Projectlet : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::SCADA::ProjectDocument, WarGrey::SCADA::Planetlet, WarGrey::SCADA::ProjectDoctype> {
 	public:
-		virtual ~Projectlet() noexcept;
-
 		Projectlet(WarGrey::SCADA::IVessellet* vessel, WarGrey::SCADA::ColorPlotlet* plot,
 			Platform::String^ project, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
@@ -39,14 +37,15 @@ namespace WarGrey::SCADA {
 
 	protected:
 		WarGrey::SCADA::ProjectDoctype filter_file(Platform::String^ file, Platform::String^ _ext) override;
-		void on_appdata(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig, WarGrey::SCADA::ProjectDoctype type) override;
-		void on_appdata_not_found(Platform::String^ file, ProjectDoctype type) override {}
+		void on_appdata(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dig, WarGrey::SCADA::ProjectDoctype type) override;
+		void on_appdata_not_found(Platform::String^ ms_appdata, ProjectDoctype type) override {}
 
 	private:
-		void on_dig(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
-		void on_xyz(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
-		void on_map_logue(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
-		void on_depth_logue(Platform::String^ file, WarGrey::SCADA::ProjectDocument^ doc_dig);
+		void on_dig(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dig);
+		void on_xyz(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_xyz);
+		void on_traceline(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dat);
+		void on_map_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
+		void on_depth_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
 
 	private:
 		void relocate_icons();
@@ -56,18 +55,17 @@ namespace WarGrey::SCADA {
 
 	private:
 		Platform::String^ ms_appdata_rootdir;
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
 
 	private: // graphlets are managed by the Planetlet
 		WarGrey::SCADA::DigMaplet* map;
-		WarGrey::SCADA::Xyzlet* depth_xyz;
-		std::deque<Platform::Object^> icons;
-		Windows::Foundation::Size view_size;
-
-	private:
 		WarGrey::SCADA::IVessellet* vessel;
 		WarGrey::SCADA::ColorPlotlet* plot;
+		WarGrey::SCADA::Xyzlet* depth_xyz;
+		std::deque<Platform::Object^> icons;
 
 	private:
+		Windows::Foundation::Size view_size;
 		double latitude;
 		double longitude;
 		double altitude;

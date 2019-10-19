@@ -2,13 +2,16 @@
 
 #include "graphlet/filesystem/project/reader/depthlog.hxx"
 #include "graphlet/filesystem/project/reader/maplog.hxx"
+#include "graphlet/filesystem/project/reader/jobdoc.hxx"
 
 #include "datum/flonum.hpp"
 #include "datum/path.hpp"
 #include "datum/file.hpp"
 
 #include "planet.hpp"
-#include "draw.hpp"
+#include "text.hpp"
+#include "shape.hpp"
+#include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
@@ -20,6 +23,7 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+using namespace Microsoft::Graphics::Canvas::Geometry;
 
 namespace {
 	private class ProjectFrame : public Planet {
@@ -59,11 +63,19 @@ namespace {
 		Size size;
 	};
 
-	static float2 graphlet_location(DigMaplet* map, double x, double y, Size& size, float scale) {
+	static float2 vessel_location(DigMaplet* map, double x, double y, float scale) {
 		float2 ipos = map->position_to_local(x, y);
 		float canvas_x = ipos.x / scale;
 		float canvas_y = ipos.y / scale;
 
+		// NOTE: vessel is dot-based item
+
+		return float2(canvas_x, canvas_y);
+	}
+
+	static float2 graphlet_location(DigMaplet* map, double x, double y, Size& size, float scale) {
+		float2 idot = vessel_location(map, x, y, scale);
+	
 		/** WARNING
 		 * The modifyDIG does not handle rectangular items accurately.
 		 * Icons as well as rectangles should be translated vertically
@@ -78,7 +90,7 @@ namespace {
 		 * Also see DigMaplet::draw for DigDatumType::Rectangle.
 		 */
 
-		return float2(canvas_x - size.Width * 0.5F, canvas_y - size.Height);
+		return float2(idot.x - size.Width * 0.5F, idot.y - size.Height);
 	}
 }
 
@@ -94,12 +106,10 @@ Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
 	this->enable_events(true, true);
 }
 
-Projectlet::~Projectlet() {
-}
-
 void Projectlet::construct() {
 	Planetlet::construct();
 
+	this->font = make_bold_text_format(32.0F);
 	this->cd(this->ms_appdata_rootdir);
 }
 
@@ -179,7 +189,7 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	}
 
 	if (this->vessel != nullptr) {
-		this->map->fill_anchor_position(0.5, 0.4, &this->vessel_x, &this->vessel_y);
+		this->map->fill_anchor_position(0.5, 0.5, &this->vessel_x, &this->vessel_y);
 		this->planet->insert(this->vessel, float(this->vessel_x), float(this->vessel_y), GraphletAnchor::CC);
 	}
 
@@ -207,6 +217,16 @@ void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	this->planet->end_update_sequence();
 }
 
+void Projectlet::on_traceline(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc) {
+	JobDoc^ xh_dat = static_cast<JobDoc^>(doc);
+	
+	for (auto it = xh_dat->sections.begin(); it != xh_dat->sections.end(); it++) {
+		for (auto line = it->second.begin(); line != it->second.end(); line++) {
+			this->get_logger()->log_message(Log::Info, L"%d: %f", line->id, line->angle_deg);
+		}
+	}
+}
+
 bool Projectlet::ready() {
 	return (this->graph_dig != nullptr);
 }
@@ -216,17 +236,24 @@ void Projectlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Projectlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	float border_thickness = 2.0F;
+	float offset = border_thickness * 0.5F;
+
 	Planetlet::draw(ds, x, y, Width, Height);
 
-	ds->DrawRectangle(x, y, Width, Height,
+	ds->DrawRectangle(x + offset, y + offset, Width - border_thickness, Height - border_thickness,
 		(this->has_caret() ? Colours::AccentDark : Colours::GrayText),
-		2.0F);
+		border_thickness);
 }
 
 void Projectlet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	Platform::String^ hint = file_name_from_path(this->ms_appdata_rootdir);
+	TextExtent te;
+	CanvasGeometry^ pname = paragraph(file_name_from_path(this->ms_appdata_rootdir), this->font, &te);
+	float px = x + (Width - te.width) * 0.5F;
+	float py = y + (Height - te.height) * 0.5F;
 
-	draw_invalid_bitmap(hint, ds, x, y, Width, Height);
+	this->draw(ds, x, y, Width, Height);
+	ds->FillGeometry(pname, px, py, Colours::GrayText);
 }
 
 bool Projectlet::on_key(VirtualKey key, bool screen_keyboard) {
@@ -236,6 +263,15 @@ bool Projectlet::on_key(VirtualKey key, bool screen_keyboard) {
 		this->planet->begin_update_sequence();
 
 		handled = Planetlet::on_key(key, screen_keyboard);
+
+		if (!handled) {
+			switch (key) {
+			case VirtualKey::H: {
+				this->map->center_at(this->vessel_x, this->vessel_y);
+				handled = true;
+			}; break;
+			}
+		}
 
 		if (handled) {
 			this->relocate_icons();
@@ -268,10 +304,9 @@ bool Projectlet::on_character(unsigned int keycode) {
 void Projectlet::relocate_icons() {
 	if (this->map != nullptr) {
 		float new_scale = float(this->map->scale());
-		float2 ship_pos = graphlet_location(this->map, this->vessel_x, this->vessel_y, this->vessel->original_size(), new_scale);
+		float2 ship_pos = vessel_location(this->map, this->vessel_x, this->vessel_y, new_scale);
 
 		this->planet->move_to(this->vessel, ship_pos.x, ship_pos.y, GraphletAnchor::CC);
-		
 		this->planet->scale(new_scale);
 
 		for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
@@ -303,6 +338,8 @@ ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::Str
 		ft = ProjectDoctype::Map_LOG;
 	} else if (filename->Equals("Deep.LOG")) {
 		ft = ProjectDoctype::Depth_LOG;
+	} else if (filename->Equals("XH.DAT")) {
+		ft = ProjectDoctype::Traceline;
 	}
 
 	return ft;
@@ -312,6 +349,7 @@ void Projectlet::on_appdata(Platform::String^ ms_appdata, ProjectDocument^ doc, 
 	switch (type) {
 	case ProjectDoctype::DIG:       this->on_dig(ms_appdata, doc); break;
 	case ProjectDoctype::XYZ:       this->on_xyz(ms_appdata, doc); break;
+	case ProjectDoctype::Traceline: this->on_traceline(ms_appdata, doc); break;
 	case ProjectDoctype::Map_LOG:   this->on_map_logue(ms_appdata, doc); break;
 	case ProjectDoctype::Depth_LOG: this->on_depth_logue(ms_appdata, doc); break;
 	}

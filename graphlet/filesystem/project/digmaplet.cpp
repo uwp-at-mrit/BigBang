@@ -327,26 +327,14 @@ Size DigMaplet::length_to_local(double width, double height) {
 }
 
 bool DigMaplet::on_key(VirtualKey key, bool screen_keyboard) {
-	bool handled = false;
+	bool handled = true;
 
 	switch (key) {
-	case VirtualKey::Left: {
-		this->xtranslation -= this->tstep;
-		handled = true;
-	}; break;
-	case VirtualKey::Right: {
-		this->xtranslation += this->tstep;
-		handled = true;
-	}; break;
-
-	case VirtualKey::Up: {
-		this->ytranslation -= this->tstep;
-		handled = true;
-	}; break;
-	case VirtualKey::Down: {
-		this->ytranslation += this->tstep;
-		handled = true;
-	}; break;
+	case VirtualKey::Left: { this->xtranslation -= this->tstep; }; break;
+	case VirtualKey::Right: { this->xtranslation += this->tstep; }; break;
+	case VirtualKey::Up: { this->ytranslation -= this->tstep; }; break;
+	case VirtualKey::Down: { this->ytranslation += this->tstep; }; break;
+	default: { handled = false; }
 	}
 
 	if (handled) {
@@ -415,10 +403,30 @@ void DigMaplet::scale_transform(double stimes, float anchor_x, float anchor_y) {
 }
 
 void DigMaplet::center() {
-	Size view = this->length_to_local(this->geo_width, this->geo_height);
+	this->center_at(flnan, flnan);
+}
 
-	this->xtranslation = (this->width - view.Width) * 0.5F;
-	this->ytranslation = (this->height - view.Height) * 0.5F;
+void DigMaplet::center_at(double x, double y) {
+	double anchor_x = x;
+	double anchor_y = y;
+
+	if (flisnan(anchor_x)) {
+		anchor_x = this->geo_x + this->geo_width * 0.5F;
+	}
+
+	if (flisnan(anchor_y)) {
+		anchor_y = this->geo_y + this->geo_height * 0.5F;
+	}
+
+	this->xtranslation = 0.0F;
+	this->ytranslation = 0.0F;
+
+	{ // do translating
+		float2 cdot = this->position_to_local(anchor_x, anchor_y);
+
+		this->xtranslation = this->width * 0.5F - cdot.x;
+		this->ytranslation = this->height * 0.5F - cdot.y;
+	}
 }
 
 float DigMaplet::scaled_font_size(long long fontsize) {

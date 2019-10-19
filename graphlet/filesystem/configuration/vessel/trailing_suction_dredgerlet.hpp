@@ -69,6 +69,7 @@ namespace WarGrey::SCADA {
 		bool ready() override;
 
 	public:
+		void set_bow_direction(double degrees) override;
 		Windows::Foundation::Size original_size() override;
 
 	public:
@@ -97,6 +98,7 @@ namespace WarGrey::SCADA {
 	private:
 		Windows::Foundation::Numerics::float2 lt;
 		Windows::Foundation::Numerics::float2 rb;
+		double bow_direction;
 		float original_scale;
 		float xscale;
 		float yscale;

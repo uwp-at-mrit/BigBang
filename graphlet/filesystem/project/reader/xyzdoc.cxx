@@ -10,9 +10,7 @@ XyzDoc::XyzDoc(std::filebuf& xyz) {
 		double3 depth;
 
 		depth.y = read_flonum(xyz);
-		discard_space(xyz);
 		depth.x = read_flonum(xyz);
-		discard_space(xyz);
 		depth.z = read_flonum(xyz);
 		discard_this_line(xyz);
 

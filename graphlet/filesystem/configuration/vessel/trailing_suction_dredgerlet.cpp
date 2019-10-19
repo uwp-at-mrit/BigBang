@@ -59,7 +59,7 @@ TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, f
 	: TrailingSuctionDredgerlet(vessel, default_trailing_suction_dredger_style(), scale, ext, rootdir) {}
 
 TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, TrailingSuctionDredgerStyle& style, float scale, Platform::String^ ext, Platform::String^ rootdir)
-	: original_scale(scale), style(style) {
+	: original_scale(scale), bow_direction(0.0), xscale(1.0F), yscale(1.0F), style(style) {
 	if (vessel != nullptr) {
 		this->ms_appdata_config = ms_appdata_file(vessel, ext, rootdir);
 	} else {
@@ -68,9 +68,6 @@ TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, T
 	}
 
 	prepare_vessel_style(&this->style);
-
-	this->xscale = 1.0F;
-	this->yscale = 1.0F;
 }
 
 TrailingSuctionDredgerlet::~TrailingSuctionDredgerlet() {
@@ -117,10 +114,6 @@ void TrailingSuctionDredgerlet::fill_margin(float x, float y, float* t, float* r
 	SET_BOX(b, ry - this->rb.y);
 }
 
-Size TrailingSuctionDredgerlet::original_size() {
-	return Size(this->xradius * 2.0F, this->yradius * 2.0F);
-}
-
 void TrailingSuctionDredgerlet::reconstruct(float2* lt, float2* rb) {
 	size_t ptsize = sizeof(double2);
 	size_t bodies = sizeof(this->preview_config->body_vertexes) / ptsize;
@@ -129,16 +122,16 @@ void TrailingSuctionDredgerlet::reconstruct(float2* lt, float2* rb) {
 	float2 scale = float2(this->xscale * this->original_scale, this->yscale * this->original_scale);
 	double2 gps_pos = this->preview_config->gps[0];
 
-	this->body = vessel_polygon(this->preview_config->body_vertexes, bodies, gps_pos, scale, lt, rb);
-	this->hopper = vessel_polygon(this->preview_config->hopper_vertexes, hoppers, gps_pos, scale, lt, rb);
-	this->bridge = vessel_polygon(this->preview_config->bridge_vertexes, bridges, gps_pos, scale, lt, rb);
+	this->body = vessel_polygon(this->preview_config->body_vertexes, bodies, gps_pos, scale, this->bow_direction, lt, rb);
+	this->hopper = vessel_polygon(this->preview_config->hopper_vertexes, hoppers, gps_pos, scale, this->bow_direction, lt, rb);
+	this->bridge = vessel_polygon(this->preview_config->bridge_vertexes, bridges, gps_pos, scale, this->bow_direction, lt, rb);
 
-	this->gps[0] = vessel_point(this->preview_config->gps[0], gps_pos, scale);
-	this->gps[1] = vessel_point(this->preview_config->gps[1], gps_pos, scale);
-	this->ps_suction = vessel_point(this->preview_config->ps_suction, gps_pos, scale);
-	this->sb_suction = vessel_point(this->preview_config->sb_suction, gps_pos, scale);
-	this->trunnion = vessel_point(this->preview_config->trunnion, gps_pos, scale);
-	this->barge = vessel_point(this->preview_config->barge, gps_pos, scale);
+	this->gps[0] = vessel_point(this->preview_config->gps[0], gps_pos, scale, this->bow_direction);
+	this->gps[1] = vessel_point(this->preview_config->gps[1], gps_pos, scale, this->bow_direction);
+	this->ps_suction = vessel_point(this->preview_config->ps_suction, gps_pos, scale, this->bow_direction);
+	this->sb_suction = vessel_point(this->preview_config->sb_suction, gps_pos, scale, this->bow_direction);
+	this->trunnion = vessel_point(this->preview_config->trunnion, gps_pos, scale, this->bow_direction);
+	this->barge = vessel_point(this->preview_config->barge, gps_pos, scale, this->bow_direction);
 }
 
 void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -205,6 +198,21 @@ void TrailingSuctionDredgerlet::resize(float width, float height) {
 		this->reconstruct();
 		this->notify_updated();
 	}
+}
+
+/*************************************************************************************************/
+void TrailingSuctionDredgerlet::set_bow_direction(double degrees) {
+	if (this->ready()) {
+		if (this->bow_direction != degrees) {
+			this->bow_direction = degrees;
+			this->reconstruct();
+			this->notify_updated();
+		}
+	}
+}
+
+Size TrailingSuctionDredgerlet::original_size() {
+	return Size(this->xradius * 2.0F, this->yradius * 2.0F);
 }
 
 /*************************************************************************************************/

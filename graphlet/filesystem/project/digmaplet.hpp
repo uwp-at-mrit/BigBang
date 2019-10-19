@@ -28,11 +28,14 @@ namespace WarGrey::SCADA {
 		float plain_font_size();
 		double scale();
 
+	public:
+		void center();
+		void center_at(double x, double y);
+
 	private:
 		void preshape(WarGrey::SCADA::IDigDatum* dig);
 		void scale_transform(double stimes, float anchor_x, float anchor_y);
-		void center();
-
+		
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ plainfont;
 		std::map<Platform::String^, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> plaintexts;

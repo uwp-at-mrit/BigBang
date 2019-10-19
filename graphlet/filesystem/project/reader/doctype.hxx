@@ -8,6 +8,8 @@ namespace WarGrey::SCADA {
 	private enum class ProjectDoctype {
 		Map_LOG, Depth_LOG,
 		DIG, XYZ, MTX,
+
+		Traceline,
 		_
 	};
 
