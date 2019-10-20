@@ -208,5 +208,8 @@ void ColorPlot::refresh(ColorPlot^ src) {
 			this->colors[idx] = src->colors[idx];
 			this->enableds[idx] = src->enableds[idx];
 		}
+
+		this->min_depth = src->min_depth;
+		this->max_depth = src->max_depth;
 	}
 }

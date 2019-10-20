@@ -45,35 +45,41 @@ void Xyzlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 		float whole_width;
 
 		for (auto it = this->doc_xyz->depths.begin(); it != this->doc_xyz->depths.end(); it++) {
-			float2 pos = this->master->position_to_local(it->x, it->y, x, y);
-			
-			if (flin(ds_x, pos.x, ds_rx) && flin(ds_y, pos.y, ds_by)) {
-				float distance = points_distance(last_pos, pos);
+			if ((this->plot == nullptr) || (this->plot->in_range(it->z))) {
+				float2 pos = this->master->position_to_local(it->x, it->y, x, y);
 
-				if (distance >= delta) {
-					CanvasSolidColorBrush^ color = this->default_color;
+				if (flin(ds_x, pos.x, ds_rx) && flin(ds_y, pos.y, ds_by)) {
+					float distance = points_distance(last_pos, pos);
 
-					if (this->plot != nullptr) {
-						color = this->plot->depth_color(it->z, color);
+					if (distance >= delta) {
+						CanvasSolidColorBrush^ color = this->default_color;
+
+						if (this->plot != nullptr) {
+							color = this->plot->depth_color(it->z, color);
+						}
+
+						if (color->Color.A > 0) {
+							this->find_or_create_depth_geometry(it->z, gs, &whole_width);
+
+							ds->DrawCachedGeometry(this->location, pos.x - this->loc_xoff, pos.y - this->loc_yoff, color);
+							ds->DrawCachedGeometry(gs[0], pos.x - whole_width - this->loc_xoff, pos.y - this->num_size * 0.8F, color);
+							ds->DrawCachedGeometry(gs[1], pos.x + this->loc_xoff, pos.y - this->num_size * 0.382F, color);
+						}
+
+						last_pos = pos;
+					} else {
+#ifdef _DEBUG
+						this->get_logger()->log_message(Log::Info, L"close depth[%lf, %lf, %lf] @(%f, %f)", it->x, it->y, it->z, pos.x, pos.y);
+#endif
 					}
-
-					if (color->Color.A > 0) {
-						this->find_or_create_depth_geometry(it->z, gs, &whole_width);
-
-						ds->DrawCachedGeometry(this->location, pos.x - this->loc_xoff, pos.y - this->loc_yoff, color);
-						ds->DrawCachedGeometry(gs[0], pos.x - whole_width - this->loc_xoff, pos.y - this->num_size * 0.8F, color);
-						ds->DrawCachedGeometry(gs[1], pos.x + this->loc_xoff, pos.y - this->num_size * 0.382F, color);
-					}
-
-					last_pos = pos;
 				} else {
 #ifdef _DEBUG
-					this->get_logger()->log_message(Log::Info, L"close depth[%lf, %lf, %lf] @(%f, %f)", it->x, it->y, it->z, pos.x, pos.y);
+					this->get_logger()->log_message(Log::Info, L"invisible depth[%lf, %lf, %lf] @(%f, %f)", it->x, it->y, it->z, pos.x, pos.y);
 #endif
 				}
 			} else {
 #ifdef _DEBUG
-				this->get_logger()->log_message(Log::Info, L"invisible depth[%lf, %lf, %lf] @(%f, %f)", it->x, it->y, it->z, pos.x, pos.y);
+				this->get_logger()->log_message(Log::Info, L"filter out depth[%lf, %lf, %lf]", it->x, it->y, it->z);
 #endif
 			}
 		}
