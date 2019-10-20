@@ -68,8 +68,8 @@ static CanvasStrokeStyle^ vector_stroke_ref(long long idx) {
 DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_times, float plain_fontsize)
 	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0), tstep(32.0F) {
 	this->enable_resizing(false);
-	this->enable_events(true, false);
-
+	this->enable_events(false, false);
+	
 	/** NOTE
 	 * Do not move these lines to DigMaplet::construct(),
 	 * Diglet::on_appdata() requires the scale to locate icons.
@@ -326,66 +326,42 @@ Size DigMaplet::length_to_local(double width, double height) {
 	return Size(local_w, local_h);
 }
 
-bool DigMaplet::on_key(VirtualKey key, bool screen_keyboard) {
-	bool handled = true;
-
-	switch (key) {
-	case VirtualKey::Left: { this->xtranslation -= this->tstep; }; break;
-	case VirtualKey::Right: { this->xtranslation += this->tstep; }; break;
-	case VirtualKey::Up: { this->ytranslation -= this->tstep; }; break;
-	case VirtualKey::Down: { this->ytranslation += this->tstep; }; break;
-	default: { handled = false; }
-	}
-
-	if (handled) {
-		this->notify_updated();
-	}
-
-	return handled;
-}
-
-bool DigMaplet::on_character(unsigned int keycode) {
+void DigMaplet::transform(MapMove move) {
 	double posttimes = this->stimes;
-	bool handled = false;
-	bool center = false;
-
-	switch (keycode) {
-	case 61 /* = */: case 43 /* + */: {
+	float sx = this->width * 0.5F;
+	float sy = this->height * 0.5F;
+	
+	switch (move) {
+	case MapMove::Left: this->xtranslation -= this->tstep; break;
+	case MapMove::Right: this->xtranslation += this->tstep; break;
+	case MapMove::Up: this->ytranslation -= this->tstep; break;
+	case MapMove::Down: this->ytranslation += this->tstep; break;
+	case MapMove::ScaleUp: {
 		if (this->stimes >= 1.0) {
 			posttimes = this->stimes + 1.0;
 		} else {
 			posttimes = this->stimes * 2.0;
 		}
 
-		handled = true;
+		this->scale_transform(posttimes, sx, sy);
 	}; break;
-	case 45 /* - */: case 95 /* _ */: {
+	case MapMove::ScaleDown: {
 		if (this->stimes > 1.0) {
 			posttimes = this->stimes - 1.0;
 		} else {
 			posttimes = this->stimes * 0.5;
 		}
 
-		handled = true;
+		this->scale_transform(posttimes, sx, sy);
 	}; break;
-	case 8 /* back */: {
+	case MapMove::Reset: {
 		posttimes = 1.0;
-		center = true;
-		handled = true;
+		this->scale_transform(posttimes, sx, sy);
+		this->center();
 	}; break;
 	}
 
-	if (handled) {
-		this->scale_transform(posttimes, this->width * 0.5F, this->height * 0.5F);
-		
-		if (center) {
-			this->center();
-		}
-
-		this->notify_updated();
-	}
-
-	return handled;
+	this->notify_updated();
 }
 
 void DigMaplet::scale_transform(double stimes, float anchor_x, float anchor_y) {

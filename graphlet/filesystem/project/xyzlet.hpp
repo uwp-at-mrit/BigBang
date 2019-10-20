@@ -8,7 +8,7 @@
 namespace WarGrey::SCADA {
 	private class Xyzlet : public WarGrey::SCADA::IGraphlet {
 	public:
-		Xyzlet(WarGrey::SCADA::XyzDoc^ depths, double width, double height, float diff_ft_times = 1.2F);
+		Xyzlet(WarGrey::SCADA::XyzDoc^ depths, float diff_ft_times = 1.2F);
 
 	public:
 		void fill_extent(float x, float y, float* width, float* height) override;
@@ -33,8 +33,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::XyzDoc^ doc_xyz;
 		WarGrey::SCADA::ColorPlotlet* plot;
 		float diff_multiple;
-		float width;
-		float height;
 
 	private:
 		float loc_xoff;

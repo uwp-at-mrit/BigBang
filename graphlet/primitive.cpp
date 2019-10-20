@@ -126,3 +126,9 @@ float IGraphlet::sketch_to_application_height(float sketch_height) {
 
 	return height;
 }
+
+void IGraphlet::fill_my_location(float* x, float* y, WarGrey::SCADA::GraphletAnchor a) {
+	if (this->info != nullptr) {
+		this->info->master->fill_graphlet_location(this, x, y, a);
+	}
+}

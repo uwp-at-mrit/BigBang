@@ -631,8 +631,10 @@ IGraphlet* Planet::find_graphlet(float x, float y) {
 					sy += (this->translate_y * this->scale_y);
 
 					if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
-						found = child;
-						break;
+						if (child->is_colliding_with_mouse(x - sx, y - sy)) {
+							found = child;
+							break;
+						}
 					}
 				}
 			}

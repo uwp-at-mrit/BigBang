@@ -7,6 +7,7 @@
 #include "graphlet/filesystem/project/reader/doctype.hxx"
 #include "graphlet/filesystem/project/digmaplet.hpp"
 #include "graphlet/filesystem/project/xyzlet.hpp"
+#include "graphlet/filesystem/project/tracelinelet.hpp"
 
 #include "graphlet/planetlet.hpp"
 #include "graphlet/vessellet.hpp"
@@ -48,6 +49,7 @@ namespace WarGrey::SCADA {
 		void on_depth_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
 
 	private:
+		void move_vessel();
 		void relocate_icons();
 
 	private:
@@ -62,6 +64,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IVessellet* vessel;
 		WarGrey::SCADA::ColorPlotlet* plot;
 		WarGrey::SCADA::Xyzlet* depth_xyz;
+		WarGrey::SCADA::Tracelinelet* jobs_dat;
 		std::deque<Platform::Object^> icons;
 
 	private:

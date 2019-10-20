@@ -23,7 +23,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void fill_auto_position(float* x, float* y, WarGrey::SCADA::IGraphlet* g, WarGrey::SCADA::GraphletAnchor a) = 0;
-		virtual bool is_colliding_with_mouse(float mouse_x, float mouse_y, float x, float y) = 0;
+		virtual bool is_colliding_with_mouse(float mouse_x, float mouse_y, float keyboard_x, float keyboad_y) = 0;
 		
 	protected:
 		virtual Windows::System::VirtualKey find_tapped_key(float mouse_x, float mouse_y) = 0;

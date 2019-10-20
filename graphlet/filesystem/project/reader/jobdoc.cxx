@@ -8,8 +8,10 @@
 using namespace WarGrey::SCADA;
 
 /*************************************************************************************************/
-JobLineSection::JobLineSection(int group, double2& s, double2& e, double depth, Platform::String^ name) {
-	this->id = group;
+JobLineSection::JobLineSection(int group, int seq, double2& s, double2& e, double depth, Platform::String^ name) {
+	this->gid = group;
+	this->seq = seq;
+
 	this->sx = s.x;
 	this->sy = s.y;
 	this->ex = e.x;
@@ -18,7 +20,6 @@ JobLineSection::JobLineSection(int group, double2& s, double2& e, double depth, 
 	this->name = name;
 
 	this->angle_deg = degrees_normalize(points_angle(s.x, s.y, e.x, e.y));
-	this->length = points_distance(s.x, s.y, e.x, e.y);
 }
 
 /*************************************************************************************************/
@@ -29,14 +30,16 @@ JobDoc::JobDoc(std::filebuf& job) {
 	double depth;
 
 	read_char(job);
-	this->default_group = int(read_integer(job));
+	this->current_job = int(read_integer(job));
+	this->current_section = -1;
 	discard_this_line(job);
 
 	for (long long idx = 0; idx < n; idx++) {
 		if (peek_char(job) == EOF) {
 			break;
 		} else {
-			int id = int(read_integer(job));
+			int gid = int(read_integer(job));
+			int seq = int(this->jobs[gid].size());
 			
 			read_char(job);
 			spt.x = read_flonum(job);
@@ -51,7 +54,7 @@ JobDoc::JobDoc(std::filebuf& job) {
 			read_char(job);
 			name = read_wgb18030(job, char_end_of_field);
 
-			this->sections[id].push_back(JobLineSection(id, spt, ept, depth, name));
+			this->jobs[gid].push_back(JobLineSection(gid, seq, spt, ept, depth, name));
 
 			discard_this_line(job);
 		}

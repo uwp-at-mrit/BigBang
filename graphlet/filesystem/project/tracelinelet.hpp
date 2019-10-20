@@ -1,44 +1,45 @@
 #pragma once
 
 #include "graphlet/filesystem/project/digmaplet.hpp"
-#include "graphlet/filesystem/project/reader/xyzdoc.hxx"
+#include "graphlet/filesystem/project/reader/jobdoc.hxx"
 
 #include "graphlet/filesystem/configuration/colorplotlet.hpp"
 
 namespace WarGrey::SCADA {
-	private class Xyzlet : public WarGrey::SCADA::IGraphlet {
+	private class Tracelinelet : public WarGrey::SCADA::IGraphlet {
 	public:
-		Xyzlet(WarGrey::SCADA::XyzDoc^ depths, double width, double height, float diff_ft_times = 1.2F);
+		Tracelinelet(WarGrey::SCADA::JobDoc^ jobs, float handler_size = 0.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ hicolor = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ handler_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ handler_hicolor = nullptr);
 
 	public:
+		void construct() override;
 		void fill_extent(float x, float y, float* width, float* height) override;
+		bool is_colliding_with_mouse(float local_x, float local_y) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
+		void on_tap(float local_x, float local_y) override;
+		
 	public:
 		void attach_to_map(WarGrey::SCADA::DigMaplet* master, bool force = false);
-		void set_color_schema(WarGrey::SCADA::ColorPlotlet* plot, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback = nullptr);
+		void on_vessel_move(double vessel_x, double vessel_y);
 
 	private:
-		void find_or_create_depth_geometry(double depth, Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ gs[], float* whole_width);
+		int find_handler(float local_x, float local_y, int* group = nullptr);
 
 	private:
-		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ default_color;
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ location;
-		std::map<int, Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^> wholes;
-		std::map<int, Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^> fractions;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ handler;
+
+	private:
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color;
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ hicolor;
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ handler_color;
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ handler_hicolor;
 
 	private:
 		WarGrey::SCADA::DigMaplet* master;
-		WarGrey::SCADA::XyzDoc^ doc_xyz;
-		WarGrey::SCADA::ColorPlotlet* plot;
-		float diff_multiple;
-		float width;
-		float height;
-
-	private:
-		float loc_xoff;
-		float loc_yoff;
-		float num_size;
+		WarGrey::SCADA::JobDoc^ jobs_dat;
+		float handler_half_size;
 	};
 }

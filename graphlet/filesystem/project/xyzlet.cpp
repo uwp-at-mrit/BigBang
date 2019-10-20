@@ -22,21 +22,19 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
-Xyzlet::Xyzlet(XyzDoc^ depths, double width, double height, float diff_ft_times)
-	: doc_xyz(depths), width(float(width)), height(float(height)), master(nullptr), diff_multiple(diff_ft_times)
-	, default_color(Colours::GhostWhite) {
+Xyzlet::Xyzlet(XyzDoc^ depths, float diff_ft_times) : doc_xyz(depths), master(nullptr), diff_multiple(diff_ft_times), default_color(Colours::GhostWhite) {
 	this->enable_resizing(false);
 	this->enable_events(false, false);
 	this->camouflage(true);
 }
 
 void Xyzlet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, this->width);
-	SET_BOX(height, this->height);
+	SET_BOX(width, this->available_visible_width(x));
+	SET_BOX(height, this->available_visible_height(y));
 }
 
 void Xyzlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if (this->master != nullptr) {
+	if ((this->master != nullptr) && (this->doc_xyz != nullptr)) {
 		float ds_x = x - this->num_size;
 		float ds_y = y - this->num_size;
 		float ds_rx = x + Width + this->num_size;

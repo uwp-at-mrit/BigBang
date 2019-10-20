@@ -2,7 +2,6 @@
 
 #include "graphlet/filesystem/project/reader/depthlog.hxx"
 #include "graphlet/filesystem/project/reader/maplog.hxx"
-#include "graphlet/filesystem/project/reader/jobdoc.hxx"
 
 #include "datum/flonum.hpp"
 #include "datum/path.hpp"
@@ -42,8 +41,7 @@ namespace {
 		}
 
 	public:
-		void on_graphlet_ready(IGraphlet* g) override {
-		}
+		void on_graphlet_ready(IGraphlet* g) override {}
 
 	public:
 		void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float x, float y) override {
@@ -194,7 +192,13 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	}
 
 	if (this->depth_xyz != nullptr) {
+		this->planet->insert(this->depth_xyz, 0.0F, 0.0F);
 		this->depth_xyz->attach_to_map(this->map);
+	}
+
+	if (this->jobs_dat != nullptr) {
+		this->planet->insert(this->jobs_dat, 0.0F, 0.0F);
+		this->jobs_dat->attach_to_map(this->map);
 	}
 
 	this->planet->end_update_sequence();
@@ -204,26 +208,29 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 
 void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	XyzDoc^ doc_xyz = static_cast<XyzDoc^>(doc);
-	
-	this->planet->begin_update_sequence();
 
-	this->depth_xyz = this->planet->insert_one(new Xyzlet(doc_xyz, this->view_size.Width, this->view_size.Height));
+	this->depth_xyz = this->planet->insert_one(new Xyzlet(doc_xyz));
 	this->depth_xyz->set_color_schema(this->plot);
 	
 	if (this->map != nullptr) {
+		this->planet->begin_update_sequence();
+		this->planet->insert(this->depth_xyz, 0.0F, 0.0F);
+		this->depth_xyz->set_color_schema(this->plot);
 		this->depth_xyz->attach_to_map(this->map);
+		this->planet->end_update_sequence();
 	}
-
-	this->planet->end_update_sequence();
 }
 
 void Projectlet::on_traceline(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc) {
 	JobDoc^ xh_dat = static_cast<JobDoc^>(doc);
 	
-	for (auto it = xh_dat->sections.begin(); it != xh_dat->sections.end(); it++) {
-		for (auto line = it->second.begin(); line != it->second.end(); line++) {
-			this->get_logger()->log_message(Log::Info, L"%d: %f", line->id, line->angle_deg);
-		}
+	this->jobs_dat = new Tracelinelet(xh_dat);
+
+	if (this->map != nullptr) {
+		this->planet->begin_update_sequence();
+		this->planet->insert(this->jobs_dat, 0.0F, 0.0F);
+		this->jobs_dat->attach_to_map(this->map);
+		this->planet->end_update_sequence();
 	}
 }
 
@@ -265,15 +272,20 @@ bool Projectlet::on_key(VirtualKey key, bool screen_keyboard) {
 		handled = Planetlet::on_key(key, screen_keyboard);
 
 		if (!handled) {
+			handled = true;
+
 			switch (key) {
-			case VirtualKey::H: {
-				this->map->center_at(this->vessel_x, this->vessel_y);
-				handled = true;
-			}; break;
+			case VirtualKey::Left: this->map->transform(MapMove::Left); break;
+			case VirtualKey::Right: this->map->transform(MapMove::Right); break;
+			case VirtualKey::Up: this->map->transform(MapMove::Up); break;
+			case VirtualKey::Down: this->map->transform(MapMove::Down); break;
+			case VirtualKey::H: this->map->center_at(this->vessel_x, this->vessel_y); break;
+			default: handled = false;
 			}
 		}
 
 		if (handled) {
+			this->move_vessel();
 			this->relocate_icons();
 		}
 
@@ -291,7 +303,19 @@ bool Projectlet::on_character(unsigned int keycode) {
 
 		handled = Planetlet::on_character(keycode);
 
+		if (!handled) {
+			handled = true;
+
+			switch (keycode) {
+			case 61 /* = */: case 43 /* + */: this->map->transform(MapMove::ScaleUp); break;
+			case 45 /* - */: case 95 /* _ */: this->map->transform(MapMove::ScaleDown); break;
+			case 8 /* back */: this->map->transform(MapMove::Reset); break;
+			default: handled = false;
+			}
+		}
+
 		if (handled) {
+			this->move_vessel();
 			this->relocate_icons();
 		}
 
@@ -301,12 +325,28 @@ bool Projectlet::on_character(unsigned int keycode) {
 	return handled;
 }
 
-void Projectlet::relocate_icons() {
+void Projectlet::move_vessel() {
 	if (this->map != nullptr) {
 		float new_scale = float(this->map->scale());
 		float2 ship_pos = vessel_location(this->map, this->vessel_x, this->vessel_y, new_scale);
 
+		this->planet->begin_update_sequence();
+
 		this->planet->move_to(this->vessel, ship_pos.x, ship_pos.y, GraphletAnchor::CC);
+
+		if (this->jobs_dat != nullptr) {
+			this->jobs_dat->on_vessel_move(this->vessel_x, this->vessel_y);
+		}
+
+		this->planet->end_update_sequence();
+	}
+}
+
+void Projectlet::relocate_icons() {
+	if (this->map != nullptr) {
+		float new_scale = float(this->map->scale());
+
+		this->planet->begin_update_sequence();
 		this->planet->scale(new_scale);
 
 		for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
@@ -316,18 +356,20 @@ void Projectlet::relocate_icons() {
 			this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::LT);
 		}
 
-		this->notify_updated();
+		this->planet->end_update_sequence();
 	}
 }
 
 void Projectlet::on_location_changed(double latitude, double longitude, double altitude, double x, double y) {
-	this->latitude = latitude;
-	this->longitude = longitude;
-	this->altitude = altitude;
-	this->vessel_x = x;
-	this->vessel_y = y;
+	if ((this->vessel_x != x) || (this->vessel_y != y)) {
+		this->latitude = latitude;
+		this->longitude = longitude;
+		this->altitude = altitude;
+		this->vessel_x = x;
+		this->vessel_y = y;
 
-	this->relocate_icons();
+		this->move_vessel();
+	}
 }
 
 /*************************************************************************************************/

@@ -10,12 +10,13 @@
 namespace WarGrey::SCADA {
 	private struct JobLineSection {
 	public:
-		JobLineSection(int group,
+		JobLineSection(int group, int seq,
 			WarGrey::SCADA::double2& start_point, WarGrey::SCADA::double2& end_point,
 			double design_depth = 0.0, Platform::String^ name = nullptr);
 
 	public:
-		int id;
+		int gid;
+		int seq;
 		double sx;
 		double sy;
 		double ex;
@@ -27,7 +28,6 @@ namespace WarGrey::SCADA {
 
 	public:
 		double angle_deg;
-		double length;
 	};
 
 	private ref class JobDoc sealed : public WarGrey::SCADA::ProjectDocument {
@@ -35,7 +35,8 @@ namespace WarGrey::SCADA {
 		JobDoc(std::filebuf& dig);
 
 	internal:
-		int default_group;
-		std::map<int, std::deque<WarGrey::SCADA::JobLineSection>> sections;
+		int current_job;
+		int current_section;
+		std::map<int, std::deque<WarGrey::SCADA::JobLineSection>> jobs;
 	};
 }

@@ -27,6 +27,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void own_caret(bool is_own) {}
+		virtual void fill_my_location(float* x, float* y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT);
+		virtual bool is_colliding_with_mouse(float local_x, float local_y) { return true; }
 
 	public:
 		void moor(WarGrey::SCADA::GraphletAnchor anchor);
