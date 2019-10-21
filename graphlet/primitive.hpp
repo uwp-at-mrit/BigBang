@@ -4,6 +4,7 @@
 #include "sprite.hpp"
 
 #include "datum/enum.hpp"
+#include "datum/flonum.hpp"
 #include "datum/box.hpp"
 #include "datum/slot.hpp"
 
@@ -138,11 +139,18 @@ namespace WarGrey::SCADA {
 
 	public:
 		double get_percentage(T value) {
-			double flmin = double(this->vmin);
-			double flrange = double(this->vmax) - flmin;
-			double v = double(value);
+			double p = 1.0;
 
-			return (this->vmin == this->vmax) ? 1.0 : ((v - flmin) / flrange);
+			if (this->vmin != this->vmax) {
+				double flmin = double(this->vmin);
+				double v = double(value);
+
+				if (!flisnan(v)) {
+					p = ((v - flmin) / (double(this->vmax) - flmin));
+				}
+			}
+
+			return p;
 		}
 
 		double get_percentage() {
