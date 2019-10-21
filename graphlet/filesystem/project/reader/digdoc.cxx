@@ -11,7 +11,7 @@ DigDoc::DigDoc(std::filebuf& dig) : lx(infinity), ty(infinity), rx(-infinity), b
 	IDigDatum* datum;
 	
 	// Lucky, 160.0F for icon size works perfectly
-	while ((datum = read_dig_line(dig, 160.0F)) != nullptr) {
+	while ((datum = read_dig_line(dig, 16.0F)) != nullptr) {
 		if (datum->type < DigDatumType::_) {
 			this->push_back_item(datum);
 		}

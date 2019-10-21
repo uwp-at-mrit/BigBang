@@ -20,6 +20,21 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+static double points_distance_for_comparing(double x1, double y1, double x2, double y2) {
+	double dx = x2 - x1;
+	double dy = y2 - y1;
+
+	return (dx * dx + dy * dy);
+}
+
+static double point_segment_distance_for_comparing(double px, double py, double Ax, double Ay, double Bx, double By, double length) {
+	double u = ((px - Ax) * (Bx - Ax) + (py - Ay) * (By - Ay)) / length;
+	double fx = Ax + u * (Bx - Ax);
+	double fy = Ay + u * (By - Ay);
+
+	return points_distance_for_comparing(fx, fy, px, py);
+}
+
 /*************************************************************************************************/
 Tracelinelet::Tracelinelet(JobDoc^ jobs, float handler_size, CanvasSolidColorBrush^ color, CanvasSolidColorBrush^ hicolor
 	, CanvasSolidColorBrush^ handler_color, CanvasSolidColorBrush^ handler_hicolor)
@@ -114,15 +129,34 @@ void Tracelinelet::attach_to_map(DigMaplet* master, bool force) {
 void Tracelinelet::on_vessel_move(double vessel_x, double vessel_y) {
 	if (this->jobs_dat != nullptr) {
 		auto the_jobline = this->jobs_dat->jobs[this->jobs_dat->current_job];
-		
-		this->jobs_dat->current_section = -1;
+		double shortest_distance = infinity;
+		int closest_section = -1;
 
 		for (auto it = the_jobline.begin(); it != the_jobline.end(); it++) {
 			if (is_foot_on_segment(vessel_x, vessel_y, it->sx, it->sy, it->ex, it->ey)) {
-				this->jobs_dat->current_section = it->seq;
-				break;
+				double distance = point_segment_distance_for_comparing(vessel_x, vessel_y, it->sx, it->sy, it->ex, it->ey, it->length);
+
+				if (distance < shortest_distance) {
+					shortest_distance = distance;
+					closest_section = it->seq;
+				}
 			}
 		}
+
+		if (closest_section < 0) {
+			shortest_distance = infinity;
+
+			for (auto it = the_jobline.begin(); it != the_jobline.end(); it++) {
+				double distance = points_distance_for_comparing(vessel_x, vessel_y, it->sx, it->sy);
+
+				if (distance < shortest_distance) {
+					shortest_distance = distance;
+					closest_section = it->seq;
+				}
+			}
+		}
+
+		this->jobs_dat->current_section = closest_section;
 	}
 }
 

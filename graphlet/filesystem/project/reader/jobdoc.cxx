@@ -20,6 +20,7 @@ JobLineSection::JobLineSection(int group, int seq, double2& s, double2& e, doubl
 	this->name = name;
 
 	this->angle_deg = degrees_normalize(points_angle(s.x, s.y, e.x, e.y));
+	this->length = points_distance(this->sx, this->sy, this->ex, this->ey);
 }
 
 /*************************************************************************************************/
