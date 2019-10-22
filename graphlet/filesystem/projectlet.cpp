@@ -51,44 +51,20 @@ namespace {
 
 	private ref struct DigIconEntity sealed {
 	internal:
-		DigIconEntity(IGraphlet* icon, double x, double y, float width, float height)
-			: icon(icon), x(x), y(y), size(Size(width, height)) {}
+		DigIconEntity(IGraphlet* icon, double x, double y) : icon(icon), x(x), y(y) {}
 
 	internal:
 		IGraphlet* icon;
 		double x;
 		double y;
-		Size size;
 	};
 
-	static float2 vessel_location(DigMaplet* map, double x, double y, float scale) {
+	static float2 dot_location(DigMaplet* map, double x, double y, float scale) {
 		float2 ipos = map->position_to_local(x, y);
 		float canvas_x = ipos.x / scale;
 		float canvas_y = ipos.y / scale;
 
-		// NOTE: vessel is dot-based item
-
 		return float2(canvas_x, canvas_y);
-	}
-
-	static float2 graphlet_location(DigMaplet* map, double x, double y, Size& size, float scale) {
-		float2 idot = vessel_location(map, x, y, scale);
-	
-		/** WARNING
-		 * The modifyDIG does not handle rectangular items accurately.
-		 * Icons as well as rectangles should be translated vertically
-		 *   since modifyDIG uses the lefthand coordinate system.
-		 */
-
-		/** NOTE
-		 * Unlike Diglet, modifyDIG draws icons on the air,
-		 *   which means icons are technically dot-based items,
-		 *   thus, icons in modifyDIG are not affected by that bug.
-		 *
-		 * Also see DigMaplet::draw for DigDatumType::Rectangle.
-		 */
-
-		return float2(idot.x - size.Width * 0.5F, idot.y - size.Height);
 	}
 }
 
@@ -144,7 +120,7 @@ void Projectlet::on_depth_logue(Platform::String^ ms_appdata, ProjectDocument^ d
 void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	DigDoc^ doc_dig = static_cast<DigDoc^>(doc);
 
-	this->planet->begin_update_sequence();;
+	this->planet->begin_update_sequence();
 	
 	/** NOTE
 	 * For the sake of simplicity, non-icon items are organized as a batch.
@@ -159,7 +135,6 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	{ // make icons
 		IDigDatum* dig = nullptr;
 		float initial_scale = float(this->map->scale());
-		float icon_width, icon_height;
 		double x, y;
 
 		doc_dig->rewind();
@@ -168,17 +143,17 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 				IGraphlet* icon = dig->make_graphlet(&x, &y);
 
 				if (icon != nullptr) {
-					icon->fill_extent(0.0F, 0.0F, &icon_width, &icon_height);
+					icon->enable_resizing(false);
 
 					{ /** TODO
 					   * Find out the reason why some icons do not like their locations?
 					   * Nonetheless, icons will be relocated when the map is translated or scaled.
 					   */
 
-						DigIconEntity^ entity = ref new DigIconEntity(icon, x, y, icon_width, icon_height);
-						float2 ipos = graphlet_location(map, x, y, entity->size, initial_scale);
+						DigIconEntity^ entity = ref new DigIconEntity(icon, x, y);
+						float2 ipos = dot_location(map, x, y, initial_scale);
 
-						this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::LT);
+						this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::CC);
 						this->icons.push_back(entity);
 					}
 				}
@@ -328,7 +303,7 @@ bool Projectlet::on_character(unsigned int keycode) {
 void Projectlet::move_vessel() {
 	if (this->map != nullptr) {
 		float new_scale = float(this->map->scale());
-		float2 ship_pos = vessel_location(this->map, this->vessel_x, this->vessel_y, new_scale);
+		float2 ship_pos = dot_location(this->map, this->vessel_x, this->vessel_y, new_scale);
 
 		this->planet->begin_update_sequence();
 
@@ -350,10 +325,10 @@ void Projectlet::relocate_icons() {
 		this->planet->scale(new_scale);
 
 		for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
-			DigIconEntity^ ent = static_cast<DigIconEntity^>((*it));
-			float2 ipos = graphlet_location(this->map, ent->x, ent->y, ent->size, new_scale);
+			DigIconEntity^ ent = static_cast<DigIconEntity^>(*it);
+			float2 ipos = dot_location(this->map, ent->x, ent->y, new_scale);
 
-			this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::LT);
+			this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::CC);
 		}
 
 		this->planet->end_update_sequence();

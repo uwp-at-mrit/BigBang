@@ -28,6 +28,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		double angle_deg;
+		double length;
 	};
 
 	private ref class JobDoc sealed : public WarGrey::SCADA::ProjectDocument {
