@@ -287,7 +287,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 }
 
 float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
-	double ss = this->scale();
+	double ss = this->actual_scale();
 	float ty = yoff + this->height + this->ytranslation;
 	float tx = xoff + this->xtranslation;
 	float gy = float((x - tx) / ss + this->geo_y);
@@ -301,7 +301,7 @@ float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
 }
 
 float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) {
-	double ss = this->scale();
+	double ss = this->actual_scale();
 	float ty = yoff + this->height + this->ytranslation;
 	float tx = xoff + this->xtranslation;
 	float local_y = -float((x - this->geo_x) * ss) + ty;
@@ -315,7 +315,7 @@ float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) 
 }
 
 Size DigMaplet::length_to_local(double width, double height) {
-	double ss = this->scale();
+	double ss = this->actual_scale();
 	float local_w = float(((height <= 0.0) ? width : height) * ss);
 	float local_h = float(width * ss);
 
@@ -406,14 +406,14 @@ void DigMaplet::center_at(double x, double y) {
 }
 
 float DigMaplet::scaled_font_size(long long fontsize) {
-	return float(double(fontsize) * this->fstimes * this->scale());
+	return float(double(fontsize) * this->fstimes * this->actual_scale());
 }
 
 float DigMaplet::plain_font_size() {
 	return this->plainfont->FontSize;
 }
 
-double DigMaplet::scale() {
+double DigMaplet::actual_scale() {
 	return this->_scale * this->stimes;
 }
 

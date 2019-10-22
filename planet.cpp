@@ -118,6 +118,7 @@ static void unsafe_fill_graphlet_bound(IGraphlet* g, GraphletInfo* info, float* 
 	(*y) = info->y;
 
 	if (info->rotation != 0.0F) {
+		// WARNING: rotation is unimplemented yet, it is recommanded that, graphlet do rotating on its own.
 		// TODO: the resulting rectangle is inaccurate especially for small graphlets.
 		auto cx = (*x) + (*width) * 0.5F;
 		auto cy = (*y) + (*height) * 0.5F;
@@ -236,25 +237,24 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 	return found;
 }
 
-static void do_resize(IGraphlet* g, float x, float y, float scale_x, float scale_y) {
+static void do_resize(Planet* master, IGraphlet* g, GraphletInfo* info, float scale_x, float scale_y, float prev_scale_x = 1.0F, float prev_scale_y = 1.0F) {
 	GraphletAnchor resize_anchor;
 
-	if (g->resizable(&resize_anchor)) {
-		float width, height;
-
-		g->fill_extent(x, y, &width, &height);
-		g->resize(width * scale_x, height * scale_y);
-	}
-}
-
-static void do_resize(IGraphlet* g, GraphletInfo* info, float scale_x, float scale_y, float prev_scale_x, float prev_scale_y) {
-	GraphletAnchor resize_anchor;
+	// TODO: the theory or implementation seems incorrect. 
 
 	if (g->resizable(&resize_anchor)) {
-		float sx, sy, sw, sh;
+		float sx, sy, sw, sh, fx, fy, nx, ny, nw, nh;
 
 		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
+		graphlet_anchor_fraction(resize_anchor, &fx, &fy);
+
 		g->resize((sw / prev_scale_x) * scale_x, (sh / prev_scale_y) * scale_y);
+		g->fill_extent(sx, sy, &nw, &nh);
+
+		nx = sx + (sw - nw) * fx;
+		ny = sy + (sh - nh) * fy;
+
+		unsafe_move_graphlet_via_info(master, info, nx, ny, true);
 	}
 }
 
@@ -319,7 +319,7 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 				true);
 
 			if ((this->scale_x != 1.0F) || (this->scale_y != 1.0F)) {
-				do_resize(g, info->async->x0, info->async->y0, this->scale_x, this->scale_y);
+				do_resize(this, g, info, this->scale_x, this->scale_y);
 			}
 
 			delete info->async;
@@ -357,7 +357,7 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 
 		if (g->ready()) {
 			if ((this->scale_x != 1.0F) || (this->scale_y != 1.0F)) {
-				do_resize(g, x, y, this->scale_x, this->scale_y);
+				do_resize(this, g, info, this->scale_x, this->scale_y);
 			}
 
 			this->notify_graphlet_updated(g);
@@ -579,7 +579,7 @@ void Planet::scale(float xscale, float yscale) {
 					GraphletInfo* info = GRAPHLET_INFO(child);
 					
 					if (unsafe_graphlet_unmasked(info, this->mode)) {
-						do_resize(child, info, xscale, yscale, this->scale_x, this->scale_y);
+						do_resize(this, child, info, xscale, yscale, this->scale_x, this->scale_y);
 					}
 
 					child = info->prev;
