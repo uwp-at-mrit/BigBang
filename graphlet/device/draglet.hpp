@@ -203,8 +203,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void set_tide_mark(double tidemark);
-		void set_design_depth(double target, double tolerance);
+		void set_tide_mark(double tidemark, bool force = false);
+		void set_design_depth(double target, double tolerance, bool force = false);
 
 	protected:
 		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
@@ -262,8 +262,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void set_tide_mark(double tidemark);
-		void set_design_depth(double target, double tolerance);
+		void set_tide_mark(double tidemark, bool force = false);
+		void set_design_depth(double target, double tolerance, bool force = false);
 
 	protected:
 		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;

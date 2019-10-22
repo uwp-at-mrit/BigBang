@@ -253,8 +253,12 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 	bool changed = false;
 
 	if (!this->position_equal(this->trunnion, trunnion)) {
-		this->suction.z = trunnion.z;
 		this->trunnion = trunnion;
+		changed = true;
+	}
+
+	if (this->suction.z != flsafe(trunnion.z, this->suction.z)) {
+		this->suction.z = trunnion.z;
 		changed = true;
 	}
 
@@ -284,8 +288,8 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 		
 		this->_suction = this->space_to_local(this->suction);
 		this->_trunnion = this->space_to_local(this->trunnion);
-		this->_draghead = this->space_to_local(draghead);
-		this->draghead_m = make_text_layout(this->position_label(draghead), this->style.font);
+		this->_draghead = this->space_to_local(this->draghead);
+		this->draghead_m = make_text_layout(this->position_label(this->draghead), this->style.font);
 		
 		arm->BeginFigure(this->_suction);
 		arm->AddLine(this->_trunnion);
@@ -294,14 +298,14 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				this->rubbers[idx] = this->universal_joint;
-				this->_ujoints[idx] = this->space_to_local(ujoints[idx]);
-				this->arm_angles[idx] = this->arctangent(ujoints[idx], last_joint);
+				this->_ujoints[idx] = this->space_to_local(this->ujoints[idx]);
+				this->arm_angles[idx] = this->arctangent(this->ujoints[idx], last_joint);
 				this->joint_angles[idx] = this->arm_angles[idx] - last_arm_angle;
-				this->ujoint_ms[idx] = make_text_layout(this->position_label(ujoints[idx]), this->style.font);
+				this->ujoint_ms[idx] = make_text_layout(this->position_label(this->ujoints[idx]), this->style.font);
 				this->arm_degs[idx] = make_text_layout(this->angle_label(this->arm_angles[idx]), this->style.font);
 				this->joint_degs[idx] = make_text_layout(this->angle_label(this->joint_angles[idx]), this->style.font);
 
-				last_joint = ujoints[idx];
+				last_joint = this->ujoints[idx];
 				last_arm_angle = this->arm_angles[idx];
 
 				arm->AddLine(this->_ujoints[idx]);
@@ -736,15 +740,26 @@ float DragYZlet::z_to_y(double z) {
 	return this->ws_height * py + this->ws_y;
 }
 
-void DragYZlet::set_tide_mark(double tidemark) {
-	this->tidemark = this->z_to_y(tidemark);
-	this->notify_updated();
+void DragYZlet::set_tide_mark(double tidemark, bool force) {
+	float fltide = this->z_to_y(tidemark);
+
+	if (force || (this->tidemark != flsafe(fltide, this->tidemark))) {
+		this->tidemark = fltide;
+		this->notify_updated();
+	}
 }
 
-void DragYZlet::set_design_depth(double target, double tolerance) {
-	this->target_depth = this->z_to_y(-target);
-	this->tolerance_depth = this->z_to_y(-tolerance);
-	this->notify_updated();
+void DragYZlet::set_design_depth(double target, double tolerance, bool force) {
+	float ddepth = this->z_to_y(-target);
+	float tdepth = this->z_to_y(-tolerance);
+
+	if (force
+		|| (this->target_depth != flsafe(ddepth, this->target_depth))
+		|| (this->tolerance_depth != flsafe(tdepth, this->tolerance_depth))) {
+		this->target_depth = ddepth;
+		this->tolerance_depth = tdepth;
+		this->notify_updated();
+	}
 }
 
 /*************************************************************************************************/
@@ -999,15 +1014,26 @@ float DragXZlet::z_to_y(double z) {
 	return this->ws_height * py + this->ws_y;
 }
 
-void DragXZlet::set_tide_mark(double tidemark) {
-	this->tidemark = this->z_to_y(tidemark);
-	this->notify_updated();
+void DragXZlet::set_tide_mark(double tidemark, bool force) {
+	float tm = this->z_to_y(tidemark);
+
+	if (force || (this->tidemark != flsafe(tm, this->tidemark))) {
+		this->tidemark = tm;
+		this->notify_updated();
+	}
 }
 
-void DragXZlet::set_design_depth(double target, double tolerance) {
-	this->target_depth = this->z_to_y(-target);
-	this->tolerance_depth = this->z_to_y(-tolerance);
-	this->notify_updated();
+void DragXZlet::set_design_depth(double target, double tolerance, bool force) {
+	float ddepth = this->z_to_y(-target);
+	float tdepth = this->z_to_y(-tolerance);
+
+	if (force
+		|| (this->target_depth != flsafe(ddepth, this->target_depth))
+		|| (this->tolerance_depth != flsafe(tdepth, this->tolerance_depth))) {
+		this->target_depth = ddepth;
+		this->tolerance_depth = tdepth;
+		this->notify_updated();
+	}
 }
 
 /*************************************************************************************************/

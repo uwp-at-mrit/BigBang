@@ -130,7 +130,11 @@ void DensitySpeedmeterlet::set_density(double density, bool force) {
 	float r = this->radius;
 	float px, py;
 
-	if (force || (this->_density != flsafe(density, this->_density))) {
+	if (flisnan(density)) {
+		density = this->density_max;
+	}
+
+	if (force || (this->_density != density)) {
 		this->_density = density;
 
 		dfmeter_point(r, density, this->density_min, this->density_max, this->density_start, this->density_end, &px, &py);
@@ -145,7 +149,11 @@ void DensitySpeedmeterlet::set_flspeed(double flspeed, bool force) {
 	float r = this->radius;
 	float px, py;
 
-	if (force || (this->_flspeed != flsafe(flspeed, this->_flspeed))) {
+	if (flisnan(flspeed)) {
+		flspeed = this->flspeed_max;
+	}
+
+	if (force || (this->_flspeed != flspeed)) {
 		this->_flspeed = flspeed;
 
 		dfmeter_point(r, flspeed, this->flspeed_min, this->flspeed_max, this->flspeed_start, this->flspeed_end, &px, &py);
