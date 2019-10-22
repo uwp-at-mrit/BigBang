@@ -85,7 +85,7 @@ namespace WarGrey::SCADA {
 		virtual void on_value_changed(T value) {}
 
 	protected:
-		virtual T guarded_value(T value) { return value; }
+		virtual T guarded_value(T value) { return flsafe(value, this->value); }
 
 	private:
 		T value;
@@ -143,11 +143,8 @@ namespace WarGrey::SCADA {
 
 			if (this->vmin != this->vmax) {
 				double flmin = double(this->vmin);
-				double v = double(value);
-
-				if (!flisnan(v)) {
-					p = ((v - flmin) / (double(this->vmax) - flmin));
-				}
+				
+				p = ((double(value) - flmin) / (double(this->vmax) - flmin));
 			}
 
 			return p;
@@ -165,6 +162,8 @@ namespace WarGrey::SCADA {
 				v = this->vmax;
 			} else if (v < this->vmin) {
 				v = this->vmin;
+			} else if (flisnan(v)) {
+				v = this->vmax;
 			}
 
 			return v;

@@ -506,6 +506,10 @@ void IEditorlet::on_value_changed(double value) {
 	this->number_box = get_text_extent(this->number_layout);
 }
 
+double IEditorlet::guarded_value(double v) {
+	return v; // NaN is okay
+}
+
 void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	DimensionStyle style = this->get_style();
 	CanvasTextLayout^ nlayout = this->number_layout;

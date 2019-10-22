@@ -64,14 +64,14 @@ void OverflowPipelet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void OverflowPipelet::set_liquid_height(double h, bool force) {
-	if (force || (this->liquid_height != h)) {
+	if (force || (this->liquid_height != flsafe(h, this->liquid_height))) {
 		this->liquid_height = h;
 		this->on_liquid_height_changed(h);
 	}
 }
 
 void OverflowPipelet::set_target_height(double h, bool force) {
-	if (force || (this->target_height != h)) {
+	if (force || (this->target_height != flsafe(h, this->liquid_height))) {
 		if (this->target_style == nullptr) {
 			this->target_style = make_dash_stroke(CanvasDashStyle::Dash);
 			this->target_font = make_bold_text_format();

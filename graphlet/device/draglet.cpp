@@ -250,26 +250,34 @@ void IDraglet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, double visor_angle, bool force) {
-	bool tchanged = (!this->position_equal(this->trunnion, trunnion));
-	bool dchanged = (!this->position_equal(this->draghead, draghead));
-	bool vchanged = (this->visor_angle != visor_angle);
-	bool ichanged = false;
+	bool changed = false;
 
-	this->suction.z = trunnion.z;
-	this->trunnion = trunnion;
-	this->draghead = draghead;
-	this->visor_angle = visor_angle;
+	if (!this->position_equal(this->trunnion, trunnion)) {
+		this->suction.z = trunnion.z;
+		this->trunnion = trunnion;
+		changed = true;
+	}
+
+	if (!this->position_equal(this->draghead, draghead)) {
+		this->draghead = draghead;
+		changed = true;
+	}
+
+	if (this->visor_angle != flsafe(visor_angle, this->visor_angle)) {
+		this->visor_angle = visor_angle;
+		changed = true;
+	}
 
 	for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 		if (this->info.pipe_lengths[idx] > 0.0) {
 			if (!this->position_equal(this->ujoints[idx], ujoints[idx])) {
 				this->ujoints[idx] = ujoints[idx];
-				ichanged = true;
+				changed = true;
 			}
 		}
 	}
 
-	if (force || tchanged || ichanged || dchanged) {
+	if (force || changed) {
 		CanvasPathBuilder^ arm = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 		float3 last_joint = this->trunnion;
 		double last_arm_angle = 0.0;
@@ -282,7 +290,7 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 		arm->BeginFigure(this->_suction);
 		arm->AddLine(this->_trunnion);
 
-		// NOTE: If the angles are not the same as those received from PLC, They should check the drags
+		// NOTE: If the angles are not the same as those received from PLC, They should check drags
 		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				this->rubbers[idx] = this->universal_joint;
@@ -481,7 +489,8 @@ void DragXYlet::draw_metrics(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, 
 }
 
 bool DragXYlet::position_equal(float3& old_pos, float3& new_pos) {
-	return ((old_pos.x == new_pos.x) && (old_pos.y == new_pos.y));
+	return ((old_pos.x == flsafe(new_pos.x, old_pos.x))
+		&& (old_pos.y == flsafe(new_pos.y, old_pos.y)));
 }
 
 Platform::String^ DragXYlet::position_label(float3& position) {
@@ -686,7 +695,8 @@ void DragYZlet::draw_line(CanvasDrawingSession^ ds, float x0, float xn, float y,
 }
 
 bool DragYZlet::position_equal(float3& old_pos, float3& new_pos) {
-	return ((old_pos.y == new_pos.y) && (old_pos.z == new_pos.z));
+	return ((old_pos.y == flsafe(new_pos.y, old_pos.y))
+		&& (old_pos.z == flsafe(new_pos.z, old_pos.z)));
 }
 
 Platform::String^ DragYZlet::position_label(float3& position) {
@@ -948,7 +958,8 @@ void DragXZlet::draw_line(CanvasDrawingSession^ ds, float x0, float xn, float y,
 }
 
 bool DragXZlet::position_equal(float3& old_pos, float3& new_pos) {
-	return ((old_pos.x == new_pos.x) && (old_pos.z == new_pos.z));
+	return ((old_pos.x == flsafe(new_pos.x, old_pos.x))
+		&& (old_pos.z == flsafe(new_pos.z, old_pos.z)));
 }
 
 Platform::String^ DragXZlet::position_label(float3& position) {
@@ -1093,7 +1104,7 @@ void DragHeadlet::construct() {
 }
 
 void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
-	if (force || (this->visor_degrees != visor_angle)) {
+	if (force || (this->visor_degrees != flsafe(visor_angle, this->visor_degrees))) {
 		float visor_length = this->radius - this->translate_x;
 		double visor_pointer = drag_adjusted_angle(visor_angle, -this->sign);
 		auto visor = make_visor(this->visor_radius, this->bottom_radius, visor_length, -visor_angle, 0.0F, this->sign, &this->teeth_y);
@@ -1105,7 +1116,7 @@ void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
 		this->notify_updated();
 	}
 
-	if (force || (this->arm_earth_degrees != arm_angle)) {
+	if (force || (this->arm_earth_degrees != flsafe(arm_angle, this->arm_earth_degrees))) {
 		double arm_degrees = drag_adjusted_angle(arm_angle, this->sign);
 		
 		this->arm_pointer = geometry_freeze(make_pointer(this->arm_pointer_radius, arm_degrees, this->arrow_radius, this->pointer_style));
@@ -1116,7 +1127,7 @@ void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
 }
 
 void DragHeadlet::set_depths(float suction_depth, float draghead_depth, bool force) {
-	if (force || (this->suction_depth != -suction_depth)) {
+	if (force || (this->suction_depth != flsafe(-suction_depth, this->suction_depth))) {
 		this->suction_depth = -suction_depth;
 		this->suction_m = make_text_layout(flstring(suction_depth, this->precision), this->depth_font);
 
@@ -1125,7 +1136,7 @@ void DragHeadlet::set_depths(float suction_depth, float draghead_depth, bool for
 		}
 	}
 
-	if (force || (this->draghead_depth != -draghead_depth)) {
+	if (force || (this->draghead_depth != flsafe(-draghead_depth, this->draghead_depth))) {
 		this->draghead_depth = -draghead_depth;
 		this->depth_m = make_text_layout(flstring(draghead_depth, this->precision), this->depth_font);
 
