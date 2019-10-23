@@ -58,14 +58,6 @@ namespace {
 		double x;
 		double y;
 	};
-
-	static float2 dot_location(DigMaplet* map, double x, double y, float scale) {
-		float2 ipos = map->position_to_local(x, y);
-		float canvas_x = ipos.x / scale;
-		float canvas_y = ipos.y / scale;
-
-		return float2(canvas_x, canvas_y);
-	}
 }
 
 /*************************************************************************************************/
@@ -130,11 +122,9 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	 */
 	
 	this->map = this->planet->insert_one(new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height));
-	this->planet->scale(float(this->map->scale()));
-
+	
 	{ // make icons
 		IDigDatum* dig = nullptr;
-		float initial_scale = float(this->map->scale());
 		double x, y;
 
 		doc_dig->rewind();
@@ -151,7 +141,7 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 					   */
 
 						DigIconEntity^ entity = ref new DigIconEntity(icon, x, y);
-						float2 ipos = dot_location(map, x, y, initial_scale);
+						float2 ipos = this->map->position_to_local(x, y);
 
 						this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::CC);
 						this->icons.push_back(entity);
@@ -163,7 +153,8 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 
 	if (this->vessel != nullptr) {
 		this->map->fill_anchor_position(0.5, 0.5, &this->vessel_x, &this->vessel_y);
-		this->planet->insert(this->vessel, float(this->vessel_x), float(this->vessel_y), GraphletAnchor::CC);
+		this->planet->insert(this->vessel, this->view_size.Width * 0.5F, this->view_size.Height * 0.5F, GraphletAnchor::CC);
+		this->vessel->scale(this->map->actual_scale());
 	}
 
 	if (this->depth_xyz != nullptr) {
@@ -290,6 +281,7 @@ bool Projectlet::on_character(unsigned int keycode) {
 		}
 
 		if (handled) {
+			this->vessel->scale(this->map->actual_scale());
 			this->move_vessel();
 			this->relocate_icons();
 		}
@@ -302,8 +294,7 @@ bool Projectlet::on_character(unsigned int keycode) {
 
 void Projectlet::move_vessel() {
 	if (this->map != nullptr) {
-		float new_scale = float(this->map->scale());
-		float2 ship_pos = dot_location(this->map, this->vessel_x, this->vessel_y, new_scale);
+		float2 ship_pos = this->map->position_to_local(this->vessel_x, this->vessel_y);
 
 		this->planet->begin_update_sequence();
 
@@ -319,14 +310,11 @@ void Projectlet::move_vessel() {
 
 void Projectlet::relocate_icons() {
 	if (this->map != nullptr) {
-		float new_scale = float(this->map->scale());
-
 		this->planet->begin_update_sequence();
-		this->planet->scale(new_scale);
 
 		for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
 			DigIconEntity^ ent = static_cast<DigIconEntity^>(*it);
-			float2 ipos = dot_location(this->map, ent->x, ent->y, new_scale);
+			float2 ipos = this->map->position_to_local(ent->x, ent->y);
 
 			this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::CC);
 		}

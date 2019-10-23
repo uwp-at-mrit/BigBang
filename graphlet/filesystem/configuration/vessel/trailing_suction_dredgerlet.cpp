@@ -174,8 +174,6 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 				this->style.barge_color);
 		}
 	}
-
-	ds->DrawRectangle(x + 1.0F, y + 1.0F, Width - 2.0F, Height - 2.0F, Colours::DodgerBlue, 2.0F);
 }
 
 void TrailingSuctionDredgerlet::resize(float width, float height) {

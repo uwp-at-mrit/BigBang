@@ -16,6 +16,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual Windows::Foundation::Size original_size() = 0;
+
+	public:
+		void scale(double s);
 	};
 
 	Windows::Foundation::Numerics::float2 vessel_point(WarGrey::SCADA::double2& src,

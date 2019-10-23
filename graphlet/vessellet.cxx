@@ -3,6 +3,7 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -33,7 +34,15 @@ static float2 vessel_point_on_screen(double2& src, double2& gps, float2 s, float
 
 /*************************************************************************************************/
 IVessellet::IVessellet() {
-	this->enable_resizing(true);
+	this->enable_resizing(false); // Affine transformation is difficulty
+}
+
+void IVessellet::scale(double s) {
+	Size os = this->original_size();
+
+	this->moor(GraphletAnchor::CC);
+	this->resize(float(os.Width * s), float(os.Height * s));
+	this->notify_updated();
 }
 
 /*************************************************************************************************/

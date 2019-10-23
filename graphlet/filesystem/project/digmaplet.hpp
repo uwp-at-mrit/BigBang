@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 		void fill_anchor_position(double fx, double fy, double* x = nullptr, double* y = nullptr);
 		float scaled_font_size(long long origin_fontsize);
 		float plain_font_size();
-		double scale();
+		double actual_scale();
 
 	public:
 		void transform(WarGrey::SCADA::MapMove move);
