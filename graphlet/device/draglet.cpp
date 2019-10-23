@@ -197,8 +197,8 @@ DragLinesStyle WarGrey::SCADA::drag_default_lines_style(CanvasStrokeStyle^ strok
 	return style;
 }
 
-float WarGrey::SCADA::drag_length(DragInfo& info) {
-	float length = info.trunnion_length + info.pipe_padding + info.head_length;
+double WarGrey::SCADA::drag_length(DragInfo& info) {
+	double length = info.trunnion_length + info.pipe_padding + info.head_length;
 
 	for (unsigned int idx = 0; idx < sizeof(info.pipe_lengths) / sizeof(float); idx++) {
 		length += info.pipe_lengths[idx];
@@ -207,8 +207,8 @@ float WarGrey::SCADA::drag_length(DragInfo& info) {
 	return length;
 }
 
-float WarGrey::SCADA::drag_depth(DragInfo& info, double max_depth_degrees) {
-	return drag_length(info) * flsin(degrees_to_radians(max_depth_degrees));
+double WarGrey::SCADA::drag_depth(DragInfo& info, double max_depth_degrees) {
+	return drag_length(info) * flsin(double(degrees_to_radians(max_depth_degrees)));
 }
 
 /*************************************************************************************************/
@@ -249,7 +249,7 @@ void IDraglet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, double visor_angle, bool force) {
+void IDraglet::set_figure(double3& trunnion, double3 ujoints[], double3& draghead, double visor_angle, bool force) {
 	bool changed = false;
 
 	if (!this->position_equal(this->trunnion, trunnion)) {
@@ -267,7 +267,8 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 		changed = true;
 	}
 
-	if (this->visor_angle != flsafe(visor_angle, this->visor_angle)) {
+	visor_angle = flsafe(visor_angle, this->info.arm_degrees_min, this->info.arm_degrees_max);
+	if (this->visor_angle != visor_angle) {
 		this->visor_angle = visor_angle;
 		changed = true;
 	}
@@ -283,14 +284,14 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 
 	if (force || changed) {
 		CanvasPathBuilder^ arm = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-		float3 last_joint = this->trunnion;
+		double3 last_joint = this->trunnion;
 		double last_arm_angle = 0.0;
-		
+
 		this->_suction = this->space_to_local(this->suction);
 		this->_trunnion = this->space_to_local(this->trunnion);
 		this->_draghead = this->space_to_local(this->draghead);
 		this->draghead_m = make_text_layout(this->position_label(this->draghead), this->style.font);
-		
+
 		arm->BeginFigure(this->_suction);
 		arm->AddLine(this->_trunnion);
 
@@ -360,17 +361,17 @@ Platform::String^ IDraglet::angle_label(double angle) {
 /*************************************************************************************************/
 DragXYlet::DragXYlet(DragInfo& info, DragStyle& style, float ws_height, float interval, unsigned int ostep, unsigned int istep)
 	: IDraglet(info, style, (ws_height < 0.0F)) {
-	float drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
-	float size_scale = ws_height / this->drag_length;
+	double drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
+	double size_scale = ws_height / this->drag_length;
 
 	this->outboard_most = interval * float(ostep);
 	this->inboard_most = -interval * float(istep);
 	this->step = ostep + istep;
 
-	this->ws_width = -float(this->outboard_most - this->inboard_most) * size_scale;
+	this->ws_width = -float((this->outboard_most - this->inboard_most) * size_scale);
 	this->ws_height = flabs(ws_height);
 
-	this->drag_thickness = this->ws_height * drag_thickness_scale;
+	this->drag_thickness = this->ws_height * float(drag_thickness_scale);
 	this->joint_radius = this->drag_thickness * 0.618F;
 	this->draghead_length = this->drag_thickness * 3.14F;
 	this->visor_length = this->draghead_length * 0.382F;
@@ -404,7 +405,7 @@ void DragXYlet::construct() {
 
 void DragXYlet::update_drag_head() {
 	float ubase = this->drag_thickness;
-	float bbase = this->width * this->info.head_width / this->drag_length;
+	float bbase = this->width * float(this->info.head_width / this->drag_length);
 	float h_height = this->draghead_length - this->visor_length;
 	double angle = this->_forearm_angle + 90.0;
 	float sign = (this->leftward ? 1.0F : -1.0F);
@@ -492,29 +493,28 @@ void DragXYlet::draw_metrics(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, 
 	}
 }
 
-bool DragXYlet::position_equal(float3& old_pos, float3& new_pos) {
-	return ((old_pos.x == flsafe(new_pos.x, old_pos.x))
-		&& (old_pos.y == flsafe(new_pos.y, old_pos.y)));
+bool DragXYlet::position_equal(double3& old_pos, double3& new_pos) {
+	return ((old_pos.x == new_pos.x) && (old_pos.y == new_pos.y));
 }
 
-Platform::String^ DragXYlet::position_label(float3& position) {
+Platform::String^ DragXYlet::position_label(double3& position) {
 	return flstring(position.y, this->style.precision);
 }
 
-float2 DragXYlet::space_to_local(float3& position) {
-	float px = position.x / this->drag_length;
-	float py = float(this->outboard_most - position.y) / float(this->outboard_most - this->inboard_most);
+float2 DragXYlet::space_to_local(double3& position) {
+	double px = flsafe(position.x, -this->drag_length, this->drag_length) / this->drag_length;
+	double py = (this->outboard_most - flsafe(position.y, -this->drag_length, this->drag_length)) / (this->outboard_most - this->inboard_most);
 	float2 location;
 
-	location.x = this->ws_width * py + this->ws_x;
-	location.y = this->ws_height * px + this->ws_y;
+	location.x = this->ws_width * float(py) + this->ws_x;
+	location.y = this->ws_height * float(px) + this->ws_y;
 	
 	return location;
 }
 
-double DragXYlet::arctangent(float3& this_pt, float3& last_pt) {
-	double dx = double(this_pt.x) - double(last_pt.x);
-	double dy = double(this_pt.y) - double(last_pt.y);
+double DragXYlet::arctangent(double3& this_pt, double3& last_pt) {
+	double dx = this_pt.x - last_pt.x;
+	double dy = this_pt.y - last_pt.y;
 	double degrees = radians_to_degrees(flatan(dy, dx));
 
 	return degrees;
@@ -524,19 +524,19 @@ double DragXYlet::arctangent(float3& this_pt, float3& last_pt) {
 DragYZlet::DragYZlet(DragInfo& info, DragStyle& style, DragLinesStyle& lines_style, float ws_height, double max_depth_degrees
 	, float vinterval, float hinterval, unsigned int ostep, unsigned int istep)
 	: IDraglet(info, style, (ws_height < 0.0F)), depth_highest(vinterval), lines_style(lines_style) {
-	float depth_max = flceiling(this->drag_length * flsin(degrees_to_radians(max_depth_degrees)) / vinterval) * vinterval;
-	float drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
-	float size_scale = ws_height / this->drag_length;
+	double depth_max = flceiling(this->drag_length * flsin(degrees_to_radians(max_depth_degrees)) / vinterval) * vinterval;
+	double drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
+	double size_scale = ws_height / this->drag_length;
 
 	this->outboard_most = hinterval * float(ostep);
 	this->inboard_most = -hinterval * float(istep);
 	this->hstep = ostep + istep;
 
-	this->ws_width = -float(this->outboard_most - this->inboard_most) * size_scale;
+	this->ws_width = -float((this->outboard_most - this->inboard_most) * size_scale);
 	this->ws_height = flabs(ws_height);
 	this->depth_lowest = -depth_max;
 
-	this->drag_thickness = this->ws_height * drag_thickness_scale;
+	this->drag_thickness = this->ws_height * float(drag_thickness_scale);
 	this->joint_radius = this->drag_thickness * 0.618F;
 	this->draghead_length = this->drag_thickness * 3.14F;
 	this->visor_length = this->draghead_length * 0.382F;
@@ -587,7 +587,7 @@ void DragYZlet::construct() {
 
 void DragYZlet::update_drag_head() {
 	float head_height = this->drag_thickness + this->style.thickness;
-	float head_width = this->width * this->info.head_width / this->drag_length;
+	float head_width = this->width * float(this->info.head_width / this->drag_length);
 	auto shape = rounded_rectangle(-head_width * 0.5F, -head_height * 0.5F, head_width, head_height,
 		this->style.thickness, this->style.thickness);
 	
@@ -698,16 +698,15 @@ void DragYZlet::draw_line(CanvasDrawingSession^ ds, float x0, float xn, float y,
 	}
 }
 
-bool DragYZlet::position_equal(float3& old_pos, float3& new_pos) {
-	return ((old_pos.y == flsafe(new_pos.y, old_pos.y))
-		&& (old_pos.z == flsafe(new_pos.z, old_pos.z)));
+bool DragYZlet::position_equal(double3& old_pos, double3& new_pos) {
+	return ((old_pos.y == new_pos.y) && (old_pos.z == new_pos.z));
 }
 
-Platform::String^ DragYZlet::position_label(float3& position) {
+Platform::String^ DragYZlet::position_label(double3& position) {
 	return flstring(position.z, this->style.precision);
 }
 
-float2 DragYZlet::space_to_local(float3& position) {
+float2 DragYZlet::space_to_local(double3& position) {
 	float2 location;
 
 	location.x = this->y_to_x(position.y);
@@ -716,28 +715,28 @@ float2 DragYZlet::space_to_local(float3& position) {
 	return location;
 }
 
-double DragYZlet::arctangent(float3& this_pt, float3& last_pt) {
-	double dx = double(this_pt.y) - double(last_pt.y);
-	double dy = double(this_pt.z) - double(last_pt.z);
+double DragYZlet::arctangent(double3& this_pt, double3& last_pt) {
+	double dx = this_pt.y - last_pt.y;
+	double dy = this_pt.z - last_pt.z;
 	double degrees = radians_to_degrees(flatan(dy, dx));
 
 	return degrees;
 }
 
-void DragYZlet::on_position_changed(float3& trunnion, float3 ujoints[], float3& draghead) {
+void DragYZlet::on_position_changed(double3& trunnion, double3 ujoints[], double3& draghead) {
 	this->suction_m = make_text_layout(flstring(trunnion.z, this->style.precision), this->style.font);
 }
 
 float DragYZlet::y_to_x(double y) {
-	float px = float(this->outboard_most - y) / float(this->outboard_most - this->inboard_most);
+	double px = (this->outboard_most - flsafe(y, -this->drag_length, this->drag_length)) / (this->outboard_most - this->inboard_most);
 
-	return this->ws_width * px + this->ws_x;
+	return this->ws_width * float(px) + this->ws_x;
 }
 
 float DragYZlet::z_to_y(double z) {
-	float py = float(this->depth_highest - z) / float(this->depth_highest - this->depth_lowest);
+	double py = (this->depth_highest - flsafe(z, -this->drag_length, this->drag_length)) / (this->depth_highest - this->depth_lowest);
 
-	return this->ws_height * py + this->ws_y;
+	return this->ws_height * float(py) + this->ws_y;
 }
 
 void DragYZlet::set_tide_mark(double tidemark, bool force) {
@@ -766,15 +765,15 @@ void DragYZlet::set_design_depth(double target, double tolerance, bool force) {
 DragXZlet::DragXZlet(DragInfo& info, DragStyle& style, DragLinesStyle& lines_style
 	, float ws_width, double max_depth_degrees, float interval, float suction_lowest)
 	: IDraglet(info, style, (ws_width < 0.0F)), depth_highest(interval), suction_lowest(suction_lowest), lines_style(lines_style) {
-	float size_scale = flabs(ws_width) / this->drag_length;
-	float depth_max = flceiling(this->drag_length * flsin(degrees_to_radians(max_depth_degrees)) / interval) * interval;
-	float drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
+	double size_scale = flabs(ws_width) / this->drag_length;
+	double depth_max = flceiling(this->drag_length * flsin(degrees_to_radians(max_depth_degrees)) / interval) * interval;
+	double drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
 
 	this->ws_width = ws_width;
-	this->ws_height = float(this->depth_highest + depth_max) * size_scale;
+	this->ws_height = float((this->depth_highest + depth_max) * size_scale);
 	this->depth_lowest = -depth_max;
 
-	this->drag_thickness = flabs(this->ws_width) * drag_thickness_scale;
+	this->drag_thickness = flabs(this->ws_width) * float(drag_thickness_scale);
 	this->joint_radius = this->drag_thickness * 0.618F;
 	this->draghead_length = this->drag_thickness * 3.14F;
 	this->visor_length = this->draghead_length * 0.5F;
@@ -822,8 +821,8 @@ void DragXZlet::construct() {
 	}
 
 	{ // make x-axis
-		float x_left = (this->leftward ? this->drag_length : 0.0F);
-		float x_right = (this->leftward ? 0.0F : this->drag_length);
+		double x_left = (this->leftward ? this->drag_length : 0.0F);
+		double x_right = (this->leftward ? 0.0F : this->drag_length);
 		HHatchMarkMetrics xmetrics = hhatchmark_metrics(x_left, x_right, this->style.thickness, this->style.precision);
 		float x_width = flabs(this->ws_width) + xmetrics.hatch_x + xmetrics.hatch_rx;
 		auto axis = hthatchmark(x_width, x_left, x_right, head_step - 1U, this->style.thickness, &xmetrics, this->style.precision);
@@ -972,16 +971,15 @@ void DragXZlet::draw_line(CanvasDrawingSession^ ds, float x0, float xn, float y,
 	}
 }
 
-bool DragXZlet::position_equal(float3& old_pos, float3& new_pos) {
-	return ((old_pos.x == flsafe(new_pos.x, old_pos.x))
-		&& (old_pos.z == flsafe(new_pos.z, old_pos.z)));
+bool DragXZlet::position_equal(double3& old_pos, double3& new_pos) {
+	return ((old_pos.x == new_pos.x) && (old_pos.z == new_pos.z));
 }
 
-Platform::String^ DragXZlet::position_label(float3& position) {
+Platform::String^ DragXZlet::position_label(double3& position) {
 	return flstring(position.z, this->style.precision);
 }
 
-float2 DragXZlet::space_to_local(float3& position) {
+float2 DragXZlet::space_to_local(double3& position) {
 	float2 location;
 
 	location.x = this->x_to_x(position.x);
@@ -990,28 +988,28 @@ float2 DragXZlet::space_to_local(float3& position) {
 	return location;
 }
 
-double DragXZlet::arctangent(float3& this_pt, float3& last_pt) {
-	double dx = double(this_pt.x) - double(last_pt.x);
-	double dy = double(this_pt.z) - double(last_pt.z);
+double DragXZlet::arctangent(double3& this_pt, double3& last_pt) {
+	double dx = this_pt.x - last_pt.x;
+	double dy = this_pt.z - last_pt.z;
 	double degrees = radians_to_degrees(flatan(dy, dx));
 
 	return degrees;
 }
 
-void DragXZlet::on_position_changed(float3& trunnion, float3 ujoints[], float3& draghead) {
+void DragXZlet::on_position_changed(double3& trunnion, double3 ujoints[], double3& draghead) {
 	this->suction_m = make_text_layout(flstring(trunnion.z, this->style.precision), this->style.font);
 }
 
 float DragXZlet::x_to_x(double x) {
-	float px = float(x) / this->drag_length;
+	double px = flsafe(x, -this->drag_length, this->drag_length) / this->drag_length;
 
-	return this->ws_width * px + this->ws_x;
+	return this->ws_width * float(px) + this->ws_x;
 }
 
 float DragXZlet::z_to_y(double z) {
-	float py = float(this->depth_highest - z) / float(this->depth_highest - this->depth_lowest);
+	double py = (this->depth_highest - flsafe(z, -this->drag_length, this->drag_length)) / (this->depth_highest - this->depth_lowest);
 	
-	return this->ws_height * py + this->ws_y;
+	return this->ws_height * float(py) + this->ws_y;
 }
 
 void DragXZlet::set_tide_mark(double tidemark, bool force) {
@@ -1040,7 +1038,7 @@ void DragXZlet::set_design_depth(double target, double tolerance, bool force) {
 DragHeadlet::DragHeadlet(DragInfo& info, float radius, unsigned int color, double max_depth_degrees, float thickness
 	, ICanvasBrush^ bcolor, ICanvasBrush^ acolor, ICanvasBrush^ sdcolor, ICanvasBrush^ ddcolor, ICanvasBrush^ hmcolor)
 	: info(info), radius(flabs(radius)), sign((radius < 0.0F) ? 1.0F : -1.0F), thickness(thickness)
-	, precision(2U), depth_interval(10.0F), offset(30.0), visor_color(Colours::make(color))
+	, precision(2U), depth_interval(10.0), offset(30.0), visor_color(Colours::make(color))
 	, body_color(bcolor == nullptr ? drag_default_head_color : bcolor)
 	, angle_pointer_color(acolor == nullptr ? drag_default_angle_pointer_color : acolor)
 	, suction_pointer_color(acolor == nullptr ? drag_default_suction_depth_pointer_color : sdcolor)
@@ -1070,7 +1068,7 @@ void DragHeadlet::construct() {
 	VHatchMarkMetrics dmetrics;
 	float aradius = this->radius * 1.000F;
 	float vradius = this->radius * 0.618F;
-	unsigned int depth_step = ((unsigned int)flround(this->depth_range / depth_interval)) + 1;
+	unsigned int depth_step = ((unsigned int)flround(this->depth_range / this->depth_interval)) + 1;
 	double adeg0 = drag_adjusted_angle(0.0, this->sign);
 	double adegn = drag_adjusted_angle(this->info.arm_degrees_max, this->sign);
 	double vdeg0 = drag_adjusted_angle(this->info.visor_degrees_min, -this->sign);
@@ -1103,7 +1101,7 @@ void DragHeadlet::construct() {
 
 	if (this->sign > 0.0F) { // leftward
 		float height = this->radius - this->bottom_radius + this->translate_y;
-		auto dhatchmark = vrhatchmark(height, -this->depth_range, depth_interval, depth_step, 1.0F, &dmetrics, 0U, true, this->depth_font);
+		auto dhatchmark = vrhatchmark(height, -this->depth_range, this->depth_interval, depth_step, 1.0F, &dmetrics, 0U, true, this->depth_font);
 		float arrow_length = dmetrics.width;
 		auto arrow = hline(arrow_length);
 		auto arrowhead = polar_arrowhead(this->arrow_radius, 0.0);
@@ -1130,7 +1128,9 @@ void DragHeadlet::construct() {
 }
 
 void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
-	if (force || (this->visor_degrees != flsafe(visor_angle, this->visor_degrees))) {
+	visor_angle = flsafe(visor_angle, this->info.arm_degrees_min, this->info.arm_degrees_max);
+
+	if (force || (this->visor_degrees != visor_angle)) {
 		float visor_length = this->radius - this->translate_x;
 		double visor_pointer = drag_adjusted_angle(visor_angle, -this->sign);
 		auto visor = make_visor(this->visor_radius, this->bottom_radius, visor_length, -visor_angle, 0.0F, this->sign, &this->teeth_y);
@@ -1152,7 +1152,7 @@ void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
 	}
 }
 
-void DragHeadlet::set_depths(float suction_depth, float draghead_depth, bool force) {
+void DragHeadlet::set_depths(double suction_depth, double draghead_depth, bool force) {
 	if (force || (this->suction_depth != flsafe(-suction_depth, this->suction_depth))) {
 		this->suction_depth = -suction_depth;
 		this->suction_m = make_text_layout(flstring(suction_depth, this->precision), this->depth_font);
@@ -1186,9 +1186,9 @@ void DragHeadlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	if (this->depth_shown) {
 		Rect suction_box = this->suction_m->LayoutBounds;
 		Rect depth_box = this->depth_m->LayoutBounds;
-		float depth_range = this->depth_interval + this->depth_range;
-		float suction_dy = (this->depth_interval - this->suction_depth) / depth_range * this->depth_height + this->depth_top;
-		float draghead_dy = (this->depth_interval - this->draghead_depth) / depth_range * this->depth_height + this->depth_top;
+		float depth_range = float(this->depth_interval + this->depth_range);
+		float suction_dy = float(this->depth_interval - this->suction_depth) / depth_range * this->depth_height + this->depth_top;
+		float draghead_dy = float(this->depth_interval - this->draghead_depth) / depth_range * this->depth_height + this->depth_top;
 		float depth_x = cx + this->depth_x;
 		float depth_meter_y = cy + draghead_dy - depth_box.Height * 0.5F;
 		float suction_meter_y = cy + suction_dy - suction_box.Height * 0.5F;

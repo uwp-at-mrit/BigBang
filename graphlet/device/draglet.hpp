@@ -9,15 +9,15 @@ namespace WarGrey::SCADA {
 #define DRAG_SEGMENT_MAX_COUNT 3
 
 	private struct DragInfo {
-		float trunnion_gapsize;
-		float trunnion_length;
-		float pipe_lengths[DRAG_SEGMENT_MAX_COUNT];
-		float pipe_padding;
-		float pipe_radius;
-		float head_width;
-		float head_length;
-		float head_height;
-		float head_compensation;
+		double trunnion_gapsize;
+		double trunnion_length;
+		double pipe_lengths[DRAG_SEGMENT_MAX_COUNT];
+		double pipe_padding;
+		double pipe_radius;
+		double head_width;
+		double head_length;
+		double head_height;
+		double head_compensation;
 		double visor_degrees_min;
 		double visor_degrees_max;
 		double arm_degrees_min;
@@ -49,8 +49,8 @@ namespace WarGrey::SCADA {
 		float thickness;
 	};
 
-	float drag_length(WarGrey::SCADA::DragInfo& info);
-	float drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees = 60.0);
+	double drag_length(WarGrey::SCADA::DragInfo& info);
+	double drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees = 60.0);
 
 	WarGrey::SCADA::DragStyle drag_default_style(unsigned int color,
 		unsigned int precision = 2U, float fontsize = 24.0F, float thickness = 2.0F);
@@ -66,7 +66,7 @@ namespace WarGrey::SCADA {
 		IDraglet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style, bool leftward);
 
 	public:
-		virtual Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& X) = 0;
+		virtual Windows::Foundation::Numerics::float2 space_to_local(WarGrey::SCADA::double3& X) = 0;
 
 	public:
 		void update(long long count, long long interval, long long uptime) override;
@@ -74,11 +74,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_dredging(bool on) { this->dredging = on; }
-		void set_figure(Windows::Foundation::Numerics::float3& trunnion,
-			Windows::Foundation::Numerics::float3 ujoints[],
-			Windows::Foundation::Numerics::float3& draghead,
-			double visor_angle,
-			bool force = false);
+		void set_figure(WarGrey::SCADA::double3& trunnion, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead, double visor_angle, bool force = false);
 
 	public:
 		double get_arm_degrees(unsigned int idx = DRAG_SEGMENT_MAX_COUNT);
@@ -86,17 +82,15 @@ namespace WarGrey::SCADA {
 		double get_visor_earth_degrees();
 
 	protected:
-		virtual double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) = 0;
+		virtual double arctangent(WarGrey::SCADA::double3& pt1, WarGrey::SCADA::double3& pt2) = 0;
 
 	protected:
-		virtual bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) = 0;
-		virtual Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) = 0;
+		virtual bool position_equal(WarGrey::SCADA::double3& old_pos, WarGrey::SCADA::double3& new_pos) = 0;
+		virtual Platform::String^ position_label(WarGrey::SCADA::double3& position) = 0;
 		virtual Platform::String^ angle_label(double degrees);
 		virtual void update_drag_head() = 0;
 		
-		virtual void on_position_changed(Windows::Foundation::Numerics::float3& trunnion,
-			Windows::Foundation::Numerics::float3 ujoints[],
-			Windows::Foundation::Numerics::float3& draghead) {}
+		virtual void on_position_changed(WarGrey::SCADA::double3& trunnion, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead) {}
 
 	protected:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
@@ -134,15 +128,15 @@ namespace WarGrey::SCADA {
 
 	protected: // real 3D coordinates
 		WarGrey::SCADA::DragInfo info;
-		Windows::Foundation::Numerics::float3 suction;
-		Windows::Foundation::Numerics::float3 trunnion;
-		Windows::Foundation::Numerics::float3 ujoints[DRAG_SEGMENT_MAX_COUNT];
-		Windows::Foundation::Numerics::float3 draghead;
+		WarGrey::SCADA::double3 suction;
+		WarGrey::SCADA::double3 trunnion;
+		WarGrey::SCADA::double3 ujoints[DRAG_SEGMENT_MAX_COUNT];
+		WarGrey::SCADA::double3 draghead;
 		double arm_angles[DRAG_SEGMENT_MAX_COUNT];
 		double joint_angles[DRAG_SEGMENT_MAX_COUNT];
 		double forearm_angle;
 		double forejoint_angle;
-		float drag_length;
+		double drag_length;
 
 	protected: // graphlets 2D coordinates
 		Windows::Foundation::Numerics::float2 _suction;
@@ -164,18 +158,18 @@ namespace WarGrey::SCADA {
 			float ws_height, float hatchmark_interval = 4.0F, unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
 
 	public:
-		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+		Windows::Foundation::Numerics::float2 space_to_local(WarGrey::SCADA::double3& position) override;
 
 	public:
 		void construct() override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
+		double arctangent(WarGrey::SCADA::double3& pt1, WarGrey::SCADA::double3& pt2) override;
 		
 	protected:
-		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
-		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
+		bool position_equal(WarGrey::SCADA::double3& old_pos, WarGrey::SCADA::double3& new_pos) override;
+		Platform::String^ position_label(WarGrey::SCADA::double3& position) override;
 		void update_drag_head() override;
 
 	private:
@@ -196,7 +190,7 @@ namespace WarGrey::SCADA {
 			unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
 
 	public:
-		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+		Windows::Foundation::Numerics::float2 space_to_local(WarGrey::SCADA::double3& position) override;
 
 	public:
 		void construct() override;
@@ -207,16 +201,14 @@ namespace WarGrey::SCADA {
 		void set_design_depth(double target, double tolerance, bool force = false);
 
 	protected:
-		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
+		double arctangent(WarGrey::SCADA::double3& pt1, WarGrey::SCADA::double3& pt2) override;
 
 	protected:
-		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
-		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
+		bool position_equal(WarGrey::SCADA::double3& old_pos, WarGrey::SCADA::double3& new_pos) override;
+		Platform::String^ position_label(WarGrey::SCADA::double3& position) override;
 		void update_drag_head() override;
 
-		void on_position_changed(Windows::Foundation::Numerics::float3& trunnion,
-			Windows::Foundation::Numerics::float3 ujoints[],
-			Windows::Foundation::Numerics::float3& draghead) override;
+		void on_position_changed(WarGrey::SCADA::double3& trunnion, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead) override;
 
 	private:
 		float y_to_x(double y);
@@ -255,7 +247,7 @@ namespace WarGrey::SCADA {
 			float hatchmark_interval = 5.0F, float suction_lowest = -15.0F);
 
 	public:
-		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+		Windows::Foundation::Numerics::float2 space_to_local(WarGrey::SCADA::double3& position) override;
 
 	public:
 		void construct() override;
@@ -266,16 +258,14 @@ namespace WarGrey::SCADA {
 		void set_design_depth(double target, double tolerance, bool force = false);
 
 	protected:
-		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
+		double arctangent(WarGrey::SCADA::double3& pt1, WarGrey::SCADA::double3& pt2) override;
 
 	protected:
-		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
-		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
+		bool position_equal(WarGrey::SCADA::double3& old_pos, WarGrey::SCADA::double3& new_pos) override;
+		Platform::String^ position_label(WarGrey::SCADA::double3& position) override;
 		void update_drag_head() override;
 
-		void on_position_changed(Windows::Foundation::Numerics::float3& trunnion,
-			Windows::Foundation::Numerics::float3 ujoints[],
-			Windows::Foundation::Numerics::float3& draghead) override;
+		void on_position_changed(WarGrey::SCADA::double3& trunnion, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead) override;
 
 	private:
 		float x_to_x(double x);
@@ -334,7 +324,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_angles(double visor_degrees, double arm_degrees, bool force = false);
-		void set_depths(float suction_depth, float draghead_depth, bool force = false);
+		void set_depths(double suction_depth, double draghead_depth, bool force = false);
 
 	public:
 		void show_depth_metrics(bool yes_or_no);
@@ -363,8 +353,8 @@ namespace WarGrey::SCADA {
 		
 	private:
 		WarGrey::SCADA::DragInfo info;
-		float depth_interval;
-		float depth_range;
+		double depth_interval;
+		double depth_range;
 		double offset;
 		float radius;
 		float thickness;
@@ -390,8 +380,8 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool depth_shown;
-		float suction_depth;
-		float draghead_depth;
+		double suction_depth;
+		double draghead_depth;
 		float depth_x;
 	};
 }

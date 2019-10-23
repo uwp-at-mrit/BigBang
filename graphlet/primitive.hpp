@@ -158,15 +158,7 @@ namespace WarGrey::SCADA {
 		virtual bool can_change_range() { return false; }
 
 		T guarded_value(T v) override {
-			if (v > this->vmax) {
-				v = this->vmax;
-			} else if (v < this->vmin) {
-				v = this->vmin;
-			} else if (flisnan(v)) {
-				v = this->vmax;
-			}
-
-			return v;
+			return flsafe(v, this->vmin, this->vmax);
 		}
 
 	protected:
