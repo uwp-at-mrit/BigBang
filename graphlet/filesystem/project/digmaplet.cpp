@@ -72,7 +72,7 @@ DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_t
 	
 	/** NOTE
 	 * Do not move these lines to DigMaplet::construct(),
-	 * Diglet::on_appdata() requires the scale to locate icons.
+	 * Projectlet::on_appdata() requires the scale to locate icons.
 	 */
 	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
 	this->_scale = flmin(this->width / this->geo_height, this->height / this->geo_width);
@@ -280,7 +280,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 #ifdef _DEBUG
 		this->get_logger()->log_message(Log::Debug,
 			L"invisible: %s; view window: (%f, %f), (%f, %f); scale: %f; translation: [%f, %f]",
-			dig->to_string()->Data(), x, y, ds_rx, ds_by, this->scale(), this->xtranslation, this->ytranslation);
+			dig->to_string()->Data(), x, y, ds_rx, ds_by, this->actual_scale(), this->xtranslation, this->ytranslation);
 #endif
 		}
 	}

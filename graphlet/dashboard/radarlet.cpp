@@ -111,13 +111,13 @@ void IRadarlet::reshape() {
 	double rad_step = 2.0 * pi / double(this->count);
 	float vx, vy;
 
-	circle_point(this->radius * this->scales[0], float(radian0), &vx, &vy);
+	circle_point(this->radius * float(this->scales[0]), float(radian0), &vx, &vy);
 	shape->BeginFigure(vx, vy);
 
 	for (unsigned int idx = 1; idx < this->count; idx++) {
 		float radian = float(radian0 + rad_step * double(idx));
 
-		circle_point(this->radius * this->scales[idx], radian, &vx, &vy);
+		circle_point(this->radius * float(this->scales[idx]), radian, &vx, &vy);
 		shape->AddLine(vx, vy);
 	}
 

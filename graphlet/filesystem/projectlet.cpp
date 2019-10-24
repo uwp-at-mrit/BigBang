@@ -7,6 +7,8 @@
 #include "datum/path.hpp"
 #include "datum/file.hpp"
 
+#include "ch6000m3/iotables/ai_dredges.hpp"
+
 #include "planet.hpp"
 #include "text.hpp"
 #include "shape.hpp"
@@ -154,7 +156,6 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	if (this->vessel != nullptr) {
 		this->map->fill_anchor_position(0.5, 0.5, &this->vessel_x, &this->vessel_y);
 		this->planet->insert(this->vessel, this->view_size.Width * 0.5F, this->view_size.Height * 0.5F, GraphletAnchor::CC);
-		this->vessel->scale(this->map->actual_scale());
 	}
 
 	if (this->depth_xyz != nullptr) {
@@ -281,7 +282,6 @@ bool Projectlet::on_character(unsigned int keycode) {
 		}
 
 		if (handled) {
-			this->vessel->scale(this->map->actual_scale());
 			this->move_vessel();
 			this->relocate_icons();
 		}
@@ -294,11 +294,12 @@ bool Projectlet::on_character(unsigned int keycode) {
 
 void Projectlet::move_vessel() {
 	if (this->map != nullptr) {
-		float2 ship_pos = this->map->position_to_local(this->vessel_x, this->vessel_y);
+		float2 vpos = this->map->position_to_local(this->vessel_x, this->vessel_y);
 
 		this->planet->begin_update_sequence();
 
-		this->planet->move_to(this->vessel, ship_pos.x, ship_pos.y, GraphletAnchor::CC);
+		this->vessel->scale(this->map->actual_scale());
+		this->planet->move_to(this->vessel, vpos.x, vpos.y, GraphletAnchor::CC);
 
 		if (this->jobs_dat != nullptr) {
 			this->jobs_dat->on_vessel_move(this->vessel_x, this->vessel_y);

@@ -42,7 +42,6 @@ void IVessellet::scale(double s) {
 
 	this->moor(GraphletAnchor::CC);
 	this->resize(float(os.Width * s), float(os.Height * s));
-	this->notify_updated();
 }
 
 /*************************************************************************************************/

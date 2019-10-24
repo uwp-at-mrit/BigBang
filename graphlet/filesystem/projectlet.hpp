@@ -2,15 +2,15 @@
 
 #include <deque>
 
+#include "graphlet/planetlet.hpp"
+#include "graphlet/vessellet.hpp"
+
 #include "graphlet/filesystem/msappdataloguelet.hxx"
 #include "graphlet/filesystem/configuration/colorplotlet.hpp"
 #include "graphlet/filesystem/project/reader/doctype.hxx"
 #include "graphlet/filesystem/project/digmaplet.hpp"
 #include "graphlet/filesystem/project/xyzlet.hpp"
 #include "graphlet/filesystem/project/tracelinelet.hpp"
-
-#include "graphlet/planetlet.hpp"
-#include "graphlet/vessellet.hpp"
 
 #include "graphlet/symbol/dig/dig.hpp"
 
