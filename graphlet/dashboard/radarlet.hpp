@@ -27,8 +27,8 @@ namespace WarGrey::SCADA {
 	private class IRadarlet abstract : public WarGrey::SCADA::IGraphlet {
 	public:
 		virtual ~IRadarlet() noexcept;
-		IRadarlet(float radius, unsigned int count, float* initials = nullptr);
-		IRadarlet(float radius, unsigned int count, WarGrey::SCADA::RadarStyle& style, float* initials = nullptr);
+		IRadarlet(float radius, unsigned int count, double* initials = nullptr);
+		IRadarlet(float radius, unsigned int count, WarGrey::SCADA::RadarStyle& style, double* initials = nullptr);
 
 	public:
 		void construct() override;
@@ -36,8 +36,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void set_scales(float* vs);
-		void set_scale(unsigned int index, float v);
+		void set_scales(double* vs);
+		void set_scale(unsigned int index, double v);
 
 	protected:
 		Platform::Array<Platform::String^>^ captions;
@@ -57,7 +57,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		unsigned int count;
-		float* scales;
+		double* scales;
 		float Radius;
 		float radius;
 	};
@@ -65,18 +65,18 @@ namespace WarGrey::SCADA {
 	template<typename E>
 	private class Radarlet : public WarGrey::SCADA::IRadarlet {
 	public:
-		Radarlet(Platform::String^ tongue, float radius, float* initials = nullptr)
+		Radarlet(Platform::String^ tongue, float radius, double* initials = nullptr)
 			: IRadarlet(radius, _N(E), initials) {
 			this->initialize_caption(tongue);
 		}
 
-		Radarlet(Platform::String^ tongue, float radius, WarGrey::SCADA::RadarStyle& style, float* initials = nullptr)
+		Radarlet(Platform::String^ tongue, float radius, WarGrey::SCADA::RadarStyle& style, double* initials = nullptr)
 			: IRadarlet(radius, _N(E), style, initials) {
 			this->initialize_caption(tongue);
 		}
 
 	public:
-		void set_scale(E id, float v) {
+		void set_scale(E id, double v) {
 			IRadarlet::set_scale(_I(id), v);
 		}
 

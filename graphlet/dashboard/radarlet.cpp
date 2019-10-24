@@ -29,19 +29,19 @@ static CanvasSolidColorBrush^ radar_default_label_color = Colours::Snow;
 static CanvasSolidColorBrush^ radar_default_ring_color = Colours::GrayText;
 
 /*************************************************************************************************/
-IRadarlet::IRadarlet(float radius, unsigned int count, float* initials)
+IRadarlet::IRadarlet(float radius, unsigned int count, double* initials)
 	: IRadarlet(radius, count, default_radar_style, initials) {}
 
-IRadarlet::IRadarlet(float radius, unsigned int count, RadarStyle& style, float* initials) : Radius(radius), count(count), style(style) {
-	this->scales = new float[this->count];
+IRadarlet::IRadarlet(float radius, unsigned int count, RadarStyle& style, double* initials) : Radius(radius), count(count), style(style) {
+	this->scales = new double[this->count];
 	this->captions = ref new Platform::Array<Platform::String^>(this->count);
 
 	if (initials != nullptr) {
 		for (unsigned int idx = 0; idx < this->count; idx++) {
-			this->scales[idx] = flmax(flmin(initials[idx], 1.0F), 0.0F);
+			this->scales[idx] = flsafe(initials[idx], 0.0, 1.0);
 		}
 	} else {
-		memset(this->scales, 0, this->count * sizeof(float));
+		memset(this->scales, 0, this->count * sizeof(double));
 	}
 }
 
@@ -126,16 +126,16 @@ void IRadarlet::reshape() {
 	this->shape = CanvasGeometry::CreatePath(shape);
 }
 
-void IRadarlet::set_scale(unsigned int index, float v) {
+void IRadarlet::set_scale(unsigned int index, double v) {
 	if (index < this->count) {
-		this->scales[index] = flmax(flmin(v, 1.0F), 0.0F);
+		this->scales[index] = flsafe(v, 0.0, 1.0);
 		this->reshape();
 	}
 }
 
-void IRadarlet::set_scales(float* vs) {
+void IRadarlet::set_scales(double* vs) {
 	for (unsigned int idx = 0; idx < this->count; idx++) {
-		this->scales[idx] = flmax(flmin(vs[idx], 1.0F), 0.0F);
+		this->scales[idx] = flsafe(vs[idx], 0.0, 1.0);
 	}
 
 	this->reshape();
