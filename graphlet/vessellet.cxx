@@ -44,6 +44,13 @@ void IVessellet::scale(double s) {
 	this->resize(float(os.Width * s), float(os.Height * s));
 }
 
+void IVessellet::clear_boundary() {
+	this->lt.x = +infinity_f;
+	this->lt.y = +infinity_f;
+	this->rb.x = -infinity_f;
+	this->rb.y = -infinity_f;
+}
+
 /*************************************************************************************************/
 float2 WarGrey::SCADA::vessel_point(double2& src, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
 	float cosbow, sinbow;

@@ -198,7 +198,7 @@ DragLinesStyle WarGrey::SCADA::drag_default_lines_style(CanvasStrokeStyle^ strok
 }
 
 double WarGrey::SCADA::drag_length(DragInfo& info) {
-	double length = info.trunnion_length + info.pipe_padding + info.head_length;
+	double length = info.offset_length + info.pipe_padding + info.head_length;
 
 	for (unsigned int idx = 0; idx < sizeof(info.pipe_lengths) / sizeof(float); idx++) {
 		length += info.pipe_lengths[idx];
@@ -213,11 +213,11 @@ double WarGrey::SCADA::drag_depth(DragInfo& info, double max_depth_degrees) {
 
 /*************************************************************************************************/
 IDraglet::IDraglet(DragInfo& info, DragStyle& style, bool leftward) : info(info), style(style), leftward(leftward) {
-	this->drag_length = this->info.trunnion_length;
+	this->drag_length = this->info.offset_length;
 
 	for (unsigned int idx = 0; idx < sizeof(this->info.pipe_lengths) / sizeof(float); idx++) {
 		this->ujoints[idx].x = this->drag_length;
-		this->ujoints[idx].y = this->info.trunnion_gapsize;
+		this->ujoints[idx].y = this->info.offset_gapsize;
 
 		if (idx == 1) {
 			this->drag_length += this->info.pipe_lengths[idx] + this->info.pipe_padding;
@@ -228,11 +228,11 @@ IDraglet::IDraglet(DragInfo& info, DragStyle& style, bool leftward) : info(info)
 
 	this->drag_length += info.head_length;
 
-	this->trunnion.x = 0.0F;
-	this->trunnion.y = this->info.trunnion_gapsize;
+	this->offset.x = 0.0F;
+	this->offset.y = this->info.offset_gapsize;
 
 	this->draghead.x = this->drag_length;
-	this->draghead.y = this->info.trunnion_gapsize;
+	this->draghead.y = this->info.offset_gapsize;
 
 	this->suction_style = make_dash_stroke(CanvasDashStyle::Dash);
 	this->dragarm_style = make_round_stroke_style();
@@ -249,16 +249,16 @@ void IDraglet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void IDraglet::set_figure(double3& trunnion, double3 ujoints[], double3& draghead, double visor_angle, bool force) {
+void IDraglet::set_figure(double3& offset, double3 ujoints[], double3& draghead, double visor_angle, bool force) {
 	bool changed = false;
 
-	if (!this->position_equal(this->trunnion, trunnion)) {
-		this->trunnion = trunnion;
+	if (!this->position_equal(this->offset, offset)) {
+		this->offset = offset;
 		changed = true;
 	}
 
-	if (this->suction.z != flsafe(trunnion.z, this->suction.z)) {
-		this->suction.z = trunnion.z;
+	if (this->suction.z != flsafe(offset.z, this->suction.z)) {
+		this->suction.z = offset.z;
 		changed = true;
 	}
 
@@ -284,16 +284,16 @@ void IDraglet::set_figure(double3& trunnion, double3 ujoints[], double3& draghea
 
 	if (force || changed) {
 		CanvasPathBuilder^ arm = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-		double3 last_joint = this->trunnion;
+		double3 last_joint = this->offset;
 		double last_arm_angle = 0.0;
 
 		this->_suction = this->space_to_local(this->suction);
-		this->_trunnion = this->space_to_local(this->trunnion);
+		this->_offset = this->space_to_local(this->offset);
 		this->_draghead = this->space_to_local(this->draghead);
 		this->draghead_m = make_text_layout(this->position_label(this->draghead), this->style.font);
 
 		arm->BeginFigure(this->_suction);
-		arm->AddLine(this->_trunnion);
+		arm->AddLine(this->_offset);
 
 		// NOTE: If the angles are not the same as those received from PLC, They should check drags
 		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
@@ -323,7 +323,7 @@ void IDraglet::set_figure(double3& trunnion, double3 ujoints[], double3& draghea
 		this->forearm_deg = make_text_layout(this->angle_label(this->forearm_angle), this->style.font);
 		this->forejoint_deg = make_text_layout(this->angle_label(this->forejoint_angle), this->style.font);
 
-		this->on_position_changed(this->trunnion, this->ujoints, this->draghead);
+		this->on_position_changed(this->offset, this->ujoints, this->draghead);
 		this->update_drag_head();
 
 		this->notify_updated();
@@ -399,7 +399,7 @@ void DragXYlet::construct() {
 	
 	{ // make drag
 		this->universal_joint = circle(this->joint_radius);
-		this->set_figure(this->trunnion, this->ujoints, this->draghead, 90.0, true);
+		this->set_figure(this->offset, this->ujoints, this->draghead, 90.0, true);
 	}
 }
 
@@ -578,7 +578,7 @@ void DragYZlet::construct() {
 
 	{ // make drag
 		this->universal_joint = circle(this->joint_radius);
-		this->set_figure(this->trunnion, this->ujoints, this->draghead, 0.0, true);
+		this->set_figure(this->offset, this->ujoints, this->draghead, 0.0, true);
 	}
 
 	this->set_tide_mark(0.0);
@@ -723,8 +723,8 @@ double DragYZlet::arctangent(double3& this_pt, double3& last_pt) {
 	return degrees;
 }
 
-void DragYZlet::on_position_changed(double3& trunnion, double3 ujoints[], double3& draghead) {
-	this->suction_m = make_text_layout(flstring(trunnion.z, this->style.precision), this->style.font);
+void DragYZlet::on_position_changed(double3& offset, double3 ujoints[], double3& draghead) {
+	this->suction_m = make_text_layout(flstring(offset.z, this->style.precision), this->style.font);
 }
 
 float DragYZlet::y_to_x(double y) {
@@ -817,7 +817,7 @@ void DragXZlet::construct() {
 	{ // make drag
 		this->ws_y = hmetrics.hatch_y;
 		this->universal_joint = circle(this->joint_radius);
-		this->set_figure(this->trunnion, this->ujoints, this->draghead, 0.0, true);
+		this->set_figure(this->offset, this->ujoints, this->draghead, 0.0, true);
 	}
 
 	{ // make x-axis
@@ -858,8 +858,8 @@ void DragXZlet::update_drag_head() {
 }
 
 void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float trunnion_x = x + this->_trunnion.x;
-	float trunnion_y = y + this->_trunnion.y;
+	float offset_x = x + this->_offset.x;
+	float offset_y = y + this->_offset.y;
 	float draghead_x = x + this->_draghead.x;
 	float draghead_y = y + this->_draghead.y;
 	
@@ -878,8 +878,8 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	{ // draw drag
 		ds->DrawGeometry(this->drag_body, x, y, this->style.body_color, this->drag_thickness, this->dragarm_style);
 
-		ds->FillGeometry(this->universal_joint, trunnion_x, trunnion_y, this->style.color);
-		ds->DrawGeometry(this->universal_joint, trunnion_x, trunnion_y, this->style.body_color, this->style.thickness);
+		ds->FillGeometry(this->universal_joint, offset_x, offset_y, this->style.color);
+		ds->DrawGeometry(this->universal_joint, offset_x, offset_y, this->style.body_color, this->style.thickness);
 
 		for (int idx = DRAG_SEGMENT_MAX_COUNT - 1; idx >= 0; idx--) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
@@ -996,8 +996,8 @@ double DragXZlet::arctangent(double3& this_pt, double3& last_pt) {
 	return degrees;
 }
 
-void DragXZlet::on_position_changed(double3& trunnion, double3 ujoints[], double3& draghead) {
-	this->suction_m = make_text_layout(flstring(trunnion.z, this->style.precision), this->style.font);
+void DragXZlet::on_position_changed(double3& offset, double3 ujoints[], double3& draghead) {
+	this->suction_m = make_text_layout(flstring(offset.z, this->style.precision), this->style.font);
 }
 
 float DragXZlet::x_to_x(double x) {

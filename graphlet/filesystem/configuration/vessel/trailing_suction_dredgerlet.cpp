@@ -59,7 +59,7 @@ TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, f
 	: TrailingSuctionDredgerlet(vessel, default_trailing_suction_dredger_style(), scale, ext, rootdir) {}
 
 TrailingSuctionDredgerlet::TrailingSuctionDredgerlet(Platform::String^ vessel, TrailingSuctionDredgerStyle& style, float scale, Platform::String^ ext, Platform::String^ rootdir)
-	: original_scale(scale), bow_direction(0.0), xscale(1.0F), yscale(1.0F), style(style) {
+	: original_scale(scale), bow_direction(0.0), xscale(1.0F), yscale(1.0F), style(style), ps_drag_exists(false), sb_drag_exists(false) {
 	if (vessel != nullptr) {
 		this->ms_appdata_config = ms_appdata_file(vessel, ext, rootdir);
 	} else {
@@ -79,17 +79,13 @@ void TrailingSuctionDredgerlet::construct() {
 }
 
 void TrailingSuctionDredgerlet::on_appdata(Uri^ vessel, TrailingSuctionDredger^ vessel_config) {
-	this->lt.x = +infinity_f;
-	this->lt.y = +infinity_f;
-	this->rb.x = -infinity_f;
-	this->rb.y = -infinity_f;
-	
 	this->vessel_config = vessel_config;
 
 	// avoid updating the raw instance accidently
 	this->preview_config = ref new TrailingSuctionDredger(this->vessel_config);
 	
-	this->reconstruct(&lt, &rb);
+	this->clear_boundary();
+	this->reconstruct(&this->lt, &this->rb);
 
 	this->xradius = vessel_radius(this->lt, this->rb);
 	this->yradius = this->xradius;
@@ -200,12 +196,33 @@ void TrailingSuctionDredgerlet::resize(float width, float height) {
 	}
 }
 
+void TrailingSuctionDredgerlet::set_ps_drag_figures(double3& offset, double3 ujoints[], size_t joint_count, double3& draghead) {
+	this->ps_drag_exists = true;
+
+	this->get_logger()->log_message(Log::Info, L"PS: Offset: (%f, %f)", offset.x, offset.y);
+	this->get_logger()->log_message(Log::Info, L"PS: Joint1: (%f, %f)", ujoints[0].x, ujoints[0].y);
+	this->get_logger()->log_message(Log::Info, L"PS: Joint2: (%f, %f)", ujoints[1].x, ujoints[1].y);
+	this->get_logger()->log_message(Log::Info, L"PS: Draghead: (%f, %f)", draghead.x, draghead.y);
+}
+
+void TrailingSuctionDredgerlet::set_sb_drag_figures(double3& offset, double3 ujoints[], size_t joint_count, double3& draghead) {
+	this->sb_drag_exists = true;
+
+	this->get_logger()->log_message(Log::Info, L"SB: Offset: (%f, %f)", offset.x, offset.y);
+	this->get_logger()->log_message(Log::Info, L"SB: Joint1(%f, %f)", ujoints[0].x, ujoints[0].y);
+	this->get_logger()->log_message(Log::Info, L"SB: Joint2(%f, %f)", ujoints[1].x, ujoints[1].y);
+	this->get_logger()->log_message(Log::Info, L"SB: Draghead: (%f, %f)", draghead.x, draghead.y);
+}
+
 /*************************************************************************************************/
 void TrailingSuctionDredgerlet::set_bow_direction(double degrees) {
 	if (this->ready()) {
 		if (this->bow_direction != degrees) {
 			this->bow_direction = degrees;
-			this->reconstruct();
+
+			this->clear_boundary();
+			this->reconstruct(&this->lt, &this->rb);
+
 			this->notify_updated();
 		}
 	}

@@ -39,7 +39,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ps_suction_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ sb_suction_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ gps_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ trunnion_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ offset_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ barge_color;
 
 		float gps_radius = -1.0;
@@ -73,6 +73,10 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Size original_size() override;
 
 	public:
+		void set_ps_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], size_t joint_count, WarGrey::SCADA::double3& draghead);
+		void set_sb_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], size_t joint_count, WarGrey::SCADA::double3& draghead);
+
+	public:
 		WarGrey::SCADA::TrailingSuctionDredger^ clone_vessel(WarGrey::SCADA::TrailingSuctionDredger^ dest = nullptr, bool real_vessel = true);
 		void preview(TrailingSuctionDredger^ src);
 		void refresh(TrailingSuctionDredger^ src);
@@ -96,8 +100,6 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Uri^ ms_appdata_config;
 
 	private:
-		Windows::Foundation::Numerics::float2 lt;
-		Windows::Foundation::Numerics::float2 rb;
 		double bow_direction;
 		float original_scale;
 		float xscale;
@@ -111,5 +113,9 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float2 sb_suction;
 		Windows::Foundation::Numerics::float2 trunnion;
 		Windows::Foundation::Numerics::float2 barge;
+
+	private:
+		bool ps_drag_exists;
+		bool sb_drag_exists;
 	};
 }

@@ -13,12 +13,17 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void set_bow_direction(double degrees) = 0;
-
-	public:
 		virtual Windows::Foundation::Size original_size() = 0;
 
 	public:
 		void scale(double s);
+
+	protected:
+		void clear_boundary();
+
+	protected:
+		Windows::Foundation::Numerics::float2 lt;
+		Windows::Foundation::Numerics::float2 rb;
 	};
 
 	Windows::Foundation::Numerics::float2 vessel_point(WarGrey::SCADA::double2& src,

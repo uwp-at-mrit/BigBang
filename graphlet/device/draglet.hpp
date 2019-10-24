@@ -9,8 +9,8 @@ namespace WarGrey::SCADA {
 #define DRAG_SEGMENT_MAX_COUNT 3
 
 	private struct DragInfo {
-		double trunnion_gapsize;
-		double trunnion_length;
+		double offset_gapsize;
+		double offset_length;
 		double pipe_lengths[DRAG_SEGMENT_MAX_COUNT];
 		double pipe_padding;
 		double pipe_radius;
@@ -74,7 +74,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_dredging(bool on) { this->dredging = on; }
-		void set_figure(WarGrey::SCADA::double3& trunnion, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead, double visor_angle, bool force = false);
+		void set_figure(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead, double visor_angle, bool force = false);
 
 	public:
 		double get_arm_degrees(unsigned int idx = DRAG_SEGMENT_MAX_COUNT);
@@ -90,7 +90,7 @@ namespace WarGrey::SCADA {
 		virtual Platform::String^ angle_label(double degrees);
 		virtual void update_drag_head() = 0;
 		
-		virtual void on_position_changed(WarGrey::SCADA::double3& trunnion, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead) {}
+		virtual void on_position_changed(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead) {}
 
 	protected:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
@@ -129,7 +129,7 @@ namespace WarGrey::SCADA {
 	protected: // real 3D coordinates
 		WarGrey::SCADA::DragInfo info;
 		WarGrey::SCADA::double3 suction;
-		WarGrey::SCADA::double3 trunnion;
+		WarGrey::SCADA::double3 offset;
 		WarGrey::SCADA::double3 ujoints[DRAG_SEGMENT_MAX_COUNT];
 		WarGrey::SCADA::double3 draghead;
 		double arm_angles[DRAG_SEGMENT_MAX_COUNT];
@@ -140,7 +140,7 @@ namespace WarGrey::SCADA {
 
 	protected: // graphlets 2D coordinates
 		Windows::Foundation::Numerics::float2 _suction;
-		Windows::Foundation::Numerics::float2 _trunnion;
+		Windows::Foundation::Numerics::float2 _offset;
 		Windows::Foundation::Numerics::float2 _draghead;
 		Windows::Foundation::Numerics::float2 _ujoints[DRAG_SEGMENT_MAX_COUNT];
 		double _forearm_angle;
@@ -208,7 +208,7 @@ namespace WarGrey::SCADA {
 		Platform::String^ position_label(WarGrey::SCADA::double3& position) override;
 		void update_drag_head() override;
 
-		void on_position_changed(WarGrey::SCADA::double3& trunnion, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead) override;
+		void on_position_changed(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead) override;
 
 	private:
 		float y_to_x(double y);
@@ -265,7 +265,7 @@ namespace WarGrey::SCADA {
 		Platform::String^ position_label(WarGrey::SCADA::double3& position) override;
 		void update_drag_head() override;
 
-		void on_position_changed(WarGrey::SCADA::double3& trunnion, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead) override;
+		void on_position_changed(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead) override;
 
 	private:
 		float x_to_x(double x);
