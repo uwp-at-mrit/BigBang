@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphlet/filesystem/msappdatalet.hxx"
+#include "graphlet/device/draglet.hpp"
 #include "graphlet/vessellet.hpp"
 
 #include "datum/flonum.hpp"
@@ -51,6 +52,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bridge_border_color = nullptr,
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hopper_border_color = nullptr);
 
+	struct TrailingSuctionDrag;
 	private class TrailingSuctionDredgerlet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::TrailingSuctionDredger, WarGrey::SCADA::IVessellet> {
 	public:
 		virtual ~TrailingSuctionDredgerlet() noexcept;
@@ -73,8 +75,10 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Size original_size() override;
 
 	public:
-		void set_ps_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], size_t joint_count, WarGrey::SCADA::double3& draghead);
-		void set_sb_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], size_t joint_count, WarGrey::SCADA::double3& draghead);
+		void set_ps_drag_info(WarGrey::SCADA::DragInfo& info, unsigned int color_hex = 0xFF0000, unsigned int actual_drag_pipe_size = 2U);
+		void set_sb_drag_info(WarGrey::SCADA::DragInfo& info, unsigned int color_hex = 0x008000, unsigned int actual_drag_pipe_size = 2U);
+		void set_ps_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead);
+		void set_sb_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead);
 
 	public:
 		WarGrey::SCADA::TrailingSuctionDredger^ clone_vessel(WarGrey::SCADA::TrailingSuctionDredger^ dest = nullptr, bool real_vessel = true);
@@ -86,9 +90,14 @@ namespace WarGrey::SCADA {
 		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
 
 	private:
-		void reconstruct(Windows::Foundation::Numerics::float2* lt = nullptr, Windows::Foundation::Numerics::float2* rb = nullptr);
+		void reconstruct();
+		Windows::Foundation::Numerics::float2 drag_position_to_local(WarGrey::SCADA::double2& dot,
+			WarGrey::SCADA::double2& suction, WarGrey::SCADA::double2& gps,
+			Windows::Foundation::Numerics::float2& scale, double y_direction);
 
 	private:
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ps_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ sb_color;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hopper;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ bridge;
@@ -111,11 +120,17 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float2 gps[2];
 		Windows::Foundation::Numerics::float2 ps_suction;
 		Windows::Foundation::Numerics::float2 sb_suction;
+		Windows::Foundation::Numerics::float2 ps_offset;
+		Windows::Foundation::Numerics::float2 ps_ujoints[DRAG_SEGMENT_MAX_COUNT];
+		Windows::Foundation::Numerics::float2 ps_draghead;
+		Windows::Foundation::Numerics::float2 sb_offset;
+		Windows::Foundation::Numerics::float2 sb_ujoints[DRAG_SEGMENT_MAX_COUNT];
+		Windows::Foundation::Numerics::float2 sb_draghead;
 		Windows::Foundation::Numerics::float2 trunnion;
 		Windows::Foundation::Numerics::float2 barge;
 
 	private:
-		bool ps_drag_exists;
-		bool sb_drag_exists;
+		WarGrey::SCADA::TrailingSuctionDrag* ps_drag;
+		WarGrey::SCADA::TrailingSuctionDrag* sb_drag;
 	};
 }

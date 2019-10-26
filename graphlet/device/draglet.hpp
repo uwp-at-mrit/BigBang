@@ -51,6 +51,7 @@ namespace WarGrey::SCADA {
 
 	double drag_length(WarGrey::SCADA::DragInfo& info);
 	double drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees = 60.0);
+	double static_drag_figure(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::double3* offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3* draghead);
 
 	WarGrey::SCADA::DragStyle drag_default_style(unsigned int color,
 		unsigned int precision = 2U, float fontsize = 24.0F, float thickness = 2.0F);

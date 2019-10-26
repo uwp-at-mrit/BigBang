@@ -26,6 +26,10 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float2 rb;
 	};
 
+	Windows::Foundation::Numerics::float2 vessel_point(double src_x, double src_y,
+		WarGrey::SCADA::double2& gps_pos, Windows::Foundation::Numerics::float2& scale, double bow_direction,
+		Windows::Foundation::Numerics::float2* lt = nullptr, Windows::Foundation::Numerics::float2* rb = nullptr);
+
 	Windows::Foundation::Numerics::float2 vessel_point(WarGrey::SCADA::double2& src,
 		WarGrey::SCADA::double2& gps_pos, Windows::Foundation::Numerics::float2& scale, double bow_direction,
 		Windows::Foundation::Numerics::float2* lt = nullptr, Windows::Foundation::Numerics::float2* rb = nullptr);

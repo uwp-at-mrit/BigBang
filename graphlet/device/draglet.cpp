@@ -55,8 +55,7 @@ static inline float drag_arm_atan(float radius, float half_thickness, float* ext
 	return radians;
 }
 
-static CanvasGeometry^ make_draghead(float radius, float bottom_radius, float arm_thickness, float arm_length
-	, double offset, double degrees0, float sign, float extent) {
+static CanvasGeometry^ make_draghead(float radius, float bottom_radius, float arm_thickness, float arm_length, double offset, double degrees0, float sign, float extent) {
 	auto head = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	double degrees = drag_adjusted_angle(degrees0, sign);
 	float center_radius = radius * 0.2718F;
@@ -108,8 +107,7 @@ static CanvasGeometry^ make_draghead(float radius, float bottom_radius, float ar
 	return geometry_union(CanvasGeometry::CreatePath(head), geometry_union(center, geometry_rotate(joint, degrees, 0.0F, 0.0F)));
 }
 
-static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth_length
-	, double degrees0, double arm_degrees0, float sign, float* teeth_y = nullptr) {
+static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth_length, double degrees0, double arm_degrees0, float sign, float* teeth_y = nullptr) {
 	auto visor = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	double degrees = drag_adjusted_angle(degrees0, sign);
 	double arm_degrees = drag_adjusted_angle(arm_degrees0, sign);
@@ -200,7 +198,7 @@ DragLinesStyle WarGrey::SCADA::drag_default_lines_style(CanvasStrokeStyle^ strok
 double WarGrey::SCADA::drag_length(DragInfo& info) {
 	double length = info.offset_length + info.pipe_padding + info.head_length;
 
-	for (unsigned int idx = 0; idx < sizeof(info.pipe_lengths) / sizeof(float); idx++) {
+	for (unsigned int idx = 0; idx < sizeof(info.pipe_lengths) / sizeof(double); idx++) {
 		length += info.pipe_lengths[idx];
 	}
 
@@ -211,29 +209,43 @@ double WarGrey::SCADA::drag_depth(DragInfo& info, double max_depth_degrees) {
 	return drag_length(info) * flsin(double(degrees_to_radians(max_depth_degrees)));
 }
 
-/*************************************************************************************************/
-IDraglet::IDraglet(DragInfo& info, DragStyle& style, bool leftward) : info(info), style(style), leftward(leftward) {
-	this->drag_length = this->info.offset_length;
+double WarGrey::SCADA::static_drag_figure(DragInfo& info, double3* offset, double3 ujoints[], double3* draghead) {
+	double drag_length = info.offset_length;
 
-	for (unsigned int idx = 0; idx < sizeof(this->info.pipe_lengths) / sizeof(float); idx++) {
-		this->ujoints[idx].x = this->drag_length;
-		this->ujoints[idx].y = this->info.offset_gapsize;
+	/** Note
+	 * The offset actually means "the start point of the offset", while
+	 * The first ujoint is "the end point of the offset", and
+	 * The draghead means "the start point of the draghead and the end point of the last ujoint"
+	 */
+
+	offset->x = 0.0;
+	offset->y = info.offset_gapsize;
+	offset->z = 0.0;
+
+	for (unsigned int idx = 0; idx < sizeof(info.pipe_lengths) / sizeof(double); idx++) {
+		ujoints[idx].x = drag_length;
+		ujoints[idx].y = info.offset_gapsize;
+		ujoints[idx].z = 0.0;
 
 		if (idx == 1) {
-			this->drag_length += this->info.pipe_lengths[idx] + this->info.pipe_padding;
+			drag_length += (info.pipe_lengths[idx] + info.pipe_padding);
 		} else {
-			this->drag_length += this->info.pipe_lengths[idx];
+			drag_length += info.pipe_lengths[idx];
 		}
 	}
 
-	this->drag_length += info.head_length;
+	drag_length += info.head_length;
 
-	this->offset.x = 0.0F;
-	this->offset.y = this->info.offset_gapsize;
+	draghead->x = drag_length;
+	draghead->y = info.offset_gapsize;
+	draghead->z = 0.0;
 
-	this->draghead.x = this->drag_length;
-	this->draghead.y = this->info.offset_gapsize;
+	return drag_length;
+}
 
+/*************************************************************************************************/
+IDraglet::IDraglet(DragInfo& info, DragStyle& style, bool leftward) : info(info), style(style), leftward(leftward) {
+	this->drag_length = static_drag_figure(info, &this->offset, this->ujoints, &this->draghead);
 	this->suction_style = make_dash_stroke(CanvasDashStyle::Dash);
 	this->dragarm_style = make_round_stroke_style();
 }
