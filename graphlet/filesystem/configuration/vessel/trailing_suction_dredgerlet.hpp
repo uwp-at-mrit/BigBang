@@ -37,14 +37,13 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hopper_border;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hopper_color;
 
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ps_suction_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ sb_suction_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ps_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ sb_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ gps_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ offset_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ barge_color;
 
 		float gps_radius = -1.0;
-		float suction_radius = -1.0;
 		float barge_radius = -1.0;
 	};
 
@@ -75,8 +74,8 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Size original_size() override;
 
 	public:
-		void set_ps_drag_info(WarGrey::SCADA::DragInfo& info, unsigned int color_hex = 0xFF0000, unsigned int actual_drag_pipe_size = 2U);
-		void set_sb_drag_info(WarGrey::SCADA::DragInfo& info, unsigned int color_hex = 0x008000, unsigned int actual_drag_pipe_size = 2U);
+		void set_ps_drag_info(WarGrey::SCADA::DragInfo& info, unsigned int actual_drag_pipe_size = 2U);
+		void set_sb_drag_info(WarGrey::SCADA::DragInfo& info, unsigned int actual_drag_pipe_size = 2U);
 		void set_ps_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead);
 		void set_sb_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead);
 
@@ -90,17 +89,14 @@ namespace WarGrey::SCADA {
 		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
 
 	private:
-		void reconstruct();
-		Windows::Foundation::Numerics::float2 drag_position_to_local(WarGrey::SCADA::double2& dot,
-			WarGrey::SCADA::double2& suction, WarGrey::SCADA::double2& gps,
-			Windows::Foundation::Numerics::float2& scale, double y_direction);
-
+		void reconstruct(Windows::Foundation::Numerics::float2* lt, Windows::Foundation::Numerics::float2* rb);
+		
 	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ps_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ sb_color;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hopper;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ bridge;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ps_drag_head;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ sb_drag_head;
 		WarGrey::SCADA::TrailingSuctionDredgerStyle style;
 
 	private:

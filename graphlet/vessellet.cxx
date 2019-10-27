@@ -56,6 +56,13 @@ float2 WarGrey::SCADA::vessel_point(double2& src, double2& gps, float2& s, doubl
 	return vessel_point(src.x, src.y, gps, s, bow, lt, rb);
 }
 
+float2 WarGrey::SCADA::vessel_point(double2& src, double2& base, double2& src_sign, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
+	double dotx = base.x + src.x * src_sign.x;
+	double doty = base.y + src.y * src_sign.y;
+
+	return vessel_point(dotx, doty, gps, s, bow, lt, rb);
+}
+
 float2 WarGrey::SCADA::vessel_point(double x, double y, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
 	float cosbow, sinbow;
 
@@ -72,6 +79,22 @@ CanvasGeometry^ WarGrey::SCADA::vessel_polygon(double2 src[], size_t count, doub
 
 	for (unsigned int idx = 0; idx < vertexes->Length; idx++) {
 		vertexes->set(idx, vessel_point_on_screen(src[idx].x, src[idx].y, gps, s, cosbow, sinbow, lt, rb));
+	}
+
+	return CanvasGeometry::CreatePolygon(CanvasDevice::GetSharedDevice(), vertexes);
+}
+
+CanvasGeometry^ WarGrey::SCADA::vessel_polygon(double2 src[], size_t count, double2& base, double2& src_sign, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
+	Platform::Array<float2>^ vertexes = ref new Platform::Array<float2>((unsigned int)count);
+	float cosbow, sinbow;
+
+	vessel_bow_transform(bow, &cosbow, &sinbow);
+
+	for (unsigned int idx = 0; idx < vertexes->Length; idx++) {
+		double dotx = base.x + src[idx].x * src_sign.x;
+		double doty = base.y + src[idx].y * src_sign.y;
+
+		vertexes->set(idx, vessel_point_on_screen(dotx, doty, gps, s, cosbow, sinbow, lt, rb));
 	}
 
 	return CanvasGeometry::CreatePolygon(CanvasDevice::GetSharedDevice(), vertexes);

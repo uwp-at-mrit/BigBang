@@ -45,14 +45,32 @@ public:
 	}
 
 	void set_figure(double3& offset, double3 ujoints[], double3& draghead) {
-		const size_t head_ptsize = sizeof(this->drag_heads) / sizeof(double2);
-		double3 drag_heads[head_ptsize];
-
+		const size_t head_ptsize = sizeof(this->draghead_vertexes) / sizeof(double2);
+		
 		set_drag_joint(&this->offset, offset, this->drag_length);
 		set_drag_joint(&this->draghead, draghead, this->drag_length);
 
 		for (int idx = 0; idx < this->joints_count; idx++) {
 			set_drag_joint(this->ujoints + idx, ujoints[idx], this->drag_length);
+		}
+
+		{ // compute the draghead vertexes
+			double2 front(this->draghead.x + this->info.head_length, this->draghead.y);
+			double2 joint = this->ujoints[this->joints_count - 1];
+			double dx = this->draghead.x - joint.x;
+			double dy = this->draghead.y - joint.y;
+
+			this->degrees = radians_to_degrees(flatan(dy, dx));
+			
+			this->draghead_vertexes[0] = this->draghead;
+			this->draghead_vertexes[1] = front;
+			this->draghead_vertexes[2] = front;
+			this->draghead_vertexes[3] = this->draghead;
+
+			this->draghead_vertexes[0].y -= this->info.pipe_radius;
+			this->draghead_vertexes[1].y -= this->info.head_width * 0.5;
+			this->draghead_vertexes[2].y += this->info.head_width * 0.5;
+			this->draghead_vertexes[3].y += this->info.pipe_radius;
 		}
 	}
 
@@ -60,7 +78,8 @@ public:
 	double2 offset;
 	double2 ujoints[DRAG_SEGMENT_MAX_COUNT];
 	double2 draghead;
-	double2 drag_heads[4];
+	double2 draghead_vertexes[4];
+	double degrees;
 
 public:
 	DragInfo info;
@@ -76,12 +95,11 @@ static void prepare_vessel_style(TrailingSuctionDredgerStyle* style) {
 	CAS_SLOT(style->bridge_border, Colours::RoyalBlue);
 	CAS_SLOT(style->gps_color, style->bridge_border);
 
-	CAS_SLOT(style->ps_suction_color, Colours::Red);
-	CAS_SLOT(style->sb_suction_color, Colours::Green);
+	CAS_SLOT(style->ps_color, Colours::Red);
+	CAS_SLOT(style->sb_color, Colours::Green);
 	CAS_SLOT(style->barge_color, Colours::WhiteSmoke);
 
 	FLCAS_SLOT(style->gps_radius, 1.0F);
-	FLCAS_SLOT(style->suction_radius, 1.5F);
 	FLCAS_SLOT(style->barge_radius, 2.0F);
 }
 
@@ -132,13 +150,15 @@ void TrailingSuctionDredgerlet::construct() {
 }
 
 void TrailingSuctionDredgerlet::on_appdata(Uri^ vessel, TrailingSuctionDredger^ vessel_config) {
+	float2 lt, rb; // drags do not affect the size of this graphlet, they only affect the margins
+
 	this->vessel_config = vessel_config;
 
 	// avoid updating the raw instance accidently
 	this->preview_config = ref new TrailingSuctionDredger(this->vessel_config);
 	
-	this->reconstruct();
-	this->xradius = vessel_radius(this->lt, this->rb);
+	this->reconstruct(&lt, &rb);
+	this->xradius = vessel_radius(lt, rb);
 	this->yradius = this->xradius;
 }
 
@@ -170,6 +190,10 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 		// Stupid design, and/or stupid referenced codebase for lacking of explanation
 		float rsx = this->yscale * this->original_scale;
 		float rsy = this->xscale * this->original_scale;
+		float ps_suction_x = this->ps_suction.x + cx;
+		float ps_suction_y = this->ps_suction.y + cy;
+		float sb_suction_x = this->sb_suction.x + cx;
+		float sb_suction_y = this->sb_suction.y + cy;
 		
 		draw_geometry(ds, this->body, cx, cy, this->style.body_color, this->style.body_border);
 		draw_geometry(ds, this->hopper, cx, cy, this->style.hopper_color, this->style.hopper_border);
@@ -177,40 +201,58 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 
 		if (this->ps_drag != nullptr) {
 			float drag_thickness = float(this->ps_drag->info.pipe_radius * 2.0) * flmin(rsx, rsy);
+			float joint_radius = float(this->ps_drag->info.pipe_radius) * 1.618F;
 			float last_x = this->ps_offset.x + cx;
 			float last_y = this->ps_offset.y + cy;
 
-			ds->DrawLine(this->ps_suction.x + cx, this->ps_suction.y + cy, last_x, last_y, this->ps_color, drag_thickness);
+			ds->DrawLine(ps_suction_x, ps_suction_y, last_x, last_y, this->style.ps_color, drag_thickness);
+			ds->FillEllipse(ps_suction_x, ps_suction_y, joint_radius * rsx, joint_radius * rsy, this->style.ps_color);
 
 			for (int idx = 0; idx < this->ps_drag->joints_count; idx++) {
 				float this_x = this->ps_ujoints[idx].x + cx;
 				float this_y = this->ps_ujoints[idx].y + cy;
 
-				ds->DrawLine(last_x, last_y, this_x, this_y, this->ps_color, drag_thickness);
+				ds->DrawLine(last_x, last_y, this_x, this_y, this->style.ps_color, drag_thickness);
+				ds->FillEllipse(last_x, last_y, joint_radius * rsx, joint_radius * rsy, this->style.ps_color);
+
 				last_x = this_x;
 				last_y = this_y;
 			}
 
-			ds->DrawLine(last_x, last_y, this->ps_draghead.x + cx, this->ps_draghead.y + cy, this->ps_color, drag_thickness);
+			ds->DrawLine(last_x, last_y, this->ps_draghead.x + cx, this->ps_draghead.y + cy, this->style.ps_color, drag_thickness);
+			ds->FillEllipse(last_x, last_y, joint_radius * rsx, joint_radius * rsy, this->style.ps_color);
+			ds->FillGeometry(this->ps_drag_head, cx, cy, this->style.ps_color);
+		} else if (this->body->FillContainsPoint(this->ps_suction)) {
+			float joint_radius = 0.5F * 1.618F;
+			ds->DrawEllipse(ps_suction_x, ps_suction_y, joint_radius * rsx, joint_radius * rsy, this->style.ps_color);
 		}
 
 		if (this->sb_drag != nullptr) {
 			float drag_thickness = float(this->sb_drag->info.pipe_radius * 2.0) * flmin(rsx, rsy);
+			float joint_radius = float(this->sb_drag->info.pipe_radius) * 1.618F;
 			float last_x = this->sb_offset.x + cx;
 			float last_y = this->sb_offset.y + cy;
 
-			ds->DrawLine(this->sb_suction.x + cx, this->sb_suction.y + cy, last_x, last_y, this->sb_color, drag_thickness);
+			ds->DrawLine(sb_suction_x, sb_suction_y, last_x, last_y, this->style.sb_color, drag_thickness);
+			ds->FillEllipse(sb_suction_x, sb_suction_y, joint_radius * rsx, joint_radius * rsy, this->style.sb_color);
 
-			for (int idx = 0; idx < this->ps_drag->joints_count; idx++) {
+			for (int idx = 0; idx < this->sb_drag->joints_count; idx++) {
 				float this_x = this->sb_ujoints[idx].x + cx;
 				float this_y = this->sb_ujoints[idx].y + cy;
 
-				ds->DrawLine(last_x, last_y, this_x, this_y, this->sb_color, drag_thickness);
+				ds->DrawLine(last_x, last_y, this_x, this_y, this->style.sb_color, drag_thickness);
+				ds->FillEllipse(last_x, last_y, joint_radius * rsx, joint_radius * rsy, this->style.sb_color);
+
 				last_x = this_x;
 				last_y = this_y;
 			}
 
-			ds->DrawLine(last_x, last_y, this->sb_draghead.x + cx, this->sb_draghead.y + cy, this->sb_color, drag_thickness);
+			ds->DrawLine(last_x, last_y, this->sb_draghead.x + cx, this->sb_draghead.y + cy, this->style.sb_color, drag_thickness);
+			ds->FillEllipse(last_x, last_y, joint_radius * rsx, joint_radius * rsy, this->style.sb_color);
+			ds->FillGeometry(this->sb_drag_head, cx, cy, this->style.sb_color);
+		} else if (this->body->FillContainsPoint(this->sb_suction)) {
+			float joint_radius = 0.5F * 1.618F;
+			ds->DrawEllipse(sb_suction_x, sb_suction_y, joint_radius * rsx, joint_radius * rsy, this->style.sb_color);
 		}
 
 		for (unsigned int idx = 0; idx < sizeof(this->gps) / sizeof(float2); idx++) {
@@ -219,18 +261,6 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 					this->style.gps_radius * rsx, this->style.gps_radius * rsy,
 					this->style.gps_color);
 			}
-		}
-
-		if (this->body->FillContainsPoint(this->ps_suction)) {
-			ds->DrawEllipse(this->ps_suction.x + cx, this->ps_suction.y + cy,
-				this->style.suction_radius * rsx, this->style.suction_radius * rsy,
-				this->style.ps_suction_color);
-		}
-
-		if (this->body->FillContainsPoint(this->sb_suction)) {
-			ds->DrawEllipse(this->sb_suction.x + cx, this->sb_suction.y + cy,
-				this->style.suction_radius * rsx, this->style.suction_radius * rsy,
-				this->style.sb_suction_color);
 		}
 
 		if (this->body->FillContainsPoint(this->barge)) {
@@ -260,35 +290,33 @@ void TrailingSuctionDredgerlet::resize(float width, float height) {
 	}
 
 	if (resized) {
-		this->reconstruct();
+		this->reconstruct(&this->lt, &this->rb);
 		this->notify_updated();
 	}
 }
 
-void TrailingSuctionDredgerlet::set_ps_drag_info(DragInfo& info, unsigned int color, unsigned int actual_drag_pipe_size) {	
+void TrailingSuctionDredgerlet::set_ps_drag_info(DragInfo& info, unsigned int actual_drag_pipe_size) {	
 	if (this->ps_drag == nullptr) {
 		this->ps_drag = new TrailingSuctionDrag(actual_drag_pipe_size);
 	}
 
 	this->ps_drag->set_info(info);
-	this->ps_color = Colours::make(color);
 
 	if (this->body != nullptr) {
-		this->reconstruct();
+		this->reconstruct(&this->lt, &this->rb);
 		this->notify_updated();
 	}
 }
 
-void TrailingSuctionDredgerlet::set_sb_drag_info(DragInfo& info, unsigned int color, unsigned int actual_drag_pipe_size) {
+void TrailingSuctionDredgerlet::set_sb_drag_info(DragInfo& info, unsigned int actual_drag_pipe_size) {
 	if (this->sb_drag == nullptr) {
 		this->sb_drag = new TrailingSuctionDrag(actual_drag_pipe_size);
 	}
 
 	this->sb_drag->set_info(info);
-	this->sb_color = Colours::make(color);
 
 	if (this->body != nullptr) {
-		this->reconstruct();
+		this->reconstruct(&this->lt, &this->rb);
 		this->notify_updated();
 	}
 }
@@ -297,7 +325,7 @@ void TrailingSuctionDredgerlet::set_ps_drag_figures(double3& offset, double3 ujo
 	if ((this->ps_drag != nullptr) && (this->body != nullptr)) {
 		this->ps_drag->set_figure(offset, ujoints, draghead);
 
-		this->reconstruct();
+		this->reconstruct(&this->lt, &this->rb);
 		this->notify_updated();
 	}
 }
@@ -306,25 +334,30 @@ void TrailingSuctionDredgerlet::set_sb_drag_figures(double3& offset, double3 ujo
 	if ((this->sb_drag != nullptr) && (this->body != nullptr)) {
 		this->sb_drag->set_figure(offset, ujoints, draghead);
 
-		this->reconstruct();
+		this->reconstruct(&this->lt, &this->rb);
 		this->notify_updated();
 	}
 }
 
 /*************************************************************************************************/
-void TrailingSuctionDredgerlet::reconstruct() {
+void TrailingSuctionDredgerlet::reconstruct(float2* lt, float2* rb) {
 	size_t ptsize = sizeof(double2);
-	size_t bodies = sizeof(this->preview_config->body_vertexes) / ptsize;
-	size_t hoppers = sizeof(this->preview_config->hopper_vertexes) / ptsize;
-	size_t bridges = sizeof(this->preview_config->bridge_vertexes) / ptsize;
+	size_t bodiesize = sizeof(this->preview_config->body_vertexes) / ptsize;
+	size_t hoppersize = sizeof(this->preview_config->hopper_vertexes) / ptsize;
+	size_t bridgesize = sizeof(this->preview_config->bridge_vertexes) / ptsize;
 	float2 scale = float2(this->xscale * this->original_scale, this->yscale * this->original_scale);
 	double2 gps_pos = this->preview_config->gps[0];
+	bool lt_copy = ((lt != nullptr) && (lt != &this->lt));
+	bool rb_copy = ((rb != nullptr) && (rb != &this->lt));
 
 	this->clear_boundary();
 
-	this->body = vessel_polygon(this->preview_config->body_vertexes, bodies, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
-	this->hopper = vessel_polygon(this->preview_config->hopper_vertexes, hoppers, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
-	this->bridge = vessel_polygon(this->preview_config->bridge_vertexes, bridges, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
+	if (lt_copy) (*lt) = this->lt;
+	if (rb_copy) (*rb) = this->rb;
+
+	this->body = vessel_polygon(this->preview_config->body_vertexes, bodiesize, gps_pos, scale, this->bow_direction, lt, rb);
+	this->hopper = vessel_polygon(this->preview_config->hopper_vertexes, hoppersize, gps_pos, scale, this->bow_direction, lt, rb);
+	this->bridge = vessel_polygon(this->preview_config->bridge_vertexes, bridgesize, gps_pos, scale, this->bow_direction, lt, rb);
 
 	this->gps[0] = vessel_point(this->preview_config->gps[0], gps_pos, scale, this->bow_direction);
 	this->gps[1] = vessel_point(this->preview_config->gps[1], gps_pos, scale, this->bow_direction);
@@ -333,36 +366,36 @@ void TrailingSuctionDredgerlet::reconstruct() {
 	this->trunnion = vessel_point(this->preview_config->trunnion, gps_pos, scale, this->bow_direction);
 	this->barge = vessel_point(this->preview_config->barge, gps_pos, scale, this->bow_direction);
 
-	if (this->ps_drag != nullptr) {
-		double2 suction = this->preview_config->ps_suction;
-		double direction = -1.0;
+	if (lt_copy) this->lt = (*lt);
+	if (rb_copy) this->rb = (*rb);
 
-		this->ps_offset = this->drag_position_to_local(this->ps_drag->offset, suction, gps_pos, scale, direction);
-		this->ps_draghead = this->drag_position_to_local(this->ps_drag->draghead, suction, gps_pos, scale, direction);
+	if (this->ps_drag != nullptr) {
+		size_t headsize = sizeof(this->ps_drag->draghead_vertexes) / ptsize;
+		double2 suction = this->preview_config->ps_suction;
+		double2 sign(-1.0, -1.0);
+
+		this->ps_offset = vessel_point(this->ps_drag->offset, suction, sign, gps_pos, scale, this->bow_direction);
+		this->ps_draghead = vessel_point(this->ps_drag->draghead, suction, sign, gps_pos, scale, this->bow_direction);
+		this->ps_drag_head = vessel_polygon(this->ps_drag->draghead_vertexes, headsize, suction, sign, gps_pos, scale, this->bow_direction + this->ps_drag->degrees);
 
 		for (int idx = 0; idx < this->ps_drag->joints_count; idx++) {
-			this->ps_ujoints[idx] = this->drag_position_to_local(this->ps_drag->ujoints[idx], suction, gps_pos, scale, direction);
+			this->ps_ujoints[idx] = vessel_point(this->ps_drag->ujoints[idx], suction, sign, gps_pos, scale, this->bow_direction);
 		}
 	}
 
 	if (this->sb_drag != nullptr) {
+		size_t headsize = sizeof(this->sb_drag->draghead_vertexes) / ptsize;
 		double2 suction = this->preview_config->sb_suction;
-		double direction = +1.0;
+		double2 sign(-1.0, +1.0);
 
-		this->sb_offset = this->drag_position_to_local(this->sb_drag->offset, suction, gps_pos, scale, direction);
-		this->sb_draghead = this->drag_position_to_local(this->sb_drag->draghead, suction, gps_pos, scale, direction);
+		this->sb_offset = vessel_point(this->sb_drag->offset, suction, sign, gps_pos, scale, this->bow_direction);
+		this->sb_draghead = vessel_point(this->sb_drag->draghead, suction, sign, gps_pos, scale, this->bow_direction);
+		this->sb_drag_head = vessel_polygon(this->sb_drag->draghead_vertexes, headsize, suction, sign, gps_pos, scale, this->bow_direction + this->sb_drag->degrees);
 
 		for (int idx = 0; idx < this->sb_drag->joints_count; idx++) {
-			this->sb_ujoints[idx] = this->drag_position_to_local(this->sb_drag->ujoints[idx], suction, gps_pos, scale, direction);
+			this->sb_ujoints[idx] = vessel_point(this->sb_drag->ujoints[idx], suction, sign, gps_pos, scale, this->bow_direction);
 		}
 	}
-}
-
-float2 TrailingSuctionDredgerlet::drag_position_to_local(double2& dot, double2& suction, double2& gps, float2& scale, double y_direction) {
-	double dotx = suction.x - dot.x;
-	double doty = suction.y + dot.y * y_direction;
-
-	return vessel_point(dotx, doty, gps, scale, this->bow_direction, &this->lt, &this->rb);
 }
 
 /*************************************************************************************************/
@@ -371,7 +404,7 @@ void TrailingSuctionDredgerlet::set_bow_direction(double degrees) {
 		if (this->bow_direction != degrees) {
 			this->bow_direction = degrees;
 
-			this->reconstruct();
+			this->reconstruct(&this->lt, &this->rb);
 			this->notify_updated();
 		}
 	}
@@ -399,7 +432,7 @@ void TrailingSuctionDredgerlet::preview(TrailingSuctionDredger^ src) {
 		this->preview_config->refresh(src);
 	}
 
-	this->reconstruct();
+	this->reconstruct(&this->lt, &this->rb);
 	this->notify_updated();
 }
 
