@@ -67,20 +67,8 @@ void Xyzlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 						}
 
 						last_pos = pos;
-					} else {
-#ifdef _DEBUG
-						this->get_logger()->log_message(Log::Info, L"close depth[%lf, %lf, %lf] @(%f, %f)", it->x, it->y, it->z, pos.x, pos.y);
-#endif
 					}
-				} else {
-#ifdef _DEBUG
-					this->get_logger()->log_message(Log::Info, L"invisible depth[%lf, %lf, %lf] @(%f, %f)", it->x, it->y, it->z, pos.x, pos.y);
-#endif
 				}
-			} else {
-#ifdef _DEBUG
-				this->get_logger()->log_message(Log::Info, L"filter out depth[%lf, %lf, %lf]", it->x, it->y, it->z);
-#endif
 			}
 		}
 	}

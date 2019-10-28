@@ -42,7 +42,7 @@ void IVessellet::scale(double s) {
 
 	this->moor(GraphletAnchor::CC);
 	this->resize(float(os.Width * s), float(os.Height * s));
-	this->clear_moor();
+	this->clear_moor(); // the vessel may already scaled in which case the notify_updated() will not be invoked and hence manually clear the moor. 
 }
 
 void IVessellet::clear_boundary() {

@@ -276,12 +276,6 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 				}
 			}; break;
 			}
-		} else {
-#ifdef _DEBUG
-		this->get_logger()->log_message(Log::Debug,
-			L"invisible: %s; view window: (%f, %f), (%f, %f); scale: %f; translation: [%f, %f]",
-			dig->to_string()->Data(), x, y, ds_rx, ds_by, this->actual_scale(), this->xtranslation, this->ytranslation);
-#endif
 		}
 	}
 }

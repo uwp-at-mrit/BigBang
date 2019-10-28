@@ -126,7 +126,5 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::TrailingSuctionDrag* ps_drag;
 		WarGrey::SCADA::TrailingSuctionDrag* sb_drag;
-		Windows::Foundation::Numerics::float2 lt_with_drag;
-		Windows::Foundation::Numerics::float2 rb_with_drag;
 	};
 }
