@@ -150,16 +150,13 @@ void TrailingSuctionDredgerlet::construct() {
 }
 
 void TrailingSuctionDredgerlet::on_appdata(Uri^ vessel, TrailingSuctionDredger^ vessel_config) {
-	float2 lt, rb; // drags do not affect the size of this graphlet, they only affect the margins
-
 	this->vessel_config = vessel_config;
 
 	// avoid updating the raw instance accidently
 	this->preview_config = ref new TrailingSuctionDredger(this->vessel_config);
 	
-	this->reconstruct(&lt, &rb);
-	this->xradius = vessel_radius(lt, rb);
-	this->yradius = this->xradius;
+	this->reconstruct();
+	this->resolve_radius();
 }
 
 bool TrailingSuctionDredgerlet::ready() {
@@ -175,10 +172,10 @@ void TrailingSuctionDredgerlet::fill_margin(float x, float y, float* t, float* r
 	float rx = this->xradius * this->xscale;
 	float ry = this->yradius * this->yscale;
 
-	SET_BOX(l, rx + this->lt.x);
-	SET_BOX(r, rx - this->rb.x);
-	SET_BOX(t, ry + this->lt.y);
-	SET_BOX(b, ry - this->rb.y);
+	SET_BOX(l, rx + this->lt_with_drag.x);
+	SET_BOX(r, rx - this->rb_with_drag.x);
+	SET_BOX(t, ry + this->lt_with_drag.y);
+	SET_BOX(b, ry - this->rb_with_drag.y);
 }
 
 void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -290,7 +287,7 @@ void TrailingSuctionDredgerlet::resize(float width, float height) {
 	}
 
 	if (resized) {
-		this->reconstruct(&this->lt, &this->rb);
+		this->reconstruct();
 		this->notify_updated();
 	}
 }
@@ -303,7 +300,7 @@ void TrailingSuctionDredgerlet::set_ps_drag_info(DragInfo& info, unsigned int ac
 	this->ps_drag->set_info(info);
 
 	if (this->body != nullptr) {
-		this->reconstruct(&this->lt, &this->rb);
+		this->reconstruct();
 		this->notify_updated();
 	}
 }
@@ -316,7 +313,7 @@ void TrailingSuctionDredgerlet::set_sb_drag_info(DragInfo& info, unsigned int ac
 	this->sb_drag->set_info(info);
 
 	if (this->body != nullptr) {
-		this->reconstruct(&this->lt, &this->rb);
+		this->reconstruct();
 		this->notify_updated();
 	}
 }
@@ -325,7 +322,7 @@ void TrailingSuctionDredgerlet::set_ps_drag_figures(double3& offset, double3 ujo
 	if ((this->ps_drag != nullptr) && (this->body != nullptr)) {
 		this->ps_drag->set_figure(offset, ujoints, draghead);
 
-		this->reconstruct(&this->lt, &this->rb);
+		this->reconstruct();
 		this->notify_updated();
 	}
 }
@@ -334,30 +331,25 @@ void TrailingSuctionDredgerlet::set_sb_drag_figures(double3& offset, double3 ujo
 	if ((this->sb_drag != nullptr) && (this->body != nullptr)) {
 		this->sb_drag->set_figure(offset, ujoints, draghead);
 
-		this->reconstruct(&this->lt, &this->rb);
+		this->reconstruct();
 		this->notify_updated();
 	}
 }
 
 /*************************************************************************************************/
-void TrailingSuctionDredgerlet::reconstruct(float2* lt, float2* rb) {
+void TrailingSuctionDredgerlet::reconstruct() {
 	size_t ptsize = sizeof(double2);
 	size_t bodiesize = sizeof(this->preview_config->body_vertexes) / ptsize;
 	size_t hoppersize = sizeof(this->preview_config->hopper_vertexes) / ptsize;
 	size_t bridgesize = sizeof(this->preview_config->bridge_vertexes) / ptsize;
 	float2 scale = float2(this->xscale * this->original_scale, this->yscale * this->original_scale);
 	double2 gps_pos = this->preview_config->gps[0];
-	bool lt_copy = ((lt != nullptr) && (lt != &this->lt));
-	bool rb_copy = ((rb != nullptr) && (rb != &this->lt));
-
+	
 	this->clear_boundary();
 
-	if (lt_copy) (*lt) = this->lt;
-	if (rb_copy) (*rb) = this->rb;
-
-	this->body = vessel_polygon(this->preview_config->body_vertexes, bodiesize, gps_pos, scale, this->bow_direction, lt, rb);
-	this->hopper = vessel_polygon(this->preview_config->hopper_vertexes, hoppersize, gps_pos, scale, this->bow_direction, lt, rb);
-	this->bridge = vessel_polygon(this->preview_config->bridge_vertexes, bridgesize, gps_pos, scale, this->bow_direction, lt, rb);
+	this->body = vessel_polygon(this->preview_config->body_vertexes, bodiesize, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
+	this->hopper = vessel_polygon(this->preview_config->hopper_vertexes, hoppersize, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
+	this->bridge = vessel_polygon(this->preview_config->bridge_vertexes, bridgesize, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
 
 	this->gps[0] = vessel_point(this->preview_config->gps[0], gps_pos, scale, this->bow_direction);
 	this->gps[1] = vessel_point(this->preview_config->gps[1], gps_pos, scale, this->bow_direction);
@@ -366,16 +358,16 @@ void TrailingSuctionDredgerlet::reconstruct(float2* lt, float2* rb) {
 	this->trunnion = vessel_point(this->preview_config->trunnion, gps_pos, scale, this->bow_direction);
 	this->barge = vessel_point(this->preview_config->barge, gps_pos, scale, this->bow_direction);
 
-	if (lt_copy) this->lt = (*lt);
-	if (rb_copy) this->rb = (*rb);
+	this->lt_with_drag = this->lt;
+	this->rb_with_drag = this->rb;
 
 	if (this->ps_drag != nullptr) {
 		size_t headsize = sizeof(this->ps_drag->draghead_vertexes) / ptsize;
 		double2 suction = this->preview_config->ps_suction;
 		double2 sign(-1.0, -1.0);
 
-		this->ps_offset = vessel_point(this->ps_drag->offset, suction, sign, gps_pos, scale, this->bow_direction);
-		this->ps_draghead = vessel_point(this->ps_drag->draghead, suction, sign, gps_pos, scale, this->bow_direction);
+		this->ps_offset = vessel_point(this->ps_drag->offset, suction, sign, gps_pos, scale, this->bow_direction, &this->lt_with_drag, &this->rb_with_drag);
+		this->ps_draghead = vessel_point(this->ps_drag->draghead, suction, sign, gps_pos, scale, this->bow_direction, &this->lt_with_drag, &this->rb_with_drag);
 		this->ps_drag_head = vessel_polygon(this->ps_drag->draghead_vertexes, headsize, suction, sign, gps_pos, scale, this->bow_direction + this->ps_drag->degrees);
 
 		for (int idx = 0; idx < this->ps_drag->joints_count; idx++) {
@@ -388,8 +380,8 @@ void TrailingSuctionDredgerlet::reconstruct(float2* lt, float2* rb) {
 		double2 suction = this->preview_config->sb_suction;
 		double2 sign(-1.0, +1.0);
 
-		this->sb_offset = vessel_point(this->sb_drag->offset, suction, sign, gps_pos, scale, this->bow_direction);
-		this->sb_draghead = vessel_point(this->sb_drag->draghead, suction, sign, gps_pos, scale, this->bow_direction);
+		this->sb_offset = vessel_point(this->sb_drag->offset, suction, sign, gps_pos, scale, this->bow_direction, &this->lt_with_drag, &this->rb_with_drag);
+		this->sb_draghead = vessel_point(this->sb_drag->draghead, suction, sign, gps_pos, scale, this->bow_direction, &this->lt_with_drag, &this->rb_with_drag);
 		this->sb_drag_head = vessel_polygon(this->sb_drag->draghead_vertexes, headsize, suction, sign, gps_pos, scale, this->bow_direction + this->sb_drag->degrees);
 
 		for (int idx = 0; idx < this->sb_drag->joints_count; idx++) {
@@ -404,7 +396,7 @@ void TrailingSuctionDredgerlet::set_bow_direction(double degrees) {
 		if (this->bow_direction != degrees) {
 			this->bow_direction = degrees;
 
-			this->reconstruct(&this->lt, &this->rb);
+			this->reconstruct();
 			this->notify_updated();
 		}
 	}
@@ -432,7 +424,7 @@ void TrailingSuctionDredgerlet::preview(TrailingSuctionDredger^ src) {
 		this->preview_config->refresh(src);
 	}
 
-	this->reconstruct(&this->lt, &this->rb);
+	this->reconstruct();
 	this->notify_updated();
 }
 

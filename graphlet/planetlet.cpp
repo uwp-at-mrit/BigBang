@@ -191,5 +191,6 @@ void Planetlet::triggle_resize_event_if_needed() {
 		// all arguments are null, just for triggling the resizing event
 		this->moor(this->stretching_anchor);
 		this->planet->fill_graphlets_boundary(nullptr, nullptr, nullptr, nullptr);
+		this->clear_moor();
 	}
 }

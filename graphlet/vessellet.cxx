@@ -42,6 +42,7 @@ void IVessellet::scale(double s) {
 
 	this->moor(GraphletAnchor::CC);
 	this->resize(float(os.Width * s), float(os.Height * s));
+	this->clear_moor();
 }
 
 void IVessellet::clear_boundary() {
@@ -49,6 +50,11 @@ void IVessellet::clear_boundary() {
 	this->lt.y = +infinity_f;
 	this->rb.x = -infinity_f;
 	this->rb.y = -infinity_f;
+}
+
+void IVessellet::resolve_radius() {
+	this->xradius = vessel_radius(this->lt, this->rb);
+	this->yradius = this->xradius;
 }
 
 /*************************************************************************************************/

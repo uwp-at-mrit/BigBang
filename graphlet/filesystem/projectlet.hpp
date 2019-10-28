@@ -23,7 +23,7 @@ namespace WarGrey::SCADA {
 			Platform::String^ rootdir = "projects");
 
 	public:
-		void on_location_changed(double latitude, double longitude, double altitude, double x, double y);
+		void on_location_changed(double x, double y);
 
 	public:
 		void construct() override;
@@ -69,9 +69,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		Windows::Foundation::Size view_size;
-		double latitude;
-		double longitude;
-		double altitude;
 		double vessel_x;
 		double vessel_y;
 	};

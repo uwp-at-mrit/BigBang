@@ -322,11 +322,8 @@ void Projectlet::relocate_icons() {
 	}
 }
 
-void Projectlet::on_location_changed(double latitude, double longitude, double altitude, double x, double y) {
+void Projectlet::on_location_changed(double x, double y) {
 	if ((this->vessel_x != x) || (this->vessel_y != y)) {
-		this->latitude = latitude;
-		this->longitude = longitude;
-		this->altitude = altitude;
 		this->vessel_x = x;
 		this->vessel_y = y;
 

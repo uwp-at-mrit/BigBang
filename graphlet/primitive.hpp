@@ -32,8 +32,9 @@ namespace WarGrey::SCADA {
 		virtual bool is_colliding_with_mouse(float local_x, float local_y) { return true; }
 
 	public:
-		void moor(WarGrey::SCADA::GraphletAnchor anchor);
 		bool has_caret();
+		void moor(WarGrey::SCADA::GraphletAnchor anchor);
+		void clear_moor(); // the notify_updated() will clear the moor, but the notifying are not always guaranteed to be done, use this method to do it manually.
 
 	public:
 		float available_visible_width(float here_x = 0.0F);

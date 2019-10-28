@@ -89,7 +89,7 @@ namespace WarGrey::SCADA {
 		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
 
 	private:
-		void reconstruct(Windows::Foundation::Numerics::float2* lt, Windows::Foundation::Numerics::float2* rb);
+		void reconstruct();
 		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
@@ -109,8 +109,6 @@ namespace WarGrey::SCADA {
 		float original_scale;
 		float xscale;
 		float yscale;
-		float xradius;
-		float yradius;
 
 	private:
 		Windows::Foundation::Numerics::float2 gps[2];
@@ -128,5 +126,7 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::TrailingSuctionDrag* ps_drag;
 		WarGrey::SCADA::TrailingSuctionDrag* sb_drag;
+		Windows::Foundation::Numerics::float2 lt_with_drag;
+		Windows::Foundation::Numerics::float2 rb_with_drag;
 	};
 }

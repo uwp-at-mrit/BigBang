@@ -20,10 +20,13 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void clear_boundary();
+		void resolve_radius();
 
 	protected:
 		Windows::Foundation::Numerics::float2 lt;
 		Windows::Foundation::Numerics::float2 rb;
+		float xradius;
+		float yradius;
 	};
 
 	Windows::Foundation::Numerics::float2 vessel_point(double src_x, double src_y,
