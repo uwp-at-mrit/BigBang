@@ -49,7 +49,7 @@ public:
 	}
 
 	void set_figure(double3& offset, double3 ujoints[], double3& draghead) {
-		const size_t head_ptsize = sizeof(this->draghead_vertexes) / sizeof(double2);
+		const size_t head_ptsize = sizeof(this->draghead_vertices) / sizeof(double2);
 		
 		set_drag_joint(&this->offset, offset, this->drag_length);
 		set_drag_joint(&this->draghead, draghead, this->drag_length);
@@ -66,12 +66,12 @@ public:
 			double dy = this->draghead.y - joint.y;
 			float radians = float(flatan(dy, dx));
 			
-			set_draghead_vertex(this->draghead_vertexes + 0, this->draghead, 0.0, -this->info.pipe_radius, radians);
-			set_draghead_vertex(this->draghead_vertexes + 1, this->draghead, back_dx, -half_head, radians);
-			set_draghead_vertex(this->draghead_vertexes + 2, this->draghead, this->info.head_length, -half_head, radians);
-			set_draghead_vertex(this->draghead_vertexes + 3, this->draghead, this->info.head_length, +half_head, radians);
-			set_draghead_vertex(this->draghead_vertexes + 4, this->draghead, back_dx, +half_head, radians);
-			set_draghead_vertex(this->draghead_vertexes + 5, this->draghead, 0.0, +this->info.pipe_radius, radians);
+			set_draghead_vertex(this->draghead_vertices + 0, this->draghead, 0.0, -this->info.pipe_radius, radians);
+			set_draghead_vertex(this->draghead_vertices + 1, this->draghead, back_dx, -half_head, radians);
+			set_draghead_vertex(this->draghead_vertices + 2, this->draghead, this->info.head_length, -half_head, radians);
+			set_draghead_vertex(this->draghead_vertices + 3, this->draghead, this->info.head_length, +half_head, radians);
+			set_draghead_vertex(this->draghead_vertices + 4, this->draghead, back_dx, +half_head, radians);
+			set_draghead_vertex(this->draghead_vertices + 5, this->draghead, 0.0, +this->info.pipe_radius, radians);
 		}
 	}
 
@@ -79,8 +79,7 @@ public:
 	double2 offset;
 	double2 ujoints[DRAG_SEGMENT_MAX_COUNT];
 	double2 draghead;
-	double2 draghead_vertexes[6];
-	double degrees;
+	double2 draghead_vertices[6];
 
 public:
 	DragInfo info;
@@ -344,17 +343,17 @@ void TrailingSuctionDredgerlet::set_sb_drag_figures(double3& offset, double3 ujo
 /*************************************************************************************************/
 void TrailingSuctionDredgerlet::reconstruct() {
 	size_t ptsize = sizeof(double2);
-	size_t bodiesize = sizeof(this->preview_config->body_vertexes) / ptsize;
-	size_t hoppersize = sizeof(this->preview_config->hopper_vertexes) / ptsize;
-	size_t bridgesize = sizeof(this->preview_config->bridge_vertexes) / ptsize;
+	size_t bodiesize = sizeof(this->preview_config->body_vertices) / ptsize;
+	size_t hoppersize = sizeof(this->preview_config->hopper_vertices) / ptsize;
+	size_t bridgesize = sizeof(this->preview_config->bridge_vertices) / ptsize;
 	float2 scale = float2(this->xscale * this->original_scale, this->yscale * this->original_scale);
 	double2 gps_pos = this->preview_config->gps[0];
 	
 	this->clear_boundary();
 
-	this->body = vessel_polygon(this->preview_config->body_vertexes, bodiesize, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
-	this->hopper = vessel_polygon(this->preview_config->hopper_vertexes, hoppersize, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
-	this->bridge = vessel_polygon(this->preview_config->bridge_vertexes, bridgesize, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
+	this->body = vessel_polygon(this->preview_config->body_vertices, bodiesize, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
+	this->hopper = vessel_polygon(this->preview_config->hopper_vertices, hoppersize, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
+	this->bridge = vessel_polygon(this->preview_config->bridge_vertices, bridgesize, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
 
 	this->gps[0] = vessel_point(this->preview_config->gps[0], gps_pos, scale, this->bow_direction);
 	this->gps[1] = vessel_point(this->preview_config->gps[1], gps_pos, scale, this->bow_direction);
@@ -364,13 +363,13 @@ void TrailingSuctionDredgerlet::reconstruct() {
 	this->barge = vessel_point(this->preview_config->barge, gps_pos, scale, this->bow_direction);
 
 	if (this->ps_drag != nullptr) {
-		size_t headsize = sizeof(this->ps_drag->draghead_vertexes) / ptsize;
+		size_t headsize = sizeof(this->ps_drag->draghead_vertices) / ptsize;
 		double2 suction = this->preview_config->ps_suction;
 		double2 sign(-1.0, -1.0);
 
 		this->ps_offset = vessel_point(this->ps_drag->offset, suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
 		this->ps_draghead = vessel_point(this->ps_drag->draghead, suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
-		this->ps_drag_head = vessel_polygon(this->ps_drag->draghead_vertexes, headsize, suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
+		this->ps_drag_head = vessel_polygon(this->ps_drag->draghead_vertices, headsize, suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
 
 		for (int idx = 0; idx < this->ps_drag->joints_count; idx++) {
 			this->ps_ujoints[idx] = vessel_point(this->ps_drag->ujoints[idx], suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
@@ -378,13 +377,13 @@ void TrailingSuctionDredgerlet::reconstruct() {
 	}
 
 	if (this->sb_drag != nullptr) {
-		size_t headsize = sizeof(this->sb_drag->draghead_vertexes) / ptsize;
+		size_t headsize = sizeof(this->sb_drag->draghead_vertices) / ptsize;
 		double2 suction = this->preview_config->sb_suction;
 		double2 sign(-1.0, +1.0);
 
 		this->sb_offset = vessel_point(this->sb_drag->offset, suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
 		this->sb_draghead = vessel_point(this->sb_drag->draghead, suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
-		this->sb_drag_head = vessel_polygon(this->sb_drag->draghead_vertexes, headsize, suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
+		this->sb_drag_head = vessel_polygon(this->sb_drag->draghead_vertices, headsize, suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
 
 		for (int idx = 0; idx < this->sb_drag->joints_count; idx++) {
 			this->sb_ujoints[idx] = vessel_point(this->sb_drag->ujoints[idx], suction, sign, gps_pos, scale, this->bow_direction, &this->lt, &this->rb);
@@ -460,27 +459,27 @@ TrailingSuctionDredger^ TrailingSuctionDredger::load(Platform::String^ path) {
 					}
 				} else if (TSD::Body.ToString()->Equals(wtype)) {
 					unsigned long long n = read_natural(src);
-					size_t size = sizeof(dredger->body_vertexes) / ptsize;
+					size_t size = sizeof(dredger->body_vertices) / ptsize;
 
 					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
-						dredger->body_vertexes[idx].x = read_flonum(src);
-						dredger->body_vertexes[idx].y = read_flonum(src);
+						dredger->body_vertices[idx].x = read_flonum(src);
+						dredger->body_vertices[idx].y = read_flonum(src);
 					}
 				} else if (TSD::Hopper.ToString()->Equals(wtype)) {
 					unsigned long long n = read_natural(src);
-					size_t size = sizeof(dredger->hopper_vertexes) / ptsize;
+					size_t size = sizeof(dredger->hopper_vertices) / ptsize;
 
 					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
-						dredger->hopper_vertexes[idx].x = read_flonum(src);
-						dredger->hopper_vertexes[idx].y = read_flonum(src);
+						dredger->hopper_vertices[idx].x = read_flonum(src);
+						dredger->hopper_vertices[idx].y = read_flonum(src);
 					}
 				} else if (TSD::Bridge.ToString()->Equals(wtype)) {
 					unsigned long long n = read_natural(src);
-					size_t size = sizeof(dredger->bridge_vertexes) / ptsize;
+					size_t size = sizeof(dredger->bridge_vertices) / ptsize;
 
 					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
-						dredger->bridge_vertexes[idx].x = read_flonum(src);
-						dredger->bridge_vertexes[idx].y = read_flonum(src);
+						dredger->bridge_vertices[idx].x = read_flonum(src);
+						dredger->bridge_vertices[idx].y = read_flonum(src);
 					}
 				} else if (TSD::Suction.ToString()->Equals(wtype)) {
 					dredger->ps_suction.x = read_flonum(src);
@@ -511,21 +510,21 @@ bool TrailingSuctionDredger::save(TrailingSuctionDredger^ self, Platform::String
 	if (open_output_binary(v_config, path)) {
 		write_wtext(v_config, TSD::TrailingSuctionHopperDredger, true);
 
-		write_wtext(v_config, TSD::Body) << " " << sizeof(self->body_vertexes) / ptsize;
-		for (size_t idx = 0; idx < sizeof(self->body_vertexes) / ptsize; idx++) {
-			write_position(v_config, self->body_vertexes[idx]);
+		write_wtext(v_config, TSD::Body) << " " << sizeof(self->body_vertices) / ptsize;
+		for (size_t idx = 0; idx < sizeof(self->body_vertices) / ptsize; idx++) {
+			write_position(v_config, self->body_vertices[idx]);
 		}
 		write_newline(v_config);
 
-		write_wtext(v_config, TSD::Bridge) << " " << sizeof(self->bridge_vertexes) / ptsize;
-		for (size_t idx = 0; idx < sizeof(self->bridge_vertexes) / ptsize; idx++) {
-			write_position(v_config, self->bridge_vertexes[idx]);
+		write_wtext(v_config, TSD::Bridge) << " " << sizeof(self->bridge_vertices) / ptsize;
+		for (size_t idx = 0; idx < sizeof(self->bridge_vertices) / ptsize; idx++) {
+			write_position(v_config, self->bridge_vertices[idx]);
 		}
 		write_newline(v_config);
 
-		write_wtext(v_config, TSD::Hopper) << " " << sizeof(self->hopper_vertexes) / ptsize;
-		for (size_t idx = 0; idx < sizeof(self->hopper_vertexes) / ptsize; idx++) {
-			write_position(v_config, self->hopper_vertexes[idx]);
+		write_wtext(v_config, TSD::Hopper) << " " << sizeof(self->hopper_vertices) / ptsize;
+		for (size_t idx = 0; idx < sizeof(self->hopper_vertices) / ptsize; idx++) {
+			write_position(v_config, self->hopper_vertices[idx]);
 		}
 		write_newline(v_config);
 
@@ -573,16 +572,16 @@ void TrailingSuctionDredger::refresh(TrailingSuctionDredger^ src) {
 			this->gps[idx] = src->gps[idx];
 		}
 
-		for (size_t idx = 0; idx < sizeof(this->body_vertexes) / ptsize; idx++) {
-			this->body_vertexes[idx] = src->body_vertexes[idx];
+		for (size_t idx = 0; idx < sizeof(this->body_vertices) / ptsize; idx++) {
+			this->body_vertices[idx] = src->body_vertices[idx];
 		}
 
-		for (size_t idx = 0; idx < sizeof(this->hopper_vertexes) / ptsize; idx++) {
-			this->hopper_vertexes[idx] = src->hopper_vertexes[idx];
+		for (size_t idx = 0; idx < sizeof(this->hopper_vertices) / ptsize; idx++) {
+			this->hopper_vertices[idx] = src->hopper_vertices[idx];
 		}
 
-		for (size_t idx = 0; idx < sizeof(this->bridge_vertexes) / ptsize; idx++) {
-			this->bridge_vertexes[idx] = src->bridge_vertexes[idx];
+		for (size_t idx = 0; idx < sizeof(this->bridge_vertices) / ptsize; idx++) {
+			this->bridge_vertices[idx] = src->bridge_vertices[idx];
 		}
 	}
 }

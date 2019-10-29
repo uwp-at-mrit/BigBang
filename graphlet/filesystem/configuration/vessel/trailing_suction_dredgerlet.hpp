@@ -22,9 +22,9 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::double2 gps[2];
 		WarGrey::SCADA::double2 ps_suction;
 		WarGrey::SCADA::double2 sb_suction;
-		WarGrey::SCADA::double2 hopper_vertexes[4];
-		WarGrey::SCADA::double2 body_vertexes[7];
-		WarGrey::SCADA::double2 bridge_vertexes[10];
+		WarGrey::SCADA::double2 hopper_vertices[4];
+		WarGrey::SCADA::double2 body_vertices[7];
+		WarGrey::SCADA::double2 bridge_vertices[10];
 		WarGrey::SCADA::double2 trunnion;
 		WarGrey::SCADA::double2 barge;
 	};
