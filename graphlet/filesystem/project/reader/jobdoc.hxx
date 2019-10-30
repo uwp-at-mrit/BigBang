@@ -33,7 +33,7 @@ namespace WarGrey::SCADA {
 
 	private ref class JobDoc sealed : public WarGrey::SCADA::ProjectDocument {
 	internal:
-		JobDoc(std::filebuf& dig);
+		JobDoc(std::filebuf& job);
 
 	internal:
 		int current_job;

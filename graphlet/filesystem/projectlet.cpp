@@ -1,7 +1,8 @@
 #include "graphlet/filesystem/projectlet.hpp"
 
-#include "graphlet/filesystem/project/reader/depthlog.hxx"
 #include "graphlet/filesystem/project/reader/maplog.hxx"
+#include "graphlet/filesystem/project/reader/depthlog.hxx"
+#include "graphlet/filesystem/project/reader/sectionlog.hxx"
 
 #include "datum/flonum.hpp"
 #include "datum/path.hpp"
@@ -82,9 +83,9 @@ void Projectlet::construct() {
 void Projectlet::on_map_logue(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	MapLog^ dig_log = static_cast<MapLog^>(doc);
 
-	for (size_t idx = 0; idx < dig_log->digs.size(); idx++) {
+	for (size_t idx = 0; idx < dig_log->maps.size(); idx++) {
 		if (dig_log->visibles[idx]) {
-			Platform::String^ dig = dig_log->digs[idx];
+			Platform::String^ dig = dig_log->maps[idx];
 			Platform::String^ ext = file_extension_from_path(dig);
 
 			if (ext->Equals(".DIG")) {
@@ -105,6 +106,19 @@ void Projectlet::on_depth_logue(Platform::String^ ms_appdata, ProjectDocument^ d
 			if (ext->Equals(".XYZ")) {
 				this->load_file(depth, ProjectDoctype::XYZ);
 			}
+		}
+	}
+}
+
+void Projectlet::on_section_logue(Platform::String^ ms_appdata, ProjectDocument^ doc) {
+	SectionLog^ section_log = static_cast<SectionLog^>(doc);
+
+	for (size_t idx = 0; idx < section_log->sections.size(); idx++) {
+		Platform::String^ section = section_log->sections[idx];
+		Platform::String^ ext = file_extension_from_path(section);
+
+		if (ext->Equals(".SEC")) {
+			this->load_file(section, ProjectDoctype::SEC);
 		}
 	}
 }
@@ -166,6 +180,11 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 		this->jobs_dat->attach_to_map(this->map);
 	}
 
+	if (this->section != nullptr) {
+		this->planet->insert(this->section, 0.0F, 0.0F);
+		this->section->attach_to_map(this->map);
+	}
+
 	this->planet->end_update_sequence();
 
 	this->graph_dig = doc_dig;
@@ -186,7 +205,7 @@ void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	}
 }
 
-void Projectlet::on_traceline(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc) {
+void Projectlet::on_traceline(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	JobDoc^ xh_dat = static_cast<JobDoc^>(doc);
 	
 	this->jobs_dat = new Tracelinelet(xh_dat);
@@ -195,6 +214,19 @@ void Projectlet::on_traceline(Platform::String^ ms_appdata, WarGrey::SCADA::Proj
 		this->planet->begin_update_sequence();
 		this->planet->insert(this->jobs_dat, 0.0F, 0.0F);
 		this->jobs_dat->attach_to_map(this->map);
+		this->planet->end_update_sequence();
+	}
+}
+
+void Projectlet::on_sec(Platform::String^ ms_appdata, ProjectDocument^ doc) {
+	SecDoc^ doc_sec = static_cast<SecDoc^>(doc);
+
+	this->section = new Sectionlet(doc_sec);
+
+	if (this->map != nullptr) {
+		this->planet->begin_update_sequence();
+		this->planet->insert(this->section, 0.0F, 0.0F);
+		this->section->attach_to_map(this->map);
 		this->planet->end_update_sequence();
 	}
 }
@@ -339,6 +371,8 @@ ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::Str
 		ft = ProjectDoctype::Map_LOG;
 	} else if (filename->Equals("Deep.LOG")) {
 		ft = ProjectDoctype::Depth_LOG;
+	} else if (filename->Equals("Section.LOG")) {
+		ft = ProjectDoctype::Section_LOG;
 	} else if (filename->Equals("XH.DAT")) {
 		ft = ProjectDoctype::Traceline;
 	}
@@ -348,10 +382,12 @@ ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::Str
 
 void Projectlet::on_appdata(Platform::String^ ms_appdata, ProjectDocument^ doc, ProjectDoctype type) {
 	switch (type) {
-	case ProjectDoctype::DIG:       this->on_dig(ms_appdata, doc); break;
-	case ProjectDoctype::XYZ:       this->on_xyz(ms_appdata, doc); break;
-	case ProjectDoctype::Traceline: this->on_traceline(ms_appdata, doc); break;
-	case ProjectDoctype::Map_LOG:   this->on_map_logue(ms_appdata, doc); break;
-	case ProjectDoctype::Depth_LOG: this->on_depth_logue(ms_appdata, doc); break;
+	case ProjectDoctype::DIG:         this->on_dig(ms_appdata, doc); break;
+	case ProjectDoctype::XYZ:         this->on_xyz(ms_appdata, doc); break;
+	case ProjectDoctype::SEC:         this->on_sec(ms_appdata, doc); break;
+	case ProjectDoctype::Traceline:   this->on_traceline(ms_appdata, doc); break;
+	case ProjectDoctype::Map_LOG:     this->on_map_logue(ms_appdata, doc); break;
+	case ProjectDoctype::Depth_LOG:   this->on_depth_logue(ms_appdata, doc); break;
+	case ProjectDoctype::Section_LOG: this->on_section_logue(ms_appdata, doc); break;
 	}
 }

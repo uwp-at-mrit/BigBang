@@ -24,7 +24,7 @@ static float2 vessel_point_on_screen(double src_x, double src_y, double2& gps, f
 	float x = x0 * cosbow - y0 * sinbow;
 	float y = x0 * sinbow + y0 * cosbow;
 
-	// NOTE that the map uses lefthand coordinate system, the xscale and yscale therefore should be interchanged
+	// NOTE that the map uses YX-axis coordinate system, the xscale and yscale therefore should be interchanged
 	// Stupid design, and/or stupid referenced codebase for lacking of explanation
 
 	region_fuse_point(lt, rb, x, y);

@@ -316,6 +316,15 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\tracelinelet.cpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\sectionlog.cxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\secdoc.cxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\sectionlet.cpp">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -641,6 +650,15 @@
       <Filter>graphlet\filesystem\project\reader</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\tracelinelet.hpp">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\sectionlog.hxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\secdoc.hxx">
+      <Filter>graphlet\filesystem\project\reader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\sectionlet.hpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
   </ItemGroup>

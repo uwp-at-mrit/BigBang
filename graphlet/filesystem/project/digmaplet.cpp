@@ -211,7 +211,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 					double start_deg = a->start_degree - 90.0;
 					double stop_deg = a->stop_degree - 90.0;
 
-					// NOTE that modifyDIG uses the lefthand coordinate system
+					// NOTE that modifyDIG uses the YX-axis coordinate system
 					//   the degrees therefore should sweep 90.0 degrees counterclockwise
 					// Stupid design, and/or stupid referenced codebase for lacking of explanation
 
@@ -233,7 +233,7 @@ void DigMaplet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, floa
 
 				/** WARNING
 				 * The modifyDIG does not handle rectangles accurately, DigMaplet follows it for the sake of compatibility.
-				 * Nevertheless, rectangles should be translated or flipped vertically since modifyDIG uses the lefthand coordinate system.
+				 * Nevertheless, rectangles should be translated or flipped vertically since modifyDIG uses the YX-axis coordinate system.
 				 * Rotation makes it even harder since its center point is the left-top one which is actually indicating the left-bottom one.
 				 *
 				 * By the way, this bug is not a big deal since rectangles are less used in real world projects.
@@ -287,7 +287,7 @@ float2 DigMaplet::local_to_position(float x, float y, float xoff, float yoff) {
 	float gy = float((x - tx) / ss + this->geo_y);
 	float gx = float((ty - y) / ss + this->geo_x);
 
-	// NOTE that modifyDIG uses lefthand coordinate system
+	// NOTE that modifyDIG uses YX-axis coordinate system
 	//   the x and y therefore should be interchanged before drawing
 	// Stupid design, and/or stupid referenced codebase for lacking of explanation
 
@@ -301,7 +301,7 @@ float2 DigMaplet::position_to_local(double x, double y, float xoff, float yoff) 
 	float local_y = -float((x - this->geo_x) * ss) + ty;
 	float local_x = float((y - this->geo_y) * ss) + tx;
 
-	// NOTE that modifyDIG uses lefthand coordinate system
+	// NOTE that modifyDIG uses YX-axis coordinate system
 	//   the x and y therefore should be interchanged before drawing
 	// Stupid design, and/or stupid referenced codebase for lacking of explanation
 
@@ -313,7 +313,7 @@ Size DigMaplet::length_to_local(double width, double height) {
 	float local_w = float(((height <= 0.0) ? width : height) * ss);
 	float local_h = float(width * ss);
 
-	// NOTE that modifyDIG uses lefthand coordinate system
+	// NOTE that modifyDIG uses YX-axis coordinate system
 	//   the width and height therefore should be interchanged before drawing
 	// Stupid design, and/or stupid referenced codebase for its lack of explanation
 

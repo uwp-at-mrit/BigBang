@@ -183,7 +183,7 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 	float cy = y + this->yradius * this->yscale;
 
 	if (this->body != nullptr) {
-		// NOTE that the map uses lefthand coordinate system, the xscale and yscale therefore should be interchanged
+		// NOTE that the map uses YX-axis coordinate system, the xscale and yscale therefore should be interchanged
 		// Stupid design, and/or stupid referenced codebase for lacking of explanation
 		float rsx = this->yscale * this->original_scale;
 		float rsy = this->xscale * this->original_scale;

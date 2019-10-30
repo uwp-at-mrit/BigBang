@@ -4,12 +4,10 @@
 
 #include "graphlet/filesystem/project/reader/doctype.hxx"
 
-#include "graphlet/symbol/dig/dig.hpp"
-
 namespace WarGrey::SCADA {
 	private ref class DepthLog sealed : public WarGrey::SCADA::ProjectDocument {
 	internal:
-		DepthLog(std::filebuf& dig);
+		DepthLog(std::filebuf& log);
 
 	internal:
 		double min;

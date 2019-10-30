@@ -3,8 +3,6 @@
 #include "graphlet/filesystem/project/digmaplet.hpp"
 #include "graphlet/filesystem/project/reader/jobdoc.hxx"
 
-#include "graphlet/filesystem/configuration/colorplotlet.hpp"
-
 namespace WarGrey::SCADA {
 	private class Tracelinelet : public WarGrey::SCADA::IGraphlet {
 	public:

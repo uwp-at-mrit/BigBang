@@ -15,7 +15,7 @@ MapLog::MapLog(std::filebuf& log) {
 			break;
 		}
 
-		this->digs.push_back(read_wgb18030(log, char_end_of_field));
+		this->maps.push_back(read_wgb18030(log, char_end_of_field));
 		read_char(log);
 		this->visibles.push_back(read_bool(log));
 		discard_this_line(log);

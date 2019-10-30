@@ -11,6 +11,7 @@
 #include "graphlet/filesystem/project/digmaplet.hpp"
 #include "graphlet/filesystem/project/xyzlet.hpp"
 #include "graphlet/filesystem/project/tracelinelet.hpp"
+#include "graphlet/filesystem/project/sectionlet.hpp"
 
 #include "graphlet/symbol/dig/dig.hpp"
 
@@ -44,9 +45,11 @@ namespace WarGrey::SCADA {
 	private:
 		void on_dig(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dig);
 		void on_xyz(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_xyz);
+		void on_sec(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_sec);
 		void on_traceline(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dat);
 		void on_map_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
 		void on_depth_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
+		void on_section_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
 
 	private:
 		void move_vessel();
@@ -65,6 +68,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::ColorPlotlet* plot;
 		WarGrey::SCADA::Xyzlet* depth_xyz;
 		WarGrey::SCADA::Tracelinelet* jobs_dat;
+		WarGrey::SCADA::Sectionlet* section;
 		std::deque<Platform::Object^> icons;
 
 	private:

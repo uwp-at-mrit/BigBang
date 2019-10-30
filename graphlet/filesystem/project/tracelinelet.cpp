@@ -1,6 +1,5 @@
 #include "graphlet/filesystem/project/tracelinelet.hpp"
 
-#include "datum/string.hpp"
 #include "datum/flonum.hpp"
 
 #include "geometry.hpp"
@@ -61,7 +60,7 @@ void Tracelinelet::construct() {
 
 void Tracelinelet::fill_extent(float x, float y, float* width, float* height) {
 	SET_BOX(width, this->available_visible_width(x));
-	SET_BOX(height, this->available_visible_height(x));
+	SET_BOX(height, this->available_visible_height(y));
 }
 
 bool Tracelinelet::is_colliding_with_mouse(float local_x, float local_y) {

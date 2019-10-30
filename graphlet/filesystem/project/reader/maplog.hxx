@@ -7,10 +7,10 @@
 namespace WarGrey::SCADA {
 	private ref class MapLog sealed : public WarGrey::SCADA::ProjectDocument {
 	internal:
-		MapLog(std::filebuf& dig);
+		MapLog(std::filebuf& log);
 
 	internal:
-		std::deque<Platform::String^> digs;
+		std::deque<Platform::String^> maps;
 		std::deque<bool> visibles;
 	};
 }
