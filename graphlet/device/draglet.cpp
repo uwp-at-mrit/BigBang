@@ -307,7 +307,7 @@ void IDraglet::set_figure(double3& offset, double3 ujoints[], double3& draghead,
 		arm->BeginFigure(this->_suction);
 		arm->AddLine(this->_offset);
 
-		// NOTE: If the angles are not the same as those received from PLC, They should check drags
+		// NOTE: If the angles are not the same as those received from PLC, drags should be calibrated
 		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				this->rubbers[idx] = this->universal_joint;
