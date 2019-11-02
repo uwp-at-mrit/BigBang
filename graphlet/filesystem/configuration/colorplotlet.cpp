@@ -49,7 +49,7 @@ void ColorPlotlet::construct() {
 	this->font = make_bold_text_format("Arial", 12.0F);
 }
 
-void ColorPlotlet::on_appdata(Uri^ gps, ColorPlot^ plot_config) {
+void ColorPlotlet::on_appdata(Uri^ plot, ColorPlot^ plot_config) {
 	this->plot_config = plot_config;
 }
 

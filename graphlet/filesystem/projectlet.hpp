@@ -68,7 +68,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::ColorPlotlet* plot;
 		WarGrey::SCADA::Xyzlet* depth_xyz;
 		WarGrey::SCADA::Tracelinelet* jobs_dat;
-		WarGrey::SCADA::Sectionlet* section;
+		WarGrey::SCADA::FrontalSectionlet* section;
 		std::deque<Platform::Object^> icons;
 
 	private:

@@ -221,7 +221,7 @@ void Projectlet::on_traceline(Platform::String^ ms_appdata, ProjectDocument^ doc
 void Projectlet::on_sec(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	SecDoc^ doc_sec = static_cast<SecDoc^>(doc);
 
-	this->section = new Sectionlet(doc_sec, true);
+	this->section = new FrontalSectionlet(doc_sec, true);
 
 	if (this->map != nullptr) {
 		this->planet->begin_update_sequence();

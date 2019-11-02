@@ -152,7 +152,7 @@ void TrailingSuctionDredgerlet::construct() {
 void TrailingSuctionDredgerlet::on_appdata(Uri^ vessel, TrailingSuctionDredger^ vessel_config) {
 	this->vessel_config = vessel_config;
 
-	// avoid updating the raw instance accidently
+	// avoid updating raw instance accidently
 	this->preview_config = ref new TrailingSuctionDredger(this->vessel_config);
 	
 	this->reconstruct();
@@ -160,7 +160,7 @@ void TrailingSuctionDredgerlet::on_appdata(Uri^ vessel, TrailingSuctionDredger^ 
 }
 
 bool TrailingSuctionDredgerlet::ready() {
-	return (this->vessel_config != nullptr);
+	return (this->preview_config != nullptr);
 }
 
 void TrailingSuctionDredgerlet::fill_extent(float x, float y, float* w, float* h) {
