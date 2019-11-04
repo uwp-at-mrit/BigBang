@@ -70,9 +70,9 @@ WarGrey::SCADA::GPSStyle WarGrey::SCADA::default_gps_style(ICanvasBrush^ metrics
 
 /*************************************************************************************************/
 GPSlet::GPSlet(Platform::String^ gps, float radius, Platform::String^ ext, Platform::String^ rootdir)
-	: GPSlet(gps, radius, default_gps_style(), ext, rootdir) {}
+	: GPSlet(default_gps_style(), gps, radius, ext, rootdir) {}
 
-GPSlet::GPSlet(Platform::String^ gps, float radius, GPSStyle& style, Platform::String^ ext, Platform::String^ rootdir)
+GPSlet::GPSlet(GPSStyle& style, Platform::String^ gps, float radius, Platform::String^ ext, Platform::String^ rootdir)
 	: radius(radius), style(style), speed(0.0) {
 	if (gps != nullptr) {
 		this->ms_appdata_config = ms_appdata_file(gps, ext, rootdir);

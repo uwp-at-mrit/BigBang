@@ -350,9 +350,9 @@ void ITimeSerieslet::prepare_style(TimeSeriesState status, TimeSeriesStyle& styl
 	CAS_SLOT(style.font, lines_default_font);
 	CAS_SLOT(style.legend_font, lines_default_legend_font);
 	CAS_SLOT(style.border_color, lines_default_border_color);
-	CAS_SLOT(style.haxes_color, Colours::DodgerBlue);
+	CAS_SLOT(style.haxes_color, Colours::Tomato);
 	CAS_SLOT(style.haxes_style, make_dash_stroke(CanvasDashStyle::DashDot));
-	CAS_SLOT(style.vaxes_color, Colours::Tomato);
+	CAS_SLOT(style.vaxes_color, Colours::DodgerBlue);
 	CAS_SLOT(style.vaxes_style, make_dash_stroke(CanvasDashStyle::DashDot));
 	CAS_SLOT(style.selected_color, Colours::GhostWhite);
 	CAS_SLOT(style.selected_style, make_dash_stroke(CanvasDashStyle::DashDotDot));
@@ -370,8 +370,8 @@ void ITimeSerieslet::prepare_style(TimeSeriesState status, TimeSeriesStyle& styl
 }
 
 void ITimeSerieslet::apply_style(TimeSeriesStyle& style) {
-	this->update_vertical_axes(style);
 	this->update_horizontal_axes(style);
+	this->update_vertical_axes(style);
 
 	for (unsigned int idx = 0; idx < this->count; idx++) {
 		this->lines[idx].color = style.lookup_color(idx);
@@ -390,11 +390,10 @@ void ITimeSerieslet::update_time_series(long long next_start) {
 
 	this->realtime.start = next_start;
 	this->no_selected();
-	this->update_horizontal_axes(this->get_style());
+	this->update_vertical_axes(this->get_style());
 }
 
-void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& style) {
-	CanvasGeometry^ vaxes = blank();
+void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
 	CanvasGeometry^ marks = blank();
 	CanvasPathBuilder^ axes = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float interval = this->height / float(this->vertical_step + 1);
@@ -414,14 +413,14 @@ void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& style) {
 		axes->EndFigure(CanvasFigureLoop::Open);
 	}
 
-	this->vmarks = geometry_freeze(marks);
-	this->vaxes = geometry_freeze(geometry_stroke(CanvasGeometry::CreatePath(axes), style.vaxes_thickness, style.vaxes_style));
+	this->hmarks = geometry_freeze(marks);
+	this->haxes = geometry_freeze(geometry_stroke(CanvasGeometry::CreatePath(axes), style.haxes_thickness, style.haxes_style));
 }
 
-void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
+void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& style) {
 	TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
 	CanvasPathBuilder^ axes = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-	CanvasGeometry^ hmarks = blank();
+	CanvasGeometry^ marks = blank();
 	float interval = this->width / float(ts->step);
 	long long delta = ts->span / ts->step;
 	float x = style.haxes_thickness * 0.5F;
@@ -440,33 +439,33 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
 		axes->AddLine(xthis, this->height);
 		axes->EndFigure(CanvasFigureLoop::Open);
 
-		hmarks = geometry_union(hmarks, gdatemark, xthis - date_mark_te.width * 0.5F, y - date_mark_te.height);
-		hmarks = geometry_union(hmarks, gtimemark, xthis - time_mark_te.width * 0.5F, y - time_mark_te.height - date_mark_te.height);
+		marks = geometry_union(marks, gdatemark, xthis - date_mark_te.width * 0.5F, y - date_mark_te.height);
+		marks = geometry_union(marks, gtimemark, xthis - time_mark_te.width * 0.5F, y - time_mark_te.height - date_mark_te.height);
 	}
 
-	this->hmarks = geometry_freeze(hmarks);
-	this->haxes = geometry_stroke(CanvasGeometry::CreatePath(axes), style.haxes_thickness, style.haxes_style);
+	this->vmarks = geometry_freeze(marks);
+	this->vaxes = geometry_stroke(CanvasGeometry::CreatePath(axes), style.haxes_thickness, style.haxes_style);
 }
 
 void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	bool history = (this->get_state() == TimeSeriesState::History);
 	TimeSeries* ts = (history ? &this->history : &this->realtime);
 	TimeSeriesStyle style = this->get_style();
-	Rect haxes_box = this->haxes->ComputeBounds();
+	Rect vaxes_box = this->vaxes->ComputeBounds();
 	float x_axis_selected = x + this->selected_x;
 	float border_off = style.border_thickness * 0.5F;
 	float x_axis_max = nanf("unknown");
-	float y_axis_max = y + haxes_box.Y;
+	float y_axis_max = y + vaxes_box.Y;
 	
 	/** WARNING
 	 * It seems that Win2D/Direct2D Path object does not like overlaid lines,
 	 * thus, it is error-prone to close the line with x-axis.
 	 * just in case, `style.lines_thickness * 2.0F` is the adjustment.
 	 */
-	float y_axis_0 = y_axis_max + haxes_box.Height + style.lines_thickness;
+	float y_axis_0 = y_axis_max + vaxes_box.Height + style.lines_thickness;
 	
-	ds->DrawCachedGeometry(this->vaxes, x, y, style.vaxes_color);
-	ds->FillGeometry(this->haxes, x, y, style.haxes_color);
+	ds->DrawCachedGeometry(this->haxes, x, y, style.haxes_color);
+	ds->FillGeometry(this->vaxes, x, y, style.vaxes_color);
 
 	{ // draw legends
 		float legend_x = x + this->width * style.legend_fx;
@@ -502,7 +501,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 			float tolerance = style.lines_thickness;
 			float last_x = nanf("no datum");
 			float last_y = nanf("no datum");
-			float rx = x + haxes_box.Width;
+			float rx = x + vaxes_box.Width;
 			CanvasPathBuilder^ area = nullptr;
 
 			line->cursor_end();
@@ -510,8 +509,8 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 			while (line->cursor_step_backward(&cursor_flonum)) {
 				double fx = (double(cursor_flonum.timepoint) - double(ts->start * 1000)) / double(ts->span * 1000);
 				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - cursor_flonum.value) / (this->vmax - this->vmin);
-				float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
-				float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
+				float this_x = x + vaxes_box.X + float(fx) * vaxes_box.Width;
+				float this_y = y + vaxes_box.Y + float(fy) * vaxes_box.Height;
 				float this_diff = flabs(this_x - x_axis_selected);
 
 				if (this_diff < minimum_diff) {
@@ -693,7 +692,7 @@ void ITimeSerieslet::set_history_interval(long long open_s, long long close_s, b
 		this->loading_timepoint = this->history_destination;
 		this->history = this->realtime;
 
-		this->update_horizontal_axes(this->get_style());
+		this->update_vertical_axes(this->get_style());
 
 		for (unsigned int idx = 0; idx < this->count; idx++) {
 			this->construct_line(idx, this->lines[idx].name);
@@ -737,7 +736,7 @@ void ITimeSerieslet::check_visual_window(long long timepoint) {
 
 void ITimeSerieslet::own_caret(bool yes) {
 	this->set_state(yes ? TimeSeriesState::History : TimeSeriesState::Realtime);
-	this->update_horizontal_axes(this->get_style());
+	this->update_vertical_axes(this->get_style());
 }
 
 void ITimeSerieslet::on_tap(float x, float y) {
@@ -776,7 +775,7 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 
 	if (handled) {
 		this->no_selected();
-		this->update_horizontal_axes(this->get_style());
+		this->update_vertical_axes(this->get_style());
 	}
 
 	return handled;

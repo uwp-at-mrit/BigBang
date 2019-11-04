@@ -166,7 +166,6 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	}
 
 	if (this->vessel != nullptr) {
-		this->map->fill_anchor_position(0.5, 0.5, &this->vessel_x, &this->vessel_y);
 		this->planet->insert(this->vessel, this->view_size.Width * 0.5F, this->view_size.Height * 0.5F, GraphletAnchor::CC);
 	}
 
@@ -180,9 +179,9 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 		this->jobs_dat->attach_to_map(this->map);
 	}
 
-	if (this->section != nullptr) {
-		this->planet->insert(this->section, 0.0F, 0.0F);
-		this->section->attach_to_map(this->map);
+	if (this->front_sec != nullptr) {
+		this->planet->insert(this->front_sec, 0.0F, 0.0F);
+		this->front_sec->attach_to_map(this->map);
 	}
 
 	this->planet->end_update_sequence();
@@ -221,12 +220,12 @@ void Projectlet::on_traceline(Platform::String^ ms_appdata, ProjectDocument^ doc
 void Projectlet::on_sec(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	SecDoc^ doc_sec = static_cast<SecDoc^>(doc);
 
-	this->section = new FrontalSectionlet(doc_sec, true);
+	this->front_sec = new FrontalSectionlet(doc_sec, true);
 
 	if (this->map != nullptr) {
 		this->planet->begin_update_sequence();
-		this->planet->insert(this->section, 0.0F, 0.0F);
-		this->section->attach_to_map(this->map);
+		this->planet->insert(this->front_sec, 0.0F, 0.0F);
+		this->front_sec->attach_to_map(this->map);
 		this->planet->end_update_sequence();
 	}
 }
@@ -282,7 +281,7 @@ bool Projectlet::on_key(VirtualKey key, bool screen_keyboard) {
 		}
 
 		if (handled) {
-			this->move_vessel();
+			this->relocate_vessel();
 			this->relocate_icons();
 		}
 
@@ -312,7 +311,7 @@ bool Projectlet::on_character(unsigned int keycode) {
 		}
 
 		if (handled) {
-			this->move_vessel();
+			this->relocate_vessel();
 			this->relocate_icons();
 		}
 
@@ -322,44 +321,57 @@ bool Projectlet::on_character(unsigned int keycode) {
 	return handled;
 }
 
-void Projectlet::move_vessel() {
-	if (this->map != nullptr) {
-		float2 vpos = this->map->position_to_local(this->vessel_x, this->vessel_y);
+bool Projectlet::relocate_vessel() {
+	bool moved = false;
 
-		this->planet->begin_update_sequence();
+	if ((this->map != nullptr) && (this->vessel != nullptr)) {
+		float2 vpos = this->map->position_to_local(this->vessel_x, this->vessel_y);
 
 		this->vessel->scale(this->map->actual_scale());
 		this->planet->move_to(this->vessel, vpos.x, vpos.y, GraphletAnchor::CC);
-
-		if (this->jobs_dat != nullptr) {
-			this->jobs_dat->on_vessel_move(this->vessel_x, this->vessel_y);
-		}
-
-		this->planet->end_update_sequence();
+		moved = true;
 	}
+
+	return moved;
 }
 
 void Projectlet::relocate_icons() {
 	if (this->map != nullptr) {
-		this->planet->begin_update_sequence();
-
 		for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
 			DigIconEntity^ ent = static_cast<DigIconEntity^>(*it);
 			float2 ipos = this->map->position_to_local(ent->x, ent->y);
 
 			this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::CC);
 		}
-
-		this->planet->end_update_sequence();
 	}
 }
 
-void Projectlet::on_location_changed(double x, double y) {
+bool Projectlet::move_vessel(double x, double y) {
+	bool moved = false;
+
 	if ((this->vessel_x != x) || (this->vessel_y != y)) {
 		this->vessel_x = x;
 		this->vessel_y = y;
 
-		this->move_vessel();
+		this->planet->begin_update_sequence();
+
+		if (this->relocate_vessel()) {
+			moved = true;
+
+			if (this->jobs_dat != nullptr) {
+				this->jobs_dat->on_vessel_move(x, y);
+			}
+		}
+
+		this->planet->end_update_sequence();
+	}
+
+	return moved;
+}
+
+void Projectlet::section(double x, double y) {
+	if (this->front_sec) {
+		this->front_sec->section(x, y);
 	}
 }
 

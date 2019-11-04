@@ -1,11 +1,13 @@
 #pragma once
 
+#include <deque>
+
 #include "graphlet/primitive.hpp"
 
 #include "datum/flonum.hpp"
 
 namespace WarGrey::SCADA {
-	private ref class IVessel abstract {};
+	private ref class IVesselShape abstract {};
 
 	private class IVessellet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:

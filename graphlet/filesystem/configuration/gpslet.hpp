@@ -49,7 +49,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~GPSlet() noexcept;
 		GPSlet(Platform::String^ gps, float radius, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
-		GPSlet(Platform::String^ gps, float radius, WarGrey::SCADA::GPSStyle& style, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
+		GPSlet(WarGrey::SCADA::GPSStyle& style, Platform::String^ gps, float radius, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
 		
 	public:
 		void construct() override;

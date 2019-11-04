@@ -24,18 +24,59 @@ namespace {
 	private enum class TS { TransverseSection, Region, ColorPlot };
 }
 
+static Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ default_mark_font = make_bold_text_format("Microsoft Yahei", 10.0F);
+static Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ default_slop_style = make_dash_stroke(CanvasDashStyle::Dash);
+
+static void prepare_transverse_section_style(TransverseSectionStyle* style) {
+	CAS_SLOT(style->font, default_mark_font);
+	CAS_SLOT(style->ps_draghead_color, Colours::Red);
+	CAS_SLOT(style->sb_draghead_color, Colours::Green);
+
+	CAS_SLOT(style->centerline_color, Colours::Crimson);
+	CAS_SLOT(style->centerline_style, default_slop_style);
+	CAS_SLOT(style->haxes_color, Colours::Tomato);
+	CAS_SLOT(style->haxes_style, default_slop_style);
+	CAS_SLOT(style->vaxes_color, Colours::DodgerBlue);
+	CAS_SLOT(style->vaxes_style, default_slop_style);
+	CAS_SLOT(style->border_color, Colours::GrayText);
+
+	FLCAS_SLOT(style->border_thickness, 1.5F);
+	FLCAS_SLOT(style->centerline_thickness, 1.0F);
+	FLCAS_SLOT(style->haxes_thickness, 0.5F);
+	FLCAS_SLOT(style->vaxes_thickness, 0.5F);
+
+	ICAS_SLOT(style->haxes_count, 4);
+	ICAS_SLOT(style->vaxes_half_count, 4);
+}
+
+TransverseSectionStyle WarGrey::SCADA::default_transverse_section_style(CanvasSolidColorBrush^ ps_color, CanvasSolidColorBrush^ sb_color) {
+	TransverseSectionStyle style;
+
+	style.ps_draghead_color = ps_color;
+	style.sb_draghead_color = sb_color;
+
+	prepare_transverse_section_style(&style);
+
+	return style;
+}
+
 /*************************************************************************************************/
-FrontalSectionlet::FrontalSectionlet(SecDoc^ sec, bool draw_slope_lines, float thickness, CanvasSolidColorBrush^ cl_color, CanvasSolidColorBrush^ sl_color)
-	: doc_sec(sec), master(nullptr), thickness(thickness), centerline_color(cl_color), sideline_color(sl_color), draw_slope_lines(draw_slope_lines) {
+FrontalSectionlet::FrontalSectionlet(SecDoc^ sec, bool draw_slope_lines, float thickness
+	, CanvasSolidColorBrush^ cl_color, CanvasSolidColorBrush^ sl_color, CanvasSolidColorBrush^ sec_color)
+	: doc_sec(sec), master(nullptr), thickness(thickness), draw_slope_lines(draw_slope_lines)
+	, centerline_color(cl_color), sideline_color(sl_color), section_color(sec_color) {
 	this->enable_resizing(false);
 	this->camouflage(true);
 
 	CAS_SLOT(this->centerline_color, Colours::Red);
 	CAS_SLOT(this->sideline_color, Colours::SpringGreen);
+	CAS_SLOT(this->section_color, this->sideline_color);
+
+	this->ray.x = flnan_f;
 }
 
 void FrontalSectionlet::construct() {
-	this->slope_style = make_dash_stroke(CanvasDashStyle::Dash);
+	this->slope_style = default_slop_style;
 
 	if ((this->doc_sec != nullptr) && (this->doc_sec->centerline.size() > 1)) {
 		SectionDot cl0 = this->doc_sec->centerline[0];
@@ -82,7 +123,7 @@ void FrontalSectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ 
 	if ((this->master != nullptr) && (this->doc_sec != nullptr)) {
 		float rx = x + Width;
 		float by = y + Height;
-		
+
 		{ // draw centerline
 			size_t count = this->doc_sec->centerline.size();
 
@@ -97,7 +138,7 @@ void FrontalSectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ 
 				}
 			}
 		}
-		
+
 		{ // draw sidelines and slope lines as well
 			size_t n = this->doc_sec->sidelines.size();
 
@@ -108,7 +149,7 @@ void FrontalSectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ 
 
 				if (count > 1) {
 					float2 last_dot = this->master->position_to_local(sideline[0].x, sideline[0].y);
-					
+
 					for (size_t dot = 1; dot < count; dot++) {
 						float2 this_dot = this->master->position_to_local(sideline[dot].x, sideline[dot].y);
 
@@ -132,6 +173,10 @@ void FrontalSectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ 
 				}
 			}
 		}
+
+		if (!flisnan(this->ray.x)) {
+			ds->DrawLine(this->ray, this->dot, this->section_color, this->thickness, this->slope_style);
+		}
 	}
 }
 
@@ -144,9 +189,40 @@ void FrontalSectionlet::attach_to_map(DigMaplet* master, bool force) {
 
 	this->master = master;
 }
+
+void FrontalSectionlet::section(double x, double y) {
+	this->ray.x = flnan_f;
+	
+	if ((this->master != nullptr) && (this->doc_sec != nullptr)) {
+		size_t count = this->doc_sec->centerline.size();
+		double foot_x, foot_y;
+
+		if (count > 1) {
+			for (size_t idx = 1; idx < count; idx++) {
+				double x1 = this->doc_sec->centerline[idx - 1].x;
+				double y1 = this->doc_sec->centerline[idx - 1].y;
+				double x2 = this->doc_sec->centerline[idx].x;
+				double y2 = this->doc_sec->centerline[idx].y;
+
+				if (is_foot_on_segment(x, y, x1, y1, x2, y2)) {
+					point_foot_on_segment(x, y, x1, y1, x2, y2, &foot_x, &foot_y);
+					
+					this->ray = this->master->position_to_local(foot_x, foot_y);
+					this->dot = this->master->position_to_local(x, y);
+
+					break;
+				}
+			}
+		}
+	}
+}
+
 /*************************************************************************************************/
 TransverseSectionlet::TransverseSectionlet(Platform::String^ section, float width, float height, Platform::String^ ext, Platform::String^ rootdir)
-	: width(width), height(height) {
+	: TransverseSectionlet(default_transverse_section_style(), section, width, height, ext, rootdir) {}
+
+TransverseSectionlet::TransverseSectionlet(TransverseSectionStyle& style, Platform::String^ section, float width, float height, Platform::String^ ext, Platform::String^ rootdir)
+	: width(width), height(height), style(style), centerline_position(0.0) {
 	if (section != nullptr) {
 		this->ms_appdata_config = ms_appdata_file(section, ext, rootdir);
 	} else {
@@ -159,6 +235,8 @@ TransverseSectionlet::TransverseSectionlet(Platform::String^ section, float widt
 	} else if (this->height < 0.0F) {
 		this->height *= -this->width;
 	}
+
+	prepare_transverse_section_style(&this->style);
 }
 
 TransverseSectionlet::~TransverseSectionlet() {
@@ -167,7 +245,6 @@ TransverseSectionlet::~TransverseSectionlet() {
 
 void TransverseSectionlet::construct() {
 	this->load(this->ms_appdata_config);
-	this->font = make_bold_text_format("Arial", 12.0F);
 }
 
 void TransverseSectionlet::on_appdata(Uri^ section, TransverseSection^ section_config) {
@@ -175,6 +252,9 @@ void TransverseSectionlet::on_appdata(Uri^ section, TransverseSection^ section_c
 
 	// avoid updating raw instance accidently
 	this->preview_config = ref new TransverseSection(this->section_config);
+
+	this->update_horizontal_axes();
+	this->update_vertical_axes();
 }
 
 bool TransverseSectionlet::ready() {
@@ -187,10 +267,77 @@ void TransverseSectionlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void TransverseSectionlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	float border_off = this->style.border_thickness * 0.5F;
+	float cx = x + this->width * 0.5F;
+
 	if (this->preview_config != nullptr) {
 	}
 
-	ds->DrawRectangle(x + 0.5F, y + 0.5F, this->width - 1.0F, this->height - 1.0F, Colours::GrayText);
+	ds->DrawCachedGeometry(this->haxes, x, y, this->style.haxes_color);
+	ds->DrawCachedGeometry(this->vaxes, x, y, this->style.vaxes_color);
+
+	ds->DrawLine(cx, y, cx, y + this->height, this->style.centerline_color, this->style.centerline_thickness, this->style.centerline_style);
+
+	ds->DrawCachedGeometry(this->hmarks, x, y, this->style.haxes_color);
+	ds->DrawCachedGeometry(this->vmarks, x, y, this->style.vaxes_color);
+
+	ds->DrawRectangle(x + border_off, y + border_off,
+		this->width - this->style.border_thickness, this->height - this->style.border_thickness,
+		this->style.border_color, this->style.border_thickness);
+}
+
+void TransverseSectionlet::update_horizontal_axes() {
+	CanvasGeometry^ marks = blank();
+	CanvasPathBuilder^ axes = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float interval = this->height / float(this->style.haxes_count + 1);
+	double delta = (this->preview_config->max_depth - this->preview_config->min_depth) / double(this->style.haxes_count + 1);
+	float y = this->height - style.haxes_thickness * 0.5F;
+	TextExtent mark_te;
+
+	for (int i = 1; i <= this->style.haxes_count; i++) {
+		float ythis = y - interval * float(i);
+		Platform::String^ mark = flstring(this->preview_config->max_depth - delta * double(i), 1U);
+		CanvasGeometry^ gmark = paragraph(mark, this->style.font, &mark_te);
+
+		marks = geometry_union(marks, gmark, style.border_thickness + mark_te.height * 0.618F, ythis - mark_te.height);
+
+		axes->BeginFigure(0.0F, ythis);
+		axes->AddLine(this->width, ythis);
+		axes->EndFigure(CanvasFigureLoop::Open);
+	}
+
+	this->hmarks = geometry_freeze(marks);
+	this->haxes = geometry_freeze(geometry_stroke(CanvasGeometry::CreatePath(axes), style.haxes_thickness, style.haxes_style));
+}
+
+void TransverseSectionlet::update_vertical_axes() {
+	CanvasPathBuilder^ axes = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	CanvasGeometry^ marks = blank();
+	int count = this->style.vaxes_half_count * 2;
+	float interval = this->width / float(count + 2);
+	float cx = this->width * 0.5F;
+	double delta = this->preview_config->width / double(count + 2);
+	double start = this->centerline_position - this->preview_config->width * 0.5;
+	float x = style.haxes_thickness * 0.5F;
+	float y = this->height - style.border_thickness;
+	TextExtent mark_te;
+
+	for (int i = 0; i <= count + 2; i++) {
+		float xthis = x + interval * float(i);
+		Platform::String^ mark = flstring(start + delta * double(i), 0U);
+		CanvasGeometry^ gmark = paragraph(mark, this->style.font, &mark_te);
+
+		if (i != this->style.vaxes_half_count + 1) {
+			axes->BeginFigure(xthis, 0.0F);
+			axes->AddLine(xthis, this->height);
+			axes->EndFigure(CanvasFigureLoop::Open);
+		}
+
+		marks = geometry_union(marks, gmark, xthis - mark_te.width * 0.5F, y - mark_te.height);
+	}
+
+	this->vmarks = geometry_freeze(marks);
+	this->vaxes = geometry_freeze(geometry_stroke(CanvasGeometry::CreatePath(axes), style.haxes_thickness, style.haxes_style));
 }
 
 /*************************************************************************************************/

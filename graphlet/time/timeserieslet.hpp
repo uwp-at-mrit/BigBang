@@ -127,14 +127,14 @@ namespace WarGrey::SCADA {
 	private:
 		void check_visual_window(long long timepoint);
 		void update_time_series(long long next_start);
-		void update_vertical_axes(WarGrey::SCADA::TimeSeriesStyle& style);
 		void update_horizontal_axes(WarGrey::SCADA::TimeSeriesStyle& style);
+		void update_vertical_axes(WarGrey::SCADA::TimeSeriesStyle& style);
 
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ vmarks;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ vaxes;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hmarks;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ haxes;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ haxes;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ vmarks;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vaxes;
 
 	private:
 		WarGrey::SCADA::TimeSeriesLine* lines;

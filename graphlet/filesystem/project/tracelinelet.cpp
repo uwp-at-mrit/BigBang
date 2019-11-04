@@ -150,7 +150,7 @@ int Tracelinelet::find_handler(float local_x, float local_y, int* group) {
 	int seq = -1;
 
 	if ((this->master != nullptr) && (this->jobs_dat != nullptr)) {
-		this->fill_my_location(&x, &y);
+		this->fill_location(&x, &y);
 
 		for (auto jit = this->jobs_dat->jobs.begin(); jit != this->jobs_dat->jobs.end(); jit++) {
 			auto sections = jit->second;

@@ -24,7 +24,8 @@ namespace WarGrey::SCADA {
 			Platform::String^ rootdir = "projects");
 
 	public:
-		void on_location_changed(double x, double y);
+		bool move_vessel(double x, double y);
+		void section(double x, double y);
 
 	public:
 		void construct() override;
@@ -52,7 +53,7 @@ namespace WarGrey::SCADA {
 		void on_section_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
 
 	private:
-		void move_vessel();
+		bool relocate_vessel();
 		void relocate_icons();
 
 	private:
@@ -68,7 +69,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::ColorPlotlet* plot;
 		WarGrey::SCADA::Xyzlet* depth_xyz;
 		WarGrey::SCADA::Tracelinelet* jobs_dat;
-		WarGrey::SCADA::FrontalSectionlet* section;
+		WarGrey::SCADA::FrontalSectionlet* front_sec;
 		std::deque<Platform::Object^> icons;
 
 	private:

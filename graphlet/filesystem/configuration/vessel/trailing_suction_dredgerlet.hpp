@@ -7,7 +7,7 @@
 #include "datum/flonum.hpp"
 
 namespace WarGrey::SCADA {
-	private ref class TrailingSuctionDredger sealed : public WarGrey::SCADA::IVessel {
+	private ref class TrailingSuctionDredger sealed : public WarGrey::SCADA::IVesselShape {
 	public:
 		static WarGrey::SCADA::TrailingSuctionDredger^ load(Platform::String^ path);
 		static bool save(WarGrey::SCADA::TrailingSuctionDredger^ self, Platform::String^ path);
