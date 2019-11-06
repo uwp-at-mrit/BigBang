@@ -359,7 +359,7 @@ bool Projectlet::move_vessel(double x, double y) {
 			moved = true;
 
 			if (this->jobs_dat != nullptr) {
-				this->jobs_dat->on_vessel_move(x, y);
+				this->jobs_dat->on_vessel_move(this->vessel_x, this->vessel_y);
 			}
 		}
 

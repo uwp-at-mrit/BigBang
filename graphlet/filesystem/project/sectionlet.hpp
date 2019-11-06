@@ -11,6 +11,7 @@
 namespace WarGrey::SCADA {
 	private class FrontalSectionlet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
+		virtual ~FrontalSectionlet() noexcept;
 		FrontalSectionlet(WarGrey::SCADA::SecDoc^ sec, bool draw_slope_lines = false, float thickness = 1.0F,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ centerline_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ sideline_color = nullptr,
@@ -24,6 +25,9 @@ namespace WarGrey::SCADA {
 	public:
 		void attach_to_map(WarGrey::SCADA::DigMaplet* master, bool force = false);
 		void section(double x, double y);
+
+	private:
+		void section(double x, double y, double center_x, double center_y);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ slope_style;
@@ -41,8 +45,13 @@ namespace WarGrey::SCADA {
 		bool draw_slope_lines;
 
 	private:
-		Windows::Foundation::Numerics::float2 ray;
-		Windows::Foundation::Numerics::float2 dot;
+		WarGrey::SCADA::double3 centerfoot;
+		WarGrey::SCADA::double3* intersections;
+		WarGrey::SCADA::double3* interslopes;
+		WarGrey::SCADA::double2 ps_boundry;
+		WarGrey::SCADA::double2 sb_boundry;
+		int intersection_count;
+		int interslope_count;
 	};
 
 	/************************************************************************************************/

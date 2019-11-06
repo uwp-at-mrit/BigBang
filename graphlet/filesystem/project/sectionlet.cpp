@@ -63,7 +63,8 @@ TransverseSectionStyle WarGrey::SCADA::default_transverse_section_style(CanvasSo
 /*************************************************************************************************/
 FrontalSectionlet::FrontalSectionlet(SecDoc^ sec, bool draw_slope_lines, float thickness
 	, CanvasSolidColorBrush^ cl_color, CanvasSolidColorBrush^ sl_color, CanvasSolidColorBrush^ sec_color)
-	: doc_sec(sec), master(nullptr), thickness(thickness), draw_slope_lines(draw_slope_lines)
+	: doc_sec(sec), master(nullptr), thickness(thickness)
+	, draw_slope_lines(draw_slope_lines), intersections(nullptr), interslopes(nullptr)
 	, centerline_color(cl_color), sideline_color(sl_color), section_color(sec_color) {
 	this->enable_resizing(false);
 	this->camouflage(true);
@@ -72,7 +73,19 @@ FrontalSectionlet::FrontalSectionlet(SecDoc^ sec, bool draw_slope_lines, float t
 	CAS_SLOT(this->sideline_color, Colours::SpringGreen);
 	CAS_SLOT(this->section_color, this->sideline_color);
 
-	this->ray.x = flnan_f;
+	this->centerfoot.x = flnan;
+	this->ps_boundry.x = flnan;
+	this->sb_boundry.x = flnan;
+}
+
+FrontalSectionlet::~FrontalSectionlet() {
+	if (this->intersections != nullptr) {
+		delete[] this->intersections;
+	}
+
+	if (this->interslopes != nullptr) {
+		delete[] this->interslopes;
+	}
 }
 
 void FrontalSectionlet::construct() {
@@ -83,14 +96,17 @@ void FrontalSectionlet::construct() {
 		SectionDot cl1 = this->doc_sec->centerline[1];
 		double3 pt0, pt1;
 
+		this->interslope_count = 0;
+		this->intersection_count = 0;
+
 		for (auto slit = this->doc_sec->sidelines.begin(); slit != this->doc_sec->sidelines.end(); slit++) {
 			std::deque<std::pair<double3, double3>> segment;
 			size_t count = slit->size();
 			
 			if (count > 1) {
 				SectionDot* slope = &(*slit)[0];
-				double position_sign = flsign(cross_product(slope->x - cl0.x, slope->y - cl0.y, cl1.x - cl0.x, cl1.y - cl0.y));
-				
+				bool has_slope = false;
+
 				for (size_t idx = 1; idx < count; idx++) {
 					SectionDot* self = &(*slit)[idx];
 
@@ -100,16 +116,32 @@ void FrontalSectionlet::construct() {
 					
 					if (self->grade > 0.0) {
 						parallel_segment(slope->x, slope->y, self->x, self->y,
-							(self->depth - self->slope_depth) * self->grade * position_sign,
-							&pt0.x, &pt0.y, &pt1.x, &pt1.y);	
+							(self->depth - self->slope_depth) * self->grade * self->position_sign,
+							&pt0.x, &pt0.y, &pt1.x, &pt1.y);
+
+						has_slope = true;
 					}
 
 					segment.push_back(std::pair<double3, double3>(pt0, pt1));
 					slope = self;
 				}
+
+				this->intersection_count += 1;
+
+				if (has_slope) {
+					this->interslope_count += 1;
+				}
 			}
 
 			this->slope_segments.push_back(segment);
+		}
+
+		if (this->intersection_count > 0) {
+			this->intersections = new double3[this->intersection_count];
+		}
+
+		if (this->interslope_count > 0) {
+			this->interslopes = new double3[this->interslope_count];
 		}
 	}
 }
@@ -127,11 +159,11 @@ void FrontalSectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ 
 		{ // draw centerline
 			size_t count = this->doc_sec->centerline.size();
 
-			if (count > 1) {
-				float2 last_dot = this->master->position_to_local(this->doc_sec->centerline[0].x, this->doc_sec->centerline[0].y);
+			if (count >= 2) {
+				float2 last_dot = this->master->position_to_local(this->doc_sec->centerline[0].x, this->doc_sec->centerline[0].y, x, y);
 
 				for (size_t idx = 1; idx < count; idx++) {
-					float2 this_dot = this->master->position_to_local(this->doc_sec->centerline[idx].x, this->doc_sec->centerline[idx].y);
+					float2 this_dot = this->master->position_to_local(this->doc_sec->centerline[idx].x, this->doc_sec->centerline[idx].y, x, y);
 
 					ds->DrawLine(last_dot, this_dot, this->centerline_color, this->thickness);
 					last_dot = this_dot;
@@ -139,43 +171,49 @@ void FrontalSectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ 
 			}
 		}
 
-		{ // draw sidelines and slope lines as well
-			size_t n = this->doc_sec->sidelines.size();
+		for (size_t idx = 0; idx < this->doc_sec->sidelines.size(); idx++) {
+			auto sideline = this->doc_sec->sidelines[idx];
+			auto segments = this->slope_segments[idx];
+			size_t count = sideline.size();
 
-			for (size_t idx = 0; idx < n; idx++) {
-				auto sideline = this->doc_sec->sidelines[idx];
-				auto segments = this->slope_segments[idx];
-				size_t count = sideline.size();
+			if (count > 1) {
+				float2 last_dot = this->master->position_to_local(sideline[0].x, sideline[0].y, x, y);
 
-				if (count > 1) {
-					float2 last_dot = this->master->position_to_local(sideline[0].x, sideline[0].y);
+				for (size_t dot = 1; dot < count; dot++) {
+					float2 this_dot = this->master->position_to_local(sideline[dot].x, sideline[dot].y, x, y);
 
-					for (size_t dot = 1; dot < count; dot++) {
-						float2 this_dot = this->master->position_to_local(sideline[dot].x, sideline[dot].y);
+					if (this->draw_slope_lines) {
+						double3 dot0 = segments[dot - 1].first;
+						double3 dot1 = segments[dot - 1].second;
 
-						if (this->draw_slope_lines) {
-							double3 dot0 = segments[dot - 1].first;
-							double3 dot1 = segments[dot - 1].second;
+						if (!flisnan(dot0.x)) {
+							float2 seg_dot0 = this->master->position_to_local(dot0.x, dot0.y, x, y);
+							float2 seg_dot1 = this->master->position_to_local(dot1.x, dot1.y, x, y);
 
-							if (!flisnan(dot0.x)) {
-								float2 seg_dot0 = this->master->position_to_local(dot0.x, dot0.y);
-								float2 seg_dot1 = this->master->position_to_local(dot1.x, dot1.y);
-
-								ds->DrawLine(seg_dot0, seg_dot1, this->sideline_color, this->thickness, this->slope_style);
-								ds->DrawLine(last_dot, seg_dot0, this->sideline_color, this->thickness, this->slope_style);
-								ds->DrawLine(this_dot, seg_dot1, this->sideline_color, this->thickness, this->slope_style);
-							}
+							ds->DrawLine(seg_dot0, seg_dot1, this->sideline_color, this->thickness, this->slope_style);
+							ds->DrawLine(last_dot, seg_dot0, this->sideline_color, this->thickness, this->slope_style);
+							ds->DrawLine(this_dot, seg_dot1, this->sideline_color, this->thickness, this->slope_style);
 						}
-
-						ds->DrawLine(last_dot, this_dot, this->sideline_color, this->thickness);
-						last_dot = this_dot;
 					}
+
+					ds->DrawLine(last_dot, this_dot, this->sideline_color, this->thickness);
+					last_dot = this_dot;
 				}
 			}
 		}
+	}
 
-		if (!flisnan(this->ray.x)) {
-			ds->DrawLine(this->ray, this->dot, this->section_color, this->thickness, this->slope_style);
+	if (!flisnan(this->centerfoot.x)) {
+		float2 ray = this->master->position_to_local(this->centerfoot.x, this->centerfoot.y, x, y);
+
+		if (!flisnan(this->ps_boundry.x)) {
+			ds->DrawLine(ray, this->master->position_to_local(this->ps_boundry.x, this->ps_boundry.y, x, y),
+				this->section_color, this->thickness, this->slope_style);
+		}
+
+		if (!flisnan(this->sb_boundry.x)) {
+			ds->DrawLine(ray, this->master->position_to_local(this->sb_boundry.x, this->sb_boundry.y, x, y),
+				this->section_color, this->thickness, this->slope_style);
 		}
 	}
 }
@@ -191,28 +229,118 @@ void FrontalSectionlet::attach_to_map(DigMaplet* master, bool force) {
 }
 
 void FrontalSectionlet::section(double x, double y) {
-	this->ray.x = flnan_f;
+	this->centerfoot.x = flnan;
+	this->ps_boundry.x = flnan;
+	this->sb_boundry.x = flnan;
 	
-	if ((this->master != nullptr) && (this->doc_sec != nullptr)) {
+	if (this->doc_sec != nullptr) {
 		size_t count = this->doc_sec->centerline.size();
-		double foot_x, foot_y;
-
+		
 		if (count > 1) {
+			double foot_x, foot_y;
+			
 			for (size_t idx = 1; idx < count; idx++) {
 				double x1 = this->doc_sec->centerline[idx - 1].x;
 				double y1 = this->doc_sec->centerline[idx - 1].y;
+				double z1 = this->doc_sec->centerline[idx - 1].depth;
 				double x2 = this->doc_sec->centerline[idx].x;
 				double y2 = this->doc_sec->centerline[idx].y;
+				double z2 = this->doc_sec->centerline[idx].depth;
 
+				// NOTE: the turning points on centerline are guaranteed to be unique when loading them
 				if (is_foot_on_segment(x, y, x1, y1, x2, y2)) {
 					point_foot_on_segment(x, y, x1, y1, x2, y2, &foot_x, &foot_y);
-					
-					this->ray = this->master->position_to_local(foot_x, foot_y);
-					this->dot = this->master->position_to_local(x, y);
 
+					{ // resolve depth
+						double t = flsqrt(points_distance_squared(x1, y1, foot_x, foot_y) / points_distance_squared(x1, y1, x2, y2));
+
+						this->centerfoot = double3(foot_x, foot_y, (z2 - z1) * t + z1);
+					}
+
+					if (points_distance_squared(x, y, foot_x, foot_y) < 0.01) {
+						line_normal0_vector(x1, y1, x2, y2, 1.0, &x, &y, foot_x, foot_y);
+					}
+
+					this->section(x, y, foot_x, foot_y);
+					
 					break;
 				}
 			}
+		}
+	}
+}
+
+void FrontalSectionlet::section(double x, double y, double center_x, double center_y) {
+	double3* self = nullptr;
+	double ps_distance2 = 0.0;
+	double sb_distance2 = 0.0;
+	int section_idx = 0;
+	int slope_idx = 0;
+
+	for (size_t idx = 0; idx < this->doc_sec->sidelines.size(); idx++) {
+		auto sideline = this->doc_sec->sidelines[idx];
+		auto segments = this->slope_segments[idx];
+		size_t count = sideline.size();
+		double sec_x = flnan;
+		double ray_t = flnan;
+		double segment_t = flnan;
+
+		if (count > 1) {
+			SectionDot* last_dot = &sideline[0];
+			
+			self = &this->intersections[section_idx];
+			self->x = flnan;
+
+			for (size_t dot = 1; dot < count; dot++) {
+				SectionDot* this_dot = &sideline[dot];
+				
+				if (lines_intersection(x, y, center_x, center_y, last_dot->x, last_dot->y, this_dot->x, this_dot->y, &sec_x, &self->y, &ray_t, &segment_t)) {
+					if (flin(0.0, segment_t, 1.0)) {
+						double3* seg_dot0 = &segments[dot - 1].first;
+						double3* seg_dot1 = &segments[dot - 1].second;
+				
+						self->x = sec_x;
+						self->z = (last_dot->depth - this_dot->depth) * segment_t + this_dot->depth;
+
+						if (this->draw_slope_lines && (!flisnan(seg_dot0->x))) {
+							self = &this->interslopes[slope_idx];
+							self->x = flnan;
+
+							if (lines_intersection(x, y, center_x, center_y, seg_dot0->x, seg_dot0->y, seg_dot1->x, seg_dot1->y, &sec_x, &self->y, &ray_t, &segment_t)) {
+								if (flin(0.0, segment_t, 1.0)) {
+									self->x = sec_x;
+									self->z = (seg_dot0->z - seg_dot1->z) * segment_t + seg_dot1->z;
+									slope_idx += 1;
+								}
+							}
+						}
+
+						{ // solve the boundry
+							double distance2 = points_distance_squared(center_x, center_y, self->x, self->y);
+
+							if (last_dot->position_sign >= 0.0) {
+								if (distance2 > ps_distance2) {
+									this->ps_boundry.x = self->x;
+									this->ps_boundry.y = self->y;
+									ps_distance2 = distance2;
+								}
+							} else {
+								if (distance2 > sb_distance2) {
+									this->sb_boundry.x = self->x;
+									this->sb_boundry.y = self->y;
+									sb_distance2 = distance2;
+								}
+							}
+						}
+
+						break;
+					}
+				}
+
+				last_dot = this_dot;
+			}
+
+			section_idx += 1;
 		}
 	}
 }

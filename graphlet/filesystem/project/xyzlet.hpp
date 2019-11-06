@@ -8,7 +8,7 @@
 namespace WarGrey::SCADA {
 	private class Xyzlet : public WarGrey::SCADA::IGraphlet {
 	public:
-		Xyzlet(WarGrey::SCADA::XyzDoc^ depths, float diff_ft_times = 2.4F);
+		Xyzlet(WarGrey::SCADA::XyzDoc^ depths, float diff_ft_times = 1.6F);
 
 	public:
 		void fill_extent(float x, float y, float* width, float* height) override;
