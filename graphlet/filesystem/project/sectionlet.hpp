@@ -9,6 +9,8 @@
 #include "datum/flonum.hpp"
 
 namespace WarGrey::SCADA {
+	struct TransversePlane;
+
 	private class FrontalSectionlet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		virtual ~FrontalSectionlet() noexcept;
@@ -24,7 +26,7 @@ namespace WarGrey::SCADA {
 		
 	public:
 		void attach_to_map(WarGrey::SCADA::DigMaplet* master, bool force = false);
-		void section(double x, double y);
+		const WarGrey::SCADA::TransversePlane* section(double x, double y);
 
 	private:
 		void section(double x, double y, double center_x, double center_y);
@@ -45,13 +47,9 @@ namespace WarGrey::SCADA {
 		bool draw_slope_lines;
 
 	private:
-		WarGrey::SCADA::double3 centerfoot;
-		WarGrey::SCADA::double3* intersections;
-		WarGrey::SCADA::double3* interslopes;
+		WarGrey::SCADA::TransversePlane* plane;
 		WarGrey::SCADA::double2 ps_boundry;
 		WarGrey::SCADA::double2 sb_boundry;
-		int intersection_count;
-		int interslope_count;
 	};
 
 	/************************************************************************************************/
@@ -79,6 +77,8 @@ namespace WarGrey::SCADA {
 	private struct TransverseSectionStyle {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
 
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ section_color;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ section_style;
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ ps_draghead_color;
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ sb_draghead_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ centerline_color;
@@ -89,6 +89,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ vaxes_style;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 
+		float section_thickness = -1.0F;
 		float centerline_thickness = -1.0F;
 		float haxes_thickness = -1.0F;
 		float vaxes_thickness = -1.0F;
@@ -98,7 +99,8 @@ namespace WarGrey::SCADA {
 		int vaxes_half_count = -1;
 	};
 
-	WarGrey::SCADA::TransverseSectionStyle default_transverse_section_style(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ ps_color = nullptr,
+	WarGrey::SCADA::TransverseSectionStyle default_transverse_section_style(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = nullptr,
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ ps_color = nullptr,
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ sb_color = nullptr);
 
 	private class TransverseSectionlet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::TransverseSection, WarGrey::SCADA::IGraphlet> {
@@ -107,6 +109,9 @@ namespace WarGrey::SCADA {
 		TransverseSectionlet(Platform::String^ section, float width, float height = 0.0F, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
 		TransverseSectionlet(WarGrey::SCADA::TransverseSectionStyle& style, Platform::String^ section, float width, float height = 0.0F,
 			Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
+
+	public:
+		void update_section(const WarGrey::SCADA::TransversePlane* plane);
 
 	public:
 		void construct() override;
@@ -143,7 +148,7 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Uri^ ms_appdata_config;
 
 	private:
-		double centerline_position;
+		WarGrey::SCADA::TransversePlane* plane;
 
 	private:
 		float width;

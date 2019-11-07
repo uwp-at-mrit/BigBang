@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool move_vessel(double x, double y);
-		void section(double x, double y);
+		const WarGrey::SCADA::TransversePlane* section(double x, double y);
 
 	public:
 		void construct() override;

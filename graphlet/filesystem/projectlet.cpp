@@ -369,10 +369,14 @@ bool Projectlet::move_vessel(double x, double y) {
 	return moved;
 }
 
-void Projectlet::section(double x, double y) {
-	if (this->front_sec) {
-		this->front_sec->section(x, y);
+const TransversePlane* Projectlet::section(double x, double y) {
+	const TransversePlane* plane = nullptr;
+
+	if (this->front_sec != nullptr) {
+		plane = this->front_sec->section(x, y);
 	}
+
+	return plane;
 }
 
 /*************************************************************************************************/
