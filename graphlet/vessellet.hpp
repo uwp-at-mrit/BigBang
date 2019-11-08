@@ -9,9 +9,19 @@
 namespace WarGrey::SCADA {
 	private ref class IVesselShape abstract {};
 
+	private class ISectionRegion abstract {
+	public:
+		virtual void fill_scale(double* xscale = nullptr, double* yscale = nullptr) = 0;
+		virtual Windows::Foundation::Numerics::float2 position_to_local(double x, double y, double depth) = 0;
+	};
+
 	private class IVessellet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		IVessellet();
+
+	public:
+		virtual void draw_transverse_section(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			WarGrey::SCADA::ISectionRegion* sectionlet, float cx, float y, float half_width, float height) = 0;
 
 	public:
 		virtual void set_bow_direction(double degrees) = 0;

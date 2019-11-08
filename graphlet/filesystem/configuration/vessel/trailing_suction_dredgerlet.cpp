@@ -53,6 +53,7 @@ public:
 		
 		set_drag_joint(&this->offset, offset, this->drag_length);
 		set_drag_joint(&this->draghead, draghead, this->drag_length);
+		this->draghead_depth = flsafe(draghead.z, -drag_length, this->drag_length);
 
 		for (int idx = 0; idx < this->joints_count; idx++) {
 			set_drag_joint(this->ujoints + idx, ujoints[idx], this->drag_length);
@@ -80,6 +81,7 @@ public:
 	double2 ujoints[DRAG_SEGMENT_MAX_COUNT];
 	double2 draghead;
 	double2 draghead_vertices[6];
+	double draghead_depth;
 
 public:
 	DragInfo info;
@@ -269,6 +271,30 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 				this->style.barge_radius * rsx, this->style.barge_radius * rsy,
 				this->style.barge_color);
 		}
+	}
+}
+
+void TrailingSuctionDredgerlet::draw_transverse_section(CanvasDrawingSession^ ds, ISectionRegion* sectionlet, float cx, float y, float half_width, float height) {
+	double xscale, yscale;
+
+	sectionlet->fill_scale(&xscale, &yscale);
+
+	if (this->ps_drag != nullptr) {
+		float2 local = sectionlet->position_to_local(this->ps_drag->draghead.x, this->ps_drag->draghead.y, this->ps_drag->draghead_depth);
+		float half_width = float(this->ps_drag->info.head_width * xscale * 0.5);
+		float half_height = float(this->ps_drag->info.head_height * yscale * 0.5);
+
+		this->get_logger()->log_message(Log::Info, L"PS: %f, (%f, %f)", this->ps_drag->draghead_depth, local.x, local.y);
+		ds->FillRectangle(cx + local.x - half_width, y + local.y - half_height, half_width * 2.0F, half_height * 2.0F, this->style.ps_color);
+	}
+
+	if (this->sb_drag != nullptr) {
+		float2 local = sectionlet->position_to_local(this->sb_drag->draghead.x, this->sb_drag->draghead.y, this->sb_drag->draghead_depth);
+		float half_width = float(this->sb_drag->info.head_width * xscale * 0.5);
+		float half_height = float(this->sb_drag->info.head_height * yscale * 0.5);
+
+		this->get_logger()->log_message(Log::Info, L"SB: %f, (%f, %f)", this->sb_drag->draghead_depth, local.x, local.y);
+		ds->FillRectangle(cx + local.x - half_width, y + local.y - half_height, half_width * 2.0F, half_height * 2.0F, this->style.sb_color);
 	}
 }
 

@@ -66,6 +66,8 @@ namespace WarGrey::SCADA {
 		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {}
+		void draw_transverse_section(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, WarGrey::SCADA::ISectionRegion* sectionlet,
+			float cx, float y, float half_width, float height) override;
 		void resize(float width, float height) override;
 		bool ready() override;
 

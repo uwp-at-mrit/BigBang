@@ -30,23 +30,30 @@ namespace {
 		double distance;
 		double depth;
 	};
+
+	bool plane_dot_compare(::PlaneDot& first, ::PlaneDot& second) {
+		// NOTE: "being in order" is the only important thing, no matter it is ascending or descending 
+		return (first.distance < second.distance);
+	}
 }
 
 static Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ default_mark_font = make_bold_text_format("Microsoft Yahei", 10.0F);
-static Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ default_slop_style = make_dash_stroke(CanvasDashStyle::Dash);
+static Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ default_slope_style = make_dash_stroke(CanvasDashStyle::Dash);
+static Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ default_section_style = make_roundcap_stroke_style();
 
 static void prepare_transverse_section_style(TransverseSectionStyle* style) {
 	CAS_SLOT(style->font, default_mark_font);
 	CAS_SLOT(style->ps_draghead_color, Colours::Red);
 	CAS_SLOT(style->sb_draghead_color, Colours::Green);
 
-	CAS_SLOT(style->section_color, Colours::DarkKhaki);
+	CAS_SLOT(style->section_color, Colours::Purple);
+	CAS_SLOT(style->section_style, default_section_style);
 	CAS_SLOT(style->centerline_color, Colours::Crimson);
-	CAS_SLOT(style->centerline_style, default_slop_style);
+	CAS_SLOT(style->centerline_style, default_slope_style);
 	CAS_SLOT(style->haxes_color, Colours::Tomato);
-	CAS_SLOT(style->haxes_style, default_slop_style);
+	CAS_SLOT(style->haxes_style, default_slope_style);
 	CAS_SLOT(style->vaxes_color, Colours::DodgerBlue);
-	CAS_SLOT(style->vaxes_style, default_slop_style);
+	CAS_SLOT(style->vaxes_style, default_slope_style);
 	CAS_SLOT(style->border_color, Colours::GrayText);
 
 	FLCAS_SLOT(style->section_thickness, 1.5F);
@@ -75,24 +82,20 @@ TransverseSectionStyle WarGrey::SCADA::default_transverse_section_style(CanvasSo
 private struct WarGrey::SCADA::TransversePlane {
 public:
 	~TransversePlane() noexcept {
-		if (this->sides != nullptr) {
-			delete[] this->sides;
-		}
-
-		if (this->slopes != nullptr) {
-			delete[] this->slopes;
+		if (this->dots != nullptr) {
+			delete[] this->dots;
 		}
 	}
 
 	TransversePlane(int side_count, int slope_count) : side_count(side_count), slope_count(slope_count) {
+		int total = side_count + slope_count;
+
 		this->center_foot.x = flnan;
 
-		if (this->side_count > 0) {
-			this->sides = new PlaneDot[this->side_count];
-		}
-
-		if (this->slope_count > 0) {
-			this->slopes = new PlaneDot[this->slope_count];
+		if (total > 0) {
+			this->dots = new PlaneDot[total];
+			this->sides = this->dots;
+			this->slopes = &this->dots[side_count];
 		}
 	}
 
@@ -109,22 +112,37 @@ public:
 		this->center_foot = src->center_foot;
 		this->center_origin = src->center_origin;
 
-		for (int idx = 0; idx < side_mcount; idx++) {
-			this->sides[idx] = src->sides[idx];
+		for (int idx = 0; idx < this->side_count; idx++) {
+			if (idx < side_mcount) {
+				this->sides[idx] = src->sides[idx];
+			} else {
+				this->sides[idx].x = flnan;
+			}
 		}
 
-		for (int idx = 0; idx < slope_mcount; idx++) {
-			this->slopes[idx] = src->slopes[idx];
+		for (int idx = 0; idx < this->slope_count; idx++) {
+			if (idx < slope_mcount) {
+				this->slopes[idx] = src->slopes[idx];
+			} else {
+				this->slopes[idx].x = flnan;
+			}
 		}
+
+		std::sort(this->dots, &this->dots[this->side_count + this->slope_count], plane_dot_compare);
 	}
 
 public:
 	WarGrey::SCADA::double3 center_foot;
 	WarGrey::SCADA::double2 center_origin;
-	::PlaneDot* sides;
-	::PlaneDot* slopes;
 	int side_count;
 	int slope_count;
+
+public: // for output
+	::PlaneDot* dots;
+
+public: // for input
+	::PlaneDot* sides;
+	::PlaneDot* slopes;
 };
 
 /*************************************************************************************************/
@@ -150,7 +168,7 @@ FrontalSectionlet::~FrontalSectionlet() {
 }
 
 void FrontalSectionlet::construct() {
-	this->slope_style = default_slop_style;
+	this->slope_style = default_slope_style;
 
 	if ((this->doc_sec != nullptr) && (this->doc_sec->centerline.size() > 1)) {
 		SectionDot cl0 = this->doc_sec->centerline[0];
@@ -405,11 +423,12 @@ void FrontalSectionlet::section(double x, double y, double center_x, double cent
 }
 
 /*************************************************************************************************/
-TransverseSectionlet::TransverseSectionlet(Platform::String^ section, float width, float height, Platform::String^ ext, Platform::String^ rootdir)
-	: TransverseSectionlet(default_transverse_section_style(), section, width, height, ext, rootdir) {}
+TransverseSectionlet::TransverseSectionlet(IVessellet* vessel, Platform::String^ section, float width, float height, Platform::String^ ext, Platform::String^ rootdir)
+	: TransverseSectionlet(default_transverse_section_style(), vessel, section, width, height, ext, rootdir) {}
 
-TransverseSectionlet::TransverseSectionlet(TransverseSectionStyle& style, Platform::String^ section, float width, float height, Platform::String^ ext, Platform::String^ rootdir)
-	: width(width), height(height), style(style) {
+TransverseSectionlet::TransverseSectionlet(TransverseSectionStyle& style, IVessellet* vessel, Platform::String^ section, float width, float height
+	, Platform::String^ ext, Platform::String^ rootdir)
+	: width(width), height(height), style(style), direction_sign(1.0), section(nullptr), vessel(vessel) {
 	if (section != nullptr) {
 		this->ms_appdata_config = ms_appdata_file(section, ext, rootdir);
 	} else {
@@ -447,6 +466,10 @@ void TransverseSectionlet::update_section(const TransversePlane* plane) {
 			this->plane->clone_from(plane);
 			this->update_vertical_axes();
 		}
+
+		if (this->preview_config != nullptr) {
+			this->update_section_line();
+		}
 	}
 }
 
@@ -458,6 +481,10 @@ void TransverseSectionlet::on_appdata(Uri^ section, TransverseSection^ section_c
 
 	this->update_horizontal_axes();
 	this->update_vertical_axes();
+
+	if (this->plane != nullptr) {
+		this->update_section_line();
+	}
 }
 
 bool TransverseSectionlet::ready() {
@@ -471,7 +498,8 @@ void TransverseSectionlet::fill_extent(float x, float y, float* w, float* h) {
 
 void TransverseSectionlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float border_off = this->style.border_thickness * 0.5F;
-	float cx = x + this->width * 0.5F;
+	float half_width = this->width * 0.5F;
+	float cx = x + half_width;
 
 	if (this->preview_config != nullptr) {
 		ds->DrawCachedGeometry(this->haxes, x, y, this->style.haxes_color);
@@ -483,17 +511,12 @@ void TransverseSectionlet::draw(CanvasDrawingSession^ ds, float x, float y, floa
 
 	ds->DrawLine(cx, y, cx, y + this->height, this->style.centerline_color, this->style.centerline_thickness, this->style.centerline_style);
 
-	if ((this->preview_config != nullptr) && (this->plane != nullptr)) {
-		double depth_range = (this->preview_config->max_depth - this->preview_config->min_depth);
-		double xscale = this->width / this->preview_config->width;
-		double yscale = ((depth_range > 0.0) ? this->height / depth_range : 1.0);
+	if (this->section != nullptr) {
+		ds->DrawGeometry(this->section, cx, y, this->style.section_color, this->style.section_thickness, this->style.section_style);
+	}
 
-		for (int idx = 0; idx < this->plane->side_count; idx++) {
-			float dx = cx - float(this->plane->sides[idx].distance * xscale);
-			float dy = y + float((this->plane->sides[idx].depth - this->preview_config->min_depth) * yscale);
-
-			ds->DrawCircle(dx, dy, 2.0F, this->style.section_color, this->style.section_thickness);
-		}
+	if ((this->vessel != nullptr) && (this->vessel->ready())) {
+		this->vessel->draw_transverse_section(ds, this, cx, y, half_width, this->height);
 	}
 
 	ds->DrawRectangle(x + border_off, y + border_off,
@@ -535,43 +558,83 @@ void TransverseSectionlet::update_vertical_axes() {
 	double start = -this->preview_config->width * 0.5;
 	float x = style.haxes_thickness * 0.5F;
 	float y = this->height - style.border_thickness;
-	CanvasGeometry^ xmark;
-	CanvasGeometry^ ymark;
-	TextExtent x_te, y_te;
+	TextExtent mark_te;
 
 	for (int i = 0; i <= count + 2; i++) {
 		float xthis = x + interval * float(i);
-		double distance = start + delta * double(i);
-
-		if ((this->plane != nullptr) && (!flisnan(this->plane->center_foot.x))) {
-			double2 dot;
-
-			line_normal0_vector(this->plane->center_foot.x, this->plane->center_foot.y, this->plane->center_origin.x, this->plane->center_origin.y,
-				-distance, &dot.x, &dot.y, this->plane->center_foot.x, this->plane->center_foot.y);
-
-			xmark = paragraph("X:" + flstring(dot.x, 1), this->style.font, &x_te);
-			ymark = paragraph("Y:" + flstring(dot.y, 1), this->style.font, &y_te);
-		} else {
-			xmark = paragraph(flstring(distance, 1), this->style.font, &x_te);
-			ymark = nullptr;
-		}
-
+		double distance = (start + delta * double(i)) * this->direction_sign;
+		CanvasGeometry^ mark = paragraph(flstring(distance, 0), this->style.font, &mark_te);
+		
 		if (i != this->style.vaxes_half_count + 1) {
 			axes->BeginFigure(xthis, 0.0F);
 			axes->AddLine(xthis, this->height);
 			axes->EndFigure(CanvasFigureLoop::Open);
 		}
 
-		if (ymark == nullptr) {
-			marks = geometry_union(marks, xmark, xthis - x_te.width * 0.5F, y - x_te.height);
-		} else {
-			marks = geometry_union(marks, xmark, xthis - x_te.width * 0.5F, y - x_te.height - y_te.height);
-			marks = geometry_union(marks, ymark, xthis - y_te.width * 0.5F, y - y_te.height);
-		}
+		marks = geometry_union(marks, mark, xthis - mark_te.width * 0.5F, y - mark_te.height);
 	}
 
 	this->vmarks = geometry_freeze(marks);
 	this->vaxes = geometry_freeze(geometry_stroke(CanvasGeometry::CreatePath(axes), style.haxes_thickness, style.haxes_style));
+}
+
+void TransverseSectionlet::update_section_line() {
+	CanvasPathBuilder^ secpath = nullptr;
+	double xscale, yscale;
+	float2 dotpos;
+
+	this->fill_scale(&xscale, &yscale);
+
+	for (int idx = 0; idx < this->plane->side_count + this->plane->slope_count; idx++) {
+		PlaneDot* self = &this->plane->dots[idx];
+
+		if (!flisnan(self->x)) {
+			dotpos = this->distance_to_local(self->distance, self->depth, xscale, yscale);
+
+			if (secpath == nullptr) {
+				secpath = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+				secpath->BeginFigure(dotpos);
+			} else {
+				secpath->AddLine(dotpos);
+			}
+		}
+  	}
+
+	if (secpath != nullptr) {
+		secpath->EndFigure(CanvasFigureLoop::Open);
+		this->section = CanvasGeometry::CreatePath(secpath);
+	} else {
+		this->section = nullptr;
+	}
+}
+
+/*************************************************************************************************/
+float2 TransverseSectionlet::position_to_local(double x, double y, double depth) {
+	float2 pos(flnan_f, 0.0F);
+
+	if (this->plane != nullptr) {
+		double distance = point_segment_distance(x, y, this->plane->center_foot.x, this->plane->center_foot.y, this->plane->center_origin.x, this->plane->center_origin.y);
+		double xscale, yscale;
+		
+		this->fill_scale(&xscale, &yscale);
+		pos = distance_to_local(distance, depth, xscale, yscale);
+	}
+
+	return pos;
+}
+
+float2 TransverseSectionlet::distance_to_local(double distance, double depth, double xscale, double yscale) {
+	float x = -float(distance * xscale * this->direction_sign);
+	float y = +float((depth - this->preview_config->min_depth) * yscale);
+
+	return float2(x, y);
+}
+
+void TransverseSectionlet::fill_scale(double* xscale, double* yscale) {
+	double depth_range = (this->preview_config->max_depth - this->preview_config->min_depth);
+
+	SET_BOX(xscale, this->width / this->preview_config->width);
+	SET_BOX(yscale, ((depth_range > 0.0) ? this->height / depth_range : 1.0));
 }
 
 /*************************************************************************************************/
