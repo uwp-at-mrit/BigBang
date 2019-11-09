@@ -617,11 +617,12 @@ float2 TransverseSectionlet::vessel_to_local(double x, double y, double depth) {
 	double xscale, yscale;
 
 	if (this->plane != nullptr) {
-		double distance = point_segment_distance(this->vessel_x + x, this->vessel_y + y,
+		double distance = point_segment_distance(this->vessel_x, this->vessel_y,
 			this->plane->center_foot.x, this->plane->center_foot.y, this->plane->center_origin.x, this->plane->center_origin.y);
 		
+		// NOTE: this is the transverse section which display `y` and `z` and hence `x` is useless
 		this->fill_scale(&xscale, &yscale);
-		pos = distance_to_local(distance, depth, xscale, yscale);
+		pos = distance_to_local(distance - y, depth, xscale, yscale);
 	}
 
 	return pos;
@@ -629,16 +630,18 @@ float2 TransverseSectionlet::vessel_to_local(double x, double y, double depth) {
 
 float2 TransverseSectionlet::distance_to_local(double distance, double depth, double xscale, double yscale) {
 	float x = -float(distance * xscale * this->direction_sign);
-	float y = +float((depth - this->preview_config->min_depth) * yscale);
+	float y = +float((depth - ((this->preview_config != nullptr) ? this->preview_config->min_depth : 0.0)) * yscale);
 
 	return float2(x, y);
 }
 
 void TransverseSectionlet::fill_scale(double* xscale, double* yscale) {
-	double depth_range = (this->preview_config->max_depth - this->preview_config->min_depth);
+	if (this->preview_config != nullptr) {
+		double depth_range = (this->preview_config->max_depth - this->preview_config->min_depth);
 
-	SET_BOX(xscale, this->width / this->preview_config->width);
-	SET_BOX(yscale, ((depth_range > 0.0) ? this->height / depth_range : 1.0));
+		SET_BOX(xscale, this->width / this->preview_config->width);
+		SET_BOX(yscale, ((depth_range > 0.0) ? this->height / depth_range : 1.0));
+	}
 }
 
 /*************************************************************************************************/

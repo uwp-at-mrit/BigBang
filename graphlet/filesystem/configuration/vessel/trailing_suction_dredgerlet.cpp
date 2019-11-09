@@ -35,7 +35,7 @@ namespace {
 }
 
 static double2 ps_sign(-1.0, -1.0);
-static double2 sb_sign(-1.0, -1.0);
+static double2 sb_sign(-1.0, +1.0);
 static float2 raw_scale(1.0F, 1.0F);
 
 private struct WarGrey::SCADA::TrailingSuctionDrag {
@@ -283,25 +283,27 @@ void TrailingSuctionDredgerlet::draw_transverse_section(CanvasDrawingSession^ ds
 
 	sectionlet->fill_scale(&xscale, &yscale);
 
-	if (this->ps_drag != nullptr) {
-		float2 drag = vessel_point(this->ps_drag->draghead, this->preview_config->ps_suction, ps_sign, this->current_gps, raw_scale, this->bow_direction);
-		float2 local = sectionlet->vessel_to_local(drag.x, drag.y, this->ps_drag->draghead_depth);
-		float half_width = float(this->ps_drag->info.head_width * xscale * 0.5);
-		float half_height = float(this->ps_drag->info.head_height * yscale * 0.5);
+	if (this->preview_config != nullptr) {
+		if (this->ps_drag != nullptr) {
+			float2 ps = vessel_point(this->ps_drag->draghead, this->preview_config->ps_suction, ps_sign, this->current_gps, raw_scale, this->bow_direction);
+			float2 local = sectionlet->vessel_to_local(ps.x, ps.y, this->ps_drag->draghead_depth);
+			float half_width = float(this->ps_drag->info.head_width * xscale * 0.5);
+			float half_height = float(this->ps_drag->info.head_height * yscale * 0.5);
 
-		if (!flisnan(local.x)) {
-			ds->FillRectangle(cx + local.x - half_width, y + local.y - half_height, half_width * 2.0F, half_height * 2.0F, this->style.ps_color);
+			if (!flisnan(local.x)) {
+				ds->FillRectangle(cx + local.x - half_width, y + local.y - half_height, half_width * 2.0F, half_height * 2.0F, this->style.ps_color);
+			}
 		}
-	}
 
-	if (this->sb_drag != nullptr) {
-		float2 drag = vessel_point(this->sb_drag->draghead, this->preview_config->sb_suction, sb_sign, this->current_gps, raw_scale, this->bow_direction);
-		float2 local = sectionlet->vessel_to_local(this->sb_drag->draghead.x, this->sb_drag->draghead.y, this->sb_drag->draghead_depth);
-		float half_width = float(this->sb_drag->info.head_width * xscale * 0.5);
-		float half_height = float(this->sb_drag->info.head_height * yscale * 0.5);
+		if (this->sb_drag != nullptr) {
+			float2 sb = vessel_point(this->sb_drag->draghead, this->preview_config->sb_suction, sb_sign, this->current_gps, raw_scale, this->bow_direction);
+			float2 local = sectionlet->vessel_to_local(sb.x, sb.y, this->sb_drag->draghead_depth);
+			float half_width = float(this->sb_drag->info.head_width * xscale * 0.5);
+			float half_height = float(this->sb_drag->info.head_height * yscale * 0.5);
 
-		if (!flisnan(local.x)) {
-			ds->FillRectangle(cx + local.x - half_width, y + local.y - half_height, half_width * 2.0F, half_height * 2.0F, this->style.sb_color);
+			if (!flisnan(local.x)) {
+				ds->FillRectangle(cx + local.x - half_width, y + local.y - half_height, half_width * 2.0F, half_height * 2.0F, this->style.sb_color);
+			}
 		}
 	}
 }
