@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
 	private class ISectionRegion abstract {
 	public:
 		virtual void fill_scale(double* xscale = nullptr, double* yscale = nullptr) = 0;
-		virtual Windows::Foundation::Numerics::float2 position_to_local(double x, double y, double depth) = 0;
+		virtual Windows::Foundation::Numerics::float2 vessel_to_local(double x, double y, double depth) = 0;
 	};
 
 	private class IVessellet abstract : public virtual WarGrey::SCADA::IGraphlet {

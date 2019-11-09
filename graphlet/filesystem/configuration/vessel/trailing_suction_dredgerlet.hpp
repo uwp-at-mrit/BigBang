@@ -107,6 +107,7 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Uri^ ms_appdata_config;
 
 	private:
+		double2 current_gps;
 		double bow_direction;
 		float original_scale;
 		float xscale;

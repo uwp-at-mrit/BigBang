@@ -457,7 +457,10 @@ void TransverseSectionlet::construct() {
 	this->load(this->ms_appdata_config);
 }
 
-void TransverseSectionlet::update_section(const TransversePlane* plane) {
+void TransverseSectionlet::update_section(const TransversePlane* plane, double vessel_x, double vessel_y) {
+	this->vessel_x = vessel_x;
+	this->vessel_y = vessel_y;
+
 	if (plane != nullptr) {
 		if (this->plane == nullptr) {
 			this->plane = new TransversePlane(plane);
@@ -609,12 +612,13 @@ void TransverseSectionlet::update_section_line() {
 }
 
 /*************************************************************************************************/
-float2 TransverseSectionlet::position_to_local(double x, double y, double depth) {
+float2 TransverseSectionlet::vessel_to_local(double x, double y, double depth) {
 	float2 pos(flnan_f, 0.0F);
+	double xscale, yscale;
 
 	if (this->plane != nullptr) {
-		double distance = point_segment_distance(x, y, this->plane->center_foot.x, this->plane->center_foot.y, this->plane->center_origin.x, this->plane->center_origin.y);
-		double xscale, yscale;
+		double distance = point_segment_distance(this->vessel_x + x, this->vessel_y + y,
+			this->plane->center_foot.x, this->plane->center_foot.y, this->plane->center_origin.x, this->plane->center_origin.y);
 		
 		this->fill_scale(&xscale, &yscale);
 		pos = distance_to_local(distance, depth, xscale, yscale);

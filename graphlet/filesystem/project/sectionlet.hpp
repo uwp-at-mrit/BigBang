@@ -117,7 +117,7 @@ namespace WarGrey::SCADA {
 			float width, float height = 0.0F, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
 
 	public:
-		void update_section(const WarGrey::SCADA::TransversePlane* plane);
+		void update_section(const WarGrey::SCADA::TransversePlane* plane, double vessel_x, double vessel_y);
 
 	public:
 		void construct() override;
@@ -127,7 +127,7 @@ namespace WarGrey::SCADA {
 		bool ready() override;
 
 	public:
-		Windows::Foundation::Numerics::float2 position_to_local(double x, double y, double depth) override;
+		Windows::Foundation::Numerics::float2 vessel_to_local(double x, double y, double depth) override;
 		void fill_scale(double* xscale, double* yscale) override;
 
 	public:
@@ -164,8 +164,12 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::TransversePlane* plane;
-		WarGrey::SCADA::IVessellet* vessel;
 		double direction_sign;
+
+	private:
+		WarGrey::SCADA::IVessellet* vessel;
+		double vessel_x;
+		double vessel_y;
 
 	private:
 		float width;
