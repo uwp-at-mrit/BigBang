@@ -71,12 +71,11 @@ Planetlet::Planetlet(IPlanet* planet, float width, float height, ICanvasBrush^ b
 
 	this->screen = new Frame(this);
 	
-	// Application has the responsibility to make decision
+	// Client applications make their own decisions
 	// this->enable_events(true, true);
 }
 
-Planetlet::Planetlet(IPlanet* planet, GraphletAnchor anchor, ICanvasBrush^ background)
-	: Planetlet(planet, 0.0F, 0.0F, background) {
+Planetlet::Planetlet(IPlanet* planet, GraphletAnchor anchor, ICanvasBrush^ background) : Planetlet(planet, 0.0F, 0.0F, background) {
 	this->stretching_anchor = anchor;
 }
 

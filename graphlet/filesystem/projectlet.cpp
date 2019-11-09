@@ -34,19 +34,7 @@ namespace {
 
 	public:
 		bool can_select(IGraphlet* g) override {
-			return true;
-		}
-
-		bool can_select_multiple() override {
-			return true;
-		}
-
-	public:
-		void on_graphlet_ready(IGraphlet* g) override {}
-
-	public:
-		void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float x, float y) override {
-			this->get_logger()->log_message(Log::Info, L"%d", anchors.size());
+			return false;
 		}
 	};
 
@@ -70,7 +58,7 @@ Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
 	, vessel(vessel), plot(plot), map(nullptr) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
 	this->enable_stretch(false, false);
-	this->enable_events(true, true);
+	this->enable_events(true, false);
 }
 
 void Projectlet::construct() {

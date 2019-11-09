@@ -972,6 +972,14 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 
 					handled = true;
 				}
+			} else {
+				if ((unmasked_graphlet != nullptr) && (unmasked_graphlet->handles_low_level_events())) {
+					GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
+					float local_x = x - info->x;
+					float local_y = y - info->y;
+
+					unmasked_graphlet->on_pointer_pressed(local_x, local_y, pdt, puk);
+				}
 			}
 
 			{ // Planet itself also has an opportunity to handle events directly.
