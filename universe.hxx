@@ -126,7 +126,7 @@ namespace WarGrey::SCADA {
 		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_moveout(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-		void on_translating_x();
+		void on_translating_x(float delta);
 
 	private:
 		void notify_transfer(WarGrey::SCADA::IPlanet* from, WarGrey::SCADA::IPlanet* to);
@@ -146,11 +146,7 @@ namespace WarGrey::SCADA {
 		float hup_right_margin;
 
 	private:
-		std::map<unsigned int, Windows::UI::Input::PointerUpdateKind> figures;
-		float figure_x0;
-		float figure_x;
-
-	private:
+		std::map<unsigned int, WarGrey::SCADA::UniverseFigure> figures;
 		Windows::Storage::ApplicationDataContainer^ universe_settings;
 		Windows::UI::Xaml::DispatcherTimer^ transfer_clock;
 		WarGrey::SCADA::IPlanet* from_planet;

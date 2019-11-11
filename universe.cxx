@@ -15,6 +15,7 @@
 #include "system.hpp"
 #include "syslog.hpp"
 
+#include "math.hpp"
 #include "paint.hpp"
 #include "brushes.hxx"
 #include "colorspace.hpp"
@@ -131,6 +132,31 @@ static inline void load_mask_alpha(ApplicationDataContainer^ zone, CanvasSolidCo
 	}
 }
 
+private struct WarGrey::SCADA::UniverseFigure {
+public:
+	UniverseFigure(unsigned int seq, PointerUpdateKind kind, float x, float y)
+		: seq(seq), kind(kind), lt(float2(+infinity_f, +infinity_f)), rb(float2(-infinity_f, -infinity_f)) {
+		this->push_point(x, y);
+	}
+
+public:
+	void push_point(float x, float y) {
+		this->points.push_back(float2(x, y));
+		region_fuse_point(&this->lt, &this->rb, x, y);
+	}
+
+public:
+	unsigned int seq;
+	PointerUpdateKind kind;
+
+public:
+	std::deque<float2> points;
+
+public:
+	float2 lt;
+	float2 rb;
+};
+
 /*************************************************************************************************/
 UniverseDisplay::UniverseDisplay(Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IHeadUpPlanet* heads_up_planet)
 	: UniverseDisplay(DisplayFit::None, 0.0F, 0.0F, logger, setting_name, navigator, heads_up_planet) {}
@@ -142,7 +168,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight
 	, Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IHeadUpPlanet* heads_up_planet)
 	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger))
-	, figure_x0(flnan_f), shortcuts_enabled(true), universe_settings(nullptr), follow_global_mask_setting(true)
+	, shortcuts_enabled(true), universe_settings(nullptr), follow_global_mask_setting(true)
 	, hup_top_margin(0.0F), hup_right_margin(0.0F), hup_bottom_margin(0.0F), hup_left_margin(0.0F) {
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Platform::Object^>(this, &UniverseDisplay::do_refresh);
@@ -157,8 +183,6 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 	this->display = ref new CanvasControl();
 	this->display->Name = this->get_logger()->get_name();
 	this->screen = new Pasteboard(this, mode, dwidth, dheight, swidth, sheight);
-	
-	// CanvasControl uses the shared one by default, while CanvasAnimatedControl does not.
 
 	if (heads_up_planet != nullptr) {
 		LinkedPlanetInfo* info = bind_planet_owership(this->screen, heads_up_planet);
@@ -657,23 +681,18 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 		this->enter_critical_section();
 
 		if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
-			bool maniplation = ((this->figures.size() > 0) || MENUED(args->KeyModifiers));
 			unsigned int id = args->Pointer->PointerId;
+			size_t sequence_id = this->figures.size() + 1;
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 			PointerUpdateKind puk = pp->Properties->PointerUpdateKind;
 			float px = pp->Position.X - this->hup_left_margin;
 			float py = pp->Position.Y - this->hup_top_margin;
 
-			this->figures.insert(std::pair<unsigned int, PointerUpdateKind>(id, puk));
+			this->figures.insert(std::pair<unsigned int, UniverseFigure>(id, UniverseFigure((unsigned int)sequence_id, puk, px, py)));
 
-			if (maniplation) {
-				this->figure_x0 = px;
-				args->Handled = true;
-			} else {
+			if (sequence_id == 1) {
 				bool handled = false;
-
-				this->figure_x0 = flnan_f;
 
 				if (this->headup_planet != nullptr) {
 					handled = this->headup_planet->on_pointer_pressed(pp->Position.X, pp->Position.Y, pdt, puk);
@@ -684,6 +703,8 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 				}
 
 				args->Handled = handled;
+			} else {
+				args->Handled = true;
 			}
 		}
 
@@ -692,38 +713,44 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 }
 
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	this->enter_critical_section();
+	unsigned int id = args->Pointer->PointerId;
+	auto it = this->figures.find(id);
 
-	if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
-		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
-		PointerDeviceType pdt = args->Pointer->PointerDeviceType;
-		float px = pp->Position.X - this->hup_left_margin;
-		float py = pp->Position.Y - this->hup_top_margin;
-		
-		if (this->figure_x0 >= 0.0F) {
-			this->figure_x = px;
-			args->Handled = true;
-		} else {
-			bool handled = false;
+	if (it != this->figures.end()) {
+		this->enter_critical_section();
 
-			if (this->headup_planet != nullptr) {
-				handled = this->headup_planet->on_pointer_moved(pp->Position.X, pp->Position.Y, pdt, pp->Properties->PointerUpdateKind);
+		if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
+			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
+			PointerDeviceType pdt = args->Pointer->PointerDeviceType;
+			float px = pp->Position.X - this->hup_left_margin;
+			float py = pp->Position.Y - this->hup_top_margin;
+
+			if (this->figures.size() == 1) {
+				bool handled = false;
+
+				if (this->headup_planet != nullptr) {
+					handled = this->headup_planet->on_pointer_moved(pp->Position.X, pp->Position.Y, pdt, pp->Properties->PointerUpdateKind);
+				}
+
+				if ((!handled) && (this->recent_planet != nullptr)) {
+					handled = this->recent_planet->on_pointer_moved(px, py, pdt, pp->Properties->PointerUpdateKind);
+				}
+
+				args->Handled = handled;
+			} else {
+				it->second.push_point(px, py);
+				args->Handled = true;
 			}
-
-			if ((!handled) && (this->recent_planet != nullptr)) {
-				handled = this->recent_planet->on_pointer_moved(px, py, pdt, pp->Properties->PointerUpdateKind);
-			}
-
-			args->Handled = handled;
 		}
-	}
 
-	this->leave_critical_section();
+		this->leave_critical_section();
+	}
 }
 
 void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	auto it = this->figures.find(args->Pointer->PointerId);
-	
+	unsigned int id = args->Pointer->PointerId;
+	auto it = this->figures.find(id);
+
 	if (it != this->figures.end()) {
 		this->canvas->ReleasePointerCapture(args->Pointer); // TODO: deal with PointerCaptureLost event;
 
@@ -733,33 +760,32 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 			float px = pp->Position.X - this->hup_left_margin;
 			float py = pp->Position.Y - this->hup_top_margin;
 
-			if (std::isnan(this->figure_x0)) {
+			switch (this->figures.size()) {
+			case 1: {
 				bool handled = false;
 
 				this->enter_critical_section();
 
 				if (this->headup_planet != nullptr) {
-					handled = this->headup_planet->on_pointer_released(pp->Position.X, pp->Position.Y, pdt, it->second);
+					handled = this->headup_planet->on_pointer_released(pp->Position.X, pp->Position.Y, pdt, it->second.kind);
 				}
 
 				if ((!handled) && (this->recent_planet != nullptr)) {
-					handled = this->recent_planet->on_pointer_released(px, py, pdt, it->second);
+					handled = this->recent_planet->on_pointer_released(px, py, pdt, it->second.kind);
 				}
 
 				this->leave_critical_section();
 
 				args->Handled = handled;
-			} else {
-				if ((this->figures.size() == 3) || MENUED(args->KeyModifiers)) {
-					this->on_translating_x();
-					this->figure_x0 = flnan_f;
-				}
-
+			}; break;
+			case 3: {
+				this->on_translating_x(px - it->second.points[0].x);
 				args->Handled = true;
+			}; break;
 			}
 		}
 
-		this->figures.erase(it);
+		this->figures.clear();
 	}
 }
 
@@ -873,9 +899,8 @@ void UniverseDisplay::use_global_mask_setting(bool yes, bool* prev_state) {
 	this->follow_global_mask_setting = yes;
 }
 
-void UniverseDisplay::on_translating_x() {
+void UniverseDisplay::on_translating_x(float delta) {
 	float width = this->actual_width;
-	float delta = this->figure_x - this->figure_x0;
 	float distance = width * 0.0382F;
 
 	if (delta < -distance) {

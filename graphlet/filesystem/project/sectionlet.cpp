@@ -461,7 +461,7 @@ void TransverseSectionlet::update_section(const TransversePlane* plane, double v
 	this->vessel_x = vessel_x;
 	this->vessel_y = vessel_y;
 
-	if (plane != nullptr) {
+	if ((plane != nullptr) && (this->preview_config != nullptr)) {
 		if (this->plane == nullptr) {
 			this->plane = new TransversePlane(plane);
 			this->update_vertical_axes();
@@ -470,9 +470,7 @@ void TransverseSectionlet::update_section(const TransversePlane* plane, double v
 			this->update_vertical_axes();
 		}
 
-		if (this->preview_config != nullptr) {
-			this->update_section_line();
-		}
+		this->update_section_line();
 	}
 }
 

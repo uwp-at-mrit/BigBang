@@ -107,21 +107,21 @@ CanvasGeometry^ WarGrey::SCADA::vessel_polygon(double2 src[], size_t count, doub
 }
 
 float WarGrey::SCADA::vessel_radius(float2& lt, float2& rb) {
-	float rlt = points_distance(lt.x, lt.y, 0.0F, 0.0F);
-	float rrt = points_distance(rb.x, lt.y, 0.0F, 0.0F);
-	float rlb = points_distance(lt.x, rb.y, 0.0F, 0.0F);
-	float rrb = points_distance(rb.x, rb.y, 0.0F, 0.0F);
+	float rlt2 = points_distance_squared(lt.x, lt.y, 0.0F, 0.0F);
+	float rrt2 = points_distance_squared(rb.x, lt.y, 0.0F, 0.0F);
+	float rlb2 = points_distance_squared(lt.x, rb.y, 0.0F, 0.0F);
+	float rrb2 = points_distance_squared(rb.x, rb.y, 0.0F, 0.0F);
 
-	return flmax(flmax(rlt, rrt), flmax(rlb, rrb));
+	return flsqrt(flmax(flmax(rlt2, rrt2), flmax(rlb2, rrb2)));
 }
 
 float WarGrey::SCADA::vessel_radius(float2& lt, float2& rb, double2& gps) {
 	float gx = float(gps.x);
 	float gy = float(gps.y);
-	float rlt = points_distance(lt.x, lt.y, gx, gy);
-	float rrt = points_distance(rb.x, lt.y, gx, gy);
-	float rlb = points_distance(lt.x, rb.y, gx, gy);
-	float rrb = points_distance(rb.x, rb.y, gx, gy);
+	float rlt2 = points_distance_squared(lt.x, lt.y, gx, gy);
+	float rrt2 = points_distance_squared(rb.x, lt.y, gx, gy);
+	float rlb2 = points_distance_squared(lt.x, rb.y, gx, gy);
+	float rrb2 = points_distance_squared(rb.x, rb.y, gx, gy);
 
-	return flmax(flmax(rlt, rrt), flmax(rlb, rrb));
+	return flsqrt(flmax(flmax(rlt2, rrt2), flmax(rlb2, rrb2)));
 }
