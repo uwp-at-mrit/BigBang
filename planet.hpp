@@ -97,6 +97,7 @@ namespace WarGrey::SCADA {
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_tap_selected(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float planet_x, float planet_y) {}
+		virtual void on_gesture(WarGrey::SCADA::GraphletGesture gesture, float delta, Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) {}
 		virtual void on_transfer(WarGrey::SCADA::IPlanet* from, WarGrey::SCADA::IPlanet* to) {}
 
 	public:
@@ -113,6 +114,7 @@ namespace WarGrey::SCADA {
 		virtual bool can_interactive_move(IGraphlet* g, float local_x, float local_y) { return false; }
 		virtual bool can_select(IGraphlet* g) { return true; }
 		virtual bool can_select_multiple() { return false; }
+		virtual bool can_affine_transform(Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) { return false; }
 		virtual void before_select(IGraphlet* g, bool on_or_off) {}
 		virtual void after_select(IGraphlet* g, bool on_or_off) {}
 		

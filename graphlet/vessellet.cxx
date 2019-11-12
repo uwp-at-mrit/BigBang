@@ -46,10 +46,7 @@ void IVessellet::scale(double s) {
 }
 
 void IVessellet::clear_boundary() {
-	this->lt.x = +infinity_f;
-	this->lt.y = +infinity_f;
-	this->rb.x = -infinity_f;
-	this->rb.y = -infinity_f;
+	region_fuse_reset(&this->lt, &this->rb);
 }
 
 void IVessellet::resolve_radius() {

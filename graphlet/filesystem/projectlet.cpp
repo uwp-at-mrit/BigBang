@@ -247,6 +247,26 @@ void Projectlet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float
 	ds->FillGeometry(pname, px, py, Colours::GrayText);
 }
 
+void Projectlet::center_vessel() {
+	if (this->map != nullptr) {
+		this->planet->begin_update_sequence();
+		this->map->center_at(this->vessel_x, this->vessel_y);
+		this->relocate_vessel();
+		this->relocate_icons();
+		this->planet->end_update_sequence();
+	}
+}
+
+void Projectlet::translate(float deltaX, float deltaY) {
+	if (this->map != nullptr) {
+		this->planet->begin_update_sequence();
+		this->map->translate(deltaX, deltaY);
+		this->relocate_vessel();
+		this->relocate_icons();
+		this->planet->end_update_sequence();
+	}
+}
+
 bool Projectlet::on_key(VirtualKey key, bool screen_keyboard) {
 	bool handled = false;
 
@@ -291,8 +311,8 @@ bool Projectlet::on_character(unsigned int keycode) {
 			handled = true;
 
 			switch (keycode) {
-			case 61 /* = */: case 43 /* + */: this->map->transform(MapMove::ScaleUp); break;
-			case 45 /* - */: case 95 /* _ */: this->map->transform(MapMove::ScaleDown); break;
+			case 61 /* = */: case 43 /* + */: this->map->transform(MapMove::ZoomIn); break;
+			case 45 /* - */: case 95 /* _ */: this->map->transform(MapMove::ZoomOut); break;
 			case 8 /* back */: this->map->transform(MapMove::Reset); break;
 			default: handled = false;
 			}

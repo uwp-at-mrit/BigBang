@@ -320,17 +320,24 @@ Size DigMaplet::length_to_local(double width, double height) {
 	return Size(local_w, local_h);
 }
 
+void DigMaplet::translate(float deltaX, float deltaY) {
+	this->xtranslation += deltaX;
+	this->ytranslation += deltaY;
+
+	this->notify_updated();
+}
+
 void DigMaplet::transform(MapMove move) {
 	double posttimes = this->stimes;
 	float sx = this->width * 0.5F;
 	float sy = this->height * 0.5F;
-	
+
 	switch (move) {
-	case MapMove::Left: this->xtranslation -= this->tstep; break;
-	case MapMove::Right: this->xtranslation += this->tstep; break;
-	case MapMove::Up: this->ytranslation -= this->tstep; break;
-	case MapMove::Down: this->ytranslation += this->tstep; break;
-	case MapMove::ScaleUp: {
+	case MapMove::Left: this->translate(-this->tstep, 0.0F); break;
+	case MapMove::Right: this->translate(this->tstep, 0.0F); break;
+	case MapMove::Up: this->translate(0.0F, -this->tstep); break;
+	case MapMove::Down: this->translate(0.0F, this->tstep); break;
+	case MapMove::ZoomIn: {
 		if (this->stimes >= 1.0) {
 			posttimes = this->stimes + 1.0;
 		} else {
@@ -339,7 +346,7 @@ void DigMaplet::transform(MapMove move) {
 
 		this->scale_transform(posttimes, sx, sy);
 	}; break;
-	case MapMove::ScaleDown: {
+	case MapMove::ZoomOut: {
 		if (this->stimes > 1.0) {
 			posttimes = this->stimes - 1.0;
 		} else {

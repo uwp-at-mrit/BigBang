@@ -73,6 +73,71 @@ namespace {
 	};
 }
 
+private struct WarGrey::SCADA::UniverseFigure {
+public:
+	UniverseFigure(unsigned int seq, PointerUpdateKind kind, float x, float y) : seq(seq), kind(kind) {
+		this->push_point(x, y);
+	}
+
+public:
+	void push_point(float x, float y) {
+		this->points.push_back(float2(x, y));
+	}
+
+public:
+	unsigned int seq;
+	PointerUpdateKind kind;
+
+public:
+	std::deque<float2> points;
+};
+
+static GraphletGesture gesture_recognize(UniverseFigure* first, UniverseFigure* second, float* delta) {
+	GraphletGesture gesture = GraphletGesture::_;
+	size_t maxidx1 = first->points.size() - 1;
+	size_t maxidx2 = second->points.size() - 1;
+	size_t lstidx1 = maxidx1 - 1;
+	size_t lstidx2 = maxidx2 - 1;
+
+	if ((maxidx1 >= 2) && (maxidx2 >= 2)) {
+		float2 pt10 = first->points[0];
+		float2 pt11 = first->points[maxidx1];
+		float2 pt1l = first->points[lstidx1];
+		float2 pt20 = second->points[0];
+		float2 pt21 = second->points[maxidx2];
+		float2 pt2l = second->points[lstidx2];
+		float vx1 = pt11.x - pt10.x;
+		float vy1 = pt11.y - pt10.y;
+		float vx2 = pt21.x - pt20.x;
+		float vy2 = pt21.y - pt20.y;
+
+		if (dot_product(vx1, vy1, vx2, vy2) > 0.0F) { // same direction, for translation
+			float delta1 = flabs(vy1) - flabs(vx1);
+			float delta2 = flabs(vy2) - flabs(vx2);
+
+			if ((delta1 > 0.0F) && (delta2 > 0.0F)) {
+				gesture = GraphletGesture::TranslateY;
+				SET_BOX(delta, flmax(pt11.y - pt1l.y, pt21.y - pt2l.y));
+			} else if ((delta1 < 0.0F) && (delta2 < 0.0F)) {
+				gesture = GraphletGesture::TranslateX;
+				SET_BOX(delta, flmax(pt11.x - pt1l.x, pt21.x - pt2l.x));
+			}
+		} else { // different direction, for scale
+			float distance0 = points_distance_squared(pt10.x, pt10.y, pt20.x, pt20.y);
+			float distance1 = points_distance_squared(pt11.x, pt11.y, pt21.x, pt21.y);
+
+			if (distance0 < distance1) {
+				gesture = GraphletGesture::ZoomIn;
+			} else if (distance0 > distance1) {
+				gesture = GraphletGesture::ZoomOut;
+			}
+		}
+	}
+
+	return gesture;
+}
+
+/*************************************************************************************************/
 static inline LinkedPlanetInfo* bind_planet_owership(IScreen* master, IPlanet* planet) {
 	auto info = new LinkedPlanetInfo(master);
 	
@@ -131,31 +196,6 @@ static inline void load_mask_alpha(ApplicationDataContainer^ zone, CanvasSolidCo
 		set_mask_alpha(color, get_preference(mask_setting_key, 0.0, zone));
 	}
 }
-
-private struct WarGrey::SCADA::UniverseFigure {
-public:
-	UniverseFigure(unsigned int seq, PointerUpdateKind kind, float x, float y)
-		: seq(seq), kind(kind), lt(float2(+infinity_f, +infinity_f)), rb(float2(-infinity_f, -infinity_f)) {
-		this->push_point(x, y);
-	}
-
-public:
-	void push_point(float x, float y) {
-		this->points.push_back(float2(x, y));
-		region_fuse_point(&this->lt, &this->rb, x, y);
-	}
-
-public:
-	unsigned int seq;
-	PointerUpdateKind kind;
-
-public:
-	std::deque<float2> points;
-
-public:
-	float2 lt;
-	float2 rb;
-};
 
 /*************************************************************************************************/
 UniverseDisplay::UniverseDisplay(Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IHeadUpPlanet* heads_up_planet)
@@ -704,6 +744,9 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 
 				args->Handled = handled;
 			} else {
+				region_fuse_reset(&this->gesture_lt, &this->gesture_rb);
+				region_fuse_point(&this->gesture_lt, &this->gesture_rb, px, py);
+
 				args->Handled = true;
 			}
 		}
@@ -715,18 +758,18 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	unsigned int id = args->Pointer->PointerId;
 	auto it = this->figures.find(id);
+	bool handled = false;
 
 	if (it != this->figures.end()) {
-		this->enter_critical_section();
-
 		if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 			float px = pp->Position.X - this->hup_left_margin;
 			float py = pp->Position.Y - this->hup_top_margin;
+			size_t size = this->figures.size();
 
-			if (this->figures.size() == 1) {
-				bool handled = false;
+			if (size == 1) {
+				this->enter_critical_section();
 
 				if (this->headup_planet != nullptr) {
 					handled = this->headup_planet->on_pointer_moved(pp->Position.X, pp->Position.Y, pdt, pp->Properties->PointerUpdateKind);
@@ -736,15 +779,41 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 					handled = this->recent_planet->on_pointer_moved(px, py, pdt, pp->Properties->PointerUpdateKind);
 				}
 
-				args->Handled = handled;
+				this->leave_critical_section();
 			} else {
 				it->second.push_point(px, py);
-				args->Handled = true;
+				region_fuse_point(&this->gesture_lt, &this->gesture_rb, px, py);
+
+				if (size == 2) {
+					if ((this->recent_planet != nullptr) && this->recent_planet->can_affine_transform(this->gesture_lt, this->gesture_rb)) {
+						UniverseFigure* first = nullptr;
+						UniverseFigure* second = nullptr;
+
+						for (auto it = this->figures.begin(); it != this->figures.end(); it++) {
+							switch (it->second.seq) {
+							case 1: first = &it->second; break;
+							case 2: second = &it->second; break;
+							}
+						}
+
+						{ // do affine transforming
+							float delta = 0.0F;
+							GraphletGesture gesture = gesture_recognize(first, second, &delta);
+
+							if (gesture != GraphletGesture::_) {
+								this->enter_critical_section();
+								this->recent_planet->on_gesture(gesture, delta, this->gesture_lt, this->gesture_rb);
+								this->leave_critical_section();
+								handled = true;
+							}
+						}
+					}
+				}
 			}
 		}
-
-		this->leave_critical_section();
 	}
+
+	args->Handled = handled;
 }
 
 void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {

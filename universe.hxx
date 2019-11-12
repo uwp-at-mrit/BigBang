@@ -147,6 +147,10 @@ namespace WarGrey::SCADA {
 
 	private:
 		std::map<unsigned int, WarGrey::SCADA::UniverseFigure> figures;
+		Windows::Foundation::Numerics::float2 gesture_lt;
+		Windows::Foundation::Numerics::float2 gesture_rb;
+
+	private:
 		Windows::Storage::ApplicationDataContainer^ universe_settings;
 		Windows::UI::Xaml::DispatcherTimer^ transfer_clock;
 		WarGrey::SCADA::IPlanet* from_planet;

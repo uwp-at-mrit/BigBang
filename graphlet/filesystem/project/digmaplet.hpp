@@ -4,7 +4,7 @@
 #include "graphlet/filesystem/project/reader/digdoc.hxx"
 
 namespace WarGrey::SCADA {
-	private enum class MapMove : unsigned int { Up, Right, Down, Left, ScaleUp, ScaleDown, Reset };
+	private enum class MapMove : unsigned int { Up, Right, Down, Left, ZoomIn, ZoomOut, Reset };
 
 	private class DigMaplet : public WarGrey::SCADA::IGraphlet {
 	public:
@@ -27,6 +27,7 @@ namespace WarGrey::SCADA {
 		double actual_scale();
 
 	public:
+		void translate(float deltaX, float deltaY);
 		void transform(WarGrey::SCADA::MapMove move);
 		void center();
 		void center_at(double x, double y);

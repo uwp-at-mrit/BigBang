@@ -28,6 +28,10 @@ namespace WarGrey::SCADA {
 		const WarGrey::SCADA::TransversePlane* section(double x, double y);
 
 	public:
+		void center_vessel();
+		void translate(float deltaX, float deltaY);
+
+	public:
 		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
