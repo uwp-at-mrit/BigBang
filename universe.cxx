@@ -112,16 +112,21 @@ static GraphletGesture gesture_recognize(UniverseFigure* first, UniverseFigure* 
 		float vy2 = pt21.y - pt20.y;
 
 		if (dot_product(vx1, vy1, vx2, vy2) > 0.0F) { // same direction, for translation
+			float magic_fraction = 0.618F; // keep the translating graphlet more closer to figures
+
 			gesture = GraphletGesture::Translation;
-			SET_BOX(param1, flmin(pt11.x - pt1l.x, pt21.x - pt2l.x));
-			SET_BOX(param2, flmin(pt11.y - pt1l.y, pt21.y - pt2l.y));
+			SET_BOX(param1, flmin(pt11.x - pt1l.x, pt21.x - pt2l.x) * magic_fraction);
+			SET_BOX(param2, flmin(pt11.y - pt1l.y, pt21.y - pt2l.y) * magic_fraction);
 		} else { // different direction, for scale
-			float distance0 = points_distance_squared(pt10.x, pt10.y, pt20.x, pt20.y);
-			float distance1 = points_distance_squared(pt11.x, pt11.y, pt21.x, pt21.y);
-			
-			gesture = GraphletGesture::Zoom;
-			line_point(pt10, pt20, 0.5, param1, param2);
-			SET_BOX(param3, (distance1 - distance0) * 0.5F);
+			float distance0 = points_distance(pt10.x, pt10.y, pt20.x, pt20.y);
+			float distance1 = points_distance(pt11.x, pt11.y, pt21.x, pt21.y);
+			float length = (distance1 - distance0) * 0.5F;
+
+			if (flabs(length) > 8.0F) {
+				gesture = GraphletGesture::Zoom;
+				line_point(pt10, pt20, 0.5, param1, param2);
+				SET_BOX(param3, length);
+			}
 		}
 	}
 
