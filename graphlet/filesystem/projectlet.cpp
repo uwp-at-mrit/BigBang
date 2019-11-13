@@ -8,6 +8,7 @@
 #include "datum/path.hpp"
 #include "datum/file.hpp"
 
+#include "math.hpp"
 #include "planet.hpp"
 #include "text.hpp"
 #include "shape.hpp"
@@ -267,6 +268,16 @@ void Projectlet::translate(float deltaX, float deltaY) {
 	}
 }
 
+void Projectlet::zoom(float zx, float zy, float length) {
+	if (this->map != nullptr) {
+		this->planet->begin_update_sequence();
+		this->map->zoom(zx, zy, length);
+		this->relocate_vessel();
+		this->relocate_icons();
+		this->planet->end_update_sequence();
+	}
+}
+
 bool Projectlet::on_key(VirtualKey key, bool screen_keyboard) {
 	bool handled = false;
 
@@ -329,14 +340,77 @@ bool Projectlet::on_character(unsigned int keycode) {
 	return handled;
 }
 
-bool Projectlet::relocate_vessel() {
+bool Projectlet::on_translation(float x, float y, float delta, bool horizontal) {
+	bool handled = (this->map != nullptr);
+
+	if (handled) {
+		this->planet->begin_update_sequence();
+
+		if (horizontal) {
+			if (delta > 0.0F) {
+				this->map->transform(MapMove::Right);
+			} else if (delta < 0.0F) {
+				this->map->transform(MapMove::Left);
+			} else {
+				handled = false;
+			}
+		} else {
+			if (delta > 0.0F) {
+				this->map->transform(MapMove::Up);
+			} else if (delta < 0.0F) {
+				this->map->transform(MapMove::Down);
+			} else {
+				handled = false;
+			}
+		}
+
+		if (handled) {
+			this->relocate_vessel();
+			this->relocate_icons();
+		}
+
+		this->planet->end_update_sequence();
+	}
+
+	return handled;
+}
+
+bool Projectlet::on_zoom(float x, float y, float delta) {
+	bool handled = (this->map != nullptr);
+	
+	if (handled) {
+		this->planet->begin_update_sequence();
+
+		if (delta > 0.0F) {
+			this->map->transform(MapMove::ZoomOut, x, y);
+		} else if (delta < 0.0F) {
+			this->map->transform(MapMove::ZoomIn, x, y);
+		} else {
+			handled = false;
+		}
+
+		if (handled) {
+			this->relocate_vessel();
+			this->relocate_icons();
+		}
+
+		this->planet->end_update_sequence();
+	}
+
+	return handled;
+}
+
+bool Projectlet::relocate_vessel(float2* local_pos) {
 	bool moved = false;
 
-	if ((this->map != nullptr) && (this->vessel != nullptr)) {
+	if (this->vessel != nullptr) {
 		float2 vpos = this->map->position_to_local(this->vessel_x, this->vessel_y);
 
 		this->vessel->scale(this->map->actual_scale());
 		this->planet->move_to(this->vessel, vpos.x, vpos.y, GraphletAnchor::CC);
+
+		SET_BOX(local_pos, vpos);
+
 		moved = true;
 	}
 
@@ -344,13 +418,11 @@ bool Projectlet::relocate_vessel() {
 }
 
 void Projectlet::relocate_icons() {
-	if (this->map != nullptr) {
-		for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
-			DigIconEntity^ ent = static_cast<DigIconEntity^>(*it);
-			float2 ipos = this->map->position_to_local(ent->x, ent->y);
+	for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
+		DigIconEntity^ ent = static_cast<DigIconEntity^>(*it);
+		float2 ipos = this->map->position_to_local(ent->x, ent->y);
 
-			this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::CC);
-		}
+		this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::CC);
 	}
 }
 
@@ -358,20 +430,33 @@ bool Projectlet::move_vessel(double x, double y) {
 	bool moved = false;
 
 	if ((this->vessel_x != x) || (this->vessel_y != y)) {
+		float2 vpos;
 		this->vessel_x = x;
 		this->vessel_y = y;
 
-		this->planet->begin_update_sequence();
+		if (this->map != nullptr) {
+			this->planet->begin_update_sequence();
 
-		if (this->relocate_vessel()) {
-			moved = true;
+			if (this->relocate_vessel(&vpos)) {
+				moved = true;
 
-			if (this->jobs_dat != nullptr) {
-				this->jobs_dat->on_vessel_move(this->vessel_x, this->vessel_y);
+				if (this->jobs_dat != nullptr) {
+					this->jobs_dat->on_vessel_move(this->vessel_x, this->vessel_y);
+				}
+
+				{ // center vessel if close to edge
+					float vwidth, vheight;
+
+					this->vessel->fill_extent(vpos.x, vpos.y, &vwidth, &vheight);
+
+					if (!rectangle_contain(vwidth, vheight, this->view_size.Width - vwidth, this->view_size.Height - vheight, vpos)) {
+						this->center_vessel();
+					}
+				}
 			}
-		}
 
-		this->planet->end_update_sequence();
+			this->planet->end_update_sequence();
+		}
 	}
 
 	return moved;

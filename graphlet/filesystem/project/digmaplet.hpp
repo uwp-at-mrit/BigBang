@@ -27,11 +27,13 @@ namespace WarGrey::SCADA {
 		double actual_scale();
 
 	public:
-		void translate(float deltaX, float deltaY);
-		void transform(WarGrey::SCADA::MapMove move);
 		void center();
 		void center_at(double x, double y);
-
+		void translate(float deltaX, float deltaY);
+		void zoom(float zx, float zy, float length);
+		void transform(WarGrey::SCADA::MapMove move);
+		void transform(WarGrey::SCADA::MapMove move, float sx, float sy);
+		
 	private:
 		void preshape(WarGrey::SCADA::IDigDatum* dig);
 		void scale_transform(double stimes, float anchor_x, float anchor_y);

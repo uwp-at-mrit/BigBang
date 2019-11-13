@@ -25,6 +25,8 @@ namespace WarGrey::SCADA {
 	public:
 		virtual bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) { return false; }
 		virtual bool on_character(unsigned int keycode) { return false; }
+		virtual bool on_translation(float local_x, float local_y, float delta, bool horizontal) { return false; }
+		virtual bool on_zoom(float local_x, float local_y, float delta) { return false; }
 		virtual void on_hover(float local_x, float local_y) {}
 		virtual void on_tap(float local_x, float local_y) {}
 		virtual void on_goodbye(float local_x, float local_y) {}
@@ -48,6 +50,10 @@ namespace WarGrey::SCADA {
 		virtual bool on_pointer_moveout(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk)
+		{ return false; }
+
+		virtual bool on_pointer_wheeled(float x, float y, float delta,
+			bool horizontal, bool controlled)
 		{ return false; }
 
 	public:

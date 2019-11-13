@@ -47,6 +47,8 @@ namespace WarGrey::SCADA {
 			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk) override;
 
+		bool on_pointer_wheeled(float x, float y, float delta, bool horizontal, bool controlled) override;
+
 	protected:
 		WarGrey::SCADA::IPlanet* planet;
 

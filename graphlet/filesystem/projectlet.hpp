@@ -30,6 +30,7 @@ namespace WarGrey::SCADA {
 	public:
 		void center_vessel();
 		void translate(float deltaX, float deltaY);
+		void zoom(float zx, float zy, float length);
 
 	public:
 		void construct() override;
@@ -41,6 +42,8 @@ namespace WarGrey::SCADA {
 	public:
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
 		bool on_character(unsigned int keycode) override;
+		bool on_translation(float x, float y, float delta, bool horizontal) override;
+		bool on_zoom(float x, float y, float delta) override;
 
 	protected:
 		WarGrey::SCADA::ProjectDoctype filter_file(Platform::String^ file, Platform::String^ _ext) override;
@@ -57,7 +60,7 @@ namespace WarGrey::SCADA {
 		void on_section_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
 
 	private:
-		bool relocate_vessel();
+		bool relocate_vessel(Windows::Foundation::Numerics::float2* vpos = nullptr);
 		void relocate_icons();
 
 	private:

@@ -126,6 +126,7 @@ namespace WarGrey::SCADA {
 		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_moveout(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+		void on_pointer_wheel(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_translating_x(float delta);
 
 	private:

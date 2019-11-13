@@ -1170,6 +1170,32 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 	return handled;
 }
 
+bool Planet::on_pointer_wheeled(float x, float y, float delta, bool horizontal, bool controlled) {
+	bool handled = false;
+
+	if (!this->keyboard->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
+
+		if ((unmasked_graphlet != nullptr) && (unmasked_graphlet->handles_events())) {
+			GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
+			float local_x = x - info->x;
+			float local_y = y - info->y;
+
+			if (controlled) {
+				handled = unmasked_graphlet->on_zoom(local_x, local_y, delta);
+			} else {
+				handled = unmasked_graphlet->on_translation(local_x, local_y, delta, horizontal);
+			}
+
+			if ((!handled) && unmasked_graphlet->handles_low_level_events()) {
+				handled = unmasked_graphlet->on_pointer_wheeled(local_x, local_y, delta, horizontal, controlled);
+			}
+		}
+	}
+
+	return handled;
+}
+
 bool Planet::on_pointer_moveout(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
 	return this->say_goodbye_to_hover_graphlet(x, y, pdt, puk);
 }

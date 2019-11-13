@@ -177,6 +177,10 @@ bool Planetlet::on_pointer_moveout(float x, float y, PointerDeviceType type, Poi
 	return this->planet->on_pointer_moveout(x, y, type, puk);
 }
 
+bool Planetlet::on_pointer_wheeled(float x, float y, float delta, bool horizontal, bool controlled) {
+	return this->planet->on_pointer_wheeled(x, y, delta, horizontal, controlled);
+}
+
 bool Planetlet::on_key(VirtualKey key, bool screen_keyboard) {
 	return this->planet->on_key(key, screen_keyboard);
 }

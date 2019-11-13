@@ -92,7 +92,7 @@ public:
 	std::deque<float2> points;
 };
 
-static GraphletGesture gesture_recognize(UniverseFigure* first, UniverseFigure* second, float* delta) {
+static GraphletGesture gesture_recognize(UniverseFigure* first, UniverseFigure* second, float* param1, float* param2, float* param3) {
 	GraphletGesture gesture = GraphletGesture::_;
 	size_t maxidx1 = first->points.size() - 1;
 	size_t maxidx2 = second->points.size() - 1;
@@ -112,25 +112,16 @@ static GraphletGesture gesture_recognize(UniverseFigure* first, UniverseFigure* 
 		float vy2 = pt21.y - pt20.y;
 
 		if (dot_product(vx1, vy1, vx2, vy2) > 0.0F) { // same direction, for translation
-			float delta1 = flabs(vy1) - flabs(vx1);
-			float delta2 = flabs(vy2) - flabs(vx2);
-
-			if ((delta1 > 0.0F) && (delta2 > 0.0F)) {
-				gesture = GraphletGesture::TranslateY;
-				SET_BOX(delta, flmax(pt11.y - pt1l.y, pt21.y - pt2l.y));
-			} else if ((delta1 < 0.0F) && (delta2 < 0.0F)) {
-				gesture = GraphletGesture::TranslateX;
-				SET_BOX(delta, flmax(pt11.x - pt1l.x, pt21.x - pt2l.x));
-			}
+			gesture = GraphletGesture::Translation;
+			SET_BOX(param1, flmin(pt11.x - pt1l.x, pt21.x - pt2l.x));
+			SET_BOX(param2, flmin(pt11.y - pt1l.y, pt21.y - pt2l.y));
 		} else { // different direction, for scale
 			float distance0 = points_distance_squared(pt10.x, pt10.y, pt20.x, pt20.y);
 			float distance1 = points_distance_squared(pt11.x, pt11.y, pt21.x, pt21.y);
-
-			if (distance0 < distance1) {
-				gesture = GraphletGesture::ZoomIn;
-			} else if (distance0 > distance1) {
-				gesture = GraphletGesture::ZoomOut;
-			}
+			
+			gesture = GraphletGesture::Zoom;
+			line_point(pt10, pt20, 0.5, param1, param2);
+			SET_BOX(param3, (distance1 - distance0) * 0.5F);
 		}
 	}
 
@@ -235,7 +226,9 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 	}
 
 	{ // initialize gesture
-	    /** TODO
+		auto master = CoreWindow::GetForCurrentThread();
+	    
+		/** TODO
 		 * All these events should be unloaded,
 		 *  however this control has the same lifetime with the application,
 		 *  currently there is no such code for unloading.
@@ -248,9 +241,9 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 		this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 		this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
 		this->display->PointerExited += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moveout);
+		this->display->PointerWheelChanged += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_wheel);
 
-		CoreWindow::GetForCurrentThread()->CharacterReceived +=
-			ref new TypedEventHandler<CoreWindow^, CharacterReceivedEventArgs^>(this, &UniverseDisplay::on_keycode);
+		master->CharacterReceived += ref new TypedEventHandler<CoreWindow^, CharacterReceivedEventArgs^>(this, &UniverseDisplay::on_keycode);
 	}
 
 	{ // initialize masks
@@ -797,12 +790,19 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 						}
 
 						{ // do affine transforming
-							float delta = 0.0F;
-							GraphletGesture gesture = gesture_recognize(first, second, &delta);
+							float param1 = 0.0F;
+							float param2 = 0.0F;
+							float param3 = 0.0F;
+							GraphletGesture gesture = gesture_recognize(first, second, &param1, &param2, &param3);
 
 							if (gesture != GraphletGesture::_) {
 								this->enter_critical_section();
-								this->recent_planet->on_gesture(gesture, delta, this->gesture_lt, this->gesture_rb);
+
+								switch (gesture) {
+								case GraphletGesture::Translation: this->recent_planet->on_translation_gesture(param1, param2, this->gesture_lt, this->gesture_rb); break;
+								case GraphletGesture::Zoom: this->recent_planet->on_zoom_gesture(param1, param2, param3, this->gesture_lt, this->gesture_rb); break;
+								}
+
 								this->leave_critical_section();
 								handled = true;
 							}
@@ -890,6 +890,32 @@ void UniverseDisplay::on_pointer_moveout(Platform::Object^ sender, PointerRouted
 	}
 
 	this->leave_critical_section();
+}
+
+void UniverseDisplay::on_pointer_wheel(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+	if ((this->headup_planet != nullptr) || (this->recent_planet != nullptr)) {
+		VirtualKeyModifiers modifies = args->KeyModifiers;
+		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
+		PointerPointProperties^ ppt = pp->Properties;
+		float delta = float(ppt->MouseWheelDelta / WHEEL_DELTA);
+		bool horizontal = ppt->IsHorizontalMouseWheel;
+		bool controlled = CONTROLLED(args->KeyModifiers);
+		bool handled = false;
+
+		this->enter_critical_section();
+
+		if (this->headup_planet != nullptr) {
+			handled = this->headup_planet->on_pointer_wheeled(pp->Position.X, pp->Position.Y, delta, horizontal, controlled);
+		}
+
+		if ((!handled) && (this->recent_planet != nullptr)) {
+			handled = this->recent_planet->on_pointer_wheeled(pp->Position.X, pp->Position.Y, delta, horizontal, controlled);
+		}
+
+		this->leave_critical_section();
+
+		args->Handled = handled;
+	}
 }
 
 void UniverseDisplay::on_virtual_key(Platform::Object^ sender, KeyRoutedEventArgs^ args) {

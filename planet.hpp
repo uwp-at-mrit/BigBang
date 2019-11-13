@@ -97,7 +97,8 @@ namespace WarGrey::SCADA {
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_tap_selected(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float planet_x, float planet_y) {}
-		virtual void on_gesture(WarGrey::SCADA::GraphletGesture gesture, float delta, Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) {}
+		virtual void on_translation_gesture(float deltaX, float deltaY, Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) {}
+		virtual void on_zoom_gesture(float zx, float zy, float length, Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) {}
 		virtual void on_transfer(WarGrey::SCADA::IPlanet* from, WarGrey::SCADA::IPlanet* to) {}
 
 	public:
@@ -141,6 +142,10 @@ namespace WarGrey::SCADA {
 		virtual bool on_pointer_moveout(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk)
+		{ return false; }
+
+		virtual bool on_pointer_wheeled(float x, float y, float delta,
+			bool horizontal, bool controlled)
 		{ return false; }
 
 	public:
@@ -313,6 +318,10 @@ namespace WarGrey::SCADA {
 		bool on_pointer_moveout(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk)
+			override;
+
+		bool on_pointer_wheeled(float x, float y, float delta,
+			bool horizontal, bool controlled)
 			override;
 
     private:

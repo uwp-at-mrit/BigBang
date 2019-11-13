@@ -327,10 +327,30 @@ void DigMaplet::translate(float deltaX, float deltaY) {
 	this->notify_updated();
 }
 
+void DigMaplet::zoom(float sx, float sy, float length) {
+	if (length < 0.0) {
+		this->transform(MapMove::ZoomOut, sx, sy);
+	} else if (length > 0.0) {
+		this->transform(MapMove::ZoomIn, sx, sy);
+	}
+
+	this->notify_updated();
+}
+
 void DigMaplet::transform(MapMove move) {
+	this->transform(move, flnan_f, flnan_f);
+}
+
+void DigMaplet::transform(MapMove move, float sx, float sy) {
 	double posttimes = this->stimes;
-	float sx = this->width * 0.5F;
-	float sy = this->height * 0.5F;
+
+	if (flisnan(sx)) {
+		sx = this->width * 0.5F;
+	}
+
+	if (flisnan(sy)) {
+		sy = this->height * 0.5F;
+	}
 
 	switch (move) {
 	case MapMove::Left: this->translate(-this->tstep, 0.0F); break;
