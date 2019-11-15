@@ -66,7 +66,7 @@ static CanvasStrokeStyle^ vector_stroke_ref(long long idx) {
 
 /*************************************************************************************************/
 DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_times, float plain_fontsize)
-	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0), tstep(32.0F) {
+	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0), tdelta(32.0F), zdelta(1.0618F) {
 	this->enable_resizing(false);
 	this->enable_events(false, false);
 	
@@ -320,6 +320,18 @@ Size DigMaplet::length_to_local(double width, double height) {
 	return Size(local_w, local_h);
 }
 
+Size DigMaplet::local_to_length(double width, double height) {
+	double ss = this->actual_scale();
+	float space_w = float(((height <= 0.0) ? width : height) / ss);
+	float space_h = float(width / ss);
+
+	// NOTE that modifyDIG uses YX-axis coordinate system
+	//   the width and height therefore should be interchanged before drawing
+	// Stupid design, and/or stupid referenced codebase for its lack of explanation
+
+	return Size(space_w, space_h);
+}
+
 void DigMaplet::translate(float deltaX, float deltaY) {
 	this->xtranslation += deltaX;
 	this->ytranslation += deltaY;
@@ -327,14 +339,11 @@ void DigMaplet::translate(float deltaX, float deltaY) {
 	this->notify_updated();
 }
 
-void DigMaplet::zoom(float sx, float sy, float length) {
-	if (length < 0.0) {
-		this->transform(MapMove::ZoomOut, sx, sy);
-	} else if (length > 0.0) {
-		this->transform(MapMove::ZoomIn, sx, sy);
+void DigMaplet::zoom(float sx, float sy, float deltaScale) {
+	if (deltaScale > 0.0) {
+		this->scale_transform(this->stimes * deltaScale, sx, sy);
+		this->notify_updated();
 	}
-
-	this->notify_updated();
 }
 
 void DigMaplet::transform(MapMove move) {
@@ -342,8 +351,6 @@ void DigMaplet::transform(MapMove move) {
 }
 
 void DigMaplet::transform(MapMove move, float sx, float sy) {
-	double posttimes = this->stimes;
-
 	if (flisnan(sx)) {
 		sx = this->width * 0.5F;
 	}
@@ -353,31 +360,14 @@ void DigMaplet::transform(MapMove move, float sx, float sy) {
 	}
 
 	switch (move) {
-	case MapMove::Left: this->translate(-this->tstep, 0.0F); break;
-	case MapMove::Right: this->translate(this->tstep, 0.0F); break;
-	case MapMove::Up: this->translate(0.0F, -this->tstep); break;
-	case MapMove::Down: this->translate(0.0F, this->tstep); break;
-	case MapMove::ZoomIn: {
-		if (this->stimes >= 1.0) {
-			posttimes = this->stimes + 1.0;
-		} else {
-			posttimes = this->stimes * 2.0;
-		}
-
-		this->scale_transform(posttimes, sx, sy);
-	}; break;
-	case MapMove::ZoomOut: {
-		if (this->stimes > 1.0) {
-			posttimes = this->stimes - 1.0;
-		} else {
-			posttimes = this->stimes * 0.5;
-		}
-
-		this->scale_transform(posttimes, sx, sy);
-	}; break;
+	case MapMove::Left: this->translate(-this->tdelta, 0.0F); break;
+	case MapMove::Right: this->translate(this->tdelta, 0.0F); break;
+	case MapMove::Up: this->translate(0.0F, -this->tdelta); break;
+	case MapMove::Down: this->translate(0.0F, this->tdelta); break;
+	case MapMove::ZoomIn: this->scale_transform(this->stimes * this->zdelta, sx, sy); break;
+	case MapMove::ZoomOut: this->scale_transform(this->stimes / this->zdelta, sx, sy); break;
 	case MapMove::Reset: {
-		posttimes = 1.0;
-		this->scale_transform(posttimes, sx, sy);
+		this->scale_transform(1.0F, sx, sy);
 		this->center();
 	}; break;
 	}
@@ -385,11 +375,11 @@ void DigMaplet::transform(MapMove move, float sx, float sy) {
 	this->notify_updated();
 }
 
-void DigMaplet::scale_transform(double stimes, float anchor_x, float anchor_y) {
-	if (this->stimes != stimes) {
+void DigMaplet::scale_transform(double zoom, float anchor_x, float anchor_y) {
+	if (this->stimes != zoom) {
 		float2 anchor = this->local_to_position(anchor_x, anchor_y, 0.0F, 0.0F);
 
-		this->stimes = stimes;
+		this->stimes = zoom;
 		anchor = this->position_to_local(anchor.x, anchor.y, 0.0F, 0.0F);
 
 		this->xtranslation -= (anchor.x - anchor_x);

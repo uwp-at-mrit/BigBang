@@ -16,6 +16,8 @@
 #include "graphlet/symbol/dig/dig.hpp"
 
 namespace WarGrey::SCADA {
+	private enum class SailingMode { Free, VesselVisible, VesselCenter };
+
 	private class Projectlet : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::SCADA::ProjectDocument, WarGrey::SCADA::Planetlet, WarGrey::SCADA::ProjectDoctype> {
 	public:
 		Projectlet(WarGrey::SCADA::IVessellet* vessel, WarGrey::SCADA::ColorPlotlet* plot,
@@ -24,13 +26,13 @@ namespace WarGrey::SCADA {
 			Platform::String^ rootdir = "projects");
 
 	public:
-		bool move_vessel(double x, double y);
+		bool move_vessel(double x, double y, WarGrey::SCADA::SailingMode mode = SailingMode::VesselVisible);
 		const WarGrey::SCADA::TransversePlane* section(double x, double y);
 
 	public:
 		void center_vessel();
 		void translate(float deltaX, float deltaY);
-		void zoom(float zx, float zy, float length);
+		void zoom(float zx, float zy, float deltaScale);
 
 	public:
 		void construct() override;
@@ -42,8 +44,8 @@ namespace WarGrey::SCADA {
 	public:
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
 		bool on_character(unsigned int keycode) override;
-		bool on_translation(float x, float y, float delta, bool horizontal) override;
-		bool on_zoom(float x, float y, float delta) override;
+		bool on_wheel_translation(float x, float y, float delta, bool horizontal) override;
+		bool on_wheel_zoom(float x, float y, float delta) override;
 
 	protected:
 		WarGrey::SCADA::ProjectDoctype filter_file(Platform::String^ file, Platform::String^ _ext) override;

@@ -97,9 +97,14 @@ namespace WarGrey::SCADA {
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_tap_selected(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float planet_x, float planet_y) {}
-		virtual void on_translation_gesture(float deltaX, float deltaY, Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) {}
-		virtual void on_zoom_gesture(float zx, float zy, float length, Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) {}
 		virtual void on_transfer(WarGrey::SCADA::IPlanet* from, WarGrey::SCADA::IPlanet* to) {}
+
+	public:
+		virtual bool in_affine_gesture_zone(Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) { return false; }
+		virtual void begin_affine_gesture() {}
+		virtual void on_translation_gesture(float deltaX, float deltaY, Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) {}
+		virtual void on_zoom_gesture(float zx, float zy, float deltaScale, Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) {}
+		virtual void end_affine_gesture() {}
 
 	public:
 		virtual void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float X, float Y, float width, float height) = 0;
@@ -115,7 +120,6 @@ namespace WarGrey::SCADA {
 		virtual bool can_interactive_move(IGraphlet* g, float local_x, float local_y) { return false; }
 		virtual bool can_select(IGraphlet* g) { return true; }
 		virtual bool can_select_multiple() { return false; }
-		virtual bool can_affine_transform(Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb) { return false; }
 		virtual void before_select(IGraphlet* g, bool on_or_off) {}
 		virtual void after_select(IGraphlet* g, bool on_or_off) {}
 		

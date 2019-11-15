@@ -19,6 +19,7 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float2 local_to_position(float x, float y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Numerics::float2 position_to_local(double x, double y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Size length_to_local(double width, double height = 0.0);
+		Windows::Foundation::Size local_to_length(double width, double height = 0.0);
 
 	public:
 		void fill_anchor_position(double fx, double fy, double* x = nullptr, double* y = nullptr);
@@ -36,7 +37,7 @@ namespace WarGrey::SCADA {
 		
 	private:
 		void preshape(WarGrey::SCADA::IDigDatum* dig);
-		void scale_transform(double stimes, float anchor_x, float anchor_y);
+		void scale_transform(double zoom, float anchor_x, float anchor_y);
 		
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ plainfont;
@@ -56,7 +57,8 @@ namespace WarGrey::SCADA {
 	private:
 		float xtranslation;
 		float ytranslation;
-		float tstep;
+		float tdelta;
+		float zdelta;
 		double stimes;
 		double fstimes;
 		double _scale;

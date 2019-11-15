@@ -101,31 +101,28 @@ static GraphletGesture gesture_recognize(UniverseFigure* first, UniverseFigure* 
 
 	if ((maxidx1 >= 2) && (maxidx2 >= 2)) {
 		float2 pt10 = first->points[0];
-		float2 pt11 = first->points[maxidx1];
+		float2 pt1m = first->points[maxidx1];
 		float2 pt1l = first->points[lstidx1];
 		float2 pt20 = second->points[0];
-		float2 pt21 = second->points[maxidx2];
+		float2 pt2m = second->points[maxidx2];
 		float2 pt2l = second->points[lstidx2];
-		float vx1 = pt11.x - pt10.x;
-		float vy1 = pt11.y - pt10.y;
-		float vx2 = pt21.x - pt20.x;
-		float vy2 = pt21.y - pt20.y;
+		float discern = dot_product(pt1m.x - pt10.x, pt1m.y - pt10.y, pt2m.x - pt20.x, pt2m.y - pt20.y);
 
-		if (dot_product(vx1, vy1, vx2, vy2) > 0.0F) { // same direction, for translation
+		if (discern > 0.0F) { // same direction, for translation
 			float magic_fraction = 0.618F; // keep the translating graphlet more closer to figures
 
 			gesture = GraphletGesture::Translation;
-			SET_BOX(param1, flmin(pt11.x - pt1l.x, pt21.x - pt2l.x) * magic_fraction);
-			SET_BOX(param2, flmin(pt11.y - pt1l.y, pt21.y - pt2l.y) * magic_fraction);
-		} else { // different direction, for scale
-			float distance0 = points_distance(pt10.x, pt10.y, pt20.x, pt20.y);
-			float distance1 = points_distance(pt11.x, pt11.y, pt21.x, pt21.y);
-			float length = (distance1 - distance0) * 0.5F;
+			SET_BOX(param1, flmin(pt1m.x - pt1l.x, pt2m.x - pt2l.x) * magic_fraction);
+			SET_BOX(param2, flmin(pt1m.y - pt1l.y, pt2m.y - pt2l.y) * magic_fraction);
+		} else if (discern < 0.0F) { // different direction, for zoom
+			float distancel = points_distance_squared(pt1l.x, pt1l.y, pt2l.x, pt2l.y);
+			float distancem = points_distance_squared(pt1m.x, pt1m.y, pt2m.x, pt2m.y);
+			float scale = flsqrt(distancem / distancel);
 
-			if (flabs(length) > 8.0F) {
+			if (scale != 1.0) {
 				gesture = GraphletGesture::Zoom;
 				line_point(pt10, pt20, 0.5, param1, param2);
-				SET_BOX(param3, length);
+				SET_BOX(param3, scale);
 			}
 		}
 	}
@@ -745,6 +742,12 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 				region_fuse_reset(&this->gesture_lt, &this->gesture_rb);
 				region_fuse_point(&this->gesture_lt, &this->gesture_rb, px, py);
 
+				if (sequence_id == 2) {
+					if (this->recent_planet != nullptr) {
+						this->recent_planet->begin_affine_gesture();
+					}
+				}
+
 				args->Handled = true;
 			}
 		}
@@ -783,33 +786,36 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 				region_fuse_point(&this->gesture_lt, &this->gesture_rb, px, py);
 
 				if (size == 2) {
-					if ((this->recent_planet != nullptr) && this->recent_planet->can_affine_transform(this->gesture_lt, this->gesture_rb)) {
-						UniverseFigure* first = nullptr;
-						UniverseFigure* second = nullptr;
+					if (this->recent_planet != nullptr) {
+						if (this->recent_planet->in_affine_gesture_zone(this->gesture_lt, this->gesture_rb)) {
+							UniverseFigure* figure1 = nullptr;
+							UniverseFigure* figure2 = nullptr;
 
-						for (auto it = this->figures.begin(); it != this->figures.end(); it++) {
-							switch (it->second.seq) {
-							case 1: first = &it->second; break;
-							case 2: second = &it->second; break;
+							for (auto it = this->figures.begin(); it != this->figures.end(); it++) {
+								switch (it->second.seq) {
+								case 1: figure1 = &it->second; break;
+								case 2: figure2 = &it->second; break;
+								}
 							}
-						}
 
-						{ // do affine transforming
-							float param1 = 0.0F;
-							float param2 = 0.0F;
-							float param3 = 0.0F;
-							GraphletGesture gesture = gesture_recognize(first, second, &param1, &param2, &param3);
+							{ // dispatch gesture event
+								float param1 = 0.0F;
+								float param2 = 0.0F;
+								float param3 = 0.0F;
+								GraphletGesture gesture = gesture_recognize(figure1, figure2, &param1, &param2, &param3);
 
-							if (gesture != GraphletGesture::_) {
 								this->enter_critical_section();
 
-								switch (gesture) {
-								case GraphletGesture::Translation: this->recent_planet->on_translation_gesture(param1, param2, this->gesture_lt, this->gesture_rb); break;
-								case GraphletGesture::Zoom: this->recent_planet->on_zoom_gesture(param1, param2, param3, this->gesture_lt, this->gesture_rb); break;
+								if (gesture != GraphletGesture::_) {
+									switch (gesture) {
+									case GraphletGesture::Translation: this->recent_planet->on_translation_gesture(param1, param2, this->gesture_lt, this->gesture_rb); break;
+									case GraphletGesture::Zoom: this->recent_planet->on_zoom_gesture(param1, param2, param3, this->gesture_lt, this->gesture_rb); break;
+									}
+
+									handled = true;
 								}
 
 								this->leave_critical_section();
-								handled = true;
 							}
 						}
 					}
@@ -851,6 +857,17 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 				this->leave_critical_section();
 
 				args->Handled = handled;
+			}; break;
+			case 2: {
+				this->enter_critical_section();
+
+				if (this->recent_planet != nullptr) {
+					this->recent_planet->end_affine_gesture();
+				}
+
+				this->leave_critical_section();
+
+				args->Handled = true;
 			}; break;
 			case 3: {
 				this->on_translating_x(px - it->second.points[0].x);
@@ -907,17 +924,19 @@ void UniverseDisplay::on_pointer_wheel(Platform::Object^ sender, PointerRoutedEv
 		bool controlled = CONTROLLED(args->KeyModifiers);
 		bool handled = false;
 
-		this->enter_critical_section();
+		if (delta != 0.0F) {
+			this->enter_critical_section();
 
-		if (this->headup_planet != nullptr) {
-			handled = this->headup_planet->on_pointer_wheeled(pp->Position.X, pp->Position.Y, delta, horizontal, controlled);
+			if (this->headup_planet != nullptr) {
+				handled = this->headup_planet->on_pointer_wheeled(pp->Position.X, pp->Position.Y, delta, horizontal, controlled);
+			}
+
+			if ((!handled) && (this->recent_planet != nullptr)) {
+				handled = this->recent_planet->on_pointer_wheeled(pp->Position.X, pp->Position.Y, delta, horizontal, controlled);
+			}
+
+			this->leave_critical_section();
 		}
-
-		if ((!handled) && (this->recent_planet != nullptr)) {
-			handled = this->recent_planet->on_pointer_wheeled(pp->Position.X, pp->Position.Y, delta, horizontal, controlled);
-		}
-
-		this->leave_critical_section();
 
 		args->Handled = handled;
 	}

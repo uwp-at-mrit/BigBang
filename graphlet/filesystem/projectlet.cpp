@@ -59,7 +59,7 @@ Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
 	, vessel(vessel), plot(plot), map(nullptr) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
 	this->enable_stretch(false, false);
-	this->enable_events(true, false);
+	this->enable_events(true, true); // enable low level events for traceline.
 }
 
 void Projectlet::construct() {
@@ -268,10 +268,10 @@ void Projectlet::translate(float deltaX, float deltaY) {
 	}
 }
 
-void Projectlet::zoom(float zx, float zy, float length) {
+void Projectlet::zoom(float zx, float zy, float deltaScale) {
 	if (this->map != nullptr) {
 		this->planet->begin_update_sequence();
-		this->map->zoom(zx, zy, length);
+		this->map->zoom(zx, zy, deltaScale);
 		this->relocate_vessel();
 		this->relocate_icons();
 		this->planet->end_update_sequence();
@@ -340,28 +340,16 @@ bool Projectlet::on_character(unsigned int keycode) {
 	return handled;
 }
 
-bool Projectlet::on_translation(float x, float y, float delta, bool horizontal) {
+bool Projectlet::on_wheel_translation(float x, float y, float delta, bool horizontal) {
 	bool handled = (this->map != nullptr);
 
 	if (handled) {
 		this->planet->begin_update_sequence();
 
 		if (horizontal) {
-			if (delta > 0.0F) {
-				this->map->transform(MapMove::Right);
-			} else if (delta < 0.0F) {
-				this->map->transform(MapMove::Left);
-			} else {
-				handled = false;
-			}
+			this->translate(delta, 0.0F);
 		} else {
-			if (delta > 0.0F) {
-				this->map->transform(MapMove::Up);
-			} else if (delta < 0.0F) {
-				this->map->transform(MapMove::Down);
-			} else {
-				handled = false;
-			}
+			this->translate(0.0F, -delta);
 		}
 
 		if (handled) {
@@ -375,19 +363,13 @@ bool Projectlet::on_translation(float x, float y, float delta, bool horizontal) 
 	return handled;
 }
 
-bool Projectlet::on_zoom(float x, float y, float delta) {
+bool Projectlet::on_wheel_zoom(float x, float y, float delta) {
 	bool handled = (this->map != nullptr);
 	
 	if (handled) {
 		this->planet->begin_update_sequence();
 
-		if (delta > 0.0F) {
-			this->map->transform(MapMove::ZoomOut, x, y);
-		} else if (delta < 0.0F) {
-			this->map->transform(MapMove::ZoomIn, x, y);
-		} else {
-			handled = false;
-		}
+		this->zoom(x, y, delta);
 
 		if (handled) {
 			this->relocate_vessel();
@@ -426,7 +408,7 @@ void Projectlet::relocate_icons() {
 	}
 }
 
-bool Projectlet::move_vessel(double x, double y) {
+bool Projectlet::move_vessel(double x, double y, SailingMode mode) {
 	bool moved = false;
 
 	if ((this->vessel_x != x) || (this->vessel_y != y)) {
@@ -444,7 +426,9 @@ bool Projectlet::move_vessel(double x, double y) {
 					this->jobs_dat->on_vessel_move(this->vessel_x, this->vessel_y);
 				}
 
-				{ // center vessel if close to edge
+				switch (mode) {
+				case SailingMode::VesselCenter: this->center_vessel(); break;
+				case SailingMode::VesselVisible: {
 					float vwidth, vheight;
 
 					this->vessel->fill_extent(vpos.x, vpos.y, &vwidth, &vheight);
@@ -452,6 +436,7 @@ bool Projectlet::move_vessel(double x, double y) {
 					if (!rectangle_contain(vwidth, vheight, this->view_size.Width - vwidth, this->view_size.Height - vheight, vpos)) {
 						this->center_vessel();
 					}
+				}; break;
 				}
 			}
 

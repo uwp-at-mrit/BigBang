@@ -1182,9 +1182,20 @@ bool Planet::on_pointer_wheeled(float x, float y, float delta, bool horizontal, 
 			float local_y = y - info->y;
 
 			if (controlled) {
-				handled = unmasked_graphlet->on_zoom(local_x, local_y, delta);
+				float zoom_magic_base = 1.0618F;
+
+				if (delta > 0.0F) {
+					delta = flexpt(zoom_magic_base, delta);
+				} else {
+					delta = flexpt(1.0F / zoom_magic_base, -delta);
+				}
+
+				handled = unmasked_graphlet->on_wheel_zoom(local_x, local_y, delta);
 			} else {
-				handled = unmasked_graphlet->on_translation(local_x, local_y, delta, horizontal);
+				float translation_magic_base = 16.0F;
+
+				delta *= translation_magic_base;
+				handled = unmasked_graphlet->on_wheel_translation(local_x, local_y, delta, horizontal);
 			}
 
 			if ((!handled) && unmasked_graphlet->handles_low_level_events()) {
