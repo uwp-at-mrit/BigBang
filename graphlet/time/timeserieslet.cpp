@@ -743,40 +743,82 @@ void ITimeSerieslet::on_tap(float x, float y) {
 	this->selected_x = x;
 }
 
-bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
+void ITimeSerieslet::translate(float delta) {
+	float ratio = float(this->history.span) / this->width;
+
+	this->translate((long long)(flround(delta * ratio)));
+}
+
+void ITimeSerieslet::translate(long long delta) {
 	long long limit = ((this->history_destination <= 0) ? current_seconds() : this->history_destination);
 	long long interval = (this->history.span >> 3);
 	long long start_left_limit = limit - this->history_span;
 	long long start_right_limit = limit - interval;
-	bool handled = true;
+
+	if (delta != 0.0f) {
+		this->history.start += delta;
+
+		if (delta < 0.0) {
+			this->history.start = fxmax(this->history.start, start_left_limit);
+		} else {
+			this->history.start = fxmin(this->history.start, start_right_limit);
+		}
+
+		this->no_selected();
+		this->update_vertical_axes(this->get_style());
+	}
+}
+
+void ITimeSerieslet::zoom(float delta) {
+	if (delta != 1.0f) {
+		this->history.span = (long long)(flround(float(this->history.span) * delta));
+
+		if (delta < 1.0) {
+			this->history.span = fxmax(this->history.span, minute_span_s);
+		} else {
+			this->history.span = fxmin(this->history.span, day_span_s);
+		}
+
+		this->no_selected();
+		this->update_vertical_axes(this->get_style());
+	}
+}
+
+bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
+	long long limit = ((this->history_destination <= 0) ? current_seconds() : this->history_destination);
+	long long interval = (this->history.span >> 3);
+	bool handled = false;
+	bool clear = true;
 
 	switch (key) {
-	case VirtualKey::Left: {
-		this->history.start -= interval;
-		this->history.start = fxmax(this->history.start, start_left_limit);
-	}; break;
-	case VirtualKey::Right: {
-		this->history.start += interval;
-		this->history.start = fxmin(this->history.start, start_right_limit);
-	}; break;
-	case VirtualKey::Add: {
-		this->history.span = this->history.span >> 1;
-		this->history.span = fxmax(this->history.span, minute_span_s);
-	}; break;
-	case VirtualKey::Subtract: {
-		this->history.span = this->history.span << 1;
-		this->history.span = fxmin(this->history.span, day_span_s);
-	}; break;
-	case VirtualKey::Home: this->history.start = start_left_limit; break;
-	case VirtualKey::End: this->history.start = start_right_limit; break;
-	case VirtualKey::Escape: this->history = this->realtime; break;
+	case VirtualKey::Add: this->zoom(0.5F); break;
+	case VirtualKey::Subtract: this->zoom(2.0F); break;
+	case VirtualKey::Left: this->translate(-interval); break;
+	case VirtualKey::Right: this->translate(interval); break;
+	case VirtualKey::Home: this->translate(-this->history.span); break;
+	case VirtualKey::End: this->translate(this->history.span); break;
+	case VirtualKey::Escape: this->history = this->realtime; clear = false; break;
 	default: handled = false; break;
 	}
 
-	if (handled) {
+	if (!clear) {
 		this->no_selected();
 		this->update_vertical_axes(this->get_style());
 	}
 
 	return handled;
+}
+
+bool ITimeSerieslet::on_wheel_translation(float x, float y, float delta, bool horizontal) {
+	this->translate(-delta);
+
+	return true;
+}
+
+bool ITimeSerieslet::on_wheel_zoom(float x, float y, float delta) {
+	if (delta > 0.0F) {
+		this->zoom(delta);
+	}
+
+	return false;
 }

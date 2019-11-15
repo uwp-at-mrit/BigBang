@@ -62,8 +62,10 @@ namespace WarGrey::SCADA {
 
 	public:
 		void enable_events(bool yes_no, bool low_level = false) { this->deal_with_events = yes_no; this->deal_with_low_level_events = low_level; }
-		bool handles_events() { return this->deal_with_events; }
-		bool handles_low_level_events() { return (this->handles_events() && this->deal_with_low_level_events); }
+		void disable_wheel_translation(bool yes_no) { this->wheel_translation = (!yes_no); }
+		bool handle_events() { return this->deal_with_events; }
+		bool handle_low_level_events() { return (this->handle_events() && this->deal_with_low_level_events); }
+		bool handle_wheel_translation() { return this->wheel_translation; }
 
 	public:
 		void camouflage(bool yes_no) { this->findable = !yes_no; }
@@ -78,6 +80,7 @@ namespace WarGrey::SCADA {
 		bool can_resize = false;
 		bool deal_with_events = false;
 		bool deal_with_low_level_events = false;
+		bool wheel_translation = true;
 		bool findable = true;
 	};
 }

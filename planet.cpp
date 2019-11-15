@@ -832,7 +832,7 @@ IGraphlet* Planet::get_focus_graphlet() {
 
 void Planet::set_caret_owner(IGraphlet* g) {
 	if (this->focused_graphlet != g) {
-		if ((g != nullptr) && (g->handles_events())) {
+		if ((g != nullptr) && (g->handle_events())) {
 			GraphletInfo* info = planet_graphlet_info(this, g);
 
 			if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
@@ -903,7 +903,7 @@ void Planet::on_tap(IGraphlet* g, float local_x, float local_y) {
 			if (this->can_select(g)) {
 				unsafe_set_selected(this, g, info);
 
-				if (g->handles_events()) {
+				if (g->handle_events()) {
 					this->set_caret_owner(g);
 				}
 			} else {
@@ -960,10 +960,10 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 
 					this->hovering_graphlet = unmasked_graphlet;
 
-					if (this->hovering_graphlet->handles_events()) {
+					if (this->hovering_graphlet->handle_events()) {
 						this->hovering_graphlet->on_hover(local_x, local_y);
 
-						if (this->hovering_graphlet->handles_low_level_events()) {
+						if (this->hovering_graphlet->handle_low_level_events()) {
 							this->hovering_graphlet->on_pointer_pressed(local_x, local_y, pdt, puk);
 						}
 					}
@@ -973,7 +973,7 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 					handled = true;
 				}
 			} else {
-				if ((unmasked_graphlet != nullptr) && (unmasked_graphlet->handles_low_level_events())) {
+				if ((unmasked_graphlet != nullptr) && (unmasked_graphlet->handle_low_level_events())) {
 					GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
 					float local_x = x - info->x;
 					float local_y = y - info->y;
@@ -1053,10 +1053,10 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 
 				this->hovering_graphlet = unmasked_graphlet;
 
-				if (unmasked_graphlet->handles_events()) {
+				if (unmasked_graphlet->handle_events()) {
 					unmasked_graphlet->on_hover(local_x, local_y);
 
-					if (unmasked_graphlet->handles_low_level_events()) {
+					if (unmasked_graphlet->handle_low_level_events()) {
 						unmasked_graphlet->on_pointer_moved(local_x, local_y, pdt, puk);
 					}
 				}
@@ -1120,14 +1120,14 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 				switch (puk) {
 				case PointerUpdateKind::LeftButtonReleased:
 				case PointerUpdateKind::LeftButtonPressed: {
-					if (unmasked_graphlet->handles_events()) {
+					if (unmasked_graphlet->handle_events()) {
 						unmasked_graphlet->on_tap(local_x, local_y);
 
 						if (pdt == PointerDeviceType::Touch) {
 							unmasked_graphlet->on_goodbye(local_x, local_y);
 						}
 
-						if (unmasked_graphlet->handles_low_level_events()) {
+						if (unmasked_graphlet->handle_low_level_events()) {
 							unmasked_graphlet->on_pointer_released(local_x, local_y, pdt, puk);
 						}
 					}
@@ -1170,18 +1170,19 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 	return handled;
 }
 
-bool Planet::on_pointer_wheeled(float x, float y, float delta, bool horizontal, bool controlled) {
+bool Planet::on_pointer_wheeled(float x, float y, float delta0, bool horizontal, bool controlled) {
 	bool handled = false;
 
 	if (!this->keyboard->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
-		if ((unmasked_graphlet != nullptr) && (unmasked_graphlet->handles_events())) {
+		if ((unmasked_graphlet != nullptr) && (this->focused_graphlet == unmasked_graphlet) && (unmasked_graphlet->handle_events())) {
 			GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
 			float local_x = x - info->x;
 			float local_y = y - info->y;
+			float delta = delta0;
 
-			if (controlled) {
+			if (controlled || (!unmasked_graphlet->handle_wheel_translation())) {
 				float zoom_magic_base = 1.0618F;
 
 				if (delta > 0.0F) {
@@ -1195,11 +1196,16 @@ bool Planet::on_pointer_wheeled(float x, float y, float delta, bool horizontal, 
 				float translation_magic_base = 16.0F;
 
 				delta *= translation_magic_base;
+
+				if (!horizontal) {
+					delta *= -1.0F;
+				}
+
 				handled = unmasked_graphlet->on_wheel_translation(local_x, local_y, delta, horizontal);
 			}
 
-			if ((!handled) && unmasked_graphlet->handles_low_level_events()) {
-				handled = unmasked_graphlet->on_pointer_wheeled(local_x, local_y, delta, horizontal, controlled);
+			if ((!handled) && unmasked_graphlet->handle_low_level_events()) {
+				handled = unmasked_graphlet->on_pointer_wheeled(local_x, local_y, delta0, horizontal, controlled);
 			}
 		}
 	}
@@ -1219,10 +1225,10 @@ bool Planet::say_goodbye_to_hover_graphlet(float x, float y, PointerDeviceType p
 		float local_x = x - info->x;
 		float local_y = y - info->y;
 
-		if (this->hovering_graphlet->handles_events()) {
+		if (this->hovering_graphlet->handle_events()) {
 			this->hovering_graphlet->on_goodbye(local_x, local_y);
 
-			if (this->hovering_graphlet->handles_low_level_events()) {
+			if (this->hovering_graphlet->handle_low_level_events()) {
 				this->hovering_graphlet->on_pointer_moveout(local_x, local_y, pdt, puk);
 			}
 		}

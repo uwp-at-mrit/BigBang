@@ -97,8 +97,15 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
+		void translate(float delta);
+		void translate(long long delta);
+		void zoom(float delta);
+
+	public:
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
 		void on_tap(float local_x, float local_y) override;
+		bool on_wheel_translation(float x, float y, float delta, bool horizontal) override;
+		bool on_wheel_zoom(float x, float y, float delta) override;
 		void own_caret(bool yes) override;
 
 	public:

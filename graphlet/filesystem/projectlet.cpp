@@ -60,6 +60,7 @@ Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
 	this->enable_stretch(false, false);
 	this->enable_events(true, true); // enable low level events for traceline.
+	this->disable_wheel_translation(true);
 }
 
 void Projectlet::construct() {
@@ -349,7 +350,7 @@ bool Projectlet::on_wheel_translation(float x, float y, float delta, bool horizo
 		if (horizontal) {
 			this->translate(delta, 0.0F);
 		} else {
-			this->translate(0.0F, -delta);
+			this->translate(0.0F, delta);
 		}
 
 		if (handled) {
