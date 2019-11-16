@@ -28,7 +28,6 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void own_caret(bool is_own) {}
-		virtual void fill_location(float* x, float* y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT);
 		virtual bool is_colliding_with_mouse(float local_x, float local_y) { return true; }
 
 	public:
@@ -41,6 +40,8 @@ namespace WarGrey::SCADA {
 		float available_visible_height(float here_y = 0.0F);
 		float sketch_to_application_width(float sketch_width);
 		float sketch_to_application_height(float sketch_height);
+		void fill_location(float* x, float* y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT);
+		bool contain_region(Windows::Foundation::Numerics::float2& lt, Windows::Foundation::Numerics::float2& rb);
 
 	public:
 		void notify_ready();

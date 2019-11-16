@@ -136,3 +136,20 @@ void IGraphlet::fill_location(float* x, float* y, WarGrey::SCADA::GraphletAnchor
 		this->info->master->fill_graphlet_location(this, x, y, a);
 	}
 }
+
+bool IGraphlet::contain_region(float2& lt, float2& rb) {
+	bool contains = false;
+
+	if (this->info != nullptr) {
+		float x, y, width, height;
+
+		this->info->master->fill_graphlet_location(this, &x, &y);
+		
+		if ((lt.x >= x) && (lt.y >= y)) {
+			this->fill_extent(x, y, &width, &height);
+			contains = ((rb.x <= (x + width)) && (rb.y <= (y + height)));
+		}
+	}
+
+	return contains;
+}

@@ -99,7 +99,7 @@ namespace WarGrey::SCADA {
 	public:
 		void translate(float delta);
 		void translate(long long delta);
-		void zoom(float delta);
+		void zoom(float zx, float zy, float delta);
 
 	public:
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
