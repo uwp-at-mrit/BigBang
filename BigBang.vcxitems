@@ -45,6 +45,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\pipelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\planetlet.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\pipelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\planetlet.hpp" />

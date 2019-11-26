@@ -5,6 +5,7 @@
 #include "graphlet/planetlet.hpp"
 #include "graphlet/vessellet.hpp"
 
+#include "graphlet/filesystem/s63let.hpp"
 #include "graphlet/filesystem/msappdataloguelet.hxx"
 #include "graphlet/filesystem/configuration/colorplotlet.hpp"
 #include "graphlet/filesystem/project/reader/doctype.hxx"
@@ -21,6 +22,11 @@ namespace WarGrey::SCADA {
 	private class Projectlet : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::SCADA::ProjectDocument, WarGrey::SCADA::Planetlet, WarGrey::SCADA::ProjectDoctype> {
 	public:
 		Projectlet(WarGrey::SCADA::IVessellet* vessel, WarGrey::SCADA::ColorPlotlet* plot,
+			Platform::String^ project, float view_width, float view_height,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
+			Platform::String^ rootdir = "projects");
+
+		Projectlet(WarGrey::SCADA::IVessellet* vessel, WarGrey::SCADA::ColorPlotlet* plot, WarGrey::SCADA::S63let* enchart,
 			Platform::String^ project, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "projects");
@@ -75,6 +81,7 @@ namespace WarGrey::SCADA {
 	private: // graphlets are managed by the Planetlet
 		WarGrey::SCADA::DigMaplet* map;
 		WarGrey::SCADA::IVessellet* vessel;
+		WarGrey::SCADA::S63let* enchart;
 		WarGrey::SCADA::ColorPlotlet* plot;
 		WarGrey::SCADA::Xyzlet* depth_xyz;
 		WarGrey::SCADA::Tracelinelet* jobs_dat;

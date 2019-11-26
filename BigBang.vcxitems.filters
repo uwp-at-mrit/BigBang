@@ -325,6 +325,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\sectionlet.cpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.cpp">
+      <Filter>graphlet\filesystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -661,6 +664,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\sectionlet.hpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.hpp">
+      <Filter>graphlet\filesystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -743,6 +749,12 @@
     </Filter>
     <Filter Include="graphlet\filesystem\configuration\vessel">
       <UniqueIdentifier>{9ab9cc11-74d3-495c-ab82-48a25a6f1bf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\symbol\enc">
+      <UniqueIdentifier>{c1efc1c5-ad64-4e0f-8b10-234b0394e6df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\filesystem\enchart">
+      <UniqueIdentifier>{aaffc5aa-c947-4d64-a78f-1b6780804d45}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

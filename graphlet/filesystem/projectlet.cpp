@@ -48,15 +48,19 @@ namespace {
 		double x;
 		double y;
 	};
+
+	private enum MapMode { Dredger = 0b01, ENChart = 0b10 };
 }
 
 /*************************************************************************************************/
 Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
-	, Platform::String^ project, float view_width, float view_height
-	, ICanvasBrush^ background, Platform::String^ rootdir)
+	, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
+	: Projectlet(vessel, plot, nullptr, project, view_width, view_height, background, rootdir) {}
+	
+Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot, S63let* enchart
+	, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
 	: Planetlet(new ProjectFrame(project), GraphletAnchor::LT, background)
-	, view_size(Size(view_width, view_height))
-	, vessel(vessel), plot(plot), map(nullptr) {
+	, view_size(Size(view_width, view_height)), vessel(vessel), plot(plot), map(nullptr), enchart(enchart) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
 	this->enable_stretch(false, false);
 	this->enable_events(true, true); // enable low level events for traceline.
@@ -65,6 +69,14 @@ Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
 
 void Projectlet::construct() {
 	Planetlet::construct();
+
+	if (this->enchart != nullptr) {
+		ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
+
+		frame->change_mode(ENChart);
+		this->planet->insert(this->enchart);
+		frame->change_mode(Dredger);
+	}
 
 	this->font = make_bold_text_format(32.0F);
 	this->cd(this->ms_appdata_rootdir);
@@ -115,6 +127,7 @@ void Projectlet::on_section_logue(Platform::String^ ms_appdata, ProjectDocument^
 
 void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	DigDoc^ doc_dig = static_cast<DigDoc^>(doc);
+	ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
 
 	this->planet->begin_update_sequence();
 	
@@ -125,6 +138,7 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	 * The modifyDIG draw icons firstly.
 	 */
 	
+	frame->change_mode(Dredger);
 	this->map = this->planet->insert_one(new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height));
 	
 	{ // make icons
@@ -155,6 +169,8 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 		}
 	}
 
+	frame->change_mode(Dredger | ENChart);
+
 	if (this->vessel != nullptr) {
 		this->planet->insert(this->vessel, this->view_size.Width * 0.5F, this->view_size.Height * 0.5F, GraphletAnchor::CC);
 	}
@@ -174,6 +190,8 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 		this->front_sec->attach_to_map(this->map);
 	}
 
+	frame->change_mode(Dredger);
+
 	this->planet->end_update_sequence();
 
 	this->graph_dig = doc_dig;
@@ -186,11 +204,15 @@ void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	this->depth_xyz->set_color_schema(this->plot);
 	
 	if (this->map != nullptr) {
+		ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
+
+		frame->change_mode(Dredger | ENChart);
 		this->planet->begin_update_sequence();
 		this->planet->insert(this->depth_xyz, 0.0F, 0.0F);
 		this->depth_xyz->set_color_schema(this->plot);
 		this->depth_xyz->attach_to_map(this->map);
 		this->planet->end_update_sequence();
+		frame->change_mode(Dredger);
 	}
 }
 
@@ -200,10 +222,14 @@ void Projectlet::on_traceline(Platform::String^ ms_appdata, ProjectDocument^ doc
 	this->jobs_dat = new Tracelinelet(xh_dat);
 
 	if (this->map != nullptr) {
+		ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
+
+		frame->change_mode(Dredger | ENChart);
 		this->planet->begin_update_sequence();
 		this->planet->insert(this->jobs_dat, 0.0F, 0.0F);
 		this->jobs_dat->attach_to_map(this->map);
 		this->planet->end_update_sequence();
+		frame->change_mode(Dredger);
 	}
 }
 
@@ -213,10 +239,14 @@ void Projectlet::on_sec(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	this->front_sec = new FrontalSectionlet(doc_sec, true);
 
 	if (this->map != nullptr) {
+		ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
+
+		frame->change_mode(Dredger | ENChart);
 		this->planet->begin_update_sequence();
 		this->planet->insert(this->front_sec, 0.0F, 0.0F);
 		this->front_sec->attach_to_map(this->map);
 		this->planet->end_update_sequence();
+		frame->change_mode(Dredger);
 	}
 }
 
