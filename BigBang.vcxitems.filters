@@ -64,9 +64,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.cpp">
       <Filter>graphlet\device</Filter>
     </ClCompile>
@@ -154,9 +151,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.cpp">
       <Filter>virtualization\screen</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)test\visitor.cpp">
-      <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.cpp">
       <Filter>virtualization\keyboard</Filter>
@@ -394,9 +388,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.hpp">
       <Filter>graphlet\device</Filter>
     </ClInclude>
@@ -484,9 +475,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp">
       <Filter>virtualization\screen</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)test\visitor.hpp">
-      <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.hpp">
       <Filter>virtualization\keyboard</Filter>
@@ -689,9 +677,6 @@
     </Filter>
     <Filter Include="graphlet\device">
       <UniqueIdentifier>{71e1271c-6732-44d7-bf10-1ff4fea770d1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="test">
-      <UniqueIdentifier>{cf2335ef-226e-4246-b9c3-37b2e8b7a3d7}</UniqueIdentifier>
     </Filter>
     <Filter Include="stone">
       <UniqueIdentifier>{89470dd2-fef9-486a-8d48-f8d1345f8cad}</UniqueIdentifier>

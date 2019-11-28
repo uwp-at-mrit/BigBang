@@ -110,8 +110,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)navigator\null.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)navigator\thumbnail.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)test\visitor.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.cpp" />
@@ -231,8 +229,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)navigator\null.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)navigator\thumbnail.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)test\visitor.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timemachine.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
