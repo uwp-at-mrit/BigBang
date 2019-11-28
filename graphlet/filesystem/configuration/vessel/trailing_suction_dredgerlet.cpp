@@ -484,34 +484,34 @@ TrailingSuctionDredger^ TrailingSuctionDredger::load(Platform::String^ path) {
 				wtype = read_wtext(src, char_end_of_word);
 
 				if (TSD::GPS.ToString()->Equals(wtype)) {
-					unsigned long long n = read_natural(src);
+					size_t n = (size_t)read_natural(src);
 					size_t size = sizeof(dredger->gps) / ptsize;
 
-					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
+					for (size_t idx = 0; idx < fxmin(n, size); idx++) {
 						dredger->gps[idx].x = read_flonum(src);
 						dredger->gps[idx].y = read_flonum(src);
 					}
 				} else if (TSD::Body.ToString()->Equals(wtype)) {
-					unsigned long long n = read_natural(src);
+					size_t n = (size_t)read_natural(src);
 					size_t size = sizeof(dredger->body_vertices) / ptsize;
 
-					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
+					for (size_t idx = 0; idx < fxmin(n, size); idx++) {
 						dredger->body_vertices[idx].x = read_flonum(src);
 						dredger->body_vertices[idx].y = read_flonum(src);
 					}
 				} else if (TSD::Hopper.ToString()->Equals(wtype)) {
-					unsigned long long n = read_natural(src);
+					size_t n = (size_t)read_natural(src);
 					size_t size = sizeof(dredger->hopper_vertices) / ptsize;
 
-					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
+					for (size_t idx = 0; idx < fxmin(n, size); idx++) {
 						dredger->hopper_vertices[idx].x = read_flonum(src);
 						dredger->hopper_vertices[idx].y = read_flonum(src);
 					}
 				} else if (TSD::Bridge.ToString()->Equals(wtype)) {
-					unsigned long long n = read_natural(src);
+					size_t n = (size_t)read_natural(src);
 					size_t size = sizeof(dredger->bridge_vertices) / ptsize;
 
-					for (unsigned long long idx = 0; idx < fxmin(n, size); idx++) {
+					for (size_t idx = 0; idx < fxmin(n, size); idx++) {
 						dredger->bridge_vertices[idx].x = read_flonum(src);
 						dredger->bridge_vertices[idx].y = read_flonum(src);
 					}
