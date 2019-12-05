@@ -118,11 +118,17 @@ void TValvelet::prepare_style(TValveState status, TValveStyle& s) {
 	case TValveState::Unclosable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray);
 	}; break;
+	case TValveState::Broken: {
+		CAS_SLOT(s.body_color, Colours::Red);
+	}; break;
 	case TValveState::VirtualOpen: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::ForestGreen);
 	}; break;
 	case TValveState::VirtualClose: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::DimGray);
+	}; break;
+	case TValveState::VirtualBroken: {
+		CAS_SLOTS(s.frame_color, s.body_color, Colours::Red);
 	}; break;
 	}
 

@@ -89,11 +89,17 @@ void GateValvelet::prepare_style(GateValveState status, GateValveStyle& s) {
 	case GateValveState::Unclosable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray);
 	}; break;
+	case GateValveState::Broken: {
+		CAS_SLOT(s.body_color, Colours::Red);
+	}; break;
 	case GateValveState::VirtualOpen: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::ForestGreen);
 	}; break;
 	case GateValveState::VirtualClose: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::DimGray);
+	}; break;
+	case GateValveState::VirtualBroken: {
+		CAS_SLOTS(s.frame_color, s.body_color, Colours::Red);
 	}; break;
 	}
 
