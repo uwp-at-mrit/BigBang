@@ -322,6 +322,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.cpp">
       <Filter>graphlet\filesystem</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.cxx">
+      <Filter>graphlet\filesystem\enchart\reader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.cxx">
+      <Filter>graphlet\filesystem\enchart\reader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -655,6 +661,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.hpp">
       <Filter>graphlet\filesystem</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.hxx">
+      <Filter>graphlet\filesystem\enchart\reader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.hxx">
+      <Filter>graphlet\filesystem\enchart\reader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -740,6 +752,9 @@
     </Filter>
     <Filter Include="graphlet\filesystem\enchart">
       <UniqueIdentifier>{aaffc5aa-c947-4d64-a78f-1b6780804d45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\filesystem\enchart\reader">
+      <UniqueIdentifier>{69a34275-d6b5-40ed-82af-c389e4b385f4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
