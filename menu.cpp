@@ -8,12 +8,18 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
 
+using namespace Windows::UI;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml::Media;
 
+using namespace Microsoft::Graphics::Canvas::Brushes;
+
+/*************************************************************************************************/
 static IPlanet* the_planet_for_multiple_selected_targets = nullptr;
 static IGraphlet* the_specific_target = nullptr;
 
+/*************************************************************************************************/
 IGraphlet* WarGrey::SCADA::menu_get_next_target_graphlet(IGraphlet* start) {
 	IGraphlet* target = nullptr;
 	
@@ -35,6 +41,7 @@ void WarGrey::SCADA::menu_push_command(MenuFlyout^ menu_background, ICommand^ ex
 	auto item = ref new MenuFlyoutItem();
 
 	item->Command = exe;
+	item->Name = label;
 	item->Text = speak(label, ((tongue == nullptr) ? "menu" : tongue));
 	
 	menu_background->Items->Append(item);
@@ -46,6 +53,7 @@ void WarGrey::SCADA::group_menu_push_command(MenuFlyout^ menu_background, IComma
 	Platform::String^ tongue = ((maybe_tongue == nullptr) ? "menu" : maybe_tongue);
 
 	item->Command = exe;
+	item->Name = group + ": " + label;
 	item->Text = speak(group, tongue) + ": " + speak(label, tongue);
 
 	menu_background->Items->Append(item);
@@ -74,5 +82,20 @@ void WarGrey::SCADA::menu_popup(MenuFlyout^ m, IPlanet* p, float x, float y, flo
 void WarGrey::SCADA::group_menu_popup(MenuFlyout^ m, IPlanet* p, float x, float y, float xoff, float yoff) {
 	if (p != nullptr) {
 		m->ShowAt(p->master()->display()->canvas, p->master()->local_to_global_point(p, x, y, xoff, yoff));
+	}
+}
+
+/*************************************************************************************************/
+void WarGrey::SCADA::menu_set_foreground_color(MenuFlyout^ master, unsigned int idx, CanvasSolidColorBrush^ brush) {
+	menu_set_foreground_color(master, idx, brush->Color);
+}
+
+void WarGrey::SCADA::menu_set_foreground_color(MenuFlyout^ master, unsigned int idx, Color& color) {
+	menu_set_foreground_color(master, idx, ref new SolidColorBrush(color));
+}
+
+void WarGrey::SCADA::menu_set_foreground_color(MenuFlyout^ master, unsigned int idx, Brush^ brush) {
+	if (idx < master->Items->Size) {
+		dynamic_cast<MenuFlyoutItem^>(master->Items->GetAt(idx))->Foreground = brush;
 	}
 }
