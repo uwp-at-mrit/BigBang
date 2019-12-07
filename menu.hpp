@@ -37,6 +37,10 @@ namespace WarGrey::SCADA {
 		float x, float y,
 		float xoff = 0.0F, float yoff = 0.0F);
 
+	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, unsigned int idx, Windows::UI::Color& color);
+	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, unsigned int idx, Windows::UI::Xaml::Media::Brush^ brush);
+	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, unsigned int idx, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ brush);
+
 	/************************************************************************************************/
 	template<typename Menu, class G, class Attachment>
 	private class IMenuCommand abstract {
@@ -247,5 +251,34 @@ namespace WarGrey::SCADA {
 		Menu last_cmd = static_cast<Menu>(static_cast<unsigned int>(Menu::_) - 1);
 
 		return WarGrey::SCADA::make_group_menu<Menu, Group, Attachment>(exe, id, first_cmd, last_cmd, pobj, tongue);
+	}
+
+	/************************************************************************************************/
+	template<typename L, class C>
+	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, L label, C c) {
+		Platform::String^ id = label.ToString();
+
+		for (unsigned int idx = 0; idx < master->Items->Size; idx++) {
+			Windows::UI::Xaml::Controls::MenuFlyoutItem^ item = dynamic_cast<Windows::UI::Xaml::Controls::MenuFlyoutItem^>(master->Items->GetAt(idx));
+
+			if (item->Name->Equals(id)) {
+				menu_set_foreground_color(master, idx, c);
+				break;
+			}
+		}
+	}
+
+	template<typename G, typename L, class C>
+	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, G group, L label, C c) {
+		Platform::String^ id = group.ToString() + ": " + label.ToString();
+
+		for (unsigned int idx = 0; idx < master->Items->Size; idx++) {
+			Windows::UI::Xaml::Controls::MenuFlyoutItem^ item = dynamic_cast<Windows::UI::Xaml::Controls::MenuFlyoutItem^>(master->Items->GetAt(idx));
+
+			if (item->Name->Equals(id)) {
+				menu_set_foreground_color(master, idx, c);
+				break;
+			}
+		}
 	}
 }
