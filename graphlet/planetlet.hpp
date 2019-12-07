@@ -16,6 +16,12 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr);
 
 	public:
+		void use_alternative_logger(Syslog* logger);
+		void use_alternative_logger(Platform::String^ name);
+		void use_alternative_logger(WarGrey::SCADA::Log level, Platform::String^ name);
+		WarGrey::SCADA::Syslog* get_logger() override;
+
+	public:
 		void construct() override;
 		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
@@ -56,6 +62,7 @@ namespace WarGrey::SCADA {
 		void triggle_resize_event_if_needed();
 
 	private:
+		WarGrey::SCADA::Syslog* alt_logger;
 		WarGrey::SCADA::IScreen* screen;
 		float width;
 		float height;

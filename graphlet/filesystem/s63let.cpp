@@ -73,8 +73,9 @@ void S63let::on_permit(Platform::String^ ms_appdata, ENChartDocument^ doc) {
 		permit->encs.size());
 
 	for (size_t idx = 0; idx < permit->encs.size(); idx++) {
-		this->get_logger()->log_message(Log::Info, L"%d: %S %s", idx,
-			permit->encs[idx].permit.c_str(), permit->encs[idx].type.ToString()->Data());
+		this->get_logger()->log_message(Log::Info, L"%d: %S %s[%s]", idx,
+			permit->encs[idx].permit.c_str(), permit->encs[idx].type.ToString()->Data(),
+			permit->encs[idx].comment->Data());
 	}
 }
 

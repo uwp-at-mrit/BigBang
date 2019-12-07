@@ -59,8 +59,13 @@ static void construct_subplanet(IPlanet* planet, Syslog* logger, CanvasCreateRes
 }
 
 /**************************************************************************************************/
+Planetlet::Planetlet(IPlanet* planet, GraphletAnchor anchor, ICanvasBrush^ background) : Planetlet(planet, 0.0F, 0.0F, background) {
+	this->stretching_anchor = anchor;
+}
+
 Planetlet::Planetlet(IPlanet* planet, float width, float height, ICanvasBrush^ background)
-	: planet(planet), width(width), height(height), stretchable_width(false), stretchable_height(false), stretching_anchor(GraphletAnchor::CC) {
+	: screen(new Frame(this)), planet(planet), width(width), height(height), alt_logger(nullptr)
+	, stretchable_width(false), stretchable_height(false), stretching_anchor(GraphletAnchor::CC) {
 	if (this->planet == nullptr) {
 		this->planet = new PlaceholderPlanet();
 	}
@@ -69,19 +74,17 @@ Planetlet::Planetlet(IPlanet* planet, float width, float height, ICanvasBrush^ b
 		this->planet->set_background(background);
 	}
 
-	this->screen = new Frame(this);
-	
 	// Client applications make their own decisions
 	// this->enable_events(true, true);
-}
-
-Planetlet::Planetlet(IPlanet* planet, GraphletAnchor anchor, ICanvasBrush^ background) : Planetlet(planet, 0.0F, 0.0F, background) {
-	this->stretching_anchor = anchor;
 }
 
 Planetlet::~Planetlet() {
 	delete this->planet;
 	delete this->screen;
+
+	if (this->alt_logger != nullptr) {
+		this->alt_logger->destroy();
+	}
 }
 
 void Planetlet::construct() {
@@ -196,4 +199,34 @@ void Planetlet::triggle_resize_event_if_needed() {
 		this->planet->fill_graphlets_boundary(nullptr, nullptr, nullptr, nullptr);
 		this->clear_moor();
 	}
+}
+
+/**************************************************************************************************/
+void Planetlet::use_alternative_logger(Syslog* logger) {
+	if (this->alt_logger != nullptr) {
+		this->alt_logger->destroy();
+	}
+
+	this->alt_logger = logger;
+	if (this->alt_logger != nullptr) {
+		this->alt_logger->reference();
+	}
+}
+
+void Planetlet::use_alternative_logger(Platform::String^ name) {
+	this->use_alternative_logger(make_system_logger(name));
+}
+
+void Planetlet::use_alternative_logger(Log level, Platform::String^ name) {
+	this->use_alternative_logger(make_system_logger(level, name));
+}
+
+Syslog* Planetlet::get_logger() {
+	Syslog* logger = this->alt_logger;
+
+	if (logger == nullptr) {
+		logger = IGraphlet::get_logger();
+	}
+
+	return logger;
 }
