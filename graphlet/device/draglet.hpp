@@ -49,6 +49,9 @@ namespace WarGrey::SCADA {
 		float thickness;
 	};
 
+	static float default_drag_y_interval = 4.0F;
+	static float default_drag_z_interval = 5.0F;
+
 	double drag_length(WarGrey::SCADA::DragInfo& info);
 	double drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees = 60.0);
 	double static_drag_figure(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::double3* offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3* draghead);
@@ -155,8 +158,8 @@ namespace WarGrey::SCADA {
 
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
 	public:
-		DragXYlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style,
-			float ws_height, float hatchmark_interval = 4.0F, unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
+		DragXYlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style, float ws_height,
+			float hatchmark_interval = default_drag_y_interval, unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
 
 	public:
 		Windows::Foundation::Numerics::float2 space_to_local(WarGrey::SCADA::double3& position) override;
@@ -187,8 +190,8 @@ namespace WarGrey::SCADA {
 	private class DragYZlet : public WarGrey::SCADA::IDraglet {
 	public:
 		DragYZlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style, WarGrey::SCADA::DragLinesStyle& line_style,
-			float ws_width, double max_depth_degrees = 45.0, float vhatchmark_interval = 5.0F, float hhatchmark_interval = 4.0F,
-			unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
+			float ws_width, double max_depth_degrees = 45.0, float vhatchmark_interval = default_drag_z_interval,
+			float hhatchmark_interval = default_drag_y_interval, unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
 
 	public:
 		Windows::Foundation::Numerics::float2 space_to_local(WarGrey::SCADA::double3& position) override;

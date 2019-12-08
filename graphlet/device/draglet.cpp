@@ -372,18 +372,17 @@ Platform::String^ IDraglet::angle_label(double angle) {
 
 /*************************************************************************************************/
 DragXYlet::DragXYlet(DragInfo& info, DragStyle& style, float ws_height, float interval, unsigned int ostep, unsigned int istep)
-	: IDraglet(info, style, (ws_height < 0.0F)) {
+	: IDraglet(info, style, (interval < 0.0F)) {
 	double drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
-	double size_scale = ws_height / this->drag_length;
+	double size_scale = flabs(ws_height) / this->drag_length;
 
-	this->outboard_most = interval * float(ostep);
-	this->inboard_most = -interval * float(istep);
 	this->step = ostep + istep;
-
-	this->ws_width = -float((this->outboard_most - this->inboard_most) * size_scale);
-	this->ws_height = flabs(ws_height);
-
-	this->drag_thickness = this->ws_height * float(drag_thickness_scale);
+	this->outboard_most = flabs(interval) * float(ostep);
+	this->inboard_most = -flabs(interval) * float(istep);
+	this->ws_width = -interval * float(this->step) * float(size_scale);
+	this->ws_height = ws_height;
+	
+	this->drag_thickness = flabs(this->ws_height) * float(drag_thickness_scale);
 	this->joint_radius = this->drag_thickness * 0.618F;
 	this->draghead_length = this->drag_thickness * 3.14F;
 	this->visor_length = this->draghead_length * 0.382F;
@@ -395,12 +394,13 @@ void DragXYlet::construct() {
 	HHatchMarkMetrics metrics = hhatchmark_metrics(vmin, vmax, this->style.thickness, 0U);
 	float hm_width = flabs(this->ws_width) + metrics.hatch_x + metrics.hatch_rx;
 	CanvasGeometry^ hm = hbhatchmark(hm_width, vmin, vmax, this->step, this->style.thickness, &metrics, 0U, true);
+	float yoff = metrics.height * 1.0F;
 	
 	this->width = hm_width;
+	this->height = flabs(this->ws_height) + yoff + metrics.height * 2.0F;
 	this->ws_x = (this->leftward ? metrics.hatch_x : (this->width - metrics.hatch_rx));
-	this->ws_y = metrics.height * 1.0F;
-	this->height = this->ws_height + this->ws_y + metrics.height * 2.0F;
-
+	this->ws_y = ((this->ws_height < 0.0F) ? -this->ws_height /* '+ yoff' makes it too close to hatchmart */ : yoff);
+	
 	{ // make axes
 		float axis_by = this->height - metrics.height;
 		auto zero = vline(axis_by, this->style.thickness);
@@ -424,6 +424,12 @@ void DragXYlet::update_drag_head() {
 	float shape_x = bbase * -0.5F;
 	auto hshape = trapezoid(shape_x, -h_height, ubase, bbase, h_height);
 	auto vshape = rectangle(shape_x, 0.0F, bbase, this->visor_length);
+
+	/** NOTE
+	 *   Draghead does not affected by vertical flipping
+	 *    since the angle is computed in real space
+	 *    which independent of the visualizing coordinate system.
+	 */
 
 	this->visor_part = geometry_freeze(geometry_rotate(vshape, angle, 0.0F, 0.0F));
 	this->draghead_part = geometry_freeze(geometry_rotate(hshape, angle, 0.0F, 0.0F));
