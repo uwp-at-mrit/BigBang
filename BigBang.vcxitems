@@ -257,6 +257,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\encerror.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -264,6 +265,7 @@
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\unit.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\encerror.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>

@@ -67,15 +67,19 @@ void S63let::construct() {
 void S63let::on_permit(Platform::String^ ms_appdata, ENChartDocument^ doc) {
 	PermitDoc^ permit = static_cast<PermitDoc^>(doc);
 
-	this->get_logger()->log_message(Log::Info, L"%s VERSION %u: (%08u, %02u:%02u:%02u) ENC %d",
-		permit->content.ToString()->Data(), permit->version,
-		permit->cdate, permit->chour, permit->cminute, permit->csecond,
-		permit->encs.size());
+	if ((permit->encs.size() + permit->ecss.size()) == 0) {
+		this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE11));
+	} else {
+		this->get_logger()->log_message(Log::Info, L"%s VERSION %u: (%08u, %02u:%02u:%02u) ENC %d",
+			permit->content.ToString()->Data(), permit->version,
+			permit->cdate, permit->chour, permit->cminute, permit->csecond,
+			permit->encs.size());
 
-	for (size_t idx = 0; idx < permit->encs.size(); idx++) {
-		this->get_logger()->log_message(Log::Info, L"%d: %S %s[%s]", idx,
-			permit->encs[idx].permit.c_str(), permit->encs[idx].type.ToString()->Data(),
-			permit->encs[idx].comment->Data());
+		for (size_t idx = 0; idx < permit->encs.size(); idx++) {
+			this->get_logger()->log_message(Log::Info, L"%d: %S %s[%s]", idx,
+				permit->encs[idx].permit.c_str(), permit->encs[idx].type.ToString()->Data(),
+				permit->encs[idx].comment->Data());
+		}
 	}
 }
 

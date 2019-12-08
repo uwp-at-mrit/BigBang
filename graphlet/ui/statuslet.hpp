@@ -49,6 +49,9 @@ namespace WarGrey::SCADA {
 		void on_log_message(WarGrey::SCADA::Log level, Platform::String^ message,
 			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic) override;
 
+	public:
+		void fix_width(float width);
+
 	private:
 		std::list<Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^> colors;
 		std::list<Microsoft::Graphics::Canvas::Text::CanvasTextLayout^> messages;
@@ -56,5 +59,6 @@ namespace WarGrey::SCADA {
 	private:
 		std::shared_mutex section;
 		unsigned int lines;
+		float fixed_width;
 	};
 }

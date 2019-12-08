@@ -257,7 +257,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 /*************************************************************************************************/
 static std::map<Log, ICanvasBrush^> status_colors;
 
-Statuslinelet::Statuslinelet(Log level, unsigned int lines) : ISyslogReceiver(level), lines(lines) {}
+Statuslinelet::Statuslinelet(Log level, unsigned int lines) : ISyslogReceiver(level), lines(lines), fixed_width(0.0F) {}
 
 void Statuslinelet::construct() {
 	initialize_status_font();
@@ -276,8 +276,12 @@ void Statuslinelet::construct() {
 }
 
 void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, flmax(this->available_visible_width(x), 0.0F));
-	
+	if (this->fixed_width <= 0.0F) {
+		SET_BOX(width, flmax(this->available_visible_width(x), 0.0F));
+	} else {
+		SET_BOX(width, fixed_width);
+	}
+
 	if (this->lines == 0) {
 		SET_BOX(height, flmax(this->available_visible_height(y), 0.0F));
 	} else {
@@ -341,4 +345,11 @@ void Statuslinelet::push_message(Platform::String^ message, Log level) {
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
 	this->push_message("[" + level.ToString() + "] " + string_first_line(message), level);
+}
+
+void Statuslinelet::fix_width(float width) {
+	if (this->fixed_width != width) {
+		this->fixed_width = width;
+		this->notify_updated();
+	}
 }
