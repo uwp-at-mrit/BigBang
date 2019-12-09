@@ -1162,6 +1162,10 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 		}
 
 #ifdef _DEBUG
+		if (dynamic_cast<IHeadUpPlanet*>(this) == nullptr) {
+			this->save(ms_apptemp_file(this->name(), ".png"), this->actual_width(), this->actual_height());
+		}
+
 		this->figure_track = nullptr;
 #endif
 		this->figure_anchors.clear();
