@@ -934,10 +934,10 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 
 		switch (puk) {
 		case PointerUpdateKind::LeftButtonPressed: {
-			this->track_thickness = 1.0F;
+			this->track_thickness = 2.0F;
 
 #ifdef _DEBUG
-			this->figure_track = blank();
+			this->figure_track = nullptr;
 #endif
 
 			this->figure_anchors.clear();
@@ -1018,7 +1018,11 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 		segment->AddLine(x, y);
 		segment->EndFigure(CanvasFigureLoop::Open);
 
-		this->figure_track = geometry_union(this->figure_track, CanvasGeometry::CreatePath(segment));
+		if (this->figure_track == nullptr) {
+			this->figure_track = CanvasGeometry::CreatePath(segment);
+		} else {
+			this->figure_track = geometry_union(this->figure_track, CanvasGeometry::CreatePath(segment));
+		}
 #endif
 
 		if ((x != last_anchor.x) || (y != last_anchor.y)) {
@@ -1162,13 +1166,14 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 		}
 
 #ifdef _DEBUG
-		if (dynamic_cast<IHeadUpPlanet*>(this) == nullptr) {
-			this->save(ms_apptemp_file(this->name(), ".png"), this->actual_width(), this->actual_height());
+		if (this->figure_anchors.size() > 8U) {
+			if (dynamic_cast<IHeadUpPlanet*>(this) == nullptr) {
+				this->save(ms_apptemp_file(this->name(), ".png"), this->actual_width(), this->actual_height());
+			}
+		} else {
+			this->figure_track = nullptr;
 		}
-
-		this->figure_track = nullptr;
 #endif
-		this->figure_anchors.clear();
 	}
 
 	return handled;
