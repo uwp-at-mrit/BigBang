@@ -1,5 +1,3 @@
-#include <ppltasks.h>
-
 #include "graphlet/filesystem/project/reader/doctype.hxx"
 #include "graphlet/filesystem/project/reader/maplog.hxx"
 #include "graphlet/filesystem/project/reader/depthlog.hxx"
@@ -10,10 +8,6 @@
 #include "graphlet/filesystem/project/reader/secdoc.hxx"
 
 using namespace WarGrey::SCADA;
-
-using namespace Concurrency;
-
-using namespace Windows::Foundation;
 
 /*************************************************************************************************/
 ProjectDocument^ ProjectDocument::load(Platform::String^ filename, WarGrey::SCADA::ProjectDoctype type) {

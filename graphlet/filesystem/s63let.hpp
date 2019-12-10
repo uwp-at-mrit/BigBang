@@ -3,20 +3,12 @@
 #include <deque>
 
 #include "graphlet/planetlet.hpp"
-#include "graphlet/vessellet.hpp"
 
 #include "graphlet/filesystem/msappdataloguelet.hxx"
-#include "graphlet/filesystem/configuration/colorplotlet.hpp"
-#include "graphlet/filesystem/project/reader/doctype.hxx"
-#include "graphlet/filesystem/project/digmaplet.hpp"
-#include "graphlet/filesystem/project/xyzlet.hpp"
-#include "graphlet/filesystem/project/tracelinelet.hpp"
-#include "graphlet/filesystem/project/sectionlet.hpp"
-
-#include "graphlet/symbol/dig/dig.hpp"
+#include "graphlet/filesystem/enchart/reader/enctype.hxx"
 
 namespace WarGrey::SCADA {
-	private class S63let : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::SCADA::ProjectDocument, WarGrey::SCADA::Planetlet, WarGrey::SCADA::ProjectDoctype> {
+	private class S63let : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::SCADA::ENChartDocument, WarGrey::SCADA::Planetlet, WarGrey::SCADA::ENChartDoctype> {
 	public:
 		S63let(Platform::String^ enc, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
@@ -34,25 +26,25 @@ namespace WarGrey::SCADA {
 		bool ready() override;
 
 	protected:
-		WarGrey::SCADA::ProjectDoctype filter_file(Platform::String^ file, Platform::String^ _ext) override;
-		void on_appdata(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dig, WarGrey::SCADA::ProjectDoctype type) override;
-		void on_appdata_not_found(Platform::String^ ms_appdata, ProjectDoctype type) override {}
+		WarGrey::SCADA::ENChartDoctype filter_file(Platform::String^ file, Platform::String^ _ext) override;
+		void on_appdata(Platform::String^ ms_appdata, WarGrey::SCADA::ENChartDocument^ doc_dig, WarGrey::SCADA::ENChartDoctype type) override;
+		void on_appdata_not_found(Platform::String^ ms_appdata, ENChartDoctype type) override {}
 
 	private:
-		void on_dig(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dig);
+		void on_permit(Platform::String^ ms_appdata, WarGrey::SCADA::ENChartDocument^ doc_dig);
 
 	private:
 		void relocate_icons();
 
 	private:
-		WarGrey::SCADA::ProjectDocument^ graph_dig;
+		WarGrey::SCADA::ENChartDocument^ graph_dig;
 
 	private:
 		Platform::String^ ms_appdata_rootdir;
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
 
 	private: // graphlets are managed by the Planetlet
-		WarGrey::SCADA::DigMaplet* map;
+		//WarGrey::SCADA::DigMaplet* map;
 		std::deque<Platform::Object^> icons;
 
 	private:

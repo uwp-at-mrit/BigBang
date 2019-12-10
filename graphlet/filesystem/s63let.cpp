@@ -1,5 +1,7 @@
 #include "graphlet/filesystem/s63let.hpp"
 
+#include "graphlet/filesystem/enchart/reader/permitdoc.hxx"
+
 #include "datum/flonum.hpp"
 #include "datum/path.hpp"
 #include "datum/file.hpp"
@@ -48,7 +50,7 @@ namespace {
 
 /*************************************************************************************************/
 S63let::S63let(Platform::String^ enc, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Planetlet(new S63Frame(enc), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)), map(nullptr) {
+	: Planetlet(new S63Frame(enc), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)) /*, map(nullptr) */ {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? enc : rootdir + "\\" + enc);
 	this->enable_stretch(false, false);
 	this->enable_events(true, false);
@@ -62,51 +64,23 @@ void S63let::construct() {
 	this->cd(this->ms_appdata_rootdir);
 }
 
-void S63let::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
-	DigDoc^ doc_dig = static_cast<DigDoc^>(doc);
+void S63let::on_permit(Platform::String^ ms_appdata, ENChartDocument^ doc) {
+	PermitDoc^ permit = static_cast<PermitDoc^>(doc);
 
-	this->planet->begin_update_sequence();
-	
-	/** NOTE
-	 * For the sake of simplicity, non-icon items are organized as a batch.
-	 * Also, they are drawn before drawing icons.
-	 *
-	 * The modifyDIG draw icons firstly.
-	 */
-	
-	this->map = this->planet->insert_one(new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height));
-	
-	{ // make icons
-		IDigDatum* dig = nullptr;
-		double x, y;
+	if ((permit->encs.size() + permit->ecss.size()) == 0) {
+		this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE11));
+	} else {
+		this->get_logger()->log_message(Log::Info, L"%s VERSION %u: (%08u, %02u:%02u:%02u) ENC %d",
+			permit->content.ToString()->Data(), permit->version,
+			permit->cdate, permit->chour, permit->cminute, permit->csecond,
+			permit->encs.size());
 
-		doc_dig->rewind();
-		while ((dig = doc_dig->step()) != nullptr) {
-			if (dig->type == DigDatumType::Icon) {
-				IGraphlet* icon = dig->make_graphlet(&x, &y);
-
-				if (icon != nullptr) {
-					icon->enable_resizing(false);
-
-					{ /** TODO
-					   * Find out the reason why some icons do not like their locations?
-					   * Nonetheless, icons will be relocated when the map is translated or scaled.
-					   */
-
-						S63IconEntity^ entity = ref new S63IconEntity(icon, x, y);
-						float2 ipos = this->map->position_to_local(x, y);
-
-						this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::CC);
-						this->icons.push_back(entity);
-					}
-				}
-			}
+		for (size_t idx = 0; idx < permit->encs.size(); idx++) {
+			this->get_logger()->log_message(Log::Info, L"%d: %S %s[%s]", idx,
+				permit->encs[idx].permit.c_str(), permit->encs[idx].type.ToString()->Data(),
+				permit->encs[idx].comment->Data());
 		}
 	}
-
-	this->planet->end_update_sequence();
-
-	this->graph_dig = doc_dig;
 }
 
 bool S63let::ready() {
@@ -139,51 +113,45 @@ void S63let::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Wid
 }
 
 void S63let::translate(float deltaX, float deltaY) {
-	if (this->map != nullptr) {
-		this->planet->begin_update_sequence();
-		this->map->translate(deltaX, deltaY);
-		this->relocate_icons();
-		this->planet->end_update_sequence();
-	}
+	//if (this->map != nullptr) {
+	//	this->planet->begin_update_sequence();
+	//	this->map->translate(deltaX, deltaY);
+	//	this->relocate_icons();
+	//	this->planet->end_update_sequence();
+	//}
 }
 
 void S63let::zoom(float zx, float zy, float deltaScale) {
-	if (this->map != nullptr) {
-		this->planet->begin_update_sequence();
-		this->map->zoom(zx, zy, deltaScale);
-		this->relocate_icons();
-		this->planet->end_update_sequence();
-	}
+	//if (this->map != nullptr) {
+	//	this->planet->begin_update_sequence();
+	//	this->map->zoom(zx, zy, deltaScale);
+	//	this->relocate_icons();
+	//	this->planet->end_update_sequence();
+	//}
 }
 
 void S63let::relocate_icons() {
-	for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
-		S63IconEntity^ ent = static_cast<S63IconEntity^>(*it);
-		float2 ipos = this->map->position_to_local(ent->x, ent->y);
+	//for (auto it = this->icons.begin(); it != this->icons.end(); it++) {
+	//	S63IconEntity^ ent = static_cast<S63IconEntity^>(*it);
+	//	float2 ipos = this->map->position_to_local(ent->x, ent->y);
 
-		this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::CC);
-	}
+	//	this->planet->move_to(ent->icon, ipos.x, ipos.y, GraphletAnchor::CC);
+	//}
 }
 
 /*************************************************************************************************/
-ProjectDoctype S63let::filter_file(Platform::String^ filename, Platform::String^ _ext) {
-	ProjectDoctype ft = ProjectDoctype::_;
+ENChartDoctype S63let::filter_file(Platform::String^ filename, Platform::String^ _ext) {
+	ENChartDoctype ft = ENChartDoctype::_;
 
-	if (filename->Equals("Back.LOG")) {
-		ft = ProjectDoctype::Map_LOG;
-	} else if (filename->Equals("Deep.LOG")) {
-		ft = ProjectDoctype::Depth_LOG;
-	} else if (filename->Equals("Section.LOG")) {
-		ft = ProjectDoctype::Section_LOG;
-	} else if (filename->Equals("XH.DAT")) {
-		ft = ProjectDoctype::Traceline;
+	if (filename->Equals("PERMIT.TXT")) {
+		ft = ENChartDoctype::PERMIT;
 	}
 
 	return ft;
 }
 
-void S63let::on_appdata(Platform::String^ ms_appdata, ProjectDocument^ doc, ProjectDoctype type) {
+void S63let::on_appdata(Platform::String^ ms_appdata, ENChartDocument^ doc, ENChartDoctype type) {
 	switch (type) {
-	case ProjectDoctype::DIG:         this->on_dig(ms_appdata, doc); break;
+	case ENChartDoctype::PERMIT: this->on_permit(ms_appdata, doc); break;
 	}
 }

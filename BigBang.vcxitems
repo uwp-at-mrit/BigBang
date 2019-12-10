@@ -32,6 +32,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\jobdoc.cxx" />
@@ -146,6 +148,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdatalet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdataloguelet.hxx" />
@@ -253,6 +257,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\encerror.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -260,6 +265,7 @@
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\unit.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\encerror.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
