@@ -1,22 +1,31 @@
 #pragma once
 
 #include <deque>
-#include <map>
 
 #include "graphlet/filesystem/enchart/reader/enctype.hxx"
-
-#include "graphlet/symbol/dig/dig.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class PermitContent { Full, Partial, _ };
 	private enum class PermitServiceLevel { Subscription, SinglePurchase, _ };
 
 	private struct ENCell {
-		std::string permit;
+	public:
+		char name[9];
+		unsigned int expiry_year;
+		unsigned char expiry_month;
+		unsigned char expiry_day;
+		unsigned char ECK1[17];
+		unsigned char ECK2[17];
+		unsigned char checksum[17];
+
+	public:
 		WarGrey::SCADA::PermitServiceLevel type;
-		unsigned long long edition;
-		std::string data_server_id;
+		unsigned long long edition; // deprecated
+		bytes data_server_id;
 		Platform::String^ comment;
+
+	public:
+		bool malformed();
 	};
 
 	private ref class PermitDoc sealed : public WarGrey::SCADA::ENChartDocument {

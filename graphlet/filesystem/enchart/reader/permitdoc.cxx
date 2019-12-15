@@ -1,8 +1,32 @@
 #include "graphlet/filesystem/enchart/reader/permitdoc.hxx"
 
 #include "datum/file.hpp"
+#include "datum/string.hpp"
 
 using namespace WarGrey::SCADA;
+
+static void cell_extract(ENCell* cell, bytes& permit) {
+	const unsigned char* pool = permit.c_str();
+	size_t psize = permit.size();
+	size_t pos = 0U;
+
+	if (psize == 64) {
+		scan_bytes(pool, &pos, psize, cell->name);
+		cell->expiry_year = (unsigned short)scan_natural(pool, &pos, 12, false);
+		cell->expiry_month = (unsigned char)scan_natural(pool, &pos, 14, false);
+		cell->expiry_day = (unsigned char)scan_natural(pool,   &pos, 16, false);
+		scan_bytes(pool, &pos, psize, cell->ECK1);
+		scan_bytes(pool, &pos, psize, cell->ECK2);
+		scan_bytes(pool, &pos, psize, cell->checksum);
+	} else {
+		scan_bytes(pool, &pos, psize, cell->name);
+		cell->checksum[0] = '\0';
+	}
+}
+
+bool WarGrey::SCADA::ENCell::malformed() {
+	return (this->checksum[0] == '\0');
+}
 
 /*************************************************************************************************/
 PermitDoc::PermitDoc(std::filebuf& permit)
@@ -67,9 +91,9 @@ PermitDoc::PermitDoc(std::filebuf& permit)
 }
 
 void PermitDoc::fill_cell_permit(std::filebuf& permit, ENCell* cell) {
-	cell->permit = read_text(permit, char_end_of_field);
+	bytes self = read_bytes(permit, char_end_of_field);
+	
 	read_char(permit);
-
 	if (read_bool(permit)) {
 		cell->type = PermitServiceLevel::SinglePurchase;
 	} else {
@@ -79,7 +103,9 @@ void PermitDoc::fill_cell_permit(std::filebuf& permit, ENCell* cell) {
 	read_char(permit);
 	cell->edition = read_natural(permit);
 	read_char(permit);
-	cell->data_server_id = read_text(permit, char_end_of_field);
+	cell->data_server_id = read_bytes(permit, char_end_of_field);
 	read_char(permit);
 	cell->comment = read_wgb18030(permit, char_end_of_line);
+
+	cell_extract(cell, self);
 }
