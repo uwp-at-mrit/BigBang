@@ -4,6 +4,8 @@
 
 #include "graphlet/filesystem/enchart/reader/enctype.hxx"
 
+#include "datum/natural.hpp"
+
 namespace WarGrey::SCADA {
 	private enum class PermitContent { Full, Partial, _ };
 	private enum class PermitServiceLevel { Subscription, SinglePurchase, _ };
