@@ -7,6 +7,7 @@ using namespace WarGrey::SCADA;
 
 static void cell_extract(ENCell* cell, bytes& permit) {
 	const unsigned char* pool = permit.c_str();
+
 	size_t psize = permit.size();
 	size_t pos = 0U;
 
