@@ -4,6 +4,8 @@
 
 #include "graphlet/filesystem/enchart/reader/enctype.hxx"
 
+#include "datum/natural.hpp"
+
 namespace WarGrey::SCADA {
 	private enum class PermitContent { Full, Partial, _ };
 	private enum class PermitServiceLevel { Subscription, SinglePurchase, _ };
@@ -11,12 +13,16 @@ namespace WarGrey::SCADA {
 	private struct ENCell {
 	public:
 		char name[9];
-		unsigned int expiry_year;
-		unsigned char expiry_month;
-		unsigned char expiry_day;
-		unsigned char ECK1[17];
-		unsigned char ECK2[17];
-		unsigned char checksum[17];
+		int expiry_year;
+		int expiry_month;
+		int expiry_day;
+		WarGrey::SCADA::Natural ECK1;
+		WarGrey::SCADA::Natural ECK2;
+		WarGrey::SCADA::Natural checksum;
+
+	public:
+		WarGrey::SCADA::Natural key1;
+		WarGrey::SCADA::Natural key2;
 
 	public:
 		WarGrey::SCADA::PermitServiceLevel type;

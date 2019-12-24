@@ -5,6 +5,9 @@
 #include "datum/flonum.hpp"
 #include "datum/path.hpp"
 #include "datum/file.hpp"
+#include "datum/time.hpp"
+
+#include "crypto/enckey.hpp"
 
 #include "math.hpp"
 #include "planet.hpp"
@@ -49,8 +52,9 @@ namespace {
 }
 
 /*************************************************************************************************/
-S63let::S63let(Platform::String^ enc, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Planetlet(new S63Frame(enc), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)) /*, map(nullptr) */ {
+S63let::S63let(Platform::String^ enc, uint64 hw_id, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
+	: Planetlet(new S63Frame(enc), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)) /*, map(nullptr) */
+	, HW_ID(enc_natural(hw_id)), pseudo_now(0) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? enc : rootdir + "\\" + enc);
 	this->enable_stretch(false, false);
 	this->enable_events(true, false);
@@ -77,10 +81,19 @@ void S63let::on_permit(Platform::String^ ms_appdata, ENChartDocument^ doc) {
 			ENCell* cell = &permit->encs[idx];
 
 			if (!cell->malformed()) {
-				this->get_logger()->log_message(Log::Debug, L"%d[%S]: %S[%s]: %S%S%S before %u-%02u-%02u",
+				long long now = ((this->pseudo_now <= 0) ? current_seconds() : this->pseudo_now);
+				long long expiry_date = make_seconds(cell->expiry_year, cell->expiry_month, cell->expiry_day);
+
+				if (expiry_date < now) {
+					this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE15, cell->name));
+				} else if (seconds_add_days(expiry_date, -30) < now) {
+					this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE20, cell->name));
+				}
+
+				this->get_logger()->log_message(Log::Debug, L"%d[%S]: %S[%s]: %S%S%S before %d-%02d-%02d",
 					idx, cell->data_server_id.c_str(),
 					cell->name, cell->type.ToString()->Data(),
-					cell->ECK1, cell->ECK2, cell->checksum,
+					cell->ECK1.to_hexstring().c_str(), cell->ECK2.to_hexstring().c_str(), cell->checksum.to_hexstring().c_str(),
 					cell->expiry_year, cell->expiry_month, cell->expiry_day);
 			} else {
 				this->get_logger()->log_message(Log::Error, enc_speak(ENCErrorCode::SSE12, cell->name));
@@ -148,6 +161,10 @@ void S63let::relocate_icons() {
 }
 
 /*************************************************************************************************/
+void S63let::set_pseudo_date(long long year, long long month, long long day) {
+	this->pseudo_now = make_seconds(year, month, day);
+}
+
 ENChartDoctype S63let::filter_file(Platform::String^ filename, Platform::String^ _ext) {
 	ENChartDoctype ft = ENChartDoctype::_;
 

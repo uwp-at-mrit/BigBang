@@ -12,20 +12,30 @@ static void cell_extract(ENCell* cell, bytes& permit) {
 
 	if (psize == 64) {
 		scan_bytes(pool, &pos, psize, cell->name);
-		cell->expiry_year = (unsigned short)scan_natural(pool, &pos, 12, false);
-		cell->expiry_month = (unsigned char)scan_natural(pool, &pos, 14, false);
-		cell->expiry_day = (unsigned char)scan_natural(pool,   &pos, 16, false);
-		scan_bytes(pool, &pos, psize, cell->ECK1);
-		scan_bytes(pool, &pos, psize, cell->ECK2);
-		scan_bytes(pool, &pos, psize, cell->checksum);
+
+		{ // extract expiry date
+			long long expiry = scan_integer(pool, &pos, 16, false);
+
+			cell->expiry_year = int(expiry / 10000);
+			cell->expiry_month = int((expiry % 10000) / 100);
+			cell->expiry_day = int(expiry % 100);
+		}
+
+		{ // extract encrypted keys and checksum
+			Natural pn(16U, pool, pos, psize);
+			
+			cell->ECK1 = pn.fixnum64_ref(0U);
+			cell->ECK2 = pn.fixnum64_ref(1U);
+			cell->checksum = pn.fixnum64_ref(2U);
+		}
 	} else {
 		scan_bytes(pool, &pos, psize, cell->name);
-		cell->checksum[0] = '\0';
+		cell->checksum = 0U;
 	}
 }
 
 bool WarGrey::SCADA::ENCell::malformed() {
-	return (this->checksum[0] == '\0');
+	return (this->checksum.is_zero());
 }
 
 /*************************************************************************************************/
