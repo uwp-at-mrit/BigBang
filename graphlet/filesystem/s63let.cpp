@@ -81,20 +81,31 @@ void S63let::on_permit(Platform::String^ ms_appdata, ENChartDocument^ doc) {
 			ENCell* cell = &permit->encs[idx];
 
 			if (!cell->malformed()) {
-				long long now = ((this->pseudo_now <= 0) ? current_seconds() : this->pseudo_now);
-				long long expiry_date = make_seconds(cell->expiry_year, cell->expiry_month, cell->expiry_day);
+				Natural plainsum = enc_cell_permit_checksum(cell->name, strlen(cell->name),
+					cell->expiry_year, cell->expiry_month, cell->expiry_day,
+					cell->ECK1, cell->ECK2);
 
-				if (expiry_date < now) {
-					this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE15, cell->name));
-				} else if (seconds_add_days(expiry_date, -30) < now) {
-					this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE20, cell->name));
+				if (enc_cell_permit_encrypt(this->HW_ID, plainsum) == cell->checksum) {
+					long long now = ((this->pseudo_now <= 0) ? current_seconds() : this->pseudo_now);
+					long long expiry_date = make_seconds(cell->expiry_year, cell->expiry_month, cell->expiry_day);
+
+					if (expiry_date < now) {
+						this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE15, cell->name));
+					} else if (seconds_add_days(expiry_date, -30) < now) {
+						this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE20, cell->name));
+					}
+
+					cell->key1 = enc_cell_permit_decrypt(this->HW_ID, cell->ECK1);
+					cell->key1 = enc_cell_permit_decrypt(this->HW_ID, cell->ECK2);
+
+					this->get_logger()->log_message(Log::Debug, L"%d[%S]: %S[%s]: %S%S%S before %d-%02d-%02d",
+						idx, cell->data_server_id.c_str(),
+						cell->name, cell->type.ToString()->Data(),
+						cell->ECK1.to_hexstring().c_str(), cell->ECK2.to_hexstring().c_str(), cell->checksum.to_hexstring().c_str(),
+						cell->expiry_year, cell->expiry_month, cell->expiry_day);
+				} else {
+					this->get_logger()->log_message(Log::Error, enc_speak(ENCErrorCode::SSE13, cell->name));
 				}
-
-				this->get_logger()->log_message(Log::Debug, L"%d[%S]: %S[%s]: %S%S%S before %d-%02d-%02d",
-					idx, cell->data_server_id.c_str(),
-					cell->name, cell->type.ToString()->Data(),
-					cell->ECK1.to_hexstring().c_str(), cell->ECK2.to_hexstring().c_str(), cell->checksum.to_hexstring().c_str(),
-					cell->expiry_year, cell->expiry_month, cell->expiry_day);
 			} else {
 				this->get_logger()->log_message(Log::Error, enc_speak(ENCErrorCode::SSE12, cell->name));
 			}
