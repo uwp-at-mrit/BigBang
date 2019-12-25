@@ -1,5 +1,6 @@
 #include "graphlet/filesystem/enchart/reader/enctype.hxx"
 #include "graphlet/filesystem/enchart/reader/permitdoc.hxx"
+#include "graphlet/filesystem/enchart/reader/pubdoc.hxx"
 
 #include "datum/string.hpp"
 #include "tongue.hpp"
@@ -26,6 +27,7 @@ ENChartDocument^ ENChartDocument::load(Platform::String^ filename, WarGrey::SCAD
 	if (src.open(filename->Data(), std::ios::in)) {
 		switch (type) {
 		case ENChartDoctype::PERMIT: doc = ref new PermitDoc(src); break;
+		case ENChartDoctype::PublicKey: doc = ref new PublicKeyDoc(src); break;
 		}
 	}
 

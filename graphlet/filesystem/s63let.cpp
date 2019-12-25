@@ -1,7 +1,5 @@
 #include "graphlet/filesystem/s63let.hpp"
 
-#include "graphlet/filesystem/enchart/reader/permitdoc.hxx"
-
 #include "datum/flonum.hpp"
 #include "datum/path.hpp"
 #include "datum/file.hpp"
@@ -105,6 +103,7 @@ void S63let::on_permit(Platform::String^ ms_appdata, ENChartDocument^ doc) {
 						cell->expiry_year, cell->expiry_month, cell->expiry_day);
 				} else {
 					this->get_logger()->log_message(Log::Error, enc_speak(ENCErrorCode::SSE13, cell->name));
+					cell->checksum = 0U;
 				}
 			} else {
 				this->get_logger()->log_message(Log::Error, enc_speak(ENCErrorCode::SSE12, cell->name));
@@ -113,10 +112,21 @@ void S63let::on_permit(Platform::String^ ms_appdata, ENChartDocument^ doc) {
 	} else {
 		this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE11));
 	}
+
+	this->PERMIT_TXT = permit;
+}
+
+void S63let::on_public_key(Platform::String^ ms_appdata, ENChartDocument^ doc) {
+	PublicKeyDoc^ pubkey = static_cast<PublicKeyDoc^>(doc);
+
+	this->get_logger()->log_message(Log::Info, L"p: %S", pubkey->p.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"q: %S", pubkey->q.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"g: %S", pubkey->g.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"y: %S", pubkey->y.to_hexstring().c_str());
 }
 
 bool S63let::ready() {
-	return (this->graph_dig != nullptr);
+	return (this->PERMIT_TXT != nullptr);
 }
 
 void S63let::fill_extent(float x, float y, float* w, float* h) {
@@ -181,6 +191,8 @@ ENChartDoctype S63let::filter_file(Platform::String^ filename, Platform::String^
 
 	if (filename->Equals("PERMIT.TXT")) {
 		ft = ENChartDoctype::PERMIT;
+	} else if (_ext->Equals(".PUB")) {
+		ft = ENChartDoctype::PublicKey;
 	}
 
 	return ft;
@@ -189,5 +201,6 @@ ENChartDoctype S63let::filter_file(Platform::String^ filename, Platform::String^
 void S63let::on_appdata(Platform::String^ ms_appdata, ENChartDocument^ doc, ENChartDoctype type) {
 	switch (type) {
 	case ENChartDoctype::PERMIT: this->on_permit(ms_appdata, doc); break;
+	case ENChartDoctype::PublicKey: this->on_public_key(ms_appdata, doc); break;
 	}
 }

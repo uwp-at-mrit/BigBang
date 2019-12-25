@@ -16,7 +16,7 @@ namespace WarGrey::SCADA {
 	};
 
 	private enum class ENChartDoctype {
-		PERMIT,
+		PERMIT, PublicKey,
 		_
 	};
 

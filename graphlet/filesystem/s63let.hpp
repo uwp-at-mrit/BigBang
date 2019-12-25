@@ -5,7 +5,10 @@
 #include "graphlet/planetlet.hpp"
 
 #include "graphlet/filesystem/msappdataloguelet.hxx"
+
 #include "graphlet/filesystem/enchart/reader/enctype.hxx"
+#include "graphlet/filesystem/enchart/reader/permitdoc.hxx"
+#include "graphlet/filesystem/enchart/reader/pubdoc.hxx"
 
 #include "datum/natural.hpp"
 
@@ -37,12 +40,14 @@ namespace WarGrey::SCADA {
 
 	private:
 		void on_permit(Platform::String^ ms_appdata, WarGrey::SCADA::ENChartDocument^ doc_dig);
+		void on_public_key(Platform::String^ ms_appdata, WarGrey::SCADA::ENChartDocument^ doc_dig);
 
 	private:
 		void relocate_icons();
 
 	private:
-		WarGrey::SCADA::ENChartDocument^ graph_dig;
+		WarGrey::SCADA::PermitDoc^ PERMIT_TXT;
+		WarGrey::SCADA::PublicKeyDoc^ IHO_PUB;
 
 	private:
 		Platform::String^ ms_appdata_rootdir;
