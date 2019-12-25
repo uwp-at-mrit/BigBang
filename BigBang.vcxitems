@@ -32,6 +32,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\crtdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\pubdoc.cxx" />
@@ -149,6 +150,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\crtdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\pubdoc.hxx" />

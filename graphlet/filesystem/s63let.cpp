@@ -117,12 +117,16 @@ void S63let::on_permit(Platform::String^ ms_appdata, ENChartDocument^ doc) {
 }
 
 void S63let::on_public_key(Platform::String^ ms_appdata, ENChartDocument^ doc) {
-	PublicKeyDoc^ pubkey = static_cast<PublicKeyDoc^>(doc);
+	this->IHO_PUB = static_cast<PublicKeyDoc^>(doc);
 
-	this->get_logger()->log_message(Log::Info, L"p: %S", pubkey->p.to_hexstring().c_str());
-	this->get_logger()->log_message(Log::Info, L"q: %S", pubkey->q.to_hexstring().c_str());
-	this->get_logger()->log_message(Log::Info, L"g: %S", pubkey->g.to_hexstring().c_str());
-	this->get_logger()->log_message(Log::Info, L"y: %S", pubkey->y.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"p: %S", this->IHO_PUB->p.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"q: %S", this->IHO_PUB->q.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"g: %S", this->IHO_PUB->g.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"y: %S", this->IHO_PUB->y.to_hexstring().c_str());
+}
+
+void S63let::on_certificate(Platform::String^ ms_appdata, ENChartDocument^ doc) {
+	this->IHO_CRT = static_cast<CertificateDoc^>(doc);
 }
 
 bool S63let::ready() {
@@ -193,6 +197,8 @@ ENChartDoctype S63let::filter_file(Platform::String^ filename, Platform::String^
 		ft = ENChartDoctype::PERMIT;
 	} else if (_ext->Equals(".PUB")) {
 		ft = ENChartDoctype::PublicKey;
+	} else if (_ext->Equals(".CRT")) {
+		ft = ENChartDoctype::Certificate;
 	}
 
 	return ft;
@@ -202,5 +208,6 @@ void S63let::on_appdata(Platform::String^ ms_appdata, ENChartDocument^ doc, ENCh
 	switch (type) {
 	case ENChartDoctype::PERMIT: this->on_permit(ms_appdata, doc); break;
 	case ENChartDoctype::PublicKey: this->on_public_key(ms_appdata, doc); break;
+	case ENChartDoctype::Certificate: this->on_certificate(ms_appdata, doc); break;
 	}
 }

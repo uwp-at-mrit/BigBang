@@ -1,7 +1,6 @@
 #include "graphlet/filesystem/enchart/reader/pubdoc.hxx"
 
 #include "datum/file.hpp"
-#include "datum/string.hpp"
 
 using namespace WarGrey::SCADA;
 
