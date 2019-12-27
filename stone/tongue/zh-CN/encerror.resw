@@ -190,12 +190,12 @@
     <value>ENC 签名格式不对</value>
   </data>
   <data name="SSE25" xml:space="preserve">
-    <value>ENC&lt;cell name&gt; Permit 过期</value>
+    <value>ENC Permit 过期</value>
   </data>
   <data name="SSE26" xml:space="preserve">
     <value>非 IHO 认证的 ENC</value>
   </data>
   <data name="SSE27" xml:space="preserve">
-    <value>ENC&lt;cell name&gt;未更新</value>
+    <value>ENC 需要更新</value>
   </data>
 </root>

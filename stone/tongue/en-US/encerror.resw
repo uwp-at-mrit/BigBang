@@ -191,12 +191,12 @@ the ENC may originate from another service</value>
     <value>ENC Signature format incorrect</value>
   </data>
   <data name="SSE25" xml:space="preserve">
-    <value>The permit for ENC&lt;cell name&gt; has expired. This cell may be out of date and MUST NOT be used for Primary NAVIGATION</value>
+    <value>The permit for ENC has expired. This cell may be out of date and MUST NOT be used for Primary NAVIGATION</value>
   </data>
   <data name="SSE26" xml:space="preserve">
     <value>This ENC is not authenticated by the IHO acting as the Scheme Administrator</value>
   </data>
   <data name="SSE27" xml:space="preserve">
-    <value>ENC&lt;cell name&gt; is not up to date. A New Edition, Re-issue or Update for this cell is missing and therefore MUST NOT be used for Primary NAVIGATION</value>
+    <value>ENC is not up to date. A New Edition, Re-issue or Update for this cell is missing and therefore MUST NOT be used for Primary NAVIGATION</value>
   </data>
 </root>

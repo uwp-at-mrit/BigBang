@@ -1,10 +1,11 @@
 #include "graphlet/filesystem/s63let.hpp"
 
-#include "graphlet/filesystem/enchart/reader/permitdoc.hxx"
-
 #include "datum/flonum.hpp"
 #include "datum/path.hpp"
 #include "datum/file.hpp"
+#include "datum/time.hpp"
+
+#include "crypto/enckey.hpp"
 
 #include "math.hpp"
 #include "planet.hpp"
@@ -49,8 +50,9 @@ namespace {
 }
 
 /*************************************************************************************************/
-S63let::S63let(Platform::String^ enc, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Planetlet(new S63Frame(enc), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)) /*, map(nullptr) */ {
+S63let::S63let(Platform::String^ enc, uint64 hw_id, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
+	: Planetlet(new S63Frame(enc), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)) /*, map(nullptr) */
+	, HW_ID(enc_natural(hw_id)), pseudo_now(0) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? enc : rootdir + "\\" + enc);
 	this->enable_stretch(false, false);
 	this->enable_events(true, false);
@@ -67,24 +69,68 @@ void S63let::construct() {
 void S63let::on_permit(Platform::String^ ms_appdata, ENChartDocument^ doc) {
 	PermitDoc^ permit = static_cast<PermitDoc^>(doc);
 
-	if ((permit->encs.size() + permit->ecss.size()) == 0) {
-		this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE11));
-	} else {
-		this->get_logger()->log_message(Log::Info, L"%s VERSION %u: (%08u, %02u:%02u:%02u) ENC %d",
+	if ((permit->encs.size() + permit->ecss.size()) > 0) {
+		this->get_logger()->log_message(Log::Debug, L"%s VERSION %u: (%08u, %02u:%02u:%02u) ENC %d",
 			permit->content.ToString()->Data(), permit->version,
 			permit->cdate, permit->chour, permit->cminute, permit->csecond,
 			permit->encs.size());
 
 		for (size_t idx = 0; idx < permit->encs.size(); idx++) {
-			this->get_logger()->log_message(Log::Info, L"%d: %S %s[%s]", idx,
-				permit->encs[idx].permit.c_str(), permit->encs[idx].type.ToString()->Data(),
-				permit->encs[idx].comment->Data());
+			ENCell* cell = &permit->encs[idx];
+
+			if (!cell->malformed()) {
+				Natural plainsum = enc_cell_permit_checksum(cell->name, strlen(cell->name),
+					cell->expiry_year, cell->expiry_month, cell->expiry_day,
+					cell->ECK1, cell->ECK2);
+
+				if (enc_cell_permit_encrypt(this->HW_ID, plainsum) == cell->checksum) {
+					long long now = ((this->pseudo_now <= 0) ? current_seconds() : this->pseudo_now);
+					long long expiry_date = make_seconds(cell->expiry_year, cell->expiry_month, cell->expiry_day);
+
+					if (expiry_date < now) {
+						this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE15, cell->name));
+					} else if (seconds_add_days(expiry_date, -30) < now) {
+						this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE20, cell->name));
+					}
+
+					cell->key1 = enc_cell_permit_decrypt(this->HW_ID, cell->ECK1);
+					cell->key1 = enc_cell_permit_decrypt(this->HW_ID, cell->ECK2);
+
+					this->get_logger()->log_message(Log::Debug, L"%d[%S]: %S[%s]: %S%S%S before %d-%02d-%02d",
+						idx, cell->data_server_id.c_str(),
+						cell->name, cell->type.ToString()->Data(),
+						cell->ECK1.to_hexstring().c_str(), cell->ECK2.to_hexstring().c_str(), cell->checksum.to_hexstring().c_str(),
+						cell->expiry_year, cell->expiry_month, cell->expiry_day);
+				} else {
+					this->get_logger()->log_message(Log::Error, enc_speak(ENCErrorCode::SSE13, cell->name));
+					cell->checksum = 0U;
+				}
+			} else {
+				this->get_logger()->log_message(Log::Error, enc_speak(ENCErrorCode::SSE12, cell->name));
+			}
 		}
+	} else {
+		this->get_logger()->log_message(Log::Warning, enc_speak(ENCErrorCode::SSE11));
 	}
+
+	this->PERMIT_TXT = permit;
+}
+
+void S63let::on_public_key(Platform::String^ ms_appdata, ENChartDocument^ doc) {
+	this->IHO_PUB = static_cast<PublicKeyDoc^>(doc);
+
+	this->get_logger()->log_message(Log::Info, L"p: %S", this->IHO_PUB->p.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"q: %S", this->IHO_PUB->q.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"g: %S", this->IHO_PUB->g.to_hexstring().c_str());
+	this->get_logger()->log_message(Log::Info, L"y: %S", this->IHO_PUB->y.to_hexstring().c_str());
+}
+
+void S63let::on_certificate(Platform::String^ ms_appdata, ENChartDocument^ doc) {
+	this->IHO_CRT = static_cast<CertificateDoc^>(doc);
 }
 
 bool S63let::ready() {
-	return (this->graph_dig != nullptr);
+	return (this->PERMIT_TXT != nullptr);
 }
 
 void S63let::fill_extent(float x, float y, float* w, float* h) {
@@ -140,11 +186,19 @@ void S63let::relocate_icons() {
 }
 
 /*************************************************************************************************/
+void S63let::set_pseudo_date(long long year, long long month, long long day) {
+	this->pseudo_now = make_seconds(year, month, day);
+}
+
 ENChartDoctype S63let::filter_file(Platform::String^ filename, Platform::String^ _ext) {
 	ENChartDoctype ft = ENChartDoctype::_;
 
 	if (filename->Equals("PERMIT.TXT")) {
 		ft = ENChartDoctype::PERMIT;
+	} else if (_ext->Equals(".PUB")) {
+		ft = ENChartDoctype::PublicKey;
+	} else if (_ext->Equals(".CRT")) {
+		ft = ENChartDoctype::Certificate;
 	}
 
 	return ft;
@@ -153,5 +207,7 @@ ENChartDoctype S63let::filter_file(Platform::String^ filename, Platform::String^
 void S63let::on_appdata(Platform::String^ ms_appdata, ENChartDocument^ doc, ENChartDoctype type) {
 	switch (type) {
 	case ENChartDoctype::PERMIT: this->on_permit(ms_appdata, doc); break;
+	case ENChartDoctype::PublicKey: this->on_public_key(ms_appdata, doc); break;
+	case ENChartDoctype::Certificate: this->on_certificate(ms_appdata, doc); break;
 	}
 }

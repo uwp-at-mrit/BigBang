@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "datum/bytes.hpp"
+
 namespace WarGrey::SCADA {
 	private enum class ENCErrorCode {
 		SSE01, SSE02, SSE03, SSE04, SSE05, SSE06, SSE07, SSE08,
@@ -14,11 +16,12 @@ namespace WarGrey::SCADA {
 	};
 
 	private enum class ENChartDoctype {
-		PERMIT,
+		PERMIT, PublicKey, Certificate,
 		_
 	};
 
-	Platform::String^ enc_speak(WarGrey::SCADA::ENCErrorCode ecode);
+	Platform::String^ enc_speak(WarGrey::SCADA::ENCErrorCode ecode, Platform::String^ cell_name = nullptr);
+	Platform::String^ enc_speak(WarGrey::SCADA::ENCErrorCode ecode, const char* cell_name);
 
 	private ref class ENChartDocument abstract {
 	public:
