@@ -134,18 +134,18 @@ namespace WarGrey::SCADA {
 	template<typename Menu, class G, class Attachment>
 	void menu_push_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
 		, WarGrey::SCADA::IMenuCommand<Menu, G, Attachment>* exe
-		, Menu start, Menu end, Attachment pobj, Platform::String^ tongue = nullptr) {
-		for (Menu cmd = start; cmd <= end; cmd++) {
+		, Menu start, Menu endp1, Attachment pobj, Platform::String^ tongue = nullptr) {
+		for (Menu cmd = start; cmd < endp1; cmd++) {
 			WarGrey::SCADA::menu_push_command(m, exe, cmd, pobj, tongue);
 		}
 	}
 
 	template<typename Menu, class G, class Attachment>
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_menu(WarGrey::SCADA::IMenuCommand<Menu, G, Attachment>* exe
-		, Menu first, Menu last, Attachment pobj, Platform::String^ tongue = nullptr) {
+		, Menu first, Menu lastp1, Attachment pobj, Platform::String^ tongue = nullptr) {
 		Windows::UI::Xaml::Controls::MenuFlyout^ m = ref new Windows::UI::Xaml::Controls::MenuFlyout();
 
-		WarGrey::SCADA::menu_push_command(m, exe, first, last, pobj, tongue);
+		WarGrey::SCADA::menu_push_command(m, exe, first, lastp1, pobj, tongue);
 
 		return m;
 	}
@@ -154,9 +154,9 @@ namespace WarGrey::SCADA {
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_menu(WarGrey::SCADA::IMenuCommand<Menu, G, Attachment>* exe
 		, Attachment pobj, Platform::String^ tongue = nullptr) {
 		Menu first_cmd = static_cast<Menu>(0);
-		Menu last_cmd = static_cast<Menu>(static_cast<unsigned int>(Menu::_) - 1);
+		Menu lastp1_cmd = Menu::_;
 
-		return WarGrey::SCADA::make_menu<Menu, G, Attachment>(exe, first_cmd, last_cmd, pobj, tongue);
+		return WarGrey::SCADA::make_menu<Menu, G, Attachment>(exe, first_cmd, lastp1_cmd, pobj, tongue);
 	}
 
 	/************************************************************************************************/
@@ -228,18 +228,18 @@ namespace WarGrey::SCADA {
 	template<typename Menu, typename Group, class Attachment>
 	void group_menu_push_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
 		, WarGrey::SCADA::IGroupMenuCommand<Menu, Group, Attachment>* exe, Group id
-		, Menu start, Menu end, Attachment pobj, Platform::String^ tongue = nullptr) {
-		for (Menu cmd = start; cmd <= end; cmd++) {
+		, Menu start, Menu endp1, Attachment pobj, Platform::String^ tongue = nullptr) {
+		for (Menu cmd = start; cmd < endp1; cmd++) {
 			WarGrey::SCADA::group_menu_push_command(m, exe, id, cmd, pobj, tongue);
 		}
 	}
 
 	template<typename Menu, typename Group, class Attachment>
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_group_menu(WarGrey::SCADA::IGroupMenuCommand<Menu, Group, Attachment>* exe
-		, Group id, Menu first, Menu last, Attachment pobj, Platform::String^ tongue = nullptr) {
+		, Group id, Menu first, Menu lastp1, Attachment pobj, Platform::String^ tongue = nullptr) {
 		Windows::UI::Xaml::Controls::MenuFlyout^ gm = ref new Windows::UI::Xaml::Controls::MenuFlyout();
 
-		WarGrey::SCADA::group_menu_push_command(gm, exe, id, first, last, pobj, tongue);
+		WarGrey::SCADA::group_menu_push_command(gm, exe, id, first, lastp1, pobj, tongue);
 
 		return gm;
 	}
@@ -248,9 +248,9 @@ namespace WarGrey::SCADA {
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_group_menu(WarGrey::SCADA::IGroupMenuCommand<Menu, Group, Attachment>* exe
 		, Group id, Attachment pobj, Platform::String^ tongue = nullptr) {
 		Menu first_cmd = static_cast<Menu>(0);
-		Menu last_cmd = static_cast<Menu>(static_cast<unsigned int>(Menu::_) - 1);
+		Menu lastp1_cmd = Menu::_;
 
-		return WarGrey::SCADA::make_group_menu<Menu, Group, Attachment>(exe, id, first_cmd, last_cmd, pobj, tongue);
+		return WarGrey::SCADA::make_group_menu<Menu, Group, Attachment>(exe, id, first_cmd, lastp1_cmd, pobj, tongue);
 	}
 
 	/************************************************************************************************/
