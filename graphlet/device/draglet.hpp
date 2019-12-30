@@ -22,6 +22,10 @@ namespace WarGrey::SCADA {
 		double visor_degrees_max;
 		double arm_degrees_min;
 		double arm_degrees_max;
+		double visor_side_b;
+		double visor_side_c;
+		double visor_side_a;
+		double visor_active_length;
 	};
 
 	private struct DragStyle {
