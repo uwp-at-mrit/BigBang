@@ -88,7 +88,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void on_appdata(Windows::Foundation::Uri^ vessel, WarGrey::SCADA::TrailingSuctionDredger^ vessel_config) override;
-		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
+		//void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
 
 	private:
 		void reconstruct();

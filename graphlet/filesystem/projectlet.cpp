@@ -138,7 +138,7 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	 * The modifyDIG draw icons firstly.
 	 */
 	
-	frame->change_mode(Dredger);
+	//frame->change_mode(Dredger);
 	this->map = this->planet->insert_one(new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height));
 	
 	{ // make icons
@@ -169,7 +169,7 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 		}
 	}
 
-	frame->change_mode(Dredger | ENChart);
+	//frame->change_mode(Dredger | ENChart);
 
 	if (this->vessel != nullptr) {
 		this->planet->insert(this->vessel, this->view_size.Width * 0.5F, this->view_size.Height * 0.5F, GraphletAnchor::CC);
@@ -190,7 +190,7 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 		this->front_sec->attach_to_map(this->map);
 	}
 
-	frame->change_mode(Dredger);
+	//frame->change_mode(Dredger);
 
 	this->planet->end_update_sequence();
 

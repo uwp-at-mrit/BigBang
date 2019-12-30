@@ -371,7 +371,7 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 #if _DEBUG
 	} else {
 		this->get_logger()->log_message(Log::Warning,
-			L"%s: inserting: ignored graphlet since it has already had a owner",
+			L"%s: inserting: ignored graphlet since it has already had an owner",
 			this->name()->Data());
 #endif
 	}
