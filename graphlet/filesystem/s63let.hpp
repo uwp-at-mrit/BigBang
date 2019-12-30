@@ -35,7 +35,8 @@ namespace WarGrey::SCADA {
 		void set_pseudo_date(long long year, long long month, long long day);
 
 	protected:
-		WarGrey::SCADA::ENChartDoctype filter_file(Platform::String^ file, Platform::String^ _ext) override;
+		bool filter_folder(Platform::String^ parent, Platform::String^ dirname) override;
+		WarGrey::SCADA::ENChartDoctype filter_file(Platform::String^ parent, Platform::String^ file, Platform::String^ _ext) override;
 		void on_appdata(Platform::String^ ms_appdata, WarGrey::SCADA::ENChartDocument^ doc_enc, WarGrey::SCADA::ENChartDoctype type) override;
 		void on_appdata_not_found(Platform::String^ ms_appdata, ENChartDoctype type) override {}
 

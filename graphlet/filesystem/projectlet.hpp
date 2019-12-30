@@ -54,7 +54,7 @@ namespace WarGrey::SCADA {
 		bool on_wheel_zoom(float x, float y, float delta) override;
 
 	protected:
-		WarGrey::SCADA::ProjectDoctype filter_file(Platform::String^ file, Platform::String^ _ext) override;
+		WarGrey::SCADA::ProjectDoctype filter_file(Platform::String^ dirpath, Platform::String^ file, Platform::String^ _ext) override;
 		void on_appdata(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dig, WarGrey::SCADA::ProjectDoctype type) override;
 		void on_appdata_not_found(Platform::String^ ms_appdata, ProjectDoctype type) override {}
 

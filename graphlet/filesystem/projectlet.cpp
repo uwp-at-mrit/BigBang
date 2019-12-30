@@ -61,7 +61,7 @@ Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot, S63let* enchart
 	, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
 	: Planetlet(new ProjectFrame(project), GraphletAnchor::LT, background)
 	, view_size(Size(view_width, view_height)), vessel(vessel), plot(plot), map(nullptr), enchart(enchart) {
-	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : rootdir + "\\" + project);
+	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : make_wstring(L"%s\\%s", rootdir->Data(), project->Data()));
 	this->enable_stretch(false, false);
 	this->enable_events(true, true); // enable low level events for traceline.
 	this->disable_wheel_translation(true);
@@ -489,7 +489,7 @@ const TransversePlane* Projectlet::section(double x, double y) {
 }
 
 /*************************************************************************************************/
-ProjectDoctype Projectlet::filter_file(Platform::String^ filename, Platform::String^ _ext) {
+ProjectDoctype Projectlet::filter_file(Platform::String^ dirpath, Platform::String^ filename, Platform::String^ _ext) {
 	ProjectDoctype ft = ProjectDoctype::_;
 
 	if (filename->Equals("Back.LOG")) {

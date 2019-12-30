@@ -11,7 +11,7 @@ namespace WarGrey::SCADA {
 		}
 
 		void on_directory_changed(Windows::Storage::StorageFolder^ rootdir) override {
-			this->list_files();
+			this->list_files_or_folders();
 		}
 
 	protected:

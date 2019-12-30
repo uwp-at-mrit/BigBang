@@ -53,7 +53,7 @@ namespace {
 S63let::S63let(Platform::String^ enc, uint64 hw_id, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
 	: Planetlet(new S63Frame(enc), GraphletAnchor::LT, background), view_size(Size(view_width, view_height)) /*, map(nullptr) */
 	, HW_ID(enc_natural(hw_id)), pseudo_now(0) {
-	this->ms_appdata_rootdir = ((rootdir == nullptr) ? enc : rootdir + "\\" + enc);
+	this->ms_appdata_rootdir = ((rootdir == nullptr) ? enc : make_wstring(L"%s\\%s", rootdir->Data(), enc->Data()));
 	this->enable_stretch(false, false);
 	this->enable_events(true, false);
 	this->disable_wheel_translation(true);
@@ -186,11 +186,11 @@ void S63let::relocate_icons() {
 }
 
 /*************************************************************************************************/
-void S63let::set_pseudo_date(long long year, long long month, long long day) {
-	this->pseudo_now = make_seconds(year, month, day);
+bool S63let::filter_folder(Platform::String^ parent, Platform::String^ dirname) {
+	return (parent == nullptr);
 }
 
-ENChartDoctype S63let::filter_file(Platform::String^ filename, Platform::String^ _ext) {
+ENChartDoctype S63let::filter_file(Platform::String^ parent, Platform::String^ filename, Platform::String^ _ext) {
 	ENChartDoctype ft = ENChartDoctype::_;
 
 	if (filename->Equals("PERMIT.TXT")) {
@@ -210,4 +210,9 @@ void S63let::on_appdata(Platform::String^ ms_appdata, ENChartDocument^ doc, ENCh
 	case ENChartDoctype::PublicKey: this->on_public_key(ms_appdata, doc); break;
 	case ENChartDoctype::Certificate: this->on_certificate(ms_appdata, doc); break;
 	}
+}
+
+/*************************************************************************************************/
+void S63let::set_pseudo_date(long long year, long long month, long long day) {
+	this->pseudo_now = make_seconds(year, month, day);
 }
