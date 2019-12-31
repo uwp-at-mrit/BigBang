@@ -5,6 +5,7 @@
 #include "datum/box.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 /*************************************************************************************************/
 DigDoc::DigDoc(std::filebuf& dig) : lx(infinity), ty(infinity), rx(-infinity), by(-infinity) {
@@ -30,7 +31,7 @@ DigDoc::~DigDoc() {
 	}
 }
 
-void DigDoc::push_back_item(WarGrey::SCADA::IDigDatum* item) {
+void DigDoc::push_back_item(WarGrey::DTPM::IDigDatum* item) {
 	this->items.push_back(item);
 	this->counters[item->type] = this->counters[item->type] + 1;
 

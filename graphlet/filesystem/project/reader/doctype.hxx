@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private enum class ProjectDoctype {
 		Map_LOG, Depth_LOG, Section_LOG,
 		DIG, XYZ, MTX, SEC,
@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 
 	private ref class ProjectDocument abstract {
 	public:
-		static WarGrey::SCADA::ProjectDocument^ load(Platform::String^ filename, WarGrey::SCADA::ProjectDoctype type);
+		static WarGrey::DTPM::ProjectDocument^ load(Platform::String^ filename, WarGrey::DTPM::ProjectDoctype type);
 
 	public:
 		virtual ~ProjectDocument() {}

@@ -4,6 +4,7 @@
 #include "datum/string.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 static void cell_extract(ENCell* cell, bytes& permit) {
 	const unsigned char* pool = permit.c_str();
@@ -35,7 +36,7 @@ static void cell_extract(ENCell* cell, bytes& permit) {
 	}
 }
 
-bool WarGrey::SCADA::ENCell::malformed() {
+bool ENCell::malformed() {
 	return (this->checksum.is_zero());
 }
 

@@ -16,24 +16,24 @@
 
 #include "graphlet/symbol/dig/dig.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private enum class SailingMode { Free, VesselVisible, VesselCenter };
 
-	private class Projectlet : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::SCADA::ProjectDocument, WarGrey::SCADA::Planetlet, WarGrey::SCADA::ProjectDoctype> {
+	private class Projectlet : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::DTPM::ProjectDocument, WarGrey::SCADA::Planetlet, WarGrey::DTPM::ProjectDoctype> {
 	public:
-		Projectlet(WarGrey::SCADA::IVessellet* vessel, WarGrey::SCADA::ColorPlotlet* plot,
+		Projectlet(WarGrey::DTPM::IVessellet* vessel, WarGrey::DTPM::ColorPlotlet* plot,
 			Platform::String^ project, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "projects");
 
-		Projectlet(WarGrey::SCADA::IVessellet* vessel, WarGrey::SCADA::ColorPlotlet* plot, WarGrey::SCADA::S63let* enchart,
+		Projectlet(WarGrey::DTPM::IVessellet* vessel, WarGrey::DTPM::ColorPlotlet* plot, WarGrey::DTPM::S63let* enchart,
 			Platform::String^ project, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "projects");
 
 	public:
-		bool move_vessel(double x, double y, WarGrey::SCADA::SailingMode mode = SailingMode::VesselVisible);
-		const WarGrey::SCADA::TransversePlane* section(double x, double y);
+		bool move_vessel(double x, double y, WarGrey::DTPM::SailingMode mode = SailingMode::VesselVisible);
+		const WarGrey::DTPM::TransversePlane* section(double x, double y);
 
 	public:
 		void center_vessel();
@@ -54,38 +54,38 @@ namespace WarGrey::SCADA {
 		bool on_wheel_zoom(float x, float y, float delta) override;
 
 	protected:
-		WarGrey::SCADA::ProjectDoctype filter_file(Platform::String^ dirpath, Platform::String^ file, Platform::String^ _ext) override;
-		void on_appdata(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dig, WarGrey::SCADA::ProjectDoctype type) override;
-		void on_appdata_not_found(Platform::String^ ms_appdata, ProjectDoctype type) override {}
+		WarGrey::DTPM::ProjectDoctype filter_file(Platform::String^ dirpath, Platform::String^ file, Platform::String^ _ext) override;
+		void on_appdata(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDocument^ doc_dig, WarGrey::DTPM::ProjectDoctype type) override;
+		void on_appdata_not_found(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDoctype type) override {}
 
 	private:
-		void on_dig(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dig);
-		void on_xyz(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_xyz);
-		void on_sec(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_sec);
-		void on_traceline(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_dat);
-		void on_map_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
-		void on_depth_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
-		void on_section_logue(Platform::String^ ms_appdata, WarGrey::SCADA::ProjectDocument^ doc_log);
+		void on_dig(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDocument^ doc_dig);
+		void on_xyz(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDocument^ doc_xyz);
+		void on_sec(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDocument^ doc_sec);
+		void on_traceline(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDocument^ doc_dat);
+		void on_map_logue(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDocument^ doc_log);
+		void on_depth_logue(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDocument^ doc_log);
+		void on_section_logue(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDocument^ doc_log);
 
 	private:
 		bool relocate_vessel(Windows::Foundation::Numerics::float2* vpos = nullptr);
 		void relocate_icons();
 
 	private:
-		WarGrey::SCADA::ProjectDocument^ graph_dig;
+		WarGrey::DTPM::ProjectDocument^ graph_dig;
 
 	private:
 		Platform::String^ ms_appdata_rootdir;
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
 
 	private: // graphlets are managed by the Planetlet
-		WarGrey::SCADA::DigMaplet* map;
-		WarGrey::SCADA::IVessellet* vessel;
-		WarGrey::SCADA::S63let* enchart;
-		WarGrey::SCADA::ColorPlotlet* plot;
-		WarGrey::SCADA::Xyzlet* depth_xyz;
-		WarGrey::SCADA::Tracelinelet* jobs_dat;
-		WarGrey::SCADA::FrontalSectionlet* front_sec;
+		WarGrey::DTPM::DigMaplet* map;
+		WarGrey::DTPM::IVessellet* vessel;
+		WarGrey::DTPM::S63let* enchart;
+		WarGrey::DTPM::ColorPlotlet* plot;
+		WarGrey::DTPM::Xyzlet* depth_xyz;
+		WarGrey::DTPM::Tracelinelet* jobs_dat;
+		WarGrey::DTPM::FrontalSectionlet* front_sec;
 		std::deque<Platform::Object^> icons;
 
 	private:

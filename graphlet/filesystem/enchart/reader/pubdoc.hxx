@@ -6,8 +6,8 @@
 
 #include "datum/natural.hpp"
 
-namespace WarGrey::SCADA {
-	private ref class PublicKeyDoc sealed : public WarGrey::SCADA::ENChartDocument {
+namespace WarGrey::DTPM {
+	private ref class PublicKeyDoc sealed : public WarGrey::DTPM::ENChartDocument {
 	internal:
 		PublicKeyDoc(std::filebuf& dig);
 

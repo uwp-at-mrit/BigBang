@@ -13,8 +13,8 @@
 
 #include "datum/natural.hpp"
 
-namespace WarGrey::SCADA {
-	private class S63let : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::SCADA::ENChartDocument, WarGrey::SCADA::Planetlet, WarGrey::SCADA::ENChartDoctype> {
+namespace WarGrey::DTPM {
+	private class S63let : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::DTPM::ENChartDocument, WarGrey::SCADA::Planetlet, WarGrey::DTPM::ENChartDoctype> {
 	public:
 		S63let(Platform::String^ enc, uint64 HW_ID, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
@@ -36,22 +36,22 @@ namespace WarGrey::SCADA {
 
 	protected:
 		bool filter_folder(Platform::String^ parent, Platform::String^ dirname) override;
-		WarGrey::SCADA::ENChartDoctype filter_file(Platform::String^ parent, Platform::String^ file, Platform::String^ _ext) override;
-		void on_appdata(Platform::String^ ms_appdata, WarGrey::SCADA::ENChartDocument^ doc_enc, WarGrey::SCADA::ENChartDoctype type) override;
+		WarGrey::DTPM::ENChartDoctype filter_file(Platform::String^ parent, Platform::String^ file, Platform::String^ _ext) override;
+		void on_appdata(Platform::String^ ms_appdata, WarGrey::DTPM::ENChartDocument^ doc_enc, WarGrey::DTPM::ENChartDoctype type) override;
 		void on_appdata_not_found(Platform::String^ ms_appdata, ENChartDoctype type) override {}
 
 	private:
-		void on_permit(Platform::String^ ms_appdata, WarGrey::SCADA::ENChartDocument^ doc_enc);
-		void on_public_key(Platform::String^ ms_appdata, WarGrey::SCADA::ENChartDocument^ doc_enc);
-		void on_certificate(Platform::String^ ms_appdata, WarGrey::SCADA::ENChartDocument^ doc_enc);
+		void on_permit(Platform::String^ ms_appdata, WarGrey::DTPM::ENChartDocument^ doc_enc);
+		void on_public_key(Platform::String^ ms_appdata, WarGrey::DTPM::ENChartDocument^ doc_enc);
+		void on_certificate(Platform::String^ ms_appdata, WarGrey::DTPM::ENChartDocument^ doc_enc);
 
 	private:
 		void relocate_icons();
 
 	private:
-		WarGrey::SCADA::PermitDoc^ PERMIT_TXT;
-		WarGrey::SCADA::PublicKeyDoc^ IHO_PUB;
-		WarGrey::SCADA::CertificateDoc^ IHO_CRT;
+		WarGrey::DTPM::PermitDoc^ PERMIT_TXT;
+		WarGrey::DTPM::PublicKeyDoc^ IHO_PUB;
+		WarGrey::DTPM::CertificateDoc^ IHO_CRT;
 
 	private:
 		Platform::String^ ms_appdata_rootdir;

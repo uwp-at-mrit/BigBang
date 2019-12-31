@@ -1,6 +1,6 @@
 #include "graphlet/primitive.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class Kettlet : public WarGrey::SCADA::IGraphlet {
 	public:
 		Kettlet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_color = nullptr,

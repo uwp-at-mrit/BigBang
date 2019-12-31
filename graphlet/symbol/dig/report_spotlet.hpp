@@ -1,6 +1,6 @@
 #include "graphlet/primitive.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class ReportSpotlet : public WarGrey::SCADA::IGraphlet {
 	public:
 		ReportSpotlet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);

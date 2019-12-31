@@ -4,7 +4,7 @@
 
 #include "graphlet/filesystem/project/reader/doctype.hxx"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private struct SectionDot {
 	public:
 		SectionDot(double x, double y, double depth);
@@ -21,12 +21,12 @@ namespace WarGrey::SCADA {
 		double position_sign;
 	};
 
-	private ref class SecDoc sealed : public WarGrey::SCADA::ProjectDocument {
+	private ref class SecDoc sealed : public WarGrey::DTPM::ProjectDocument {
 	internal:
 		SecDoc(std::filebuf& sec);
 
 	internal:
-		std::deque<WarGrey::SCADA::SectionDot> centerline;
-		std::deque<std::deque<WarGrey::SCADA::SectionDot>> sidelines;
+		std::deque<WarGrey::DTPM::SectionDot> centerline;
+		std::deque<std::deque<WarGrey::DTPM::SectionDot>> sidelines;
 	};
 }

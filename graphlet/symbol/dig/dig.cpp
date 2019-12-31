@@ -33,6 +33,7 @@
 #include "graphlet/symbol/dig/rocklet.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
@@ -95,7 +96,7 @@ static void rotate_endpoints(double* lx, double* ty, double* rx, double* by, dou
 }
 
 /*************************************************************************************************/
-IDigDatum* WarGrey::SCADA::read_dig_line(std::filebuf& dig, float icon_size) {
+IDigDatum* WarGrey::DTPM::read_dig_line(std::filebuf& dig, float icon_size) {
 	IDigDatum* datum = nullptr;
 	char ch = read_char(dig);
 

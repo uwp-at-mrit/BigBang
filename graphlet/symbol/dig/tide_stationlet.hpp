@@ -1,6 +1,6 @@
 #include "graphlet/primitive.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class TideStationlet : public WarGrey::SCADA::IGraphlet {
 	public:
 		TideStationlet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_color = nullptr,

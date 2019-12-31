@@ -1,7 +1,7 @@
 #include "graphlet/primitive.hpp"
 #include "turtle.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private struct LightShiplet : public WarGrey::SCADA::IGraphlet{
 	public:
 		LightShiplet(float size,

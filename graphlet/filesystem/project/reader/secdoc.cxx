@@ -6,6 +6,7 @@
 #include "math.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 /*************************************************************************************************/
 SectionDot::SectionDot(double x, double y, double depth)

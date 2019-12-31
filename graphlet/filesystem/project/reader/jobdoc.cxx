@@ -6,6 +6,7 @@
 #include "math.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 /*************************************************************************************************/
 JobLineSection::JobLineSection(int group, int seq, double2& s, double2& e, double depth, Platform::String^ name) {

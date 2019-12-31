@@ -10,6 +10,7 @@
 #include "math.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 using namespace Windows::UI;
 using namespace Windows::System;
@@ -66,7 +67,7 @@ static void prepare_transverse_section_style(TransverseSectionStyle* style) {
 	ICAS_SLOT(style->vaxes_half_count, 4);
 }
 
-TransverseSectionStyle WarGrey::SCADA::default_transverse_section_style(CanvasSolidColorBrush^ section, CanvasSolidColorBrush^ ps_color, CanvasSolidColorBrush^ sb_color) {
+TransverseSectionStyle WarGrey::DTPM::default_transverse_section_style(CanvasSolidColorBrush^ section, CanvasSolidColorBrush^ ps_color, CanvasSolidColorBrush^ sb_color) {
 	TransverseSectionStyle style;
 
 	style.section_color = section;
@@ -79,7 +80,7 @@ TransverseSectionStyle WarGrey::SCADA::default_transverse_section_style(CanvasSo
 	return style;
 }
 
-private struct WarGrey::SCADA::TransversePlane {
+private struct WarGrey::DTPM::TransversePlane {
 public:
 	~TransversePlane() noexcept {
 		if (this->dots != nullptr) {

@@ -2,7 +2,7 @@
 
 #include "turtle.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class OilWelllet : public WarGrey::SCADA::IGraphlet {
 	public:
 		OilWelllet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ rig_color = nullptr,

@@ -6,7 +6,7 @@
 
 #include "datum/natural.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private enum class PermitContent { Full, Partial, _ };
 	private enum class PermitServiceLevel { Subscription, SinglePurchase, _ };
 
@@ -25,16 +25,16 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Natural key2;
 
 	public:
-		WarGrey::SCADA::PermitServiceLevel type;
+		WarGrey::DTPM::PermitServiceLevel type;
 		unsigned long long edition; // deprecated
-		bytes data_server_id;
+		WarGrey::SCADA::bytes data_server_id;
 		Platform::String^ comment;
 
 	public:
 		bool malformed();
 	};
 
-	private ref class PermitDoc sealed : public WarGrey::SCADA::ENChartDocument {
+	private ref class PermitDoc sealed : public WarGrey::DTPM::ENChartDocument {
 	internal:
 		PermitDoc(std::filebuf& dig);
 
@@ -44,13 +44,13 @@ namespace WarGrey::SCADA {
 		unsigned char cminute;
 		unsigned char csecond;
 		unsigned char version;
-		WarGrey::SCADA::PermitContent content;
+		WarGrey::DTPM::PermitContent content;
 
 	internal:
-		std::deque<WarGrey::SCADA::ENCell> encs;
-		std::deque<WarGrey::SCADA::ENCell> ecss;
+		std::deque<WarGrey::DTPM::ENCell> encs;
+		std::deque<WarGrey::DTPM::ENCell> ecss;
 
 	private:
-		void fill_cell_permit(std::filebuf& dig, WarGrey::SCADA::ENCell* cell);
+		void fill_cell_permit(std::filebuf& dig, WarGrey::DTPM::ENCell* cell);
 	};
 }

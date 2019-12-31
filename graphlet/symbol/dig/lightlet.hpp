@@ -1,6 +1,6 @@
 #include "graphlet/primitive.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class Lightlet : public WarGrey::SCADA::IGraphlet {
 	public:
 		Lightlet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr

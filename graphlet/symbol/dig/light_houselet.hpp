@@ -2,7 +2,7 @@
 
 #include "turtle.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class LightHouselet : public WarGrey::SCADA::IGraphlet {
 	public:
 		LightHouselet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ light_color = nullptr,

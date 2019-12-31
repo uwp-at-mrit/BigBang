@@ -15,6 +15,7 @@
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 using namespace Windows::System;
 

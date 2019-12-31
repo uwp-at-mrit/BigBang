@@ -2,6 +2,7 @@
 #include "math.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
@@ -55,18 +56,18 @@ void IVessellet::resolve_radius() {
 }
 
 /*************************************************************************************************/
-float2 WarGrey::SCADA::vessel_point(double2& src, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
+float2 WarGrey::DTPM::vessel_point(double2& src, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
 	return vessel_point(src.x, src.y, gps, s, bow, lt, rb);
 }
 
-float2 WarGrey::SCADA::vessel_point(double2& src, double2& base, double2& src_sign, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
+float2 WarGrey::DTPM::vessel_point(double2& src, double2& base, double2& src_sign, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
 	double dotx = base.x + src.x * src_sign.x;
 	double doty = base.y + src.y * src_sign.y;
 
 	return vessel_point(dotx, doty, gps, s, bow, lt, rb);
 }
 
-float2 WarGrey::SCADA::vessel_point(double x, double y, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
+float2 WarGrey::DTPM::vessel_point(double x, double y, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
 	float cosbow, sinbow;
 
 	vessel_bow_transform(bow, &cosbow, &sinbow);
@@ -74,7 +75,7 @@ float2 WarGrey::SCADA::vessel_point(double x, double y, double2& gps, float2& s,
 	return vessel_point_on_screen(x, y, gps, s, cosbow, sinbow, lt, rb);
 }
 
-CanvasGeometry^ WarGrey::SCADA::vessel_polygon(double2 src[], size_t count, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
+CanvasGeometry^ WarGrey::DTPM::vessel_polygon(double2 src[], size_t count, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
 	Platform::Array<float2>^ vertexes = ref new Platform::Array<float2>((unsigned int)count);
 	float cosbow, sinbow;
 
@@ -87,7 +88,7 @@ CanvasGeometry^ WarGrey::SCADA::vessel_polygon(double2 src[], size_t count, doub
 	return CanvasGeometry::CreatePolygon(CanvasDevice::GetSharedDevice(), vertexes);
 }
 
-CanvasGeometry^ WarGrey::SCADA::vessel_polygon(double2 src[], size_t count, double2& base, double2& src_sign, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
+CanvasGeometry^ WarGrey::DTPM::vessel_polygon(double2 src[], size_t count, double2& base, double2& src_sign, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
 	Platform::Array<float2>^ vertexes = ref new Platform::Array<float2>((unsigned int)count);
 	float cosbow, sinbow;
 
@@ -103,7 +104,7 @@ CanvasGeometry^ WarGrey::SCADA::vessel_polygon(double2 src[], size_t count, doub
 	return CanvasGeometry::CreatePolygon(CanvasDevice::GetSharedDevice(), vertexes);
 }
 
-float WarGrey::SCADA::vessel_radius(float2& lt, float2& rb) {
+float WarGrey::DTPM::vessel_radius(float2& lt, float2& rb) {
 	float rlt2 = points_distance_squared(lt.x, lt.y, 0.0F, 0.0F);
 	float rrt2 = points_distance_squared(rb.x, lt.y, 0.0F, 0.0F);
 	float rlb2 = points_distance_squared(lt.x, rb.y, 0.0F, 0.0F);
@@ -112,7 +113,7 @@ float WarGrey::SCADA::vessel_radius(float2& lt, float2& rb) {
 	return flsqrt(flmax(flmax(rlt2, rrt2), flmax(rlb2, rrb2)));
 }
 
-float WarGrey::SCADA::vessel_radius(float2& lt, float2& rb, double2& gps) {
+float WarGrey::DTPM::vessel_radius(float2& lt, float2& rb, double2& gps) {
 	float gx = float(gps.x);
 	float gy = float(gps.y);
 	float rlt2 = points_distance_squared(lt.x, lt.y, gx, gy);

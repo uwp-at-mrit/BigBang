@@ -1,6 +1,6 @@
 #include "graphlet/primitive.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class Picketlet : public WarGrey::SCADA::IGraphlet {
 	public:
 		Picketlet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,

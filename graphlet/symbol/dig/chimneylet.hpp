@@ -2,7 +2,7 @@
 
 #include "turtle.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class Chimneylet : public WarGrey::SCADA::IGraphlet {
 	public:
 		Chimneylet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);

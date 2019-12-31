@@ -7,7 +7,7 @@
 
 #include "datum/flonum.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private struct JobLineSection {
 	public:
 		JobLineSection(int group, int seq,
@@ -30,13 +30,13 @@ namespace WarGrey::SCADA {
 		double angle_deg;
 	};
 
-	private ref class JobDoc sealed : public WarGrey::SCADA::ProjectDocument {
+	private ref class JobDoc sealed : public WarGrey::DTPM::ProjectDocument {
 	internal:
 		JobDoc(std::filebuf& job);
 
 	internal:
 		int current_job;
 		int current_section;
-		std::map<int, std::deque<WarGrey::SCADA::JobLineSection>> jobs;
+		std::map<int, std::deque<WarGrey::DTPM::JobLineSection>> jobs;
 	};
 }

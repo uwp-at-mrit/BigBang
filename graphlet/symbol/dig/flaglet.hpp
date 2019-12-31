@@ -2,7 +2,7 @@
 
 #include "turtle.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class Flaglet : public WarGrey::SCADA::IGraphlet {
 	public:
 		Flaglet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);

@@ -7,10 +7,10 @@
 #include "graphlet/filesystem/project/reader/jobdoc.hxx"
 #include "graphlet/filesystem/project/reader/secdoc.hxx"
 
-using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 /*************************************************************************************************/
-ProjectDocument^ ProjectDocument::load(Platform::String^ filename, WarGrey::SCADA::ProjectDoctype type) {
+ProjectDocument^ ProjectDocument::load(Platform::String^ filename, WarGrey::DTPM::ProjectDoctype type) {
 	ProjectDocument^ doc = nullptr;
 	std::filebuf src;
 

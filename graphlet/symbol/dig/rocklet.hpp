@@ -1,6 +1,6 @@
 #include "graphlet/primitive.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class Rocklet : public WarGrey::SCADA::IGraphlet {
 	public:
 		Rocklet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);

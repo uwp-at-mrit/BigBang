@@ -7,8 +7,8 @@
 
 #include "graphlet/symbol/dig/dig.hpp"
 
-namespace WarGrey::SCADA {
-	private ref class DigDoc sealed : public WarGrey::SCADA::ProjectDocument {
+namespace WarGrey::DTPM {
+	private ref class DigDoc sealed : public WarGrey::DTPM::ProjectDocument {
 	internal:
 		DigDoc(std::filebuf& dig);
 
@@ -19,9 +19,9 @@ namespace WarGrey::SCADA {
 		void fill_enclosing_box(double* x, double* y, double* width, double* height);
 
 	internal:
-		void push_back_item(WarGrey::SCADA::IDigDatum* item);
+		void push_back_item(WarGrey::DTPM::IDigDatum* item);
 		void rewind();
-		WarGrey::SCADA::IDigDatum* step();
+		WarGrey::DTPM::IDigDatum* step();
 
 	private:
 		double lx;
@@ -30,8 +30,8 @@ namespace WarGrey::SCADA {
 		double by;
 
 	private:
-		std::deque<WarGrey::SCADA::IDigDatum*> items;
-		std::deque<WarGrey::SCADA::IDigDatum*>::iterator cursor;
-		std::map<WarGrey::SCADA::DigDatumType, unsigned int> counters;
+		std::deque<WarGrey::DTPM::IDigDatum*> items;
+		std::deque<WarGrey::DTPM::IDigDatum*>::iterator cursor;
+		std::map<WarGrey::DTPM::DigDatumType, unsigned int> counters;
 	};
 }

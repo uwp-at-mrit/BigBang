@@ -1,6 +1,6 @@
 #include "graphlet/primitive.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class PilotStationlet : public WarGrey::SCADA::IGraphlet {
 	public:
 		PilotStationlet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);

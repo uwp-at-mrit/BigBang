@@ -4,8 +4,8 @@
 
 #include "graphlet/filesystem/project/reader/doctype.hxx"
 
-namespace WarGrey::SCADA {
-	private ref class DepthLog sealed : public WarGrey::SCADA::ProjectDocument {
+namespace WarGrey::DTPM {
+	private ref class DepthLog sealed : public WarGrey::DTPM::ProjectDocument {
 	internal:
 		DepthLog(std::filebuf& log);
 

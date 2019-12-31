@@ -12,6 +12,7 @@
 #include "math.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 using namespace Windows::UI;
 using namespace Windows::System;

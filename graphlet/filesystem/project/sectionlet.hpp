@@ -9,13 +9,13 @@
 
 #include "datum/flonum.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	struct TransversePlane;
 
 	private class FrontalSectionlet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		virtual ~FrontalSectionlet() noexcept;
-		FrontalSectionlet(WarGrey::SCADA::SecDoc^ sec, bool draw_slope_lines = false, float thickness = 1.0F,
+		FrontalSectionlet(WarGrey::DTPM::SecDoc^ sec, bool draw_slope_lines = false, float thickness = 1.0F,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ centerline_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ sideline_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ section_color = nullptr);
@@ -26,8 +26,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		
 	public:
-		void attach_to_map(WarGrey::SCADA::DigMaplet* master, bool force = false);
-		const WarGrey::SCADA::TransversePlane* section(double x, double y);
+		void attach_to_map(WarGrey::DTPM::DigMaplet* master, bool force = false);
+		const WarGrey::DTPM::TransversePlane* section(double x, double y);
 
 	private:
 		void section(double x, double y, double center_x, double center_y);
@@ -39,8 +39,8 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ section_color;
 
 	private:
-		WarGrey::SCADA::DigMaplet* master;
-		WarGrey::SCADA::SecDoc^ doc_sec;
+		WarGrey::DTPM::DigMaplet* master;
+		WarGrey::DTPM::SecDoc^ doc_sec;
 		std::deque<std::deque<std::pair<WarGrey::SCADA::double3, WarGrey::SCADA::double3>>> slope_segments;
 
 	private:
@@ -48,7 +48,7 @@ namespace WarGrey::SCADA {
 		bool draw_slope_lines;
 
 	private:
-		WarGrey::SCADA::TransversePlane* plane;
+		WarGrey::DTPM::TransversePlane* plane;
 		WarGrey::SCADA::double2 ps_boundry;
 		WarGrey::SCADA::double2 sb_boundry;
 	};
@@ -56,8 +56,8 @@ namespace WarGrey::SCADA {
 	/************************************************************************************************/
 	private ref class TransverseSection sealed {
 	public:
-		static WarGrey::SCADA::TransverseSection^ load(Platform::String^ path);
-		static bool save(WarGrey::SCADA::TransverseSection^ self, Platform::String^ path);
+		static WarGrey::DTPM::TransverseSection^ load(Platform::String^ path);
+		static bool save(WarGrey::DTPM::TransverseSection^ self, Platform::String^ path);
 
 	public:
 		TransverseSection(TransverseSection^ src = nullptr);
@@ -100,24 +100,24 @@ namespace WarGrey::SCADA {
 		int vaxes_half_count = -1;
 	};
 
-	WarGrey::SCADA::TransverseSectionStyle default_transverse_section_style(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = nullptr,
+	WarGrey::DTPM::TransverseSectionStyle default_transverse_section_style(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = nullptr,
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ ps_color = nullptr,
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ sb_color = nullptr);
 
 	private class TransverseSectionlet 
-		: public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::TransverseSection, WarGrey::SCADA::IGraphlet>
-		, public virtual WarGrey::SCADA::ISectionRegion {
+		: public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::DTPM::TransverseSection, WarGrey::SCADA::IGraphlet>
+		, public virtual WarGrey::DTPM::ISectionRegion {
 	public:
 		virtual ~TransverseSectionlet() noexcept;
 
-		TransverseSectionlet(WarGrey::SCADA::IVessellet* vessel, Platform::String^ section, float width, float height = 0.0F,
+		TransverseSectionlet(WarGrey::DTPM::IVessellet* vessel, Platform::String^ section, float width, float height = 0.0F,
 			Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
 		
-		TransverseSectionlet(WarGrey::SCADA::TransverseSectionStyle& style, WarGrey::SCADA::IVessellet* vessel, Platform::String^ section,
+		TransverseSectionlet(WarGrey::DTPM::TransverseSectionStyle& style, WarGrey::DTPM::IVessellet* vessel, Platform::String^ section,
 			float width, float height = 0.0F, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
 
 	public:
-		void update_section(const WarGrey::SCADA::TransversePlane* plane, double vessel_x, double vessel_y);
+		void update_section(const WarGrey::DTPM::TransversePlane* plane, double vessel_x, double vessel_y);
 
 	public:
 		void construct() override;
@@ -131,12 +131,12 @@ namespace WarGrey::SCADA {
 		void fill_scale(double* xscale, double* yscale) override;
 
 	public:
-		WarGrey::SCADA::TransverseSection^ clone_section(WarGrey::SCADA::TransverseSection^ dest = nullptr, bool real_section = true);
+		WarGrey::DTPM::TransverseSection^ clone_section(WarGrey::DTPM::TransverseSection^ dest = nullptr, bool real_section = true);
 		void preview(TransverseSection^ src);
 		void refresh(TransverseSection^ src);
 
 	protected:
-		void on_appdata(Windows::Foundation::Uri^ section, WarGrey::SCADA::TransverseSection^ section_config) override;
+		void on_appdata(Windows::Foundation::Uri^ section, WarGrey::DTPM::TransverseSection^ section_config) override;
 		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
 
 	private:
@@ -155,19 +155,19 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ section;
 
 	private:
-		WarGrey::SCADA::TransverseSectionStyle style;
+		WarGrey::DTPM::TransverseSectionStyle style;
 
 	private:
-		WarGrey::SCADA::TransverseSection^ preview_config;
-		WarGrey::SCADA::TransverseSection^ section_config;
+		WarGrey::DTPM::TransverseSection^ preview_config;
+		WarGrey::DTPM::TransverseSection^ section_config;
 		Windows::Foundation::Uri^ ms_appdata_config;
 
 	private:
-		WarGrey::SCADA::TransversePlane* plane;
+		WarGrey::DTPM::TransversePlane* plane;
 		double direction_sign;
 
 	private:
-		WarGrey::SCADA::IVessellet* vessel;
+		WarGrey::DTPM::IVessellet* vessel;
 		double vessel_x;
 		double vessel_y;
 

@@ -6,7 +6,7 @@
 
 #include "datum/flonum.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private ref class IVesselShape abstract {};
 
 	private class ISectionRegion abstract {
@@ -21,7 +21,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void draw_transverse_section(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			WarGrey::SCADA::ISectionRegion* sectionlet, float cx, float y, float half_width, float height) = 0;
+			WarGrey::DTPM::ISectionRegion* sectionlet, float cx, float y, float half_width, float height) = 0;
 
 	public:
 		virtual void set_bow_direction(double degrees) = 0;

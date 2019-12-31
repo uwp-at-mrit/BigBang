@@ -5,7 +5,7 @@
 #include "graphlet/primitive.hpp"
 #include "graphlet/symbol/dig/dig.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private enum class BuoyType {
 		_1, _2, _3, _4, _5, _6, _7,
 		RedWhite, Yellow, Black,
@@ -15,14 +15,14 @@ namespace WarGrey::SCADA {
 	
 	private struct BuoyDig : public IconDig {
 	public:
-		BuoyDig(std::filebuf& dig, WarGrey::SCADA::BuoyType subtype, float size);
+		BuoyDig(std::filebuf& dig, WarGrey::DTPM::BuoyType subtype, float size);
 
 	public:
 		WarGrey::SCADA::IGraphlet* make_graphlet(double* x, double* y) override;
 		Platform::String^ to_string() override;
 
 	private:
-		WarGrey::SCADA::BuoyType subtype;
+		WarGrey::DTPM::BuoyType subtype;
 		float size;
 	};
 
@@ -33,9 +33,9 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_color = nullptr;
 	};
 
-	private struct Buoylet : public IStatelet<WarGrey::SCADA::BuoyType, WarGrey::SCADA::BuoyStyle> {
+	private struct Buoylet : public WarGrey::SCADA::IStatelet<WarGrey::DTPM::BuoyType, WarGrey::DTPM::BuoyStyle> {
 	public:
-		Buoylet(WarGrey::SCADA::BuoyType subtype, float size);
+		Buoylet(WarGrey::DTPM::BuoyType subtype, float size);
 
 	public:
 		void fill_extent(float x, float y, float* width, float* height) override;
@@ -43,8 +43,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void prepare_style(WarGrey::SCADA::BuoyType type, WarGrey::SCADA::BuoyStyle& style) override;
-		void on_state_changed(WarGrey::SCADA::BuoyType type) override;
+		void prepare_style(WarGrey::DTPM::BuoyType type, WarGrey::DTPM::BuoyStyle& style) override;
+		void on_state_changed(WarGrey::DTPM::BuoyType type) override;
 
 	private:
 		void construct_buoy(bool resized);

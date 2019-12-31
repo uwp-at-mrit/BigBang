@@ -1,6 +1,6 @@
 #include "graphlet/primitive.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class NavigationMarklet : public WarGrey::SCADA::IGraphlet {
 	public:
 		NavigationMarklet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,

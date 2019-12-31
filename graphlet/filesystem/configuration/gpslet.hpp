@@ -7,11 +7,11 @@
 
 #include "cs/wgs_xy.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private ref class GPSCS sealed {
 	public:
-		static WarGrey::SCADA::GPSCS^ load(Platform::String^ path);
-		static bool save(WarGrey::SCADA::GPSCS^ self, Platform::String^ path);
+		static WarGrey::DTPM::GPSCS^ load(Platform::String^ path);
+		static bool save(WarGrey::DTPM::GPSCS^ self, Platform::String^ path);
 
 	public:
 		GPSCS(GPSCS^ src = nullptr);
@@ -20,7 +20,7 @@ namespace WarGrey::SCADA {
 		void refresh(GPSCS^ src);
 
 	internal:
-		WarGrey::SCADA::GCSParameter parameter;
+		WarGrey::DTPM::GCSParameter parameter;
 	};
 
 	private struct GPSStyle {
@@ -41,15 +41,15 @@ namespace WarGrey::SCADA {
 		int metrics_precision = -1;
 	};
 
-	WarGrey::SCADA::GPSStyle default_gps_style(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ metrics_color = nullptr,
+	WarGrey::DTPM::GPSStyle default_gps_style(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ metrics_color = nullptr,
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ arrow_color = nullptr, double arrow_alpha = 0.64,
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = nullptr, double color_alpha = 0.48);
 
-	private class GPSlet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::SCADA::GPSCS, WarGrey::SCADA::IGraphlet> {
+	private class GPSlet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::DTPM::GPSCS, WarGrey::SCADA::IGraphlet> {
 	public:
 		virtual ~GPSlet() noexcept;
 		GPSlet(Platform::String^ gps, float radius, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
-		GPSlet(WarGrey::SCADA::GPSStyle& style, Platform::String^ gps, float radius, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
+		GPSlet(WarGrey::DTPM::GPSStyle& style, Platform::String^ gps, float radius, Platform::String^ ext = ".config", Platform::String^ rootdir = "configuration");
 		
 	public:
 		void construct() override;
@@ -63,21 +63,21 @@ namespace WarGrey::SCADA {
 		void set_speed(double knot, bool force = false);
 
 	public:
-		WarGrey::SCADA::GPSCS^ clone_gpscs(WarGrey::SCADA::GPSCS^ dest = nullptr);
+		WarGrey::DTPM::GPSCS^ clone_gpscs(WarGrey::DTPM::GPSCS^ dest = nullptr);
 		void refresh(GPSCS^ src);
 
 	protected:
-		void on_appdata(Windows::Foundation::Uri^ gps, WarGrey::SCADA::GPSCS^ gps_config) override;
+		void on_appdata(Windows::Foundation::Uri^ gps, WarGrey::DTPM::GPSCS^ gps_config) override;
 		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ arrow;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ N;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ knot;
-		WarGrey::SCADA::GPSStyle style;
+		WarGrey::DTPM::GPSStyle style;
 
 	private:
-		WarGrey::SCADA::GPSCS^ gps_config;
+		WarGrey::DTPM::GPSCS^ gps_config;
 		Windows::Foundation::Uri^ ms_appdata_config;
 
 	private:

@@ -3,12 +3,12 @@
 #include "graphlet/primitive.hpp"
 #include "graphlet/filesystem/project/reader/digdoc.hxx"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private enum class MapMove : unsigned int { Up, Right, Down, Left, ZoomIn, ZoomOut, Reset };
 
 	private class DigMaplet : public WarGrey::SCADA::IGraphlet {
 	public:
-		DigMaplet(WarGrey::SCADA::DigDoc^ map, double width, double height, double fontsize_times = 2.0, float plain_fontsize = 14.0F);
+		DigMaplet(WarGrey::DTPM::DigDoc^ map, double width, double height, double fontsize_times = 2.0, float plain_fontsize = 14.0F);
 
 	public:
 		void construct() override;
@@ -32,21 +32,21 @@ namespace WarGrey::SCADA {
 		void center_at(double x, double y);
 		void translate(float deltaX, float deltaY);
 		void zoom(float zx, float zy, float length);
-		void transform(WarGrey::SCADA::MapMove move);
-		void transform(WarGrey::SCADA::MapMove move, float sx, float sy);
+		void transform(WarGrey::DTPM::MapMove move);
+		void transform(WarGrey::DTPM::MapMove move, float sx, float sy);
 		
 	private:
-		void preshape(WarGrey::SCADA::IDigDatum* dig);
+		void preshape(WarGrey::DTPM::IDigDatum* dig);
 		void scale_transform(double zoom, float anchor_x, float anchor_y);
 		
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ plainfont;
 		std::map<Platform::String^, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> plaintexts;
 		std::map<Platform::String^, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> numtexts;
-		std::map<WarGrey::SCADA::FontTextDig*, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> fonttexts;
+		std::map<WarGrey::DTPM::FontTextDig*, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> fonttexts;
 
 	private:
-		WarGrey::SCADA::DigDoc^ map;
+		WarGrey::DTPM::DigDoc^ map;
 		double geo_x;
 		double geo_y;
 		double geo_width;

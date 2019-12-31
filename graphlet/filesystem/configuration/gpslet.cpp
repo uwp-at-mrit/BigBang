@@ -11,6 +11,7 @@
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 using namespace Windows::System;
 
@@ -53,7 +54,7 @@ static void prepare_gps_style(GPSStyle* style) {
 }
 
 /*************************************************************************************************/
-WarGrey::SCADA::GPSStyle WarGrey::SCADA::default_gps_style(ICanvasBrush^ metrics_color
+GPSStyle WarGrey::DTPM::default_gps_style(ICanvasBrush^ metrics_color
 	, CanvasSolidColorBrush^ arrow_color, double arrow_alpha, CanvasSolidColorBrush^ color, double color_alpha) {
 	CanvasSolidColorBrush^ acolor = ((arrow_color == nullptr) ? gps_arrow_color : color);
 	GPSStyle style;

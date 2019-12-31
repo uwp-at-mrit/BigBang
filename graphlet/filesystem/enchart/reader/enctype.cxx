@@ -8,9 +8,10 @@
 #include "tongue.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 /*************************************************************************************************/
-Platform::String^ WarGrey::SCADA::enc_speak(ENCErrorCode ecode, Platform::String^ cell_name) {
+Platform::String^ WarGrey::DTPM::enc_speak(ENCErrorCode ecode, Platform::String^ cell_name) {
 	Platform::String^ strecode = ecode.ToString();
 	Platform::String^ strerror = speak(strecode, "encerror");
 	Platform::String^ message = "Stupid Microsoft"; // too many types to represent a string
@@ -24,12 +25,12 @@ Platform::String^ WarGrey::SCADA::enc_speak(ENCErrorCode ecode, Platform::String
 	return message;
 }
 
-Platform::String^ WarGrey::SCADA::enc_speak(WarGrey::SCADA::ENCErrorCode ecode, const char* cell_name) {
+Platform::String^ WarGrey::DTPM::enc_speak(ENCErrorCode ecode, const char* cell_name) {
 	return enc_speak(ecode, ((cell_name == nullptr) ? nullptr : make_wstring(cell_name)));
 }
 
 /*************************************************************************************************/
-ENChartDocument^ ENChartDocument::load(Platform::String^ filename, WarGrey::SCADA::ENChartDoctype type) {
+ENChartDocument^ ENChartDocument::load(Platform::String^ filename, ENChartDoctype type) {
 	ENChartDocument^ doc = nullptr;
 	std::filebuf src;
 

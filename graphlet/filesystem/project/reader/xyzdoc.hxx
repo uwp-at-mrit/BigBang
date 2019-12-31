@@ -6,8 +6,8 @@
 
 #include "datum/flonum.hpp"
 
-namespace WarGrey::SCADA {
-	private ref class XyzDoc sealed : public WarGrey::SCADA::ProjectDocument {
+namespace WarGrey::DTPM {
+	private ref class XyzDoc sealed : public WarGrey::DTPM::ProjectDocument {
 	internal:
 		XyzDoc(std::filebuf& dig);
 

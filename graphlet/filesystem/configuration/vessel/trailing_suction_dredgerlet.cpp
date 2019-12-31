@@ -10,6 +10,7 @@
 #include "draw.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::DTPM;
 
 using namespace Windows::System;
 
@@ -38,7 +39,7 @@ static double2 ps_sign(-1.0, -1.0);
 static double2 sb_sign(-1.0, +1.0);
 static float2 raw_scale(1.0F, 1.0F);
 
-private struct WarGrey::SCADA::TrailingSuctionDrag {
+private struct WarGrey::DTPM::TrailingSuctionDrag {
 public:
 	TrailingSuctionDrag(unsigned int actual_drag_pipe_size)
 		: joints_count(fxmin(actual_drag_pipe_size, (unsigned int)DRAG_SEGMENT_MAX_COUNT)) {}
@@ -110,7 +111,7 @@ static void prepare_vessel_style(TrailingSuctionDredgerStyle* style) {
 }
 
 /*************************************************************************************************/
-TrailingSuctionDredgerStyle WarGrey::SCADA::default_trailing_suction_dredger_style(ICanvasBrush^ body_color
+TrailingSuctionDredgerStyle WarGrey::DTPM::default_trailing_suction_dredger_style(ICanvasBrush^ body_color
 	, ICanvasBrush^ bridge_border_color, ICanvasBrush^ hopper_border_color) {
 	TrailingSuctionDredgerStyle style;
 
