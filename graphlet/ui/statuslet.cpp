@@ -23,8 +23,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static Platform::String^ tongue_scope = "status";
-
 static CanvasTextFormat^ status_font = nullptr;
 static float status_prefix_width = 0.0F;
 static float status_height = 0.0F;
@@ -40,7 +38,7 @@ public:
     }
 
     void on_battery_capacity_changed(float capacity) override {
-		Platform::String^ label = speak("power", tongue_scope);
+		Platform::String^ label = status_speak("power");
 		Platform::String^ percentage = (flround(capacity * 100.0F).ToString() + "%");
 
 		this->enter_critical_section();
@@ -51,8 +49,8 @@ public:
 
     void on_wifi_signal_strength_changed(Platform::String^ ssid, char strength) override {
 		float percentage = flround(float(strength) * 100.0F / 5.0F);
-		Platform::String^ label = speak("wifi", tongue_scope);
-        Platform::String^ signal = ((ssid == nullptr) ? speak("nowifi", tongue_scope) : (ssid + " " + percentage.ToString() + "%"));
+		Platform::String^ label = status_speak("wifi");
+        Platform::String^ signal = ((ssid == nullptr) ? status_speak("nowifi") : (ssid + " " + percentage.ToString() + "%"));
 
 		this->enter_critical_section();
         this->wifi = make_text_layout(label + signal, status_font);
@@ -61,7 +59,7 @@ public:
 	}
 
     void on_available_storage_changed(unsigned long long free_bytes, unsigned long long total_bytes) override {
-		Platform::String^ label = speak("storage", tongue_scope);
+		Platform::String^ label = status_speak("storage");
 		Platform::String^ percentage = flstring(double(free_bytes) / double(total_bytes) * 100.0, 1);
 		Platform::String^ free = sstring(free_bytes, 1);
 
@@ -72,8 +70,8 @@ public:
 	}
 
     void on_ipv4_address_changed(Platform::String^ ipv4) override {
-		Platform::String^ label = speak("ipv4", tongue_scope);
-		Platform::String^ ip = ((ipv4 == nullptr) ? speak("noipv4", tongue_scope) : ipv4);
+		Platform::String^ label = status_speak("ipv4");
+		Platform::String^ ip = ((ipv4 == nullptr) ? status_speak("noipv4") : ipv4);
 
 		this->enter_critical_section();
 		this->ipv4 = make_text_layout(label + ip, status_font);
@@ -129,7 +127,7 @@ static void initialize_status_font() {
 	if (status_font == nullptr) {
 		status_font = make_bold_text_format("Microsoft YaHei", 14.0F);
 		
-		TextExtent te = get_text_extent(speak("plc", tongue_scope), status_font);
+		TextExtent te = get_text_extent(status_speak("plc"), status_font);
 		status_height = te.height * 1.2F;
 		status_prefix_width = te.width;
 	}
@@ -202,7 +200,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	ds->DrawTextLayout(statusbar->ipv4, x + lastone_xoff, context_y, Colours::Yellow);
 	statusbar->leave_shared_section();
 
-	{ // draw App Memory Usage, but it's a liar
+	{ // draw App Memory Usage
 		AppMemoryUsageLevel level;
 		unsigned long long app_usage, private_working_set;
 		CanvasSolidColorBrush^ color = Colours::YellowGreen;
@@ -215,18 +213,18 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 		case AppMemoryUsageLevel::Low: color = Colours::RoyalBlue; break;
 		}
 
-		ds->DrawText(speak("memory", tongue_scope) + ": " + sstring(private_working_set, 1) + "/" + sstring(app_usage, 1),
+		ds->DrawText(status_speak("memory") + ": " + sstring(private_working_set, 1) + "/" + sstring(app_usage, 1),
 			x + width * 3.0F, context_y, color, status_font);
 	}
 
 	{ // draw PLC State
 		float plc_x = x + width * 5.0F;
 
-		ds->DrawText(speak("plc", tongue_scope), plc_x, context_y, Colours::Yellow, status_font);
+		ds->DrawText(status_speak("plc"), plc_x, context_y, Colours::Yellow, status_font);
 
 		if (this->device == nullptr) {
 			if (this->device_name == nullptr) {
-				this->device_name = make_text_layout(speak("offline", tongue_scope), status_font);
+				this->device_name = make_text_layout(status_speak("offline"), status_font);
 			}
 
 			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Red);
