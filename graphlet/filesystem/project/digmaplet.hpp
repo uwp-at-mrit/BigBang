@@ -59,7 +59,7 @@ namespace WarGrey::DTPM {
 		float ytranslation;
 		float tdelta;
 		float zdelta;
-		double stimes;
+		double ztimes;
 		double fstimes;
 		double _scale;
 	};

@@ -3,6 +3,7 @@
 #include "datum/string.hpp"
 #include "datum/flonum.hpp"
 
+#include "preference.hxx"
 #include "colorspace.hpp"
 #include "geometry.hpp"
 #include "brushes.hxx"
@@ -25,6 +26,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static std::map<long long, CanvasSolidColorBrush^> vector_colors;
+static Platform::String^ map_scale_key = "Map_Scale";
 
 #define StrokeWidth(sw) ((sw > 0) ? float(sw) : 1.0F)
 
@@ -67,7 +69,7 @@ static CanvasStrokeStyle^ vector_stroke_ref(long long idx) {
 
 /*************************************************************************************************/
 DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_times, float plain_fontsize)
-	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), stimes(1.0), tdelta(32.0F), zdelta(1.0618F) {
+	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), tdelta(32.0F), zdelta(1.0618F) {
 	this->enable_resizing(false);
 	this->enable_events(false, false);
 	
@@ -75,9 +77,12 @@ DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_t
 	 * Do not move these lines to DigMaplet::construct(),
 	 * Projectlet::on_appdata() requires the scale to locate icons.
 	 */
+
 	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
 	this->_scale = flmin(this->width / this->geo_height, this->height / this->geo_width);
 	this->plainfont = make_text_format(plain_fontsize);
+
+	this->ztimes = get_preference(map_scale_key, 1.0);
 }
 
 void DigMaplet::construct() {
@@ -342,7 +347,7 @@ void DigMaplet::translate(float deltaX, float deltaY) {
 
 void DigMaplet::zoom(float sx, float sy, float deltaScale) {
 	if (deltaScale > 0.0) {
-		this->scale_transform(this->stimes * deltaScale, sx, sy);
+		this->scale_transform(this->ztimes * deltaScale, sx, sy);
 		this->notify_updated();
 	}
 }
@@ -365,8 +370,8 @@ void DigMaplet::transform(MapMove move, float sx, float sy) {
 	case MapMove::Right: this->translate(this->tdelta, 0.0F); break;
 	case MapMove::Up: this->translate(0.0F, -this->tdelta); break;
 	case MapMove::Down: this->translate(0.0F, this->tdelta); break;
-	case MapMove::ZoomIn: this->scale_transform(this->stimes * this->zdelta, sx, sy); break;
-	case MapMove::ZoomOut: this->scale_transform(this->stimes / this->zdelta, sx, sy); break;
+	case MapMove::ZoomIn: this->scale_transform(this->ztimes * this->zdelta, sx, sy); break;
+	case MapMove::ZoomOut: this->scale_transform(this->ztimes / this->zdelta, sx, sy); break;
 	case MapMove::Reset: {
 		this->scale_transform(1.0F, sx, sy);
 		this->center();
@@ -377,16 +382,18 @@ void DigMaplet::transform(MapMove move, float sx, float sy) {
 }
 
 void DigMaplet::scale_transform(double zoom, float anchor_x, float anchor_y) {
-	if (this->stimes != zoom) {
+	if (this->ztimes != zoom) {
 		float2 anchor = this->local_to_position(anchor_x, anchor_y, 0.0F, 0.0F);
 
-		this->stimes = zoom;
+		this->ztimes = zoom;
 		anchor = this->position_to_local(anchor.x, anchor.y, 0.0F, 0.0F);
 
 		this->xtranslation -= (anchor.x - anchor_x);
 		this->ytranslation -= (anchor.y - anchor_y);
 
 		this->fonttexts.clear();
+		
+		put_preference(map_scale_key, this->ztimes);
 	}
 }
 
@@ -426,7 +433,7 @@ float DigMaplet::plain_font_size() {
 }
 
 double DigMaplet::actual_scale() {
-	return this->_scale * this->stimes;
+	return this->_scale * this->ztimes;
 }
 
 void DigMaplet::fill_anchor_position(double fx, double fy, double* x, double* y) {
