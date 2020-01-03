@@ -3,8 +3,6 @@
 #include "graphlet/filesystem/msappdatalet.hxx"
 #include "graphlet/primitive.hpp"
 
-#include "datum/flonum.hpp"
-
 #include "cs/wgs_xy.hpp"
 
 namespace WarGrey::DTPM {
@@ -61,6 +59,7 @@ namespace WarGrey::DTPM {
 	public:
 		void set_north(double degrees, bool force = false);
 		void set_speed(double knot, bool force = false);
+		void set_position(double latitude, double longitude, bool force = false);
 
 	public:
 		WarGrey::DTPM::GPSCS^ clone_gpscs(WarGrey::DTPM::GPSCS^ dest = nullptr);
@@ -74,6 +73,8 @@ namespace WarGrey::DTPM {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ arrow;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ N;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ knot;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ladeg;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ lodeg;
 		WarGrey::DTPM::GPSStyle style;
 
 	private:
@@ -85,5 +86,7 @@ namespace WarGrey::DTPM {
 		float arrow_radius;
 		double degrees;
 		double speed;
+		double latitude;
+		double longitude;
 	};
 }

@@ -74,7 +74,7 @@ GPSlet::GPSlet(Platform::String^ gps, float radius, Platform::String^ ext, Platf
 	: GPSlet(default_gps_style(), gps, radius, ext, rootdir) {}
 
 GPSlet::GPSlet(GPSStyle& style, Platform::String^ gps, float radius, Platform::String^ ext, Platform::String^ rootdir)
-	: radius(radius), style(style), speed(0.0) {
+	: radius(radius), style(style), speed(0.0), latitude(0.0), longitude(0.0) {
 	if (gps != nullptr) {
 		this->ms_appdata_config = ms_appdata_file(gps, ext, rootdir);
 	} else {
@@ -121,6 +121,8 @@ void GPSlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float
 	ds->DrawGeometry(this->N, cx, cy, this->style.N_border_color, this->style.N_border_thickness);
 
 	ds->FillGeometry(this->knot, cx, cy, this->style.metrics_color);
+	ds->FillGeometry(this->ladeg, cx, cy, this->style.metrics_color);
+	ds->FillGeometry(this->lodeg, cx, cy, this->style.metrics_color);
 }
 
 /*************************************************************************************************/
@@ -133,17 +135,35 @@ void GPSlet::set_north(double degrees, bool force) {
 		this->style.N_font->FontSize = (this->radius - this->arrow_radius) * 0.85F;
 		this->arrow = polar_arrowhead(this->arrow_radius, degrees);
 		this->N = paragraph("N", degrees, n_r, this->style.N_font);
+
 		this->set_speed(this->speed, true);
+		this->set_position(this->latitude, this->longitude, true);
 	}
 }
 
 void GPSlet::set_speed(double knot, bool force) {
 	if (force || (this->speed != knot)) {
 		this->style.metrics_font->FontSize = this->arrow_radius * 0.5F;
-		float m_r = -this->arrow_radius;
+		float m_r = -this->arrow_radius * 0.75F;
 
 		this->speed = knot;
 		this->knot = paragraph(flstring(knot, this->style.metrics_precision) + unitspeak("knot"), this->degrees, m_r, this->style.metrics_font);
+		this->notify_updated();
+	}
+}
+
+void GPSlet::set_position(double latitude, double longitude, bool force) {
+	if (force || (this->latitude != latitude) || (this->longitude != longitude)) {
+		this->style.metrics_font->FontSize = this->arrow_radius * 0.36F;
+		float la_r = -this->arrow_radius * 1.20F;
+		float lo_r = -this->arrow_radius * 1.50F;
+
+		this->latitude = latitude;
+		this->longitude = longitude;
+		this->ladeg = paragraph(gpstring(this->latitude, 'N'), this->degrees, la_r, this->style.metrics_font);
+		this->lodeg = paragraph(gpstring(this->longitude, 'E'), this->degrees, lo_r, this->style.metrics_font);
+	
+		this->notify_updated();
 	}
 }
 
