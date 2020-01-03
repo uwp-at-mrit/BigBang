@@ -279,15 +279,15 @@ void TrailingSuctionDredgerlet::draw(CanvasDrawingSession^ ds, float x, float y,
 	}
 }
 
-void TrailingSuctionDredgerlet::draw_transverse_section(CanvasDrawingSession^ ds, ISectionRegion* sectionlet, float cx, float y, float half_width, float height) {
+void TrailingSuctionDredgerlet::draw_profile(CanvasDrawingSession^ ds, IProfileRegion* profilet, float cx, float y, float half_width, float height) {
 	double xscale, yscale;
 
-	sectionlet->fill_scale(&xscale, &yscale);
+	profilet->fill_scale(&xscale, &yscale);
 
 	if (this->preview_config != nullptr) {
 		if (this->ps_drag != nullptr) {
 			float2 ps = vessel_point(this->ps_drag->draghead, this->preview_config->ps_suction, ps_sign, this->current_gps, raw_scale, this->bow_direction);
-			float2 local = sectionlet->vessel_to_local(ps.x, ps.y, this->ps_drag->draghead_depth);
+			float2 local = profilet->vessel_to_local(ps.x, ps.y, this->ps_drag->draghead_depth);
 			float half_width = float(this->ps_drag->info.head_width * xscale * 0.5);
 			float half_height = float(this->ps_drag->info.head_height * yscale * 0.5);
 
@@ -298,7 +298,7 @@ void TrailingSuctionDredgerlet::draw_transverse_section(CanvasDrawingSession^ ds
 
 		if (this->sb_drag != nullptr) {
 			float2 sb = vessel_point(this->sb_drag->draghead, this->preview_config->sb_suction, sb_sign, this->current_gps, raw_scale, this->bow_direction);
-			float2 local = sectionlet->vessel_to_local(sb.x, sb.y, this->sb_drag->draghead_depth);
+			float2 local = profilet->vessel_to_local(sb.x, sb.y, this->sb_drag->draghead_depth);
 			float half_width = float(this->sb_drag->info.head_width * xscale * 0.5);
 			float half_height = float(this->sb_drag->info.head_height * yscale * 0.5);
 

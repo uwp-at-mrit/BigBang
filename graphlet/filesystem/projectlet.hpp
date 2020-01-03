@@ -33,7 +33,7 @@ namespace WarGrey::DTPM {
 
 	public:
 		bool move_vessel(double x, double y, WarGrey::DTPM::SailingMode mode = SailingMode::VesselVisible);
-		const WarGrey::DTPM::TransversePlane* section(double x, double y);
+		const WarGrey::DTPM::Outline* section(double geo_x, double geo_y);
 
 	public:
 		void center_vessel();
@@ -85,7 +85,7 @@ namespace WarGrey::DTPM {
 		WarGrey::DTPM::ColorPlotlet* plot;
 		WarGrey::DTPM::Xyzlet* depth_xyz;
 		WarGrey::DTPM::Tracelinelet* jobs_dat;
-		WarGrey::DTPM::FrontalSectionlet* front_sec;
+		WarGrey::DTPM::Sectionlet* front_sec;
 		std::deque<Platform::Object^> icons;
 
 	private:

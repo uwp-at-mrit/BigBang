@@ -334,6 +334,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\pubdoc.cxx">
       <Filter>graphlet\filesystem\enchart\reader</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.cpp">
+      <Filter>graphlet\filesystem\project</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -678,6 +681,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\pubdoc.hxx">
       <Filter>graphlet\filesystem\enchart\reader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.hpp">
+      <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

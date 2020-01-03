@@ -1,7 +1,9 @@
+#include <algorithm>
+
 #include "graphlet/filesystem/project/reader/secdoc.hxx"
 
 #include "datum/file.hpp"
-#include "datum/flonum.hpp"
+#include "datum/fixnum.hpp"
 
 #include "math.hpp"
 
@@ -97,4 +99,58 @@ SecDoc::SecDoc(std::filebuf& sec) {
 			}
 		}
 	}
+}
+
+/*************************************************************************************************/
+static inline bool plane_dot_compare(ProfileDot& first, ProfileDot& second) {
+	// NOTE: "being in order" is the only thing mattering regardless ascent or descent 
+	return (first.distance < second.distance);
+}
+
+Outline::~Outline() noexcept {
+	if (this->dots != nullptr) {
+		delete[] this->dots;
+	}
+}
+
+Outline::Outline(int side_count, int slope_count) : side_count(side_count), slope_count(slope_count) {
+	int total = side_count + slope_count;
+
+	this->center_foot.x = flnan;
+
+	if (total > 0) {
+		this->dots = new ProfileDot[total];
+		this->sides = this->dots;
+		this->slopes = &this->dots[side_count];
+	}
+}
+
+Outline::Outline(const Outline* src) : Outline(src->side_count, src->slope_count) {
+	this->clone_from(src);
+}
+
+void Outline::clone_from(const Outline* src) {
+	int side_mcount = fxmin(this->side_count, src->side_count);
+	int slope_mcount = fxmin(this->slope_count, src->slope_count);
+
+	this->center_foot = src->center_foot;
+	this->center_origin = src->center_origin;
+
+	for (int idx = 0; idx < this->side_count; idx++) {
+		if (idx < side_mcount) {
+			this->sides[idx] = src->sides[idx];
+		} else {
+			this->sides[idx].x = flnan;
+		}
+	}
+
+	for (int idx = 0; idx < this->slope_count; idx++) {
+		if (idx < slope_mcount) {
+			this->slopes[idx] = src->slopes[idx];
+		} else {
+			this->slopes[idx].x = flnan;
+		}
+	}
+
+	std::sort(this->dots, &this->dots[this->side_count + this->slope_count], plane_dot_compare);
 }

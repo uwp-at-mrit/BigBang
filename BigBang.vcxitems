@@ -37,6 +37,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\pubdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\jobdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.cxx" />
@@ -158,6 +159,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdatalet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdataloguelet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappxlet.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\jobdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\maplog.hxx" />

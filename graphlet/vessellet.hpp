@@ -9,7 +9,7 @@
 namespace WarGrey::DTPM {
 	private ref class IVesselShape abstract {};
 
-	private class ISectionRegion abstract {
+	private class IProfileRegion abstract {
 	public:
 		virtual void fill_scale(double* xscale = nullptr, double* yscale = nullptr) = 0;
 		virtual Windows::Foundation::Numerics::float2 vessel_to_local(double x, double y, double depth) = 0;
@@ -20,8 +20,8 @@ namespace WarGrey::DTPM {
 		IVessellet();
 
 	public:
-		virtual void draw_transverse_section(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			WarGrey::DTPM::ISectionRegion* sectionlet, float cx, float y, float half_width, float height) = 0;
+		virtual void draw_profile(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			WarGrey::DTPM::IProfileRegion* profilet, float cx, float y, float half_width, float height) = 0;
 
 	public:
 		virtual void set_bow_direction(double degrees) = 0;

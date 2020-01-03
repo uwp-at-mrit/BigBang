@@ -237,7 +237,7 @@ void Projectlet::on_traceline(Platform::String^ ms_appdata, ProjectDocument^ doc
 void Projectlet::on_sec(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	SecDoc^ doc_sec = static_cast<SecDoc^>(doc);
 
-	this->front_sec = new FrontalSectionlet(doc_sec, true);
+	this->front_sec = new Sectionlet(doc_sec, true);
 
 	if (this->map != nullptr) {
 		ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
@@ -479,8 +479,8 @@ bool Projectlet::move_vessel(double x, double y, SailingMode mode) {
 	return moved;
 }
 
-const TransversePlane* Projectlet::section(double x, double y) {
-	const TransversePlane* plane = nullptr;
+const Outline* Projectlet::section(double x, double y) {
+	const Outline* plane = nullptr;
 
 	if (this->front_sec != nullptr) {
 		plane = this->front_sec->section(x, y);

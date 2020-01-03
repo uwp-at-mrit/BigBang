@@ -4,6 +4,8 @@
 
 #include "graphlet/filesystem/project/reader/doctype.hxx"
 
+#include "datum/flonum.hpp"
+
 namespace WarGrey::DTPM {
 	private struct SectionDot {
 	public:
@@ -28,5 +30,36 @@ namespace WarGrey::DTPM {
 	internal:
 		std::deque<WarGrey::DTPM::SectionDot> centerline;
 		std::deque<std::deque<WarGrey::DTPM::SectionDot>> sidelines;
+	};
+
+	/*********************************************************************************************/
+	private struct ProfileDot {
+		double x;
+		double y;
+		double distance;
+		double depth;
+	};
+
+	private struct Outline {
+	public:
+		~Outline() noexcept;
+		Outline(int side_count, int slope_count);
+		Outline(const Outline* src);
+
+	public:
+		void clone_from(const Outline* src);
+
+	public:
+		WarGrey::SCADA::double3 center_foot;
+		WarGrey::SCADA::double2 center_origin;
+		int side_count;
+		int slope_count;
+
+	public: // for output
+		WarGrey::DTPM::ProfileDot* dots;
+
+	public: // for input
+		WarGrey::DTPM::ProfileDot* sides;
+		WarGrey::DTPM::ProfileDot* slopes;
 	};
 }
