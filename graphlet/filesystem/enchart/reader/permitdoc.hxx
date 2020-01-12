@@ -16,13 +16,13 @@ namespace WarGrey::DTPM {
 		int expiry_year;
 		int expiry_month;
 		int expiry_day;
-		WarGrey::SCADA::Natural ECK1;
-		WarGrey::SCADA::Natural ECK2;
-		WarGrey::SCADA::Natural checksum;
+		WarGrey::DTPM::Natural ECK1;
+		WarGrey::DTPM::Natural ECK2;
+		WarGrey::DTPM::Natural checksum;
 
 	public:
-		WarGrey::SCADA::Natural key1;
-		WarGrey::SCADA::Natural key2;
+		WarGrey::DTPM::Natural key1;
+		WarGrey::DTPM::Natural key2;
 
 	public:
 		WarGrey::DTPM::PermitServiceLevel type;
