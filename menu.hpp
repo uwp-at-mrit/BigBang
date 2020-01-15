@@ -146,7 +146,7 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::MenuFlyout^ m = ref new Windows::UI::Xaml::Controls::MenuFlyout();
 
 		WarGrey::SCADA::menu_push_command(m, exe, first, lastp1, pobj, tongue);
-
+		
 		return m;
 	}
 

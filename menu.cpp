@@ -10,8 +10,10 @@ using namespace Windows::Foundation;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml::Input;
-using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Media;
+
+using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml::Controls::Primitives;
 
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
