@@ -3,6 +3,7 @@
 #include "datum/object.hpp"
 
 #include "forward.hpp"
+#include "system.hpp"
 
 namespace WarGrey::SCADA {
 	WarGrey::SCADA::IGraphlet* menu_get_next_target_graphlet(WarGrey::SCADA::IGraphlet* start = nullptr);
@@ -256,29 +257,37 @@ namespace WarGrey::SCADA {
 	/************************************************************************************************/
 	template<typename L, class C>
 	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, L label, C c) {
-		Platform::String^ id = label.ToString();
+		if (WarGrey::SCADA::ui_thread_accessed()) {
+			Platform::String^ id = label.ToString();
 
-		for (unsigned int idx = 0; idx < master->Items->Size; idx++) {
-			Windows::UI::Xaml::Controls::MenuFlyoutItem^ item = dynamic_cast<Windows::UI::Xaml::Controls::MenuFlyoutItem^>(master->Items->GetAt(idx));
+			for (unsigned int idx = 0; idx < master->Items->Size; idx++) {
+				Windows::UI::Xaml::Controls::MenuFlyoutItem^ item = dynamic_cast<Windows::UI::Xaml::Controls::MenuFlyoutItem^>(master->Items->GetAt(idx));
 
-			if (item->Name->Equals(id)) {
-				menu_set_foreground_color(master, idx, c);
-				break;
+				if (item->Name->Equals(id)) {
+					menu_set_foreground_color(master, idx, c);
+					break;
+				}
 			}
+		} else {
+			WarGrey::SCADA::ui_thread_run_async([=]() { menu_set_foreground_color(master, label, c); });
 		}
 	}
 
 	template<typename G, typename L, class C>
 	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, G group, L label, C c) {
-		Platform::String^ id = group.ToString() + ": " + label.ToString();
+		if (WarGrey::SCADA::ui_thread_accessed()) {
+			Platform::String^ id = group.ToString() + ": " + label.ToString();
 
-		for (unsigned int idx = 0; idx < master->Items->Size; idx++) {
-			Windows::UI::Xaml::Controls::MenuFlyoutItem^ item = dynamic_cast<Windows::UI::Xaml::Controls::MenuFlyoutItem^>(master->Items->GetAt(idx));
+			for (unsigned int idx = 0; idx < master->Items->Size; idx++) {
+				Windows::UI::Xaml::Controls::MenuFlyoutItem^ item = dynamic_cast<Windows::UI::Xaml::Controls::MenuFlyoutItem^>(master->Items->GetAt(idx));
 
-			if (item->Name->Equals(id)) {
-				menu_set_foreground_color(master, idx, c);
-				break;
+				if (item->Name->Equals(id)) {
+					menu_set_foreground_color(master, idx, c);
+					break;
+				}
 			}
+		} else {
+			WarGrey::SCADA::ui_thread_run_async([=]() { menu_set_foreground_color(master, group, label, c) });
 		}
 	}
 }

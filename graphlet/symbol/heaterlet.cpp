@@ -159,3 +159,7 @@ void Heaterlet::set_auto_mode(bool yes) {
 		this->notify_updated();
 	}
 }
+
+bool Heaterlet::is_auto() {
+	return this->auto_mode;
+}

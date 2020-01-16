@@ -93,11 +93,23 @@ void WarGrey::SCADA::menu_set_foreground_color(MenuFlyout^ master, unsigned int 
 }
 
 void WarGrey::SCADA::menu_set_foreground_color(MenuFlyout^ master, unsigned int idx, Color& color) {
-	menu_set_foreground_color(master, idx, ref new SolidColorBrush(color));
+	if (ui_thread_accessed()) {
+		menu_set_foreground_color(master, idx, ref new SolidColorBrush(color));
+	} else {
+		ui_thread_run_async([=]() { menu_set_foreground_color(master, idx, color); });
+	}
 }
 
 void WarGrey::SCADA::menu_set_foreground_color(MenuFlyout^ master, unsigned int idx, Brush^ brush) {
-	if (idx < master->Items->Size) {
-		dynamic_cast<MenuFlyoutItem^>(master->Items->GetAt(idx))->Foreground = brush;
+	if (ui_thread_accessed()) {
+		if (idx < master->Items->Size) {
+			MenuFlyoutItem^ item = dynamic_cast<MenuFlyoutItem^>(master->Items->GetAt(idx));
+			
+			if (item->Command->CanExecute(nullptr)) {
+				item->Foreground = brush;
+			}
+		}
+	} else {
+		ui_thread_run_async([=]() { menu_set_foreground_color(master, idx, brush); });
 	}
 }

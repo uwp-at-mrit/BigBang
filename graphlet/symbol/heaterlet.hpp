@@ -36,6 +36,7 @@ namespace WarGrey::SCADA {
 	public:
 		void set_remote_control(bool on);
 		void set_auto_mode(bool yes);
+		bool is_auto();
 
 	protected:
 		void prepare_style(WarGrey::SCADA::HeaterState status, WarGrey::SCADA::HeaterStyle& style) override;
