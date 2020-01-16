@@ -32,6 +32,11 @@ static CanvasSolidColorBrush^ radar_default_ring_color = Colours::GrayText;
 IRadarlet::IRadarlet(float radius, unsigned int count, double* initials)
 	: IRadarlet(radius, count, default_radar_style, initials) {}
 
+IRadarlet::IRadarlet(float radius, unsigned int count, ICanvasBrush^ outline_color, double* initials)
+	: IRadarlet(radius, count, default_radar_style, initials) {
+	this->style.outline_color = outline_color;
+}
+
 IRadarlet::IRadarlet(float radius, unsigned int count, RadarStyle& style, double* initials) : Radius(radius), count(count), style(style) {
 	this->scales = new double[this->count];
 	this->captions = ref new Platform::Array<Platform::String^>(this->count);

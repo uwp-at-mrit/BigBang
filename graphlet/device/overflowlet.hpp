@@ -6,15 +6,27 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
+	private struct OverflowPipeStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ target_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ hatch_color;
+		
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ auto_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ disabled_color;
+
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ target_font;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ target_style;
+
+		float disable_icon_thickness = -1.0F;
+	};
+
 	private class OverflowPipelet : public WarGrey::SCADA::IRangelet<double> {
 	public:
-		OverflowPipelet(double range, float width, float height = 0.0F,
-			unsigned int step = 0U, unsigned int precision = 2U,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ target_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ hatch_color = nullptr);
+		OverflowPipelet(double range, float width, float height = 0.0F, unsigned int step = 0U, unsigned int precision = 2U);
+		OverflowPipelet(WarGrey::SCADA::OverflowPipeStyle& style, double range, float width,
+			float height = 0.0F, unsigned int step = 0U, unsigned int precision = 2U);
 
 	public:
 		void construct() override;
@@ -24,6 +36,8 @@ namespace WarGrey::SCADA {
 	public:
 		void set_liquid_height(double h, bool force_update = false);
 		void set_target_height(double h, bool force_update = false);
+		void disable(bool yes);
+		void set_auto_mode(bool on);
 
 	protected:
 		void on_value_changed(double t) override;
@@ -32,21 +46,16 @@ namespace WarGrey::SCADA {
 
 	private:
 		float get_outlet_height(double percentage);
+		void prepare_style();
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ liquid;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ target;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hatchmark;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ target_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatch_color;
 
 	private:
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ target_font;
-		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ target_style;
+		WarGrey::SCADA::OverflowPipeStyle style;
 
 	private:
 		double liquid_height;
@@ -66,5 +75,9 @@ namespace WarGrey::SCADA {
 		unsigned int step;
 		unsigned int precision;
 		bool leftward;
+
+	private:
+		bool disabled;
+		bool auto_mode;
 	};
 }

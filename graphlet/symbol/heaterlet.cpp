@@ -23,7 +23,7 @@ Heaterlet::Heaterlet(float radius, double degrees)
 	: Heaterlet(HeaterState::Default, radius, degrees) {}
 
 Heaterlet::Heaterlet(HeaterState default_state, float radius, double degrees)
-	: ISymbollet(default_state, radius, degrees) {
+	: ISymbollet(default_state, radius, degrees), auto_mode(false), remote_control(false) {
 	this->radiusY = this->radiusX * 0.618F;
 	this->brdiff = default_thickness * 2.5F;
 }

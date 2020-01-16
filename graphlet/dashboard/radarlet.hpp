@@ -29,6 +29,7 @@ namespace WarGrey::SCADA {
 		virtual ~IRadarlet() noexcept;
 		IRadarlet(float radius, unsigned int count, double* initials = nullptr);
 		IRadarlet(float radius, unsigned int count, WarGrey::SCADA::RadarStyle& style, double* initials = nullptr);
+		IRadarlet(float radius, unsigned int count, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ outline_color, double* initials = nullptr);
 
 	public:
 		void construct() override;
@@ -72,6 +73,11 @@ namespace WarGrey::SCADA {
 
 		Radarlet(Platform::String^ tongue, float radius, WarGrey::SCADA::RadarStyle& style, double* initials = nullptr)
 			: IRadarlet(radius, _N(E), style, initials) {
+			this->initialize_caption(tongue);
+		}
+
+		Radarlet(Platform::String^ tongue, float radius, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ outline_color, double* initials = nullptr)
+			: IRadarlet(radius, _N(E), outline_color, initials) {
 			this->initialize_caption(tongue);
 		}
 

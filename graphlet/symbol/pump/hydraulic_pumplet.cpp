@@ -18,7 +18,7 @@ HydraulicPumplet::HydraulicPumplet(float radius, double degrees)
 	: HydraulicPumplet(HydraulicPumpState::Stopped, radius, degrees) {}
 
 HydraulicPumplet::HydraulicPumplet(HydraulicPumpState default_state, float radius, double degrees)
-	: ISymbollet(default_state, radius, degrees) {
+	: ISymbollet(default_state, radius, degrees), auto_mode(false), remote_control(false) {
 	this->tradius = radius - default_thickness * 2.0F;
 }
 
