@@ -8,11 +8,13 @@ namespace WarGrey::SCADA {
 	};
 
 	private struct HydraulicPumpStyle {
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ remote_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
+
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ remote_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ auto_color;
 	};
 
 	private class HydraulicPumplet
@@ -28,6 +30,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_remote_control(bool on);
+		void set_auto_mode(bool on);
+		bool is_auto();
 
 	protected:
 		void prepare_style(WarGrey::SCADA::HydraulicPumpState status, WarGrey::SCADA::HydraulicPumpStyle& style) override;
@@ -45,5 +49,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool remote_control;
+		bool auto_mode;
 	};
 }

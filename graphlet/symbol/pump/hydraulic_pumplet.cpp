@@ -100,6 +100,7 @@ void HydraulicPumplet::prepare_style(HydraulicPumpState status, HydraulicPumpSty
 	CAS_SLOT(s.remote_color, Colours::Cyan);
 	CAS_SLOT(s.border_color, Colours::WhiteSmoke);
 	CAS_SLOT(s.body_color, Colours::DarkGray);
+	CAS_SLOT(s.auto_color, Colours::RoyalBlue);
 	CAS_SLOT(s.skeleton_color, s.body_color);
 
 	// NOTE: The others can be nullptr;
@@ -113,7 +114,7 @@ void HydraulicPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Wi
 	float cy = y + radiusY + default_thickness;
 	
 	ds->FillEllipse(cx, cy, radiusX, radiusY, Colours::Background);
-	ds->DrawCachedGeometry(this->body, cx, cy, style.body_color);
+	ds->DrawCachedGeometry(this->body, cx, cy, (this->auto_mode ? style.auto_color : style.body_color));
 
 	if (style.mask_color != nullptr) {
 		auto mask = ((this->mask == nullptr) ? this->skeleton : this->mask);
@@ -135,4 +136,15 @@ void HydraulicPumplet::set_remote_control(bool on) {
 		this->remote_control = on;
 		this->notify_updated();
 	}
+}
+
+void HydraulicPumplet::set_auto_mode(bool on) {
+	if (this->auto_mode != on) {
+		this->auto_mode = on;
+		this->notify_updated();
+	}
+}
+
+bool HydraulicPumplet::is_auto() {
+	return this->auto_mode;
 }
