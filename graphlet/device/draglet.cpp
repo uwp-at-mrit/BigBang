@@ -31,6 +31,7 @@ static CanvasSolidColorBrush^ drag_default_arm_angle_color = Colours::DarkOrange
 static CanvasSolidColorBrush^ drag_default_joint_angle_color = Colours::Cyan;
 static CanvasSolidColorBrush^ drag_default_head_color = Colours::DimGray;
 static CanvasSolidColorBrush^ drag_default_body_color = Colours::Gold;
+static CanvasSolidColorBrush^ drag_default_alarm_color = Colours::Crimson;
 static CanvasSolidColorBrush^ drag_default_angle_pointer_color = Colours::GhostWhite;
 static CanvasSolidColorBrush^ drag_default_draghead_depth_pointer_color = Colours::Cyan;
 static CanvasSolidColorBrush^ drag_default_suction_depth_pointer_color = Colours::Yellow;
@@ -172,6 +173,7 @@ DragStyle WarGrey::SCADA::drag_default_style(unsigned int color, unsigned int pr
 	style.joint_angle_color = drag_default_joint_angle_color;
 	style.head_color = drag_default_head_color;
 	style.body_color = drag_default_body_color;
+	style.alarm_color = drag_default_alarm_color;
 	style.hatchmark_color = drag_default_hatchmark_color;
 
 	style.font = make_text_format(mark_fontsize);
@@ -442,7 +444,9 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	ds->DrawCachedGeometry(this->hatchmarks, x, y, this->style.hatchmark_color);
 
 	{ // draw drag
-		ds->DrawGeometry(this->drag_body, x, y, this->style.body_color, this->drag_thickness, this->dragarm_style);
+		ICanvasBrush^ body_color = (this->alarming ? this->style.alarm_color : this->style.body_color);
+
+		ds->DrawGeometry(this->drag_body, x, y, body_color, this->drag_thickness, this->dragarm_style);
 
 		for (int idx = DRAG_SEGMENT_MAX_COUNT - 1; idx >= 0; idx--) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
@@ -451,7 +455,7 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 
 				if (this->rubbers[idx] != nullptr) {
 					ds->FillGeometry(this->rubbers[idx], ix, iy, this->style.color);
-					ds->DrawGeometry(this->rubbers[idx], ix, iy, this->style.body_color);
+					ds->DrawGeometry(this->rubbers[idx], ix, iy, body_color);
 				}
 			}
 		}
@@ -631,13 +635,15 @@ void DragYZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	}
 
 	{ // draw drag
+		ICanvasBrush^ body_color = (this->alarming ? this->style.alarm_color : this->style.body_color);
+		
 		ds->DrawCachedGeometry(this->visor_part, draghead_x, draghead_y, this->style.color);
 		ds->DrawCachedGeometry(this->draghead_part, draghead_x, draghead_y, this->style.head_color);
 
-		ds->DrawGeometry(this->drag_body, x, y, this->style.body_color, this->drag_thickness, this->dragarm_style);
+		ds->DrawGeometry(this->drag_body, x, y, body_color, this->drag_thickness, this->dragarm_style);
 
 		ds->FillGeometry(this->universal_joint, suction_x, suction_y, this->style.color);
-		ds->DrawGeometry(this->universal_joint, suction_x, suction_y, this->style.body_color, this->style.thickness);
+		ds->DrawGeometry(this->universal_joint, suction_x, suction_y, body_color, this->style.thickness);
 		ds->FillGeometry(this->universal_joint, draghead_x, draghead_y, this->style.color);
 
 		for (int idx = DRAG_SEGMENT_MAX_COUNT - 1; idx >= 0; idx--) {
@@ -647,7 +653,7 @@ void DragYZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 
 				if (this->rubbers[idx] != nullptr) {
 					ds->FillGeometry(this->rubbers[idx], ix, iy, this->style.color);
-					ds->DrawGeometry(this->rubbers[idx], ix, iy, this->style.body_color);
+					ds->DrawGeometry(this->rubbers[idx], ix, iy, body_color);
 				}
 			}
 		}
@@ -894,10 +900,12 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	}
 
 	{ // draw drag
-		ds->DrawGeometry(this->drag_body, x, y, this->style.body_color, this->drag_thickness, this->dragarm_style);
+		ICanvasBrush^ body_color = (this->alarming ? this->style.alarm_color : this->style.body_color);
+
+		ds->DrawGeometry(this->drag_body, x, y, body_color, this->drag_thickness, this->dragarm_style);
 
 		ds->FillGeometry(this->universal_joint, offset_x, offset_y, this->style.color);
-		ds->DrawGeometry(this->universal_joint, offset_x, offset_y, this->style.body_color, this->style.thickness);
+		ds->DrawGeometry(this->universal_joint, offset_x, offset_y, body_color, this->style.thickness);
 
 		for (int idx = DRAG_SEGMENT_MAX_COUNT - 1; idx >= 0; idx--) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
@@ -906,7 +914,7 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 
 				if (this->rubbers[idx] != nullptr) {
 					ds->FillGeometry(this->rubbers[idx], ix, iy, this->style.color);
-					ds->DrawGeometry(this->rubbers[idx], ix, iy, this->style.body_color);
+					ds->DrawGeometry(this->rubbers[idx], ix, iy, body_color);
 				}
 			}
 		}
@@ -918,7 +926,7 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 			float draghead_joint_y = draghead_y + this->mask_dy;
 
 			ds->FillGeometry(this->universal_joint, draghead_joint_x, draghead_joint_y, this->style.color);
-			ds->DrawGeometry(this->universal_joint, draghead_joint_x, draghead_joint_y, this->style.body_color, this->style.thickness);
+			ds->DrawGeometry(this->universal_joint, draghead_joint_x, draghead_joint_y, body_color, this->style.thickness);
 			ds->DrawCachedGeometry(this->joint_mask, draghead_joint_x, draghead_joint_y, Colours::Background);
 
 			ds->DrawCachedGeometry(this->visor_part, draghead_x, draghead_y, this->style.color);

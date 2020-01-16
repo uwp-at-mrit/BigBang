@@ -36,6 +36,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ joint_angle_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ alarm_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
 
@@ -82,6 +83,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_dredging(bool on) { this->dredging = on; }
+		void set_alarm(bool on) { this->alarming = on; }
 		void set_figure(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead, double visor_angle, bool force = false);
 
 	public:
@@ -158,6 +160,7 @@ namespace WarGrey::SCADA {
 		float draghead_length;
 		float visor_length;
 		bool dredging;
+		bool alarming;
 	};
 
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
