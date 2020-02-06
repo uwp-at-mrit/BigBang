@@ -3,6 +3,7 @@
 #include "datum/file.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 using namespace WarGrey::DTPM;
 
 /*************************************************************************************************/

@@ -7,8 +7,6 @@ using namespace WarGrey::DTPM;
 
 /*************************************************************************************************/
 CertificateDoc::CertificateDoc(std::filebuf& crt) {
-	Natural n;
-
 	while (peek_char(crt) != EOF) {
 		discard_this_line(crt);
 	}

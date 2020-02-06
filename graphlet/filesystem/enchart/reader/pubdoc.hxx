@@ -12,9 +12,9 @@ namespace WarGrey::DTPM {
 		PublicKeyDoc(std::filebuf& dig);
 
 	internal:
-		WarGrey::DTPM::Natural p;
-		WarGrey::DTPM::Natural q;
-		WarGrey::DTPM::Natural g;
-		WarGrey::DTPM::Natural y;
+		WarGrey::GYDM::Natural p;
+		WarGrey::GYDM::Natural q;
+		WarGrey::GYDM::Natural g;
+		WarGrey::GYDM::Natural y;
 	};
 }

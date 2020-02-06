@@ -4,6 +4,7 @@
 #include "datum/string.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 using namespace WarGrey::DTPM;
 
 static void cell_extract(ENCell* cell, bytes& permit) {

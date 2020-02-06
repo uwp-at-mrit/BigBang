@@ -65,7 +65,7 @@ namespace WarGrey::DTPM {
 		Windows::Foundation::Size view_size;
 
 	private:
-		WarGrey::DTPM::Natural HW_ID;
+		WarGrey::GYDM::Natural HW_ID;
 		long long pseudo_now;
 	};
 }
