@@ -32,10 +32,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\crtdoc.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\pubdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.cxx" />
@@ -50,7 +46,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\pipelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\planetlet.cpp" />
@@ -151,10 +146,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\colorplotlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\crtdoc.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\pubdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdatalet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdataloguelet.hxx" />
@@ -172,7 +163,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\digdoc.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\doctype.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\xyzdoc.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\svglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\pipelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\planetlet.hpp" />

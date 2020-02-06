@@ -5,7 +5,6 @@
 #include "graphlet/planetlet.hpp"
 #include "graphlet/vessellet.hpp"
 
-#include "graphlet/filesystem/s63let.hpp"
 #include "graphlet/filesystem/msappdataloguelet.hxx"
 #include "graphlet/filesystem/configuration/colorplotlet.hpp"
 #include "graphlet/filesystem/project/reader/doctype.hxx"
@@ -26,10 +25,10 @@ namespace WarGrey::DTPM {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "projects");
 
-		Projectlet(WarGrey::DTPM::IVessellet* vessel, WarGrey::DTPM::ColorPlotlet* plot, WarGrey::DTPM::S63let* enchart,
-			Platform::String^ project, float view_width, float view_height,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
-			Platform::String^ rootdir = "projects");
+		//Projectlet(WarGrey::DTPM::IVessellet* vessel, WarGrey::DTPM::ColorPlotlet* plot, WarGrey::DTPM::S63let* enchart,
+			//Platform::String^ project, float view_width, float view_height,
+			//Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
+			//Platform::String^ rootdir = "projects");
 
 	public:
 		bool move_vessel(double x, double y, WarGrey::DTPM::SailingMode mode = SailingMode::VesselVisible);
@@ -81,7 +80,6 @@ namespace WarGrey::DTPM {
 	private: // graphlets are managed by the Planetlet
 		WarGrey::DTPM::DigMaplet* map;
 		WarGrey::DTPM::IVessellet* vessel;
-		WarGrey::DTPM::S63let* enchart;
 		WarGrey::DTPM::ColorPlotlet* plot;
 		WarGrey::DTPM::Xyzlet* depth_xyz;
 		WarGrey::DTPM::Tracelinelet* jobs_dat;

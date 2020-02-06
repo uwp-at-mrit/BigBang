@@ -319,21 +319,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\sectionlet.cpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.cpp">
-      <Filter>graphlet\filesystem</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.cxx">
-      <Filter>graphlet\filesystem\enchart\reader</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.cxx">
-      <Filter>graphlet\filesystem\enchart\reader</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\crtdoc.cxx">
-      <Filter>graphlet\filesystem\enchart\reader</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\pubdoc.cxx">
-      <Filter>graphlet\filesystem\enchart\reader</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.cpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
@@ -667,21 +652,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\sectionlet.hpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\s63let.hpp">
-      <Filter>graphlet\filesystem</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\enctype.hxx">
-      <Filter>graphlet\filesystem\enchart\reader</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\permitdoc.hxx">
-      <Filter>graphlet\filesystem\enchart\reader</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\crtdoc.hxx">
-      <Filter>graphlet\filesystem\enchart\reader</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\enchart\reader\pubdoc.hxx">
-      <Filter>graphlet\filesystem\enchart\reader</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.hpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
@@ -764,15 +734,6 @@
     </Filter>
     <Filter Include="graphlet\filesystem\configuration\vessel">
       <UniqueIdentifier>{9ab9cc11-74d3-495c-ab82-48a25a6f1bf6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="graphlet\symbol\enc">
-      <UniqueIdentifier>{c1efc1c5-ad64-4e0f-8b10-234b0394e6df}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="graphlet\filesystem\enchart">
-      <UniqueIdentifier>{aaffc5aa-c947-4d64-a78f-1b6780804d45}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="graphlet\filesystem\enchart\reader">
-      <UniqueIdentifier>{69a34275-d6b5-40ed-82af-c389e4b385f4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

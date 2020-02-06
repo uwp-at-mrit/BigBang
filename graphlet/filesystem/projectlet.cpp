@@ -54,14 +54,14 @@ namespace {
 }
 
 /*************************************************************************************************/
-Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
-	, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	: Projectlet(vessel, plot, nullptr, project, view_width, view_height, background, rootdir) {}
+//Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
+	//, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
+	//: Projectlet(vessel, plot, nullptr, project, view_width, view_height, background, rootdir) {}
 	
-Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot, S63let* enchart
+Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot/*, S63let* enchart */
 	, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
 	: Planetlet(new ProjectFrame(project), GraphletAnchor::LT, background)
-	, view_size(Size(view_width, view_height)), vessel(vessel), plot(plot), map(nullptr), enchart(enchart) {
+	, view_size(Size(view_width, view_height)), vessel(vessel), plot(plot), map(nullptr) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : make_wstring(L"%s\\%s", rootdir->Data(), project->Data()));
 	this->enable_stretch(false, false);
 	this->enable_events(true, true); // enable low level events for traceline.
@@ -71,13 +71,13 @@ Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot, S63let* enchart
 void Projectlet::construct() {
 	Planetlet::construct();
 
-	if (this->enchart != nullptr) {
-		ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
+	//if (this->enchart != nullptr) {
+	//	ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
 
-		frame->change_mode(ENChart);
-		this->planet->insert(this->enchart);
-		frame->change_mode(Dredger);
-	}
+	//	frame->change_mode(ENChart);
+	//	this->planet->insert(this->enchart);
+	//	frame->change_mode(Dredger);
+	//}
 
 	this->font = make_bold_text_format(32.0F);
 	this->cd(this->ms_appdata_rootdir);
