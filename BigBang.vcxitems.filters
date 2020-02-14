@@ -755,11 +755,5 @@
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\timemachine.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\encerror.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\encerror.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
   </ItemGroup>
 </Project>
