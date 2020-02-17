@@ -24,7 +24,7 @@ Togglet::Togglet(bool initial_state, Platform::String^ checked_label, Platform::
 	: ckcolor(ckcolor == nullptr ? toggle_default_checked_color : ckcolor)
 	, uncolor(uncolor == nullptr ? toggle_default_unchecked_color : uncolor)
 	, state(initial_state), width(width) {
-	CanvasTextFormat^ font = make_text_format("Microsoft YaHei", 20.0F);
+	CanvasTextFormat^ font = make_text_format("Microsoft YaHei", 16.0F);
 
 	this->label = make_text_layout(speak(checked_label, tongue), font);
 	this->unlabel = make_text_layout(speak(unchecked_label, tongue), font);
