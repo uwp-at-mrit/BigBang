@@ -15,15 +15,21 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+static CanvasSolidColorBrush^ toggle_default_checked_color = Colours::DodgerBlue;
+static CanvasSolidColorBrush^ toggle_default_unchecked_color = Colours::SlateGray;
+
+/**************************************************************************************************/
 Togglet::Togglet(bool initial_state, Platform::String^ checked_label, Platform::String^ unchecked_label, float width
 	, CanvasSolidColorBrush^ ckcolor, CanvasSolidColorBrush^ uncolor, Platform::String^ tongue)
-	: state(initial_state), width(width), ckcolor(ckcolor), uncolor(uncolor) {
+	: ckcolor(ckcolor == nullptr ? toggle_default_checked_color : ckcolor)
+	, uncolor(uncolor == nullptr ? toggle_default_unchecked_color : uncolor)
+	, state(initial_state), width(width) {
 	CanvasTextFormat^ font = make_text_format("Microsoft YaHei", 20.0F);
 
 	this->label = make_text_layout(speak(checked_label, tongue), font);
 	this->unlabel = make_text_layout(speak(unchecked_label, tongue), font);
-	this->lblcolor = Colours::contrast(ckcolor);
-	this->unlblcolor = Colours::contrast(uncolor);
+	this->lblcolor = Colours::contrast(this->ckcolor);
+	this->unlblcolor = Colours::contrast(this->uncolor);
 
 	this->state = initial_state;
 	this->width = width;
