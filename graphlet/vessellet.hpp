@@ -15,6 +15,32 @@ namespace WarGrey::DTPM {
 		virtual Windows::Foundation::Numerics::float2 vessel_to_local(double x, double y, double depth) = 0;
 	};
 
+	/************************************************************************************************/
+	private class ITrackDataReceiver abstract {
+	public:
+		virtual void begin_maniplation_sequence() {}
+		virtual void on_datum_values(long long open_s, long long timepoint_ms, double* values, unsigned int n) = 0;
+		virtual void end_maniplation_sequence() {}
+
+	public:
+		virtual void on_maniplation_complete(long long open_s, long long close_s) {}
+	};
+
+	private class ITrackDataSource abstract : public WarGrey::SCADA::SharedObject {
+	public:
+		virtual bool ready() = 0;
+		virtual bool loading() = 0;
+		virtual void cancel() = 0;
+
+	public:
+		virtual void load(WarGrey::DTPM::ITrackDataReceiver* receiver, long long open_s, long long close_s) = 0;
+		virtual void save(long long timepoint, double* values, unsigned int n) = 0;
+
+	protected:
+		~ITrackDataSource() noexcept {}
+	};
+
+	/************************************************************************************************/
 	private class IVessellet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		IVessellet();
@@ -41,6 +67,7 @@ namespace WarGrey::DTPM {
 		float yradius;
 	};
 
+	/************************************************************************************************/
 	Windows::Foundation::Numerics::float2 vessel_point(double src_x, double src_y,
 		WarGrey::SCADA::double2& gps_pos, Windows::Foundation::Numerics::float2& scale, double bow_direction,
 		Windows::Foundation::Numerics::float2* lt = nullptr, Windows::Foundation::Numerics::float2* rb = nullptr);
