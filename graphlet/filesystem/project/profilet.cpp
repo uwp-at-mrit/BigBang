@@ -312,13 +312,13 @@ void Profilet::refresh(Profile^ src) {
 
 /*************************************************************************************************/
 Profile^ Profile::load(Platform::String^ path) {
-	Profile^ cs = nullptr;
+	Profile^ p = nullptr;
 	size_t ptsize = sizeof(double2);
 	Platform::String^ wtype;
 	std::filebuf src;
 
 	if (open_input_binary(src, path)) {
-		cs = ref new Profile();
+		p = ref new Profile();
 		wtype = read_wtext(src);
 		discard_this_line(src);
 
@@ -327,12 +327,12 @@ Profile^ Profile::load(Platform::String^ path) {
 				wtype = read_wtext(src, char_end_of_word);
 
 				if (TS::Region.ToString()->Equals(wtype)) {
-					cs->width = read_flonum(src);
-					cs->min_depth = read_flonum(src);
-					cs->max_depth = read_flonum(src);
+					p->width = read_flonum(src);
+					p->min_depth = read_flonum(src);
+					p->max_depth = read_flonum(src);
 				} else if (TS::ColorPlot.ToString()->Equals(wtype)) {
-					cs->depth_distance = read_flonum(src);
-					cs->dragheads_distance = read_flonum(src);
+					p->depth_distance = read_flonum(src);
+					p->dragheads_distance = read_flonum(src);
 				}
 
 				discard_this_line(src);
@@ -340,7 +340,7 @@ Profile^ Profile::load(Platform::String^ path) {
 		}
 	}
 
-	return cs;
+	return p;
 }
 
 bool Profile::save(Profile^ self, Platform::String^ path) {
