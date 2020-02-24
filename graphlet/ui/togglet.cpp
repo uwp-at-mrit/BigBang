@@ -96,6 +96,12 @@ void Togglet::toggle() {
 	this->notify_updated();
 }
 
+void Togglet::toggle(bool state) {
+	if (this->state != state) {
+		this->toggle();
+	}
+}
+
 void Togglet::prepare_style() {
 	CAS_SLOT(this->style.font, make_text_format(toggle_default_font_name, toggle_default_font_size));
 

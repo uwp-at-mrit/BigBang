@@ -1,4 +1,4 @@
-#include "graphlet/filesystem/project/dragtracklet.hpp"
+#include "graphlet/filesystem/project/dredgetracklet.hpp"
 
 #include "datum/file.hpp"
 #include "datum/fixnum.hpp"
@@ -20,68 +20,77 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 namespace {
-	private enum class DT { DragheadTrack, Period, AfterImagePeriod, Visibility, Filter, Style };
+	private enum class DT { DredgeTrack, Period, AfterImagePeriod, Visibility, Filter, Style };
 }
 
 /*************************************************************************************************/
-DragTracklet::DragTracklet(IVessellet* vessel, Platform::String^ profile, float width, float height, Platform::String^ ext, Platform::String^ rootdir)
-	: width(width), height(height), direction_sign(1.0), profile(nullptr), vessel(vessel) {
-	if (profile != nullptr) {
-		this->ms_appdata_config = ms_appdata_file(profile, ext, rootdir);
+DredgeTracklet::DredgeTracklet(ITrackDataSource* src, Platform::String^ track, float width, float height, Platform::String^ ext, Platform::String^ rootdir)
+	: width(width), height(height), track(nullptr) {
+	if (track != nullptr) {
+		this->ms_appdata_config = ms_appdata_file(track, ext, rootdir);
 	} else {
 		// TODO: meanwhile it's useless and easy to be used incorrectly
-		this->ms_appdata_config = ref new Uri(ms_apptemp_file("profile", ext));
+		this->ms_appdata_config = ref new Uri(ms_apptemp_file("track", ext));
 	}
 
 	if (this->height == 0.0F) {
-		this->height = 200.0F;
+		this->height = this->width;
 	} else if (this->height < 0.0F) {
 		this->height *= -this->width;
 	}
 }
 
-DragTracklet::~DragTracklet() {
+DredgeTracklet::~DredgeTracklet() {
 	this->unload(this->ms_appdata_config);
-
-	if (this->outline) {
-		delete this->outline;
-	}
 }
 
-void DragTracklet::construct() {
+void DredgeTracklet::construct() {
 	this->load(this->ms_appdata_config);
 }
 
-void DragTracklet::update_outline(const Outline* outline, double vessel_x, double vessel_y) {
-	this->vessel_x = vessel_x;
-	this->vessel_y = vessel_y;
+void DredgeTracklet::update(long long count, long long interval, long long uptime) {
+	if (this->ready()) {
+		//long long limit = this->history_destination;
 
-	if ((outline != nullptr) && (this->preview_config != nullptr)) {
-		if (this->outline == nullptr) {
-			this->outline = new Outline(outline);
-		} else if ((this->outline->center_foot.x != outline->center_foot.x) || (this->outline->center_foot.y != outline->center_foot.y)) {
-			this->outline->clone_from(outline);
+		//if (this->history_destination <= 0) {
+			//limit = current_seconds();
+			//this->check_visual_window(limit);
+		//}
+
+		{ // load exists data
+			//long long request_interval = this->history_span / this->realtime.step;
+			//long long request_earliest_s = fxmin(this->realtime.start, limit - this->history_span);
+
+			//if (this->loading_timepoint > request_earliest_s) {
+				//if (this->data_source != nullptr) {
+					//if (this->data_source->ready() && (!this->data_source->loading())) {
+						//this->data_source->load(this, this->loading_timepoint, (this->loading_timepoint - request_interval));
+					//}
+				//} else {
+					//this->on_maniplation_complete(this->loading_timepoint, (this->loading_timepoint - request_interval));
+				//}
+			//}
 		}
 	}
 }
 
-void DragTracklet::on_appdata(Uri^ profile, DragTrack^ profile_config) {
-	this->profile_config = profile_config;
+void DredgeTracklet::on_appdata(Uri^ profile, DredgeTrack^ profile_config) {
+	this->track_config = profile_config;
 
 	// avoid updating raw instance accidently
-	this->preview_config = ref new DragTrack(this->profile_config);
+	this->preview_config = ref new DredgeTrack(this->track_config);
 }
 
-bool DragTracklet::ready() {
+bool DredgeTracklet::ready() {
 	return (this->preview_config != nullptr);
 }
 
-void DragTracklet::fill_extent(float x, float y, float* w, float* h) {
+void DredgeTracklet::fill_extent(float x, float y, float* w, float* h) {
 	SET_BOX(w, this->width);
 	SET_BOX(h, this->height);
 }
 
-void DragTracklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void DredgeTracklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float border_off = 0.0F;// this->style.border_thickness * 0.5F;
 	float half_width = this->width * 0.5F;
 	float cx = x + half_width;
@@ -96,33 +105,28 @@ void DragTracklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 
 	//ds->DrawLine(cx, y, cx, y + this->height, this->style.centerline_color, this->style.centerline_thickness, this->style.centerline_style);
 
-	if (this->profile != nullptr) {
+	if (this->track != nullptr) {
 		//ds->DrawGeometry(this->profile, cx, y, this->style.profile_color, this->style.profile_thickness, this->style.profile_style);
 	}
 
-	if ((this->vessel != nullptr) && (this->vessel->ready())) {
-		//this->vessel->draw_profile(ds, this, cx, y, half_width, this->height);
-	}
-
-	//ds->DrawRectangle(x + border_off, y + border_off,
-		//this->width - this->style.border_thickness, this->height - this->style.border_thickness,
-		//this->style.border_color, this->style.border_thickness);
+	ds->DrawRectangle(x + border_off, y + border_off, this->width, this->height,
+		Colours::DodgerBlue, 1.0F);
 }
 
 /*************************************************************************************************/
-DragTrack^ DragTracklet::clone_profile(DragTrack^ dest, bool real_profile) {
-	DragTrack^ clone = ((dest == nullptr) ? ref new DragTrack() : dest);
+DredgeTrack^ DredgeTracklet::clone_track(DredgeTrack^ dest, bool real_profile) {
+	DredgeTrack^ clone = ((dest == nullptr) ? ref new DredgeTrack() : dest);
 
-	clone->refresh(real_profile ? this->profile_config : this->preview_config);
+	clone->refresh(real_profile ? this->track_config : this->preview_config);
 
 	return clone;
 }
 
-void DragTracklet::preview(DragTrack^ src) {
+void DredgeTracklet::preview(DredgeTrack^ src) {
 	if (src == nullptr) {
-		this->preview_config->refresh(this->profile_config);
+		this->preview_config->refresh(this->track_config);
 	} else if (this->preview_config == nullptr) {
-		this->preview_config = ref new DragTrack(src);
+		this->preview_config = ref new DredgeTrack(src);
 	} else {
 		this->preview_config->refresh(src);
 	}
@@ -130,23 +134,23 @@ void DragTracklet::preview(DragTrack^ src) {
 	this->notify_updated();
 }
 
-void DragTracklet::refresh(DragTrack^ src) {
+void DredgeTracklet::refresh(DredgeTrack^ src) {
 	this->store(this->ms_appdata_config, src);
 }
 
 /*************************************************************************************************/
-DragTrack^ DragTrack::load(Platform::String^ path) {
-	DragTrack^ dt = nullptr;
+DredgeTrack^ DredgeTrack::load(Platform::String^ path) {
+	DredgeTrack^ dt = nullptr;
 	size_t ptsize = sizeof(double2);
 	Platform::String^ wtype;
 	std::filebuf src;
 
 	if (open_input_binary(src, path)) {
-		dt = ref new DragTrack();
+		dt = ref new DredgeTrack();
 		wtype = read_wtext(src);
 		discard_this_line(src);
 
-		if (DT::DragheadTrack.ToString()->Equals(wtype)) {
+		if (DT::DredgeTrack.ToString()->Equals(wtype)) {
 			while (peek_char(src) != EOF) {
 				wtype = read_wtext(src, char_end_of_word);
 
@@ -154,7 +158,7 @@ DragTrack^ DragTrack::load(Platform::String^ path) {
 					dt->begin_timepoint = read_natural(src);
 					dt->begin_timepoint = read_natural(src);
 				} else if (DT::AfterImagePeriod.ToString()->Equals(wtype)) {
-					dt->after_image_period = read_natural(src);
+					dt->after_image_period = read_flonum(src);
 				} else if (DT::Visibility.ToString()->Equals(wtype)) {
 					dt->ps_visible = read_bool(src);
 					dt->sb_visible = read_bool(src);
@@ -174,12 +178,12 @@ DragTrack^ DragTrack::load(Platform::String^ path) {
 	return dt;
 }
 
-bool DragTrack::save(DragTrack^ self, Platform::String^ path) {
+bool DredgeTrack::save(DredgeTrack^ self, Platform::String^ path) {
 	std::wofstream v_config;
 	bool okay = false;
 
 	if (open_output_binary(v_config, path)) {
-		write_wtext(v_config, DT::DragheadTrack, true);
+		write_wtext(v_config, DT::DredgeTrack, true);
 
 		write_wtext(v_config, DT::Period);
 		v_config << " " << self->begin_timepoint << " " << self->end_timepoint;
@@ -212,20 +216,36 @@ bool DragTrack::save(DragTrack^ self, Platform::String^ path) {
 	return okay;
 }
 
-DragTrack::DragTrack(DragTrack^ src) {
+DredgeTrack::DredgeTrack(DredgeTrack^ src) {
 	this->refresh(src);
 }
 
-void DragTrack::refresh(DragTrack^ src) {
-	if ((src != nullptr) && (this != src)) {
-		this->begin_timepoint = src->begin_timepoint;
-		this->end_timepoint = src->end_timepoint;
-		this->after_image_period = src->after_image_period;
-		
+void DredgeTrack::refresh(DredgeTrack^ src) {
+	if ((src != nullptr) && (this != src)) {		
 		this->depth0 = src->depth0;
 		this->interval = src->interval;
+		this->after_image_period = src->after_image_period;
+
+		this->begin_timepoint = src->begin_timepoint;
+		this->end_timepoint = src->end_timepoint;
+		this->ps_visible = src->ps_visible;
+		this->sb_visible = src->sb_visible;
 
 		this->track_width = src->track_width;
 		this->track_color = src->track_color;
 	}
+}
+
+void DredgeTracklet::on_datum_values(long long open_s, long long timepoint_ms, long long group, double3& dot) {
+	//if (this->loading_timepoint == open_s) {
+		//for (unsigned int idx = 0; idx < this->count; idx++) {
+			//this->lines[idx].push_front_value(timepoint_ms, values[idx]);
+		//}
+	//}
+}
+
+void DredgeTracklet::on_maniplation_complete(long long open_s, long long close_s) {
+	//if (this->loading_timepoint == open_s) {
+		//this->loading_timepoint = close_s;
+	//}
 }

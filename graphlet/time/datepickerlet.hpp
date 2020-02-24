@@ -35,7 +35,7 @@ namespace WarGrey::SCADA {
 
 		float datetime_leading_space = -1.0F;
 	};
-
+	
 	private class DatePickerlet abstract
 		: public virtual WarGrey::SCADA::ITextlet
 		, public virtual WarGrey::SCADA::IValuelet<long long>

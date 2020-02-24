@@ -31,6 +31,7 @@ namespace WarGrey::SCADA {
 	public:
 		bool checked();
 		void toggle();
+		void toggle(bool state);
 
 	private:
 		void prepare_style();

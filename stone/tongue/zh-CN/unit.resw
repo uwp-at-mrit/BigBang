@@ -129,6 +129,12 @@
   <data name="degrees" xml:space="preserve">
     <value>deg</value>
   </data>
+  <data name="dot" xml:space="preserve">
+    <value>pt</value>
+  </data>
+  <data name="hour" xml:space="preserve">
+    <value>h</value>
+  </data>
   <data name="kgrams" xml:space="preserve">
     <value>kg</value>
   </data>
@@ -158,6 +164,9 @@
   </data>
   <data name="mps" xml:space="preserve">
     <value>m/s</value>
+  </data>
+  <data name="pixel" xml:space="preserve">
+    <value>px</value>
   </data>
   <data name="rpm" xml:space="preserve">
     <value>rpm</value>
