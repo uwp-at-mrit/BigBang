@@ -28,14 +28,16 @@ static CanvasTextFormat^ lines_default_font = make_bold_text_format(12.0F);
 static CanvasTextFormat^ lines_default_legend_font = make_bold_text_format(14.0F);
 
 /*************************************************************************************************/
-private struct tsdouble {
-	long long timepoint;
-	double value;
-};
+namespace {
+	private struct tsdouble {
+		long long timepoint;
+		double value;
+	};
+}
 
-private class WarGrey::SCADA::TimeSeriesLine {
+class WarGrey::SCADA::ITimeSerieslet::Line {
 public:
-	~TimeSeriesLine() noexcept {
+	~Line() noexcept {
 		this->clear_pool();
 	}
 
@@ -324,7 +326,7 @@ void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
 	long long count_rate = DEFAULT_COUNT_RATE;
 
 	if (this->lines == nullptr) {
-		this->lines = new TimeSeriesLine[this->count];
+		this->lines = new ITimeSerieslet::Line[this->count];
 	}
 
 	if (slot_size > this->history_span * count_rate) {
@@ -477,7 +479,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 		float flcount = 0.0F;
 
 		for (unsigned int idx = 0; idx < this->count; idx++) {
-			TimeSeriesLine* line = &this->lines[idx];
+			ITimeSerieslet::Line* line = &this->lines[idx];
 
 			if (!line->hiden) {
 				float yoff = legend_label_height * (flcount + 0.618F);
@@ -491,7 +493,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	}
 
 	for (unsigned idx = 0; idx < this->count; idx++) {
-		TimeSeriesLine* line = &this->lines[idx];
+		ITimeSerieslet::Line* line = &this->lines[idx];
 		tsdouble cursor_flonum;
 
 		line->selected_value = nanf("not resolved");
@@ -579,7 +581,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 			style.selected_color, style.selected_thickness, style.selected_style);
 
 		for (unsigned idx = 0; idx < this->count; idx++) {
-			TimeSeriesLine* line = &this->lines[idx];
+			ITimeSerieslet::Line* line = &this->lines[idx];
 
 			if (!isnan(line->selected_value)) {
 				Platform::String^ metric = line->name + ": " + flstring(line->selected_value, this->precision);

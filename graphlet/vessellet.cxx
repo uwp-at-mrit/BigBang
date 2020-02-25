@@ -10,14 +10,28 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static void vessel_bow_transform(double bow, float* cosbow, float* sinbow) {
+static inline void vessel_bow_transform(double bow, float* cosbow, float* sinbow) {
 	float radians = degrees_to_radians(bow);
 
 	(*cosbow) = flcos(radians);
 	(*sinbow) = flsin(radians);
 }
 
-static float2 vessel_point_on_screen(double src_x, double src_y, double2& gps, float2 s, float cosbow, float sinbow, float2* lt, float2* rb) {
+static inline void vessel_body_transform(double2& src, double2& base, double2& src_sign, double* dotx, double* doty) {
+	(*dotx) = base.x + src.x * src_sign.x;
+	(*doty) = base.y + src.y * src_sign.y;
+}
+
+static inline double2 vessel_point_on_map(double2& o, double src_x, double src_y, double2& gps, float cosbow, float sinbow) {
+	double geo_x = src_x - gps.x;
+	double geo_y = src_y - gps.y;
+	double x = geo_x * cosbow - geo_y * sinbow;
+	double y = geo_x * sinbow + geo_y * cosbow;
+	
+	return double2(x + o.x, y + o.y);
+}
+
+static inline float2 vessel_point_on_screen(double src_x, double src_y, double2& gps, float2 s, float cosbow, float sinbow, float2* lt, float2* rb) {
 	float geo_x = float(src_x - gps.x) * s.x;
 	float geo_y = float(src_y - gps.y) * s.y;
 	float x0 = geo_y;
@@ -56,13 +70,34 @@ void IVessellet::resolve_radius() {
 }
 
 /*************************************************************************************************/
+double2 WarGrey::DTPM::vessel_geo_point(double2& o, double2& src, double2& gps, double bow) {
+	return vessel_geo_point(o, src.x, src.y, gps, bow);
+}
+
+double2 WarGrey::DTPM::vessel_geo_point(double2& o, double x, double y, double2& gps, double bow) {
+	float cosbow, sinbow;
+
+	vessel_bow_transform(bow, &cosbow, &sinbow);
+
+	return vessel_point_on_map(o, x, y, gps, cosbow, sinbow);
+}
+
+double2 WarGrey::DTPM::vessel_geo_point(double2& o, double2& src, double2& base, double2& src_sign, double2& gps, double bow) {
+	double dotx, doty;
+	
+	vessel_body_transform(src, base, src_sign, &dotx, &doty);
+
+	return vessel_geo_point(o, dotx, doty, gps, bow);
+}
+
 float2 WarGrey::DTPM::vessel_point(double2& src, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
 	return vessel_point(src.x, src.y, gps, s, bow, lt, rb);
 }
 
 float2 WarGrey::DTPM::vessel_point(double2& src, double2& base, double2& src_sign, double2& gps, float2& s, double bow, float2* lt, float2* rb) {
-	double dotx = base.x + src.x * src_sign.x;
-	double doty = base.y + src.y * src_sign.y;
+	double dotx, doty;
+
+	vessel_body_transform(src, base, src_sign, &dotx, &doty);
 
 	return vessel_point(dotx, doty, gps, s, bow, lt, rb);
 }

@@ -8,6 +8,11 @@
 #include "datum/flonum.hpp"
 
 namespace WarGrey::DTPM {
+	private enum class DredgeTrackType : unsigned int { // order matters
+		GPS, PSDrag, SBDrag, Reamer,
+		_
+	};
+
 	private ref class DredgeTrack sealed {
 	public:
 		static WarGrey::DTPM::DredgeTrack^ load(Platform::String^ path);
@@ -27,8 +32,7 @@ namespace WarGrey::DTPM {
 	internal:
 		unsigned long long begin_timepoint;
 		unsigned long long end_timepoint;
-		bool ps_visible;
-		bool sb_visible;
+		bool visibles[_N(DredgeTrackType)];
 
 	internal:
 		float track_width;
@@ -39,7 +43,7 @@ namespace WarGrey::DTPM {
 	private class ITrackDataReceiver abstract {
 	public:
 		virtual void begin_maniplation_sequence() {}
-		virtual void on_datum_values(long long open_s, long long timepoint_ms, long long group, WarGrey::SCADA::double3& dot) = 0;
+		virtual void on_datum_values(long long open_s, long long timepoint_ms, long long type, WarGrey::SCADA::double3& dot) = 0;
 		virtual void end_maniplation_sequence() {}
 
 	public:
@@ -54,7 +58,7 @@ namespace WarGrey::DTPM {
 
 	public:
 		virtual void load(WarGrey::DTPM::ITrackDataReceiver* receiver, long long open_s, long long close_s) = 0;
-		virtual void save(long long timepoint, long long group, WarGrey::SCADA::double3& dot) = 0;
+		virtual void save(long long timepoint, long long type, WarGrey::SCADA::double3& dot) = 0;
 
 	protected:
 		~ITrackDataSource() noexcept {}
@@ -85,12 +89,19 @@ namespace WarGrey::DTPM {
 		void refresh(DredgeTrack^ src);
 
 	public:
-		void on_datum_values(long long open_s, long long timepoint_ms, long long group, WarGrey::SCADA::double3& dot) override;
+		void attach_to_map(WarGrey::DTPM::DigMaplet* master, bool force = false);
+		void push_track_dot(WarGrey::DTPM::DredgeTrackType type, WarGrey::SCADA::double3& dot, bool persistent = true, long long timepoint_ms = 0LL);
+
+	public:
+		void on_datum_values(long long open_s, long long timepoint_ms, long long type, WarGrey::SCADA::double3& dot) override;
 		void on_maniplation_complete(long long open_s, long long close_s) override;
 
 	protected:
 		void on_appdata(Windows::Foundation::Uri^ track, WarGrey::DTPM::DredgeTrack^ track_config) override;
 		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
+
+	private:
+		void construct_line_if_necessary(unsigned int type);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hmarks;
@@ -103,6 +114,17 @@ namespace WarGrey::DTPM {
 		WarGrey::DTPM::DredgeTrack^ preview_config;
 		WarGrey::DTPM::DredgeTrack^ track_config;
 		Windows::Foundation::Uri^ ms_appdata_config;
+
+	private:
+		class Line;
+		WarGrey::DTPM::DigMaplet* master;
+		WarGrey::DTPM::DredgeTracklet::Line* lines[_N(DredgeTrackType)];
+
+	private:
+		WarGrey::DTPM::ITrackDataSource* data_source;
+		long long loading_timepoint;
+		long long history_span;
+		long long history_destination;
 
 	private:
 		float width;

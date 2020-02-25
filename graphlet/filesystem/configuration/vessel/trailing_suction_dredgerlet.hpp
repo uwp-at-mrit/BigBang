@@ -51,7 +51,6 @@ namespace WarGrey::DTPM {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bridge_border_color = nullptr,
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hopper_border_color = nullptr);
 
-	struct TrailingSuctionDrag;
 	private class TrailingSuctionDredgerlet : public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::DTPM::TrailingSuctionDredger, WarGrey::DTPM::IVessellet> {
 	public:
 		virtual ~TrailingSuctionDredgerlet() noexcept;
@@ -79,6 +78,9 @@ namespace WarGrey::DTPM {
 		void set_sb_drag_info(WarGrey::SCADA::DragInfo& info, unsigned int actual_drag_pipe_size = 2U);
 		void set_ps_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead);
 		void set_sb_drag_figures(WarGrey::SCADA::double3& offset, WarGrey::SCADA::double3 ujoints[], WarGrey::SCADA::double3& draghead);
+		
+		void fill_ps_track_position(WarGrey::SCADA::double3* pos, WarGrey::SCADA::double2& self_pos);
+		void fill_sb_track_position(WarGrey::SCADA::double3* pos, WarGrey::SCADA::double2& self_pos);
 
 	public:
 		WarGrey::DTPM::TrailingSuctionDredger^ clone_vessel(WarGrey::DTPM::TrailingSuctionDredger^ dest = nullptr, bool real_vessel = true);
@@ -126,7 +128,8 @@ namespace WarGrey::DTPM {
 		Windows::Foundation::Numerics::float2 barge;
 
 	private:
-		WarGrey::DTPM::TrailingSuctionDrag* ps_drag;
-		WarGrey::DTPM::TrailingSuctionDrag* sb_drag;
+		struct Drag;
+		WarGrey::DTPM::TrailingSuctionDredgerlet::Drag* ps_drag;
+		WarGrey::DTPM::TrailingSuctionDredgerlet::Drag* sb_drag;
 	};
 }

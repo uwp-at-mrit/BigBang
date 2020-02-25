@@ -39,10 +39,9 @@ static double2 ps_sign(-1.0, -1.0);
 static double2 sb_sign(-1.0, +1.0);
 static float2 raw_scale(1.0F, 1.0F);
 
-private struct WarGrey::DTPM::TrailingSuctionDrag {
+struct WarGrey::DTPM::TrailingSuctionDredgerlet::Drag {
 public:
-	TrailingSuctionDrag(unsigned int actual_drag_pipe_size)
-		: joints_count(fxmin(actual_drag_pipe_size, (unsigned int)DRAG_SEGMENT_MAX_COUNT)) {}
+	Drag(unsigned int actual_drag_pipe_size) : joints_count(fxmin(actual_drag_pipe_size, (unsigned int)DRAG_SEGMENT_MAX_COUNT)) {}
 
 public:
 	void set_info(DragInfo& info) {
@@ -335,7 +334,7 @@ void TrailingSuctionDredgerlet::resize(float width, float height) {
 
 void TrailingSuctionDredgerlet::set_ps_drag_info(DragInfo& info, unsigned int actual_drag_pipe_size) {	
 	if (this->ps_drag == nullptr) {
-		this->ps_drag = new TrailingSuctionDrag(actual_drag_pipe_size);
+		this->ps_drag = new TrailingSuctionDredgerlet::Drag(actual_drag_pipe_size);
 	}
 
 	this->ps_drag->set_info(info);
@@ -348,7 +347,7 @@ void TrailingSuctionDredgerlet::set_ps_drag_info(DragInfo& info, unsigned int ac
 
 void TrailingSuctionDredgerlet::set_sb_drag_info(DragInfo& info, unsigned int actual_drag_pipe_size) {
 	if (this->sb_drag == nullptr) {
-		this->sb_drag = new TrailingSuctionDrag(actual_drag_pipe_size);
+		this->sb_drag = new TrailingSuctionDredgerlet::Drag(actual_drag_pipe_size);
 	}
 
 	this->sb_drag->set_info(info);
@@ -374,6 +373,26 @@ void TrailingSuctionDredgerlet::set_sb_drag_figures(double3& offset, double3 ujo
 
 		this->reconstruct();
 		this->notify_updated();
+	}
+}
+
+void TrailingSuctionDredgerlet::fill_ps_track_position(double3* pos, double2& self_pos) {
+	if ((this->ps_drag != nullptr) && (this->body != nullptr)) {
+		double2 draghead = vessel_geo_point(self_pos, this->ps_drag->draghead, this->preview_config->ps_suction, ps_sign, this->current_gps, this->bow_direction);
+
+		pos->x = draghead.x;
+		pos->y = draghead.y;
+		pos->z = this->ps_drag->draghead_depth;
+	}
+}
+
+void TrailingSuctionDredgerlet::fill_sb_track_position(double3* pos, double2& self_pos) {
+	if ((this->sb_drag != nullptr) && (this->body != nullptr)) {
+		double2 draghead = vessel_geo_point(self_pos, this->sb_drag->draghead, this->preview_config->sb_suction, sb_sign, this->current_gps, this->bow_direction);
+
+		pos->x = draghead.x;
+		pos->y = draghead.y;
+		pos->z = this->sb_drag->draghead_depth;
 	}
 }
 

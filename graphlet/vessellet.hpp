@@ -43,16 +43,22 @@ namespace WarGrey::DTPM {
 	};
 
 	/************************************************************************************************/
+	WarGrey::SCADA::double2 vessel_geo_point(WarGrey::SCADA::double2& o, double src_x, double src_y, WarGrey::SCADA::double2& gps_pos, double bow_direction);
+	WarGrey::SCADA::double2 vessel_geo_point(WarGrey::SCADA::double2& o, WarGrey::SCADA::double2& src, WarGrey::SCADA::double2& gps_pos, double bow_direction);
+
+	WarGrey::SCADA::double2 vessel_geo_point(WarGrey::SCADA::double2& o, WarGrey::SCADA::double2& src,
+		WarGrey::SCADA::double2& base, WarGrey::SCADA::double2& src_sign, WarGrey::SCADA::double2& gps_pos, double bow_direction);
+	
 	Windows::Foundation::Numerics::float2 vessel_point(double src_x, double src_y,
 		WarGrey::SCADA::double2& gps_pos, Windows::Foundation::Numerics::float2& scale, double bow_direction,
 		Windows::Foundation::Numerics::float2* lt = nullptr, Windows::Foundation::Numerics::float2* rb = nullptr);
 
 	Windows::Foundation::Numerics::float2 vessel_point(WarGrey::SCADA::double2& src,
-		WarGrey::SCADA::double2& base, WarGrey::SCADA::double2& src_sign,
 		WarGrey::SCADA::double2& gps_pos, Windows::Foundation::Numerics::float2& scale, double bow_direction,
 		Windows::Foundation::Numerics::float2* lt = nullptr, Windows::Foundation::Numerics::float2* rb = nullptr);
 
 	Windows::Foundation::Numerics::float2 vessel_point(WarGrey::SCADA::double2& src,
+		WarGrey::SCADA::double2& base, WarGrey::SCADA::double2& src_sign,
 		WarGrey::SCADA::double2& gps_pos, Windows::Foundation::Numerics::float2& scale, double bow_direction,
 		Windows::Foundation::Numerics::float2* lt = nullptr, Windows::Foundation::Numerics::float2* rb = nullptr);
 

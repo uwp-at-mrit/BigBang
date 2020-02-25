@@ -12,6 +12,7 @@
 #include "graphlet/filesystem/project/xyzlet.hpp"
 #include "graphlet/filesystem/project/tracelinelet.hpp"
 #include "graphlet/filesystem/project/sectionlet.hpp"
+#include "graphlet/filesystem/project/dredgetracklet.hpp"
 
 #include "graphlet/symbol/dig/dig.hpp"
 
@@ -20,18 +21,19 @@ namespace WarGrey::DTPM {
 
 	private class Projectlet : public virtual WarGrey::SCADA::IMsAppdataLoguelet<WarGrey::DTPM::ProjectDocument, WarGrey::SCADA::Planetlet, WarGrey::DTPM::ProjectDoctype> {
 	public:
-		Projectlet(WarGrey::DTPM::IVessellet* vessel, WarGrey::DTPM::ColorPlotlet* plot,
+		Projectlet(WarGrey::DTPM::IVessellet* vessel, WarGrey::DTPM::DredgeTracklet* track, WarGrey::DTPM::ColorPlotlet* plot,
 			Platform::String^ project, float view_width, float view_height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "projects");
 
-		//Projectlet(WarGrey::DTPM::IVessellet* vessel, WarGrey::DTPM::ColorPlotlet* plot, WarGrey::DTPM::S63let* enchart,
+		//Projectlet(WarGrey::DTPM::IVessellet* vessel, WarGrey::DTPM::DredgeTracklet* track, WarGrey::DTPM::ColorPlotlet* plot, WarGrey::DTPM::S63let* enchart,
 			//Platform::String^ project, float view_width, float view_height,
 			//Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			//Platform::String^ rootdir = "projects");
 
 	public:
 		bool move_vessel(double x, double y, WarGrey::DTPM::SailingMode mode = SailingMode::VesselVisible);
+		WarGrey::SCADA::double2& vessel_position();
 		const WarGrey::DTPM::Outline* section(double geo_x, double geo_y);
 
 	public:
@@ -80,6 +82,7 @@ namespace WarGrey::DTPM {
 	private: // graphlets are managed by the Planetlet
 		WarGrey::DTPM::DigMaplet* map;
 		WarGrey::DTPM::IVessellet* vessel;
+		WarGrey::DTPM::DredgeTracklet* track;
 		WarGrey::DTPM::ColorPlotlet* plot;
 		WarGrey::DTPM::Xyzlet* depth_xyz;
 		WarGrey::DTPM::Tracelinelet* jobs_dat;
@@ -88,7 +91,6 @@ namespace WarGrey::DTPM {
 
 	private:
 		Windows::Foundation::Size view_size;
-		double vessel_x;
-		double vessel_y;
+		WarGrey::SCADA::double2 vessel_pos;
 	};
 }

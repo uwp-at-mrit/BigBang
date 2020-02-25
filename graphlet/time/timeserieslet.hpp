@@ -12,8 +12,6 @@
 namespace WarGrey::SCADA {
 	typedef Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush ^ (*lookup_line_color)(unsigned int idx);
 
-	class TimeSeriesLine;
-
 	private enum class TimeSeriesState { Realtime, History, _ };
 
 	private struct TimeSeries {
@@ -144,7 +142,8 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vaxes;
 
 	private:
-		WarGrey::SCADA::TimeSeriesLine* lines;
+		class Line;
+		WarGrey::SCADA::ITimeSerieslet::Line* lines;
 		unsigned int count;
 
 	private:

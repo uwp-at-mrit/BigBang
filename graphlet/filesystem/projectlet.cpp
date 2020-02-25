@@ -54,14 +54,14 @@ namespace {
 }
 
 /*************************************************************************************************/
-//Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot
+//Projectlet::Projectlet(IVessellet* vessel, DredgeTracklet* track, ColorPlotlet* plot
 	//, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	//: Projectlet(vessel, plot, nullptr, project, view_width, view_height, background, rootdir) {}
+	//: Projectlet(vessel, track, plot, nullptr, project, view_width, view_height, background, rootdir) {}
 	
-Projectlet::Projectlet(IVessellet* vessel, ColorPlotlet* plot/*, S63let* enchart */
+Projectlet::Projectlet(IVessellet* vessel, DredgeTracklet* track, ColorPlotlet* plot/*, S63let* enchart */
 	, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
 	: Planetlet(new ProjectFrame(project), GraphletAnchor::LT, background)
-	, view_size(Size(view_width, view_height)), vessel(vessel), plot(plot), map(nullptr) {
+	, view_size(Size(view_width, view_height)), vessel(vessel), track(track), plot(plot), map(nullptr) {
 	this->ms_appdata_rootdir = ((rootdir == nullptr) ? project : make_wstring(L"%s\\%s", rootdir->Data(), project->Data()));
 	this->enable_stretch(false, false);
 	this->enable_events(true, true); // enable low level events for traceline.
@@ -171,6 +171,11 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	}
 
 	//frame->change_mode(Dredger | ENChart);
+
+	if (this->track != nullptr) {
+		this->planet->insert(this->track, 0.0F, 0.0F);
+		this->track->attach_to_map(this->map);
+	}
 
 	if (this->vessel != nullptr) {
 		this->planet->insert(this->vessel, this->view_size.Width * 0.5F, this->view_size.Height * 0.5F, GraphletAnchor::CC);
@@ -283,7 +288,7 @@ void Projectlet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float
 void Projectlet::center_vessel() {
 	if (this->map != nullptr) {
 		this->planet->begin_update_sequence();
-		this->map->center_at(this->vessel_x, this->vessel_y);
+		this->map->center_at(this->vessel_pos.x, this->vessel_pos.y);
 		this->relocate_vessel();
 		this->relocate_icons();
 		this->planet->end_update_sequence();
@@ -326,7 +331,7 @@ bool Projectlet::on_key(VirtualKey key, bool screen_keyboard) {
 			case VirtualKey::Right: this->map->transform(MapMove::Right); break;
 			case VirtualKey::Up: this->map->transform(MapMove::Up); break;
 			case VirtualKey::Down: this->map->transform(MapMove::Down); break;
-			case VirtualKey::H: this->map->center_at(this->vessel_x, this->vessel_y); break;
+			case VirtualKey::H: this->map->center_at(this->vessel_pos.x, this->vessel_pos.y); break;
 			default: handled = false;
 			}
 		}
@@ -418,7 +423,7 @@ bool Projectlet::relocate_vessel(float2* local_pos) {
 	bool moved = false;
 
 	if (this->vessel != nullptr) {
-		float2 vpos = this->map->position_to_local(this->vessel_x, this->vessel_y);
+		float2 vpos = this->map->position_to_local(this->vessel_pos.x, this->vessel_pos.y);
 
 		this->vessel->scale(this->map->actual_scale());
 		this->planet->move_to(this->vessel, vpos.x, vpos.y, GraphletAnchor::CC);
@@ -443,10 +448,10 @@ void Projectlet::relocate_icons() {
 bool Projectlet::move_vessel(double x, double y, SailingMode mode) {
 	bool moved = false;
 
-	if ((this->vessel_x != x) || (this->vessel_y != y)) {
+	if ((this->vessel_pos.x != x) || (this->vessel_pos.y != y)) {
 		float2 vpos;
-		this->vessel_x = x;
-		this->vessel_y = y;
+		this->vessel_pos.x = x;
+		this->vessel_pos.y = y;
 
 		if (this->map != nullptr) {
 			this->planet->begin_update_sequence();
@@ -455,7 +460,7 @@ bool Projectlet::move_vessel(double x, double y, SailingMode mode) {
 				moved = true;
 
 				if (this->jobs_dat != nullptr) {
-					this->jobs_dat->on_vessel_move(this->vessel_x, this->vessel_y);
+					this->jobs_dat->on_vessel_move(this->vessel_pos.x, this->vessel_pos.y);
 				}
 
 				switch (mode) {
@@ -477,6 +482,10 @@ bool Projectlet::move_vessel(double x, double y, SailingMode mode) {
 	}
 
 	return moved;
+}
+
+double2& Projectlet::vessel_position() {
+	return this->vessel_pos;
 }
 
 const Outline* Projectlet::section(double x, double y) {
