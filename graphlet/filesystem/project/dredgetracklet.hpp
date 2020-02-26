@@ -26,7 +26,8 @@ namespace WarGrey::DTPM {
 	
 	internal:
 		double depth0;
-		double interval;
+		double subinterval;
+		double partition_distance;
 		double after_image_period;
 
 	internal:
@@ -102,6 +103,7 @@ namespace WarGrey::DTPM {
 
 	private:
 		void construct_line_if_necessary(unsigned int type);
+		void clear_lines();
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hmarks;
@@ -125,6 +127,7 @@ namespace WarGrey::DTPM {
 		long long loading_timepoint;
 		long long history_span;
 		long long history_destination;
+		double last_after_image_period;
 
 	private:
 		float width;

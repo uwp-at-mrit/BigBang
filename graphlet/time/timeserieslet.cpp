@@ -304,7 +304,7 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 		this->check_visual_window(limit);
 	}
 
-	{ // load exists data
+	{ // load existed data
 		long long request_interval = this->history_span / this->realtime.step;
 		long long request_earliest_s = fxmin(this->realtime.start, limit - this->history_span);
 
