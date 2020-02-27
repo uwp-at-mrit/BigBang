@@ -322,9 +322,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.cpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\dredgetracklet.cpp">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -658,9 +655,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.hpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\dredgetracklet.hpp">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -761,5 +755,7 @@
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\timemachine.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\encerror.resw" />
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\encerror.resw" />
   </ItemGroup>
 </Project>
