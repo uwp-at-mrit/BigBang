@@ -322,15 +322,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.cpp">
       <Filter>graphlet\filesystem\project</Filter>
     </ClCompile>
-<<<<<<< HEAD
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\dredgetracklet.cpp">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\metricslet.cpp">
-      <Filter>graphlet\ui</Filter>
-    </ClCompile>
-=======
->>>>>>> 1088474c4e69d1304c8e09174c4300740aba611a
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -663,12 +654,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.hpp">
       <Filter>graphlet\filesystem\project</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\dredgetracklet.hpp">
-      <Filter>graphlet\filesystem\project</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\metricslet.hpp">
-      <Filter>graphlet\ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
