@@ -63,11 +63,10 @@ namespace WarGrey::DTPM {
 
 	public:
 		WarGrey::DTPM::GPSCS^ clone_gpscs(WarGrey::DTPM::GPSCS^ dest = nullptr);
-		void refresh(GPSCS^ src);
+		void refresh(WarGrey::DTPM::GPSCS^ src);
 
 	protected:
 		void on_appdata(Windows::Foundation::Uri^ gps, WarGrey::DTPM::GPSCS^ gps_config) override;
-		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ arrow;

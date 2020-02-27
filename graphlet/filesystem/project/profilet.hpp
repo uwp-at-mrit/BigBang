@@ -86,13 +86,12 @@ namespace WarGrey::DTPM {
 
 	public:
 		WarGrey::DTPM::Profile^ clone_profile(WarGrey::DTPM::Profile^ dest = nullptr, bool real_profile = true);
-		void preview(Profile^ src);
-		void refresh(Profile^ src);
+		void preview(WarGrey::DTPM::Profile^ src);
+		void refresh(WarGrey::DTPM::Profile^ src);
 
 	protected:
 		void on_appdata(Windows::Foundation::Uri^ profile, WarGrey::DTPM::Profile^ profile_config) override;
-		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
-
+		
 	private:
 		Windows::Foundation::Numerics::float2 distance_to_local(double distance, double depth, double xscale, double yscale);
 		

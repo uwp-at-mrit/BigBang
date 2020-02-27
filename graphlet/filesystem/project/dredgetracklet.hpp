@@ -86,8 +86,8 @@ namespace WarGrey::DTPM {
 
 	public:
 		WarGrey::DTPM::DredgeTrack^ clone_track(WarGrey::DTPM::DredgeTrack^ dest = nullptr, bool real_track = true);
-		void preview(DredgeTrack^ src);
-		void refresh(DredgeTrack^ src);
+		void preview(WarGrey::DTPM::DredgeTrack^ src);
+		void refresh(WarGrey::DTPM::DredgeTrack^ src);
 
 	public:
 		void attach_to_map(WarGrey::DTPM::DigMaplet* master, bool force = false);
@@ -99,8 +99,7 @@ namespace WarGrey::DTPM {
 
 	protected:
 		void on_appdata(Windows::Foundation::Uri^ track, WarGrey::DTPM::DredgeTrack^ track_config) override;
-		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
-
+		
 	private:
 		void construct_line_if_necessary(unsigned int type);
 		void clear_lines();

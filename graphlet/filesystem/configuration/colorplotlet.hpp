@@ -48,12 +48,11 @@ namespace WarGrey::DTPM {
 
 	public:
 		WarGrey::DTPM::ColorPlot^ clone_plot(WarGrey::DTPM::ColorPlot^ dest = nullptr);
-		void refresh(ColorPlot^ src);
+		void refresh(WarGrey::DTPM::ColorPlot^ src);
 
 	protected:
 		void on_appdata(Windows::Foundation::Uri^ plot, WarGrey::DTPM::ColorPlot^ plot_config) override;
-		void on_appdata_not_found(Windows::Foundation::Uri^ file) override {}
-
+		
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
 

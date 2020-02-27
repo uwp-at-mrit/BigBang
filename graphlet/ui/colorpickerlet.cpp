@@ -10,6 +10,7 @@
 
 #include "brushes.hxx"
 
+using namespace WarGrey::DTPM;
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;

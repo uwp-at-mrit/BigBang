@@ -99,6 +99,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\colorpickerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\metricslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\tablet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\textlet.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\buttonlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\colorpickerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\metricslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\statuslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\tablet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\textlet.hpp" />

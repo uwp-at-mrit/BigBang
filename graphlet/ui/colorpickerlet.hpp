@@ -5,11 +5,11 @@
 #include "palette.hpp"
 #include "satellite.hpp"
 
-namespace WarGrey::SCADA {
+namespace WarGrey::DTPM {
 	private class ColorPickerlet : public WarGrey::SCADA::IGraphlet {
 	public:
-		ColorPickerlet(WarGrey::SCADA::Palette ptype, float width = 128.0F, float height = 32.0F);
-		ColorPickerlet(WarGrey::SCADA::Palette ptype, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ initial_color = nullptr,
+		ColorPickerlet(WarGrey::DTPM::Palette ptype, float width = 128.0F, float height = 32.0F);
+		ColorPickerlet(WarGrey::DTPM::Palette ptype, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ initial_color = nullptr,
 			float width = 128.0F, float height = 32.0F);
 		
 	public:
@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ _color;
-		WarGrey::SCADA::Palette ptype;
+		WarGrey::DTPM::Palette ptype;
 		WarGrey::SCADA::ISatellite* picker;
 
 	private:
