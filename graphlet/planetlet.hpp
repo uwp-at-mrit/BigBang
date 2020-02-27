@@ -29,8 +29,8 @@ namespace WarGrey::SCADA {
 		void resize(float width, float height) override;
 
 	public:
-		void enable_stretch(bool resizable_width, bool resizable_height);
 		void enable_stretch(bool yes_or_no);
+		void enable_stretch(bool resizable_width, bool resizable_height);
 		void set_stretch_anchor(WarGrey::SCADA::GraphletAnchor anchor);
 
 	public:
