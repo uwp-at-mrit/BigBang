@@ -7,6 +7,7 @@
 #include "graphlet/shapelet.hpp"
 
 #include "filesystem/msappdata.hxx"
+#include "satellite/colorpicker.hpp"
 
 #include "datum/credit.hpp"
 #include "datum/string.hpp"
@@ -16,6 +17,7 @@
 #include "module.hpp"
 #include "brushes.hxx"
 #include "planet.hpp"
+#include "menu.hpp"
 
 #include "colorspace.hpp"
 
@@ -24,6 +26,8 @@ using namespace WarGrey::DTPM;
 
 using namespace Windows::Foundation;
 
+using namespace Windows::UI::Xaml::Controls;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -31,11 +35,11 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
 static Platform::String^ metrics_file_type = "metrics style";
-static Platform::String^ metrics_tongue = "status";
+static Platform::String^ metrics_tongue = "metrics";
 
 static unsigned int default_slot_count = 20U;
 
-static CanvasTextFormat^ default_metrics_label_font = make_bold_text_format("Microsoft YaHei", 18.0F);
+static CanvasTextFormat^ default_metrics_label_font = make_text_format("Microsoft YaHei", 18.0F);
 static CanvasTextFormat^ default_metrics_font = make_bold_text_format("Cambria Math", 20.0F);
 
 #define SET_METRICS(ms, id, v, p) \
@@ -95,16 +99,37 @@ MetricsStyle WarGrey::DTPM::make_metrics_style(CanvasTextFormat^ lblft, CanvasTe
 
 /*************************************************************************************************/
 namespace {
+	private enum class MetricsAction { SwitchDimension, ColorizeLabel, ColorizeMetric, _ };
+
 	private struct Metric {
 		unsigned int uuid;
-		unsigned int label_color;
-		unsigned int value_color;
+		CanvasSolidColorBrush^ label_color;
+		CanvasSolidColorBrush^ value_color;
 	};
 
 	private ref class Metrics sealed {
 	public:
 		static Metrics^ load(Platform::String^ path) {
-			return nullptr;
+			Metrics^ ms = nullptr;
+			std::filebuf src;
+
+			if (open_input_binary(src, path)) {
+				ms = ref new Metrics();
+
+				while (peek_char(src) != EOF) {
+					Metric m;
+
+					m.uuid = (unsigned int)read_natural(src);
+					m.label_color = color_ref((unsigned int)read_natural(src));
+					m.value_color = color_ref((unsigned int)read_natural(src));
+
+					ms->db.push_back(m);
+
+					discard_this_line(src);
+				}
+			}
+
+			return ms;
 		}
 		
 		static bool save(Metrics^ self, Platform::String^ path) {
@@ -113,7 +138,9 @@ namespace {
 
 			if (open_output_binary(m_config, path)) {
 				for (auto m = self->db.begin(); m != self->db.end(); m++) {
-					m_config << " " << m->uuid << " " << m->label_color << " " << m->value_color;
+					m_config << " " << m->uuid;
+					m_config << " " << color_to_hexadecimal(m->label_color->Color);
+					m_config << " " << color_to_hexadecimal(m->value_color->Color);
 					write_newline(m_config);
 				}
 			}
@@ -123,24 +150,28 @@ namespace {
 
 	public:
 		Metrics(Metrics^ src = nullptr) {
-
+			this->refresh(src);
 		}
 
 	public:
 		void refresh(Metrics^ src) {
-
+			if ((this != src) && (src != nullptr)) {
+				for (auto it = src->db.begin(); it != src->db.end(); it++) {
+					this->db.push_back(*it);
+				}
+			}
 		}
 
 	internal:
-		Metrics(Metricslet* master, size_t slot_count) {
-			unsigned int total = fxmin((unsigned int)slot_count, master->capacity());
+		Metrics(Metricslet* master, unsigned int slot_count) {
+			unsigned int total = fxmin(slot_count, master->capacity());
 
 			for (unsigned int idx = 0; idx < total; idx++) {
 				Metric m;
 
 				m.uuid = idx;
-				m.label_color = color_to_hexadecimal(master->label_color_ref(idx)->Color);
-				m.value_color = color_to_hexadecimal(master->label_color_ref(idx)->Color);
+				m.label_color = master->label_color_ref(idx);
+				m.value_color = master->value_color_ref(idx);
 
 				this->db.push_back(m);
 			}
@@ -150,9 +181,18 @@ namespace {
 		std::vector<Metric> db;
 	};
 
-	private class MetricsFrame final : public virtual Planet, public virtual IMsAppdata<Metrics> {
+	private class Metriclet : public Labellet {
+		using Labellet::Labellet;
+
+	};
+
+	private class MetricsFrame final
+		: public virtual Planet
+		, public virtual IMsAppdata<Metrics>
+		, public virtual IColorPickerReceiver
+		, public virtual IMenuCommand<MetricsAction, Credit<RoundedRectanglet, unsigned int>, MetricsFrame*> {
 	public:
-		MetricsFrame(Metricslet* master, Platform::String^ name, MetricsStyle& style, size_t slots)
+		MetricsFrame(Metricslet* master, Platform::String^ name, MetricsStyle& style, unsigned int slots)
 			: Planet(name), master(master), style(style), slot_count(slots > 0 ? slots : default_slot_count), metrics_config(nullptr) {
 			this->ms_appdata_config = ms_appdata_file(name, ".config", "metrics");
 
@@ -161,23 +201,17 @@ namespace {
 			this->inset = this->style.metrics_font->FontSize * 0.618F;
 			this->hgapsize = this->inset * 0.618F;
 
-			this->slots = new Credit<RoundedRectanglet, size_t>*[this->slot_count];
-			this->labels = new Credit<Labellet, size_t>*[this->slot_count];
-			this->metrics = new Credit<Labellet, size_t>*[this->slot_count];
+			this->slots = new Credit<RoundedRectanglet, unsigned int>*[this->slot_count];
+			this->labels = new Credit<Labellet, unsigned int>*[this->slot_count];
+			this->metrics = new Credit<Metriclet, unsigned int>*[this->slot_count];
+
+			this->mertics_menu = make_menu<MetricsAction, Credit<RoundedRectanglet, unsigned int>, MetricsFrame*>(this, this, metrics_tongue);
 		}
 
 		~MetricsFrame() noexcept {
-			if (this->slots != nullptr) {
-				delete[] this->slots;
-			}
-
-			if (this->labels != nullptr) {
-				delete[] this->labels;
-			}
-
-			if (this->metrics != nullptr) {
-				delete[] this->metrics;
-			}
+			delete[] this->slots;
+			delete[] this->labels;
+			delete[] this->metrics;
 		}
 
 	public:
@@ -189,14 +223,18 @@ namespace {
 			this->background = this->insert_one(new Rectanglet(width - this->style.border_thickness, bgheight,
 				this->style.background_color, this->style.border_color, this->style.border_thickness));
 
-			for (size_t idx = 0; idx < this->slot_count; idx++) {
+			for (unsigned int idx = 0; idx < this->slot_count; idx++) {
 				ICanvasBrush^ color = Colours::Foreground;
 
-				this->slots[idx] = this->insert_one(new Credit<RoundedRectanglet, size_t>(
+				this->slots[idx] = this->insert_one(new Credit<RoundedRectanglet, unsigned int>(
 					slot_width, this->slot_height, corner_radius, this->style.slot_color_color, this->style.slot_border_color), idx);
 
-				this->labels[idx] = this->insert_one(new Credit<Labellet, size_t>(speak("loading", metrics_tongue), this->style.label_font, color), idx);
-				this->metrics[idx] = this->insert_one(new Credit<Labellet, size_t>("0.0", this->style.metrics_font, color), idx);
+				this->labels[idx] = this->insert_one(new Credit<Labellet, unsigned int>(speak("loading", metrics_tongue), this->style.label_font, color), idx);
+				this->metrics[idx] = this->insert_one(new Credit<Metriclet, unsigned int>("-", this->style.metrics_font, color), idx);
+
+				// so that tapping label and metrics as well as their slot will popup the menu
+				this->labels[idx]->camouflage(true);
+				this->metrics[idx]->camouflage(true);
 			}
 
 			IMsAppdata::load(this->ms_appdata_config, metrics_file_type);
@@ -213,7 +251,36 @@ namespace {
 
 	public:
 		bool can_select(IGraphlet* g) override {
-			return (dynamic_cast<Labellet*>(g) != nullptr);
+			return (dynamic_cast<RoundedRectanglet*>(g) != nullptr);
+		}
+
+		void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
+			menu_popup(this->mertics_menu, g, local_x, local_y);
+		}
+
+		void execute(MetricsAction cmd, Credit<RoundedRectanglet, unsigned int>* slot, MetricsFrame* self) override {
+			switch (cmd) {
+			case MetricsAction::SwitchDimension: this->master->get_logger()->log_message(Log::Info, L"%s: %d", cmd.ToString()->Data(), slot->id); break;
+			case MetricsAction::ColorizeLabel: WarGrey::DTPM::ColorPicker::get_instance(Palette::X11)->show(this, this->labels[slot->id]); break;
+			case MetricsAction::ColorizeMetric: WarGrey::DTPM::ColorPicker::get_instance(Palette::X11)->show(this, this->metrics[slot->id]); break;
+			}
+		}
+
+		void on_color_pick(CanvasSolidColorBrush^ color, IGraphlet* target) override {
+			auto l = dynamic_cast<Credit<Labellet, unsigned int>*>(target);
+			auto m = dynamic_cast<Credit<Metriclet, unsigned int>*>(target);
+
+			if (l != nullptr) {
+				if (l->id < this->metrics_config->db.size()) {
+					this->metrics_config->db[l->id].label_color = color;
+					this->store(this->ms_appdata_config, this->metrics_config, metrics_file_type);
+				}
+			} else if (m != nullptr) {
+				if (m->id < this->metrics_config->db.size()) {
+					this->metrics_config->db[m->id].value_color = color;
+					this->store(this->ms_appdata_config, this->metrics_config, metrics_file_type);
+				}
+			}
 		}
 
 	protected:
@@ -225,10 +292,10 @@ namespace {
 			for (size_t idx = 0; idx < this->slot_count; idx++) {
 				if (idx < total) {
 					this->labels[idx]->set_text(this->master->label_ref(ftobject->db[idx].uuid), GraphletAnchor::LC);
-					this->labels[idx]->set_color(color_ref(ftobject->db[idx].label_color));
+					this->labels[idx]->set_color(ftobject->db[idx].label_color);
 
-					this->metrics[idx]->set_text(idx.ToString(), GraphletAnchor::RC);
-					this->labels[idx]->set_color(color_ref(ftobject->db[idx].value_color));
+					this->metrics[idx]->set_text(flstring(double(idx + 1), 1), GraphletAnchor::RC);
+					this->metrics[idx]->set_color(ftobject->db[idx].value_color);
 				} else {
 					this->labels[idx]->set_text(speak("nodatum", metrics_tongue), GraphletAnchor::LC);
 					this->labels[idx]->set_color(this->style.nodatum_color);
@@ -252,18 +319,19 @@ namespace {
 		}
 
 	private: // never deletes these graphlets manually
-		Credit<RoundedRectanglet, size_t>** slots;
-		Credit<Labellet, size_t>** labels;
-		Credit<Labellet, size_t>** metrics;
+		Credit<RoundedRectanglet, unsigned int>** slots;
+		Credit<Labellet, unsigned int>** labels;
+		Credit<Metriclet, unsigned int>** metrics;
 		Rectanglet* background;
 
 	private:
 		Uri^ ms_appdata_config;
 		Metrics^ metrics_config;
 		MetricsStyle style;
+		MenuFlyout^ mertics_menu;
 
 	private:
-		size_t slot_count;
+		unsigned int slot_count;
 		float slot_height;
 		float hgapsize;
 		float inset;
@@ -274,10 +342,10 @@ namespace {
 }
 
 /*************************************************************************************************/
-Metricslet::Metricslet(Platform::String^ name, float width, GraphletAnchor anchor, size_t slot_count)
+Metricslet::Metricslet(Platform::String^ name, float width, GraphletAnchor anchor, unsigned int slot_count)
 	: Metricslet(make_metrics_style(), name, width, anchor, slot_count) {}
 
-Metricslet::Metricslet(MetricsStyle& style, Platform::String^ name, float width, GraphletAnchor anchor, size_t slot_count)
+Metricslet::Metricslet(MetricsStyle& style, Platform::String^ name, float width, GraphletAnchor anchor, unsigned int slot_count)
 	: Planetlet(new MetricsFrame(this, name, style, slot_count), width) {
 	this->set_stretch_anchor(anchor);
 	this->enable_events(true, true);

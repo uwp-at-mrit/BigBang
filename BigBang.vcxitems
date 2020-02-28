@@ -112,6 +112,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)navigator\null.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)navigator\thumbnail.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)satellite\colorpicker.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard\affinepad.cpp" />
@@ -233,6 +234,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)navigator\null.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)navigator\thumbnail.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)satellite\colorpicker.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timemachine.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
@@ -257,6 +259,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\screen\pasteboard.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\metrics.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -264,6 +267,7 @@
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\unit.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\metrics.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>

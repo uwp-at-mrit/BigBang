@@ -117,37 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="disconnected" xml:space="preserve">
-    <value>断开</value>
+  <data name="loading" xml:space="preserve">
+    <value>加载中...</value>
   </data>
-  <data name="ipv4" xml:space="preserve">
-    <value>本机 IP: </value>
+  <data name="nodatum" xml:space="preserve">
+    <value>未配置</value>
   </data>
-  <data name="nowifi" xml:space="preserve">
-    <value>未使用</value>
+  <data name="ColorizeLabel" xml:space="preserve">
+    <value>改变标签颜色</value>
   </data>
-  <data name="plc" xml:space="preserve">
-    <value>PLC: </value>
+  <data name="ColorizeMetric" xml:space="preserve">
+    <value>改变数值颜色</value>
   </data>
-  <data name="power" xml:space="preserve">
-    <value>电量: </value>
-  </data>
-  <data name="storage" xml:space="preserve">
-    <value>可用硬盘: </value>
-  </data>
-  <data name="noipv4" xml:space="preserve">
-    <value>无网络连接</value>
-  </data>
-  <data name="wifi" xml:space="preserve">
-    <value>WiFi: </value>
-  </data>
-  <data name="offline" xml:space="preserve">
-    <value>未使用</value>
-  </data>
-  <data name="brightness" xml:space="preserve">
-    <value>亮度:</value>
-  </data>
-  <data name="memory" xml:space="preserve">
-    <value>内存用量</value>
+  <data name="SwitchDimension" xml:space="preserve">
+    <value>切换量纲</value>
   </data>
 </root>

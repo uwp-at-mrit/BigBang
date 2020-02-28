@@ -2,8 +2,7 @@
 
 #include "graphlet/primitive.hpp"
 
-#include "palette.hpp"
-#include "satellite.hpp"
+#include "satellite/colorpicker.hpp"
 
 namespace WarGrey::DTPM {
 	private class ColorPickerlet : public WarGrey::SCADA::IGraphlet {
@@ -26,7 +25,7 @@ namespace WarGrey::DTPM {
 	private:
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ _color;
 		WarGrey::DTPM::Palette ptype;
-		WarGrey::SCADA::ISatellite* picker;
+		WarGrey::DTPM::ColorPicker* picker;
 
 	private:
 		float width;

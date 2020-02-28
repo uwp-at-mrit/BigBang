@@ -150,10 +150,4 @@
   <data name="memory" xml:space="preserve">
     <value>App Memory</value>
   </data>
-  <data name="loading" xml:space="preserve">
-    <value>Loading</value>
-  </data>
-  <data name="nodatum" xml:space="preserve">
-    <value>No Datum</value>
-  </data>
 </root>

@@ -25,8 +25,8 @@ namespace WarGrey::DTPM {
 
 	private class Metricslet abstract : public WarGrey::SCADA::Planetlet {
 	public:
-		Metricslet(Platform::String^ name, float width, WarGrey::SCADA::GraphletAnchor anchor, size_t slot_count = 0U);
-		Metricslet(WarGrey::DTPM::MetricsStyle& style, Platform::String^ name, float width, WarGrey::SCADA::GraphletAnchor anchor, size_t slot_count = 0U);
+		Metricslet(Platform::String^ name, float width, WarGrey::SCADA::GraphletAnchor anchor, unsigned int slot_count = 0U);
+		Metricslet(WarGrey::DTPM::MetricsStyle& style, Platform::String^ name, float width, WarGrey::SCADA::GraphletAnchor anchor, unsigned int slot_count = 0U);
 
 	public:
 		virtual unsigned int capacity() = 0;
