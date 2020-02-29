@@ -39,6 +39,26 @@ IGraphlet* WarGrey::SCADA::menu_get_next_target_graphlet(IGraphlet* start) {
 }
 
 /*************************************************************************************************/
+void WarGrey::SCADA::menu_push_command(MenuFlyout^ menu_background, Platform::String^ label, ICommand^ exe) {
+	auto item = ref new MenuFlyoutItem();
+
+	item->Command = exe;
+	item->Name = label;
+	item->Text = item->Name;
+
+	menu_background->Items->Append(item);
+}
+
+void WarGrey::SCADA::group_menu_push_command(MenuFlyout^ menu_background, Platform::String^ group, Platform::String^ label, ICommand^ exe) {
+	auto item = ref new MenuFlyoutItem();
+	
+	item->Command = exe;
+	item->Name = group + ": " + label;
+	item->Text = item->Name;
+
+	menu_background->Items->Append(item);
+}
+
 void WarGrey::SCADA::menu_push_command(MenuFlyout^ menu_background, ICommand^ exe, Platform::String^ label, Platform::String^ tongue) {
 	auto item = ref new MenuFlyoutItem();
 

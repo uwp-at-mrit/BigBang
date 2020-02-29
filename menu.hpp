@@ -10,6 +10,16 @@ namespace WarGrey::SCADA {
 
 	void menu_push_command(
 		Windows::UI::Xaml::Controls::MenuFlyout^ master,
+		Platform::String^ label,
+		Windows::UI::Xaml::Input::ICommand^ cmd);
+
+	void group_menu_push_command(
+		Windows::UI::Xaml::Controls::MenuFlyout^ master,
+		Platform::String^ group, Platform::String^ label,
+		Windows::UI::Xaml::Input::ICommand^ cmd);
+
+	void menu_push_command(
+		Windows::UI::Xaml::Controls::MenuFlyout^ master,
 		Windows::UI::Xaml::Input::ICommand^ cmd,
 		Platform::String^ label,
 		Platform::String^ tongue = nullptr);

@@ -132,4 +132,10 @@
   <data name="SwitchDimension" xml:space="preserve">
     <value>切换量纲</value>
   </data>
+  <data name="ConcealDimension" xml:space="preserve">
+    <value>显示/隐藏量纲</value>
+  </data>
+  <data name="unset" xml:space="preserve">
+    <value>&lt;不配置&gt;</value>
+  </data>
 </root>

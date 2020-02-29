@@ -132,4 +132,10 @@
   <data name="SwitchDimension" xml:space="preserve">
     <value>Switch Dimension</value>
   </data>
+  <data name="ConcealDimension" xml:space="preserve">
+    <value>Show/Hide Dimension</value>
+  </data>
+  <data name="unset" xml:space="preserve">
+    <value>&lt;unset&gt;</value>
+  </data>
 </root>

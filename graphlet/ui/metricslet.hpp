@@ -23,17 +23,25 @@ namespace WarGrey::DTPM {
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ background = nullptr,
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ slot_background = nullptr);
 
-	private class Metricslet abstract : public WarGrey::SCADA::Planetlet {
-	public:
-		Metricslet(Platform::String^ name, float width, WarGrey::SCADA::GraphletAnchor anchor, unsigned int slot_count = 0U);
-		Metricslet(WarGrey::DTPM::MetricsStyle& style, Platform::String^ name, float width, WarGrey::SCADA::GraphletAnchor anchor, unsigned int slot_count = 0U);
-
+	private class IMetricsProvider abstract : public WarGrey::SCADA::SharedObject {
 	public:
 		virtual unsigned int capacity() = 0;
+
+	public:
 		virtual Platform::String^ label_ref(unsigned int idx) = 0;
+		virtual double value_ref(unsigned int idx) = 0;
 
 	public:
 		virtual Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ label_color_ref(unsigned int idx);
 		virtual Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ value_color_ref(unsigned int idx);
+	};
+
+	private class Metricslet : public WarGrey::SCADA::Planetlet {
+	public:
+		Metricslet(WarGrey::DTPM::IMetricsProvider* master,
+			Platform::String^ name, float width, WarGrey::SCADA::GraphletAnchor anchor, unsigned int slot_count = 0U);
+
+		Metricslet(WarGrey::DTPM::MetricsStyle& style, WarGrey::DTPM::IMetricsProvider* master,
+			Platform::String^ name, float width, WarGrey::SCADA::GraphletAnchor anchor, unsigned int slot_count = 0U);
 	};
 }
