@@ -126,8 +126,7 @@ namespace {
 					m_config << " " << m->dimension_idx;
 					m_config << " " << color_to_hexadecimal(m->label_color->Color);
 					m_config << " " << color_to_hexadecimal(m->value_color->Color);
-					m_config << " ";
-					write_bool(m_config, true);
+					write_bool(m_config << " ", m->visible);
 					write_newline(m_config);
 				}
 			}
@@ -338,11 +337,12 @@ namespace {
 
 	protected:
 		void on_appdata(Windows::Foundation::Uri^ ms_appdata, Metrics^ ftobject) override {
+			std::map<unsigned int, bool> dimensions;
 			size_t total = ftobject->db.size();
-
+			
 			this->begin_update_sequence();
 
-			for (size_t idx = 0; idx < this->slot_count; idx++) {
+			for (unsigned int idx = 0; idx < this->slot_count; idx++) {
 				float opacity = (ftobject->db[idx].visible ? 100.0F : 0.0F);
 				
 				this->cellophane(this->labels[idx], opacity);
@@ -354,6 +354,7 @@ namespace {
 					this->labels[idx]->set_text(this->master->label_ref(this->metrics[idx]->dimension_idx), GraphletAnchor::LC);
 					this->labels[idx]->set_color(ftobject->db[idx].label_color);
 					this->metrics[idx]->set_color(ftobject->db[idx].value_color);
+					dimensions.insert(std::pair<unsigned int, bool>(this->metrics[idx]->dimension_idx, ftobject->db[idx].visible));
 				} else {
 					this->labels[idx]->set_text(speak("nodatum", metrics_tongue), GraphletAnchor::LC);
 					this->labels[idx]->set_color(this->style.nodatum_color);
@@ -362,6 +363,18 @@ namespace {
 			}
 
 			this->end_update_sequence();
+
+			ui_thread_run_async([=]() {
+				for (unsigned int idx = 0; idx < this->master->capacity(); idx++) {
+					auto dim = dimensions.find(idx);
+					if (dim == dimensions.end()) {
+						menu_set_foreground_color(this->metrics_menu, idx, Colours::Foreground);
+					} else if (dim->second) {
+						menu_set_foreground_color(this->metrics_menu, idx, Colours::Green);
+					} else {
+						menu_set_foreground_color(this->metrics_menu, idx, Colours::ForestGreen);
+					}
+				}});
 
 			this->metrics_config = ftobject;
 		}

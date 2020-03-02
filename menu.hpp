@@ -48,7 +48,6 @@ namespace WarGrey::SCADA {
 		float x, float y,
 		float xoff = 0.0F, float yoff = 0.0F);
 
-	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, unsigned int idx, Windows::UI::Color& color);
 	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, unsigned int idx, Windows::UI::Xaml::Media::Brush^ brush);
 	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, unsigned int idx, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ brush);
 
@@ -265,8 +264,8 @@ namespace WarGrey::SCADA {
 	}
 
 	/************************************************************************************************/
-	template<typename L, class C>
-	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, L label, C c) {
+	template<typename L, class B>
+	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, L label, B^ c) {
 		if (WarGrey::SCADA::ui_thread_accessed()) {
 			Platform::String^ id = label.ToString();
 
@@ -283,8 +282,8 @@ namespace WarGrey::SCADA {
 		}
 	}
 
-	template<typename G, typename L, class C>
-	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, G group, L label, C c) {
+	template<typename G, typename L, class B>
+	void menu_set_foreground_color(Windows::UI::Xaml::Controls::MenuFlyout^ master, G group, L label, B^ c) {
 		if (WarGrey::SCADA::ui_thread_accessed()) {
 			Platform::String^ id = group.ToString() + ": " + label.ToString();
 

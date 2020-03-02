@@ -1,6 +1,7 @@
 #include "menu.hpp"
 #include "planet.hpp"
 #include "tongue.hpp"
+#include "syslog.hpp"
 
 #include "graphlet/primitive.hpp"
 
@@ -20,6 +21,21 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 /*************************************************************************************************/
 static IPlanet* the_planet_for_multiple_selected_targets = nullptr;
 static IGraphlet* the_specific_target = nullptr;
+
+// Stupid Microsoft for its broken template specialization
+static void menu_set_foreground(MenuFlyout^ master, unsigned int idx, Brush^ brush) {
+	if (ui_thread_accessed()) {
+		if (idx < master->Items->Size) {
+			MenuFlyoutItem^ item = dynamic_cast<MenuFlyoutItem^>(master->Items->GetAt(idx));
+
+			if (item->Command->CanExecute(nullptr)) {
+				item->Foreground = brush;
+			}
+		}
+	} else {
+		ui_thread_run_async([=]() { menu_set_foreground_color(master, idx, brush); });
+	}
+}
 
 /*************************************************************************************************/
 IGraphlet* WarGrey::SCADA::menu_get_next_target_graphlet(IGraphlet* start) {
@@ -109,27 +125,9 @@ void WarGrey::SCADA::group_menu_popup(MenuFlyout^ m, IPlanet* p, float x, float 
 
 /*************************************************************************************************/
 void WarGrey::SCADA::menu_set_foreground_color(MenuFlyout^ master, unsigned int idx, CanvasSolidColorBrush^ brush) {
-	menu_set_foreground_color(master, idx, brush->Color);
-}
-
-void WarGrey::SCADA::menu_set_foreground_color(MenuFlyout^ master, unsigned int idx, Color& color) {
-	if (ui_thread_accessed()) {
-		menu_set_foreground_color(master, idx, ref new SolidColorBrush(color));
-	} else {
-		ui_thread_run_async([=]() { menu_set_foreground_color(master, idx, color); });
-	}
+	menu_set_foreground(master, idx, ref new SolidColorBrush(brush->Color));
 }
 
 void WarGrey::SCADA::menu_set_foreground_color(MenuFlyout^ master, unsigned int idx, Brush^ brush) {
-	if (ui_thread_accessed()) {
-		if (idx < master->Items->Size) {
-			MenuFlyoutItem^ item = dynamic_cast<MenuFlyoutItem^>(master->Items->GetAt(idx));
-			
-			if (item->Command->CanExecute(nullptr)) {
-				item->Foreground = brush;
-			}
-		}
-	} else {
-		ui_thread_run_async([=]() { menu_set_foreground_color(master, idx, brush); });
-	}
+	menu_set_foreground(master, idx, brush);
 }
