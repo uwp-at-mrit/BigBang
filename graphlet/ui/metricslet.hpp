@@ -3,6 +3,19 @@
 #include "graphlet/planetlet.hpp"
 
 namespace WarGrey::DTPM {
+	private enum class MetricValueType : unsigned int { Flonum, Fixnum, Time, Period, Null };
+
+	private struct MetricValue {
+	public:
+		MetricValueType type;
+		int precision = 0;
+
+		union {
+			double flonum;
+			long long fixnum;
+		} as;
+	};
+
 	private struct MetricsStyle {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ metrics_font;
@@ -29,7 +42,7 @@ namespace WarGrey::DTPM {
 
 	public:
 		virtual Platform::String^ label_ref(unsigned int idx) = 0;
-		virtual double value_ref(unsigned int idx) = 0;
+		virtual WarGrey::DTPM::MetricValue value_ref(unsigned int idx) = 0;
 
 	public:
 		virtual Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ label_color_ref(unsigned int idx);

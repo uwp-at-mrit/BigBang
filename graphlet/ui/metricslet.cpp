@@ -13,6 +13,7 @@
 #include "datum/string.hpp"
 #include "datum/fixnum.hpp"
 #include "datum/file.hpp"
+#include "datum/time.hpp"
 
 #include "module.hpp"
 #include "brushes.hxx"
@@ -53,7 +54,6 @@ static CanvasSolidColorBrush^ color_ref(unsigned int hex) {
 	return colors[hex];
 }
 
-/*************************************************************************************************/
 static void prepare_metrics_style(MetricsStyle* style) {
 	CAS_SLOT(style->label_font, default_metrics_label_font);
 	CAS_SLOT(style->metrics_font, default_metrics_font);
@@ -68,6 +68,39 @@ static void prepare_metrics_style(MetricsStyle* style) {
 	FLCAS_SLOT(style->border_thickness, 2.0F);
 }
 
+static bool metric_value_equals(MetricValue& lv, MetricValue& rv) {
+	bool eq = (lv.type == rv.type);
+
+	if (eq) {
+		switch (lv.type) {
+		case MetricValueType::Flonum: eq = (lv.as.flonum == rv.as.flonum); break;
+		case MetricValueType::Fixnum: eq = (lv.as.fixnum == rv.as.fixnum); break;
+		case MetricValueType::Time:   eq = (lv.as.fixnum == rv.as.fixnum); break;
+		}
+	}
+
+	return eq;
+}
+
+static Platform::String^ strftime(long long period_s) {
+	Platform::String^ ts = "00:00";
+
+	if (period_s > 0LL) {
+		long long hours, minutes, seconds;
+
+		split_time_utc(period_s, false, &hours, &minutes, &seconds);
+
+		if (hours > 0LL) {
+			ts = make_wstring(L"%ld:%02ld:%02ld", hours, minutes, seconds);
+		} else {
+			ts = make_wstring(L"%02ld:%02ld", minutes, seconds);
+		}
+	}
+
+	return ts;
+}
+
+/*************************************************************************************************/
 MetricsStyle WarGrey::DTPM::make_metrics_style(CanvasTextFormat^ lblft, CanvasTextFormat^ mft, CanvasSolidColorBrush ^ bg, CanvasSolidColorBrush ^ slot_bg) {
 	MetricsStyle s;
 
@@ -85,7 +118,7 @@ namespace {
 	private enum class MetricsAction { SwitchDimension, ColorizeLabel, ColorizeMetric, ConcealDimension, _ };
 
 	private struct Metric {
-		unsigned int dimension_idx;
+		unsigned int index;
 		CanvasSolidColorBrush^ label_color;
 		CanvasSolidColorBrush^ value_color;
 		bool visible;
@@ -103,7 +136,7 @@ namespace {
 				while (peek_char(src) != EOF) {
 					Metric m;
 
-					m.dimension_idx = (unsigned int)read_natural(src);
+					m.index = (unsigned int)read_natural(src);
 					m.label_color = color_ref((unsigned int)read_natural(src));
 					m.value_color = color_ref((unsigned int)read_natural(src));
 					m.visible = read_bool(src);
@@ -123,7 +156,7 @@ namespace {
 
 			if (open_output_binary(m_config, path)) {
 				for (auto m = self->db.begin(); m != self->db.end(); m++) {
-					m_config << " " << m->dimension_idx;
+					m_config << " " << m->index;
 					m_config << " " << color_to_hexadecimal(m->label_color->Color);
 					m_config << " " << color_to_hexadecimal(m->value_color->Color);
 					write_bool(m_config << " ", m->visible);
@@ -157,7 +190,7 @@ namespace {
 			for (unsigned int idx = 0; idx < total; idx++) {
 				Metric m;
 
-				m.dimension_idx = idx;
+				m.index = idx;
 				m.label_color = master->label_color_ref(idx);
 				m.value_color = master->value_color_ref(idx);
 				m.visible = true;
@@ -173,28 +206,37 @@ namespace {
 	private class Metriclet : public Labellet {
 	public:
 		Metriclet(IMetricsProvider* master, unsigned int idx, CanvasTextFormat^ font, ICanvasBrush^ color)
-			: Labellet("-", font, color), master(master), dimension_idx(idx), value(0.0) { }
+			: Labellet("-", font, color), master(master), index(idx) {
+			this->value.type = MetricValueType::Null;
+		}
 
 	public:
 		void update(long long count, long long interval, long long uptime) override {
-			if (this->dimension_idx < this->master->capacity()) {
-				double current_value = this->master->value_ref(this->dimension_idx);
+			if (this->index < this->master->capacity()) {
+				MetricValue mv = this->master->value_ref(this->index);
 
-				if (this->value != current_value) {
-					this->value = current_value;
-					this->set_text(flstring(this->value, 2), GraphletAnchor::RC);
+				if (!metric_value_equals(this->value, mv)) {
+					this->value = mv;
+
+					switch (this->value.type) {
+					case MetricValueType::Flonum: this->set_text(flstring(this->value.as.flonum, this->value.precision), GraphletAnchor::RC); break;
+					case MetricValueType::Fixnum: this->set_text(this->value.as.fixnum.ToString(), GraphletAnchor::RC); break;
+					case MetricValueType::Time: this->set_text(make_daytimestamp_utc(this->value.as.fixnum, true), GraphletAnchor::RC); break;
+					case MetricValueType::Period: this->set_text(strftime(this->value.as.fixnum), GraphletAnchor::RC); break;
+					case MetricValueType::Null: this->set_text("-", GraphletAnchor::RC); break;
+					}
 				}
-			} else if (!flisnan(this->value)) {
-				this->value = flnan;
+			} else if (this->value.type != MetricValueType::Null) {
+				this->value.type = MetricValueType::Null;
 				this->set_text("-", GraphletAnchor::RC);
 			}
 		}
 
 	public:
-		unsigned int dimension_idx;
+		unsigned int index;
 
 	private:
-		double value;
+		MetricValue value;
 
 	private:
 		IMetricsProvider* master;
@@ -307,8 +349,8 @@ namespace {
 			auto slot = dynamic_cast<Credit<RoundedRectanglet, unsigned int>*>(this->find_next_selected_graphlet());
 
 			if (slot != nullptr) {
-				this->metrics[slot->id]->dimension_idx = dim_idx;
-				this->metrics_config->db[slot->id].dimension_idx = dim_idx;
+				this->metrics[slot->id]->index = dim_idx;
+				this->metrics_config->db[slot->id].index = dim_idx;
 				this->metrics_config->db[slot->id].visible = true;
 				this->store(this->ms_appdata_config, this->metrics_config, metrics_file_type);
 			}
@@ -348,13 +390,13 @@ namespace {
 				this->cellophane(this->labels[idx], opacity);
 				this->cellophane(this->metrics[idx], opacity);
 
-				this->metrics[idx]->dimension_idx = ftobject->db[idx].dimension_idx;
+				this->metrics[idx]->index = ftobject->db[idx].index;
 
-				if ((idx < total) && (ftobject->db[idx].dimension_idx < this->master->capacity())) {
-					this->labels[idx]->set_text(this->master->label_ref(this->metrics[idx]->dimension_idx), GraphletAnchor::LC);
+				if ((idx < total) && (ftobject->db[idx].index < this->master->capacity())) {
+					this->labels[idx]->set_text(this->master->label_ref(this->metrics[idx]->index), GraphletAnchor::LC);
 					this->labels[idx]->set_color(ftobject->db[idx].label_color);
 					this->metrics[idx]->set_color(ftobject->db[idx].value_color);
-					dimensions.insert(std::pair<unsigned int, bool>(this->metrics[idx]->dimension_idx, ftobject->db[idx].visible));
+					dimensions.insert(std::pair<unsigned int, bool>(this->metrics[idx]->index, ftobject->db[idx].visible));
 				} else {
 					this->labels[idx]->set_text(speak("nodatum", metrics_tongue), GraphletAnchor::LC);
 					this->labels[idx]->set_color(this->style.nodatum_color);
