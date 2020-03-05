@@ -487,19 +487,34 @@ void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_f
 	this->tmstream.open(current_file->Path->Data(), std::ios::out | std::ios::app | std::ios::binary);
 }
 
-void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* datablock, size_t size) {
+void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* datablock, size_t size, uint8* attachment, size_t a_size) {
 	// TODO: find the reason if `write` fails.
 	if (this->tmstream.is_open()) {
+		bool has_attachment = ((attachment != nullptr) || (a_size > 0U));
+
 		// NOTE: `std::endl` does not put newline for `std::ios::binary` 
-		this->tmstream << timepoint_ms << " " << addr0 << " " << addrn << "\n\r" << std::endl;
-		this->tmstream.write((char*)datablock, size) << "\n\r" << std::endl;
+		this->tmstream << timepoint_ms << " " << addr0 << " " << addrn;
+		
+		if (has_attachment) {
+			this->tmstream << " " << a_size;
+		}
+		
+		this->tmstream << "\n\r" << std::endl;
+		this->tmstream.write((char*)datablock, size);
+		
+		if (has_attachment) {
+			this->tmstream.write((char*)attachment, a_size);
+		}
+
+		this->tmstream << "\n\r" << std::endl;
 		this->tmstream.flush();
 	}
 }
 
-uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0) {
+uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0, size_t* attachment_size) {
 	long long src = this->resolve_timepoint((*timepoint_ms) / 1000LL);
 	uint8* datablock = nullptr;
+	size_t a_size = 0U;
 
 	if (this->ifsrc != src) {
 		Platform::String^ ifpathname = this->resolve_pathname(src);
@@ -525,7 +540,7 @@ uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t*
 				this->ifpool = new uint8[this->ifsize];
 			}
 
-			this->get_logger()->log_message(Log::Info, L"loading snapshot from %s[%s]",
+			this->get_logger()->log_message(Log::Debug, L"loading snapshot from %s[%s]",
 				ifpathname->Data(), sstring(this->ifeof, 3)->Data());
 
 			tmstream.seekg(0);
@@ -543,7 +558,12 @@ uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t*
 			(*addr0) = size_t(scan_integer(this->ifpool, &this->ifpos, this->ifeof, true));
 			(*size) = size_t(scan_integer(this->ifpool, &this->ifpos, this->ifeof, false) - (*addr0) + 1);
 
-			scan_skip_newline(this->ifpool, &this->ifpos, this->ifeof);
+			if (this->ifpool[this->ifpos] == ' ') {
+				scan_skip_space(this->ifpool, &this->ifpos, this->ifeof);
+				a_size = size_t(scan_integer(this->ifpool, &this->ifpos, this->ifeof, false));
+			}
+
+			scan_skip_this_line(this->ifpool, &this->ifpos, this->ifeof);
 
 			if (this->ifutc >= (*timepoint_ms)) {
 				(*timepoint_ms) = this->ifutc;
@@ -554,6 +574,8 @@ uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t*
 			scan_skip_this_line(this->ifpool, &this->ifpos, this->ifeof);
 		}
 	}
+
+	SET_BOX(attachment_size, a_size);
 
 	return datablock;
 }

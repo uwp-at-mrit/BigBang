@@ -25,8 +25,8 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::RotationPeriod period, unsigned int period_count);
 
 	public:
-		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size) = 0;
-		virtual uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0) = 0;
+		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, uint8* attachment = nullptr, size_t a_size = 0U) = 0;
+		virtual uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0, size_t* attachment_size = nullptr) = 0;
 		virtual void step();
 	
 	public:
@@ -74,8 +74,8 @@ namespace WarGrey::SCADA {
 			unsigned int period_count = 1);
 
 	public:
-		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size) override;
-		uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0) override;
+		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, uint8* attachment = nullptr, size_t a_size = 0U) override;
+		uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0, size_t* attachment_size = nullptr) override;
 
 	public:
 		void on_hiden() override;
