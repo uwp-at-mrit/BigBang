@@ -26,10 +26,10 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size,
-			uint8 attachment_type = 0U, uint8* attachment = nullptr, size_t attachment_size = 0U) = 0;
+			uint8 parcel_type = 0U, uint8* parcel = nullptr, size_t parcel_size = 0U) = 0;
 
 		virtual uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0,
-			uint8* attachment_type = nullptr, size_t* attachment_size = nullptr) = 0;
+			uint8* parcel_type = nullptr, size_t* parcel_size = nullptr) = 0;
 
 		virtual void step();
 	
@@ -48,7 +48,7 @@ namespace WarGrey::SCADA {
 		unsigned int get_speed_shift();
 
 	protected:
-		virtual uint8* single_step(long long* timepoint_ms, size_t* size, size_t* addr0, uint8* attachment_type = nullptr, size_t* attachment_size = nullptr);
+		virtual uint8* single_step(long long* timepoint_ms, size_t* size, size_t* addr0, uint8* parcel_type = nullptr, size_t* parcel_size = nullptr);
 
 	protected:
 		Windows::UI::Xaml::Controls::Flyout^ user_interface() override;
@@ -79,10 +79,10 @@ namespace WarGrey::SCADA {
 
 	public:
 		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size,
-			uint8 attachment_type = 0U, uint8* attachment = nullptr, size_t attachment_size = 0U) override;
+			uint8 parcel_type = 0U, uint8* parcel = nullptr, size_t parcel_size = 0U) override;
 
 		uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0,
-			uint8* attachment_type = nullptr, size_t* attachment_size = nullptr) override;
+			uint8* parcel_type = nullptr, size_t* parcel_size = nullptr) override;
 
 	public:
 		void on_hiden() override;
