@@ -400,9 +400,9 @@ void ITimeMachine::timeskip(long long timepoint) {
 }
 
 /**************************************************************************************************/
-uint8* ITimeMachine::single_step(long long* timepoint_ms, size_t* size, size_t* addr0) {
+uint8* ITimeMachine::single_step(long long* timepoint_ms, size_t* size, size_t* addr0, uint8* attachment_type, size_t* attachment_size) {
 	long long current_file_timepoint = this->resolve_timepoint((*timepoint_ms) / 1000LL);
-	uint8* data = this->seek_snapshot(timepoint_ms, size, addr0);
+	uint8* data = this->seek_snapshot(timepoint_ms, size, addr0, attachment_type, attachment_size);
 	
 	if (data == nullptr) { // no such snapshot in the current file (or no such file)
 		(*timepoint_ms) = (current_file_timepoint + this->span_seconds()) * 1000LL;
@@ -487,7 +487,7 @@ void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_f
 	this->tmstream.open(current_file->Path->Data(), std::ios::out | std::ios::app | std::ios::binary);
 }
 
-void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* datablock, size_t size, uint8* attachment, size_t a_size) {
+void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* datablock, size_t size, uint8 a_type, uint8* attachment, size_t a_size) {
 	// TODO: find the reason if `write` fails.
 	if (this->tmstream.is_open()) {
 		bool has_attachment = ((attachment != nullptr) || (a_size > 0U));
@@ -496,7 +496,7 @@ void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t add
 		this->tmstream << timepoint_ms << " " << addr0 << " " << addrn;
 		
 		if (has_attachment) {
-			this->tmstream << " " << a_size;
+			this->tmstream << " " << a_type << " " << a_size;
 		}
 		
 		this->tmstream << "\n\r" << std::endl;
@@ -511,9 +511,10 @@ void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t add
 	}
 }
 
-uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0, size_t* attachment_size) {
+uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0, uint8* attachment_type, size_t* attachment_size) {
 	long long src = this->resolve_timepoint((*timepoint_ms) / 1000LL);
 	uint8* datablock = nullptr;
+	uint8 a_type = 0U;
 	size_t a_size = 0U;
 
 	if (this->ifsrc != src) {
@@ -560,6 +561,7 @@ uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t*
 
 			if (this->ifpool[this->ifpos] == ' ') {
 				scan_skip_space(this->ifpool, &this->ifpos, this->ifeof);
+				a_type = (uint8)scan_integer(this->ifpool, &this->ifpos, this->ifeof, true);
 				a_size = size_t(scan_integer(this->ifpool, &this->ifpos, this->ifeof, false));
 			}
 
@@ -575,6 +577,7 @@ uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t*
 		}
 	}
 
+	SET_BOX(attachment_type, a_type);
 	SET_BOX(attachment_size, a_size);
 
 	return datablock;
