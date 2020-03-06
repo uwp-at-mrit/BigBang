@@ -487,7 +487,7 @@ void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_f
 	this->tmstream.open(current_file->Path->Data(), std::ios::out | std::ios::app | std::ios::binary);
 }
 
-void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* datablock, size_t size, uint8 p_type, uint8* parcel, size_t p_size) {
+void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const uint8* datablock, size_t size, uint8 p_type, const uint8* parcel, size_t p_size) {
 	// TODO: find the reason if `write` fails.
 	if (this->tmstream.is_open()) {
 		bool has_parcel = ((parcel != nullptr) || (p_size > 0U));
@@ -496,14 +496,15 @@ void TimeMachine::save_snapshot(long long timepoint_ms, size_t addr0, size_t add
 		this->tmstream << timepoint_ms << " " << addr0 << " " << addrn;
 		
 		if (has_parcel) {
-			this->tmstream << " " << p_type << " " << p_size;
+			// NOTE: p_type declared as uint8 which will be written as raw byte.
+			this->tmstream << " " << size_t(p_type) << " " << p_size;
 		}
 		
 		this->tmstream << "\n\r" << std::endl;
-		this->tmstream.write((char*)datablock, size);
+		this->tmstream.write((const char*)datablock, size);
 		
 		if (has_parcel) {
-			this->tmstream.write((char*)parcel, p_size);
+			this->tmstream.write((const char*)parcel, p_size);
 		}
 
 		this->tmstream << "\n\r" << std::endl;
@@ -572,7 +573,7 @@ uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t*
 				datablock = &this->ifpool[this->ifpos];
 			}
 
-			this->ifpos += (*size);
+			this->ifpos += (*size) + p_size;
 			scan_skip_this_line(this->ifpool, &this->ifpos, this->ifeof);
 		}
 	}

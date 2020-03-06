@@ -25,8 +25,8 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::RotationPeriod period, unsigned int period_count);
 
 	public:
-		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size,
-			uint8 parcel_type = 0U, uint8* parcel = nullptr, size_t parcel_size = 0U) = 0;
+		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const uint8* data, size_t size,
+			uint8 parcel_type = 0U, const uint8* parcel = nullptr, size_t parcel_size = 0U) = 0;
 
 		virtual uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0,
 			uint8* parcel_type = nullptr, size_t* parcel_size = nullptr) = 0;
@@ -41,6 +41,11 @@ namespace WarGrey::SCADA {
 		void terminate();
 		void shift_speed();
 		void timeskip(long long timepoint_ms);
+		
+		template<typename E>
+		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const uint8* data, size_t size, E parcel_type, const uint8* parcel, size_t parcel_size) {
+			this->save_snapshot(timepoint_ms, addr0, addrn, data, size, static_cast<uint8>(parcel_type), parcel, parcel_size);
+		}
 
 	public:
 		WarGrey::SCADA::Syslog* get_logger();
@@ -78,8 +83,8 @@ namespace WarGrey::SCADA {
 			unsigned int period_count = 1);
 
 	public:
-		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size,
-			uint8 parcel_type = 0U, uint8* parcel = nullptr, size_t parcel_size = 0U) override;
+		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const uint8* data, size_t size,
+			uint8 parcel_type = 0U, const uint8* parcel = nullptr, size_t parcel_size = 0U) override;
 
 		uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0,
 			uint8* parcel_type = nullptr, size_t* parcel_size = nullptr) override;
