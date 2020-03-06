@@ -13,8 +13,8 @@ namespace WarGrey::SCADA {
 	private class ITimeMachineListener abstract {
 	public:
 		virtual void on_startover(long long departure_ms, long long destination_ms) {}
-		virtual void on_timestream(long long timepoint_ms,
-			size_t addr0, size_t addrn, uint8* data, size_t size,
+		virtual void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn,
+			uint8* data, size_t size, uint64 parcel_type, size_t parcel_size,
 			WarGrey::SCADA::Syslog* logger) = 0;
 	};
 
@@ -26,10 +26,10 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const uint8* data, size_t size,
-			uint8 parcel_type = 0U, const uint8* parcel = nullptr, size_t parcel_size = 0U) = 0;
+			uint64 parcel_type = 0U, const uint8* parcel = nullptr, size_t parcel_size = 0U) = 0;
 
 		virtual uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0,
-			uint8* parcel_type = nullptr, size_t* parcel_size = nullptr) = 0;
+			uint64* parcel_type = nullptr, size_t* parcel_size = nullptr) = 0;
 
 		virtual void step();
 	
@@ -44,7 +44,7 @@ namespace WarGrey::SCADA {
 		
 		template<typename E>
 		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const uint8* data, size_t size, E parcel_type, const uint8* parcel, size_t parcel_size) {
-			this->save_snapshot(timepoint_ms, addr0, addrn, data, size, static_cast<uint8>(parcel_type), parcel, parcel_size);
+			this->save_snapshot(timepoint_ms, addr0, addrn, data, size, static_cast<uint64>(parcel_type), parcel, parcel_size);
 		}
 
 	public:
@@ -53,13 +53,13 @@ namespace WarGrey::SCADA {
 		unsigned int get_speed_shift();
 
 	protected:
-		virtual uint8* single_step(long long* timepoint_ms, size_t* size, size_t* addr0, uint8* parcel_type = nullptr, size_t* parcel_size = nullptr);
+		virtual uint8* single_step(long long* timepoint_ms, size_t* size, size_t* addr0, uint64* parcel_type, size_t* parcel_size);
 
 	protected:
 		Windows::UI::Xaml::Controls::Flyout^ user_interface() override;
 
 	private:
-		void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, bool keystream);
+		void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn, uint8* data, size_t size, uint64 p_type, size_t p_size, bool keystream);
 
 	private:
 		Windows::UI::Xaml::Controls::Flyout^ machine;
@@ -84,10 +84,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const uint8* data, size_t size,
-			uint8 parcel_type = 0U, const uint8* parcel = nullptr, size_t parcel_size = 0U) override;
+			uint64 parcel_type = 0U, const uint8* parcel = nullptr, size_t parcel_size = 0U) override;
 
-		uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0,
-			uint8* parcel_type = nullptr, size_t* parcel_size = nullptr) override;
+		uint8* seek_snapshot(long long* timepoint_ms, size_t* size, size_t* addr0, uint64* parcel_type, size_t* parcel_size) override;
 
 	public:
 		void on_hiden() override;
