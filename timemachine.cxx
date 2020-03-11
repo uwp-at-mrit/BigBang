@@ -558,13 +558,13 @@ uint8* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* size, size_t*
 
 		while ((datablock == nullptr) && (this->ifpos < this->ifeof)) {
 			this->ifutc = scan_integer(this->ifpool, &this->ifpos, this->ifeof, true);
-			(*addr0) = scan_natural(this->ifpool, &this->ifpos, this->ifeof, true);
-			(*size) = scan_integer(this->ifpool, &this->ifpos, this->ifeof, false) - (*addr0) + 1;
+			(*addr0) = size_t(scan_natural(this->ifpool, &this->ifpos, this->ifeof, true));
+			(*size) = size_t(scan_integer(this->ifpool, &this->ifpos, this->ifeof, false)) - (*addr0) + 1;
 
 			if (this->ifpool[this->ifpos] == ' ') {
 				scan_skip_space(this->ifpool, &this->ifpos, this->ifeof);
 				p_type = scan_natural(this->ifpool, &this->ifpos, this->ifeof, true);
-				p_size = scan_natural(this->ifpool, &this->ifpos, this->ifeof, false);
+				p_size = size_t(scan_natural(this->ifpool, &this->ifpos, this->ifeof, false));
 			}
 
 			scan_skip_this_line(this->ifpool, &this->ifpos, this->ifeof);
