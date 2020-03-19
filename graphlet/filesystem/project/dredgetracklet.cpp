@@ -454,8 +454,8 @@ DredgeTrack^ DredgeTrack::load(Platform::String^ path) {
 				wtype = read_wtext(src, char_end_of_word);
 
 				if (DT::Period.ToString()->Equals(wtype)) {
-					dt->begin_timepoint = read_natural(src);
-					dt->begin_timepoint = read_natural(src);
+					dt->begin_timepoint = read_integer(src);
+					dt->begin_timepoint = read_integer(src);
 				} else if (DT::AfterImagePeriod.ToString()->Equals(wtype)) {
 					dt->after_image_period = read_flonum(src);
 				} else if (DT::Filter.ToString()->Equals(wtype)) {

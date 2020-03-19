@@ -31,8 +31,8 @@ namespace WarGrey::DTPM {
 		double after_image_period;
 
 	internal:
-		unsigned long long begin_timepoint;
-		unsigned long long end_timepoint;
+		long long begin_timepoint;
+		long long end_timepoint;
 		bool visibles[_N(DredgeTrackType)];
 
 	internal:
