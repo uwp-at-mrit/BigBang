@@ -37,7 +37,6 @@ namespace WarGrey::DTPM {
 
 	internal:
 		float track_width;
-		unsigned int track_color;
 	};
 
 	/************************************************************************************************/
@@ -91,7 +90,7 @@ namespace WarGrey::DTPM {
 
 	public:
 		void attach_to_map(WarGrey::DTPM::DigMaplet* master, bool force = false);
-		void push_track_dot(WarGrey::DTPM::DredgeTrackType type, WarGrey::SCADA::double3& dot, bool persistent = true, long long timepoint_ms = 0LL);
+		void filter_dredging_dot(WarGrey::DTPM::DredgeTrackType type, WarGrey::SCADA::double3& dot, bool persistent = true, long long timepoint_ms = 0LL);
 
 	public:
 		void on_datum_values(long long open_s, long long timepoint_ms, long long type, WarGrey::SCADA::double3& dot) override;
@@ -101,9 +100,18 @@ namespace WarGrey::DTPM {
 		void on_appdata(Windows::Foundation::Uri^ track, WarGrey::DTPM::DredgeTrack^ track_config) override;
 		
 	private:
-		void construct_line_if_necessary(unsigned int type);
-		void clear_lines();
+		class Line;
 
+	private:
+		bool is_key_dot(WarGrey::SCADA::double3& dot);
+		void construct_line_if_necessary(unsigned int type);
+		void clear_history_lines();
+		void clear_realtime_lines();
+
+	private:
+		void draw_line(WarGrey::DTPM::DredgeTracklet::Line* line, Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			float x, float y, long long start, long long end, double partition_squared);
+		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ haxes;
@@ -117,19 +125,23 @@ namespace WarGrey::DTPM {
 		Windows::Foundation::Uri^ ms_appdata_config;
 
 	private:
-		class Line;
 		WarGrey::DTPM::DigMaplet* master;
-		WarGrey::DTPM::DredgeTracklet::Line* lines[_N(DredgeTrackType)];
+		WarGrey::DTPM::DredgeTracklet::Line* after_image_lines[_N(DredgeTrackType)];
+		WarGrey::DTPM::DredgeTracklet::Line* realtime_lines[_N(DredgeTrackType)];
 
 	private:
 		WarGrey::DTPM::ITrackDataSource* data_source;
-		long long loading_timepoint;
-		long long history_span;
-		long long history_destination;
-		double last_after_image_period;
+		long long loading_after_image_timepoint;
+		long long after_image_span;
+		long long after_image_end;
 
 	private:
 		float width;
 		float height;
+
+	private:
+		WarGrey::SCADA::double3 last_dot;
+		double interval_squared;
+		bool history_outdated;
 	};
 }

@@ -32,7 +32,7 @@ namespace {
 static const long long DEFAULT_SLOT_SIZE = 4096LL;
 static const unsigned int DEFAULT_COUNT_RATE = 5;
 
-static inline long long period_ms(double period) {
+static inline long long period_s(double period) {
 	return (long long)flround(period * double(hour_span_s));
 }
 
@@ -44,6 +44,10 @@ public:
 	}
 
 	Line(long long history_s, long long count_rate = DEFAULT_COUNT_RATE, long long slot_size = DEFAULT_SLOT_SIZE) {
+		if (history_s <= 0) {
+			history_s = 1LL;
+		}
+
 		if (slot_size > history_s * count_rate) {
 			slot_size = history_s;
 		}
@@ -207,7 +211,7 @@ private:
 
 /*************************************************************************************************/
 DredgeTracklet::DredgeTracklet(ITrackDataSource* datasrc, Platform::String^ track, float width, float height, Platform::String^ ext, Platform::String^ rootdir)
-	: width(width), height(height), track(nullptr), data_source(datasrc), preview_config(nullptr), history_destination(0LL), last_after_image_period(0.0) {
+	: width(width), height(height), track(nullptr), data_source(datasrc), preview_config(nullptr), history_outdated(true) {
 	if (track != nullptr) {
 		this->ms_appdata_config = ms_appdata_file(track, ext, rootdir);
 	} else {
@@ -224,6 +228,9 @@ DredgeTracklet::DredgeTracklet(ITrackDataSource* datasrc, Platform::String^ trac
 	if (this->data_source != nullptr) {
 		this->data_source->reference();
 	}
+
+	this->last_dot.x = flnan;
+	this->after_image_end = current_seconds();
 }
 
 DredgeTracklet::~DredgeTracklet() {
@@ -233,7 +240,10 @@ DredgeTracklet::~DredgeTracklet() {
 		this->data_source->destroy();
 	}
 
-	this->clear_lines();
+	this->clear_history_lines();
+	this->clear_realtime_lines();
+
+	this->last_dot.x = flnan;
 }
 
 void DredgeTracklet::construct() {
@@ -244,8 +254,12 @@ void DredgeTracklet::construct_line_if_necessary(unsigned int idx) {
 	long long slot_size = DEFAULT_SLOT_SIZE;
 	long long count_rate = DEFAULT_COUNT_RATE;
 
-	if (this->lines[idx] == nullptr) {
-		this->lines[idx] = new DredgeTracklet::Line(this->history_span, count_rate, slot_size);
+	if (this->after_image_lines[idx] == nullptr) {
+		this->after_image_lines[idx] = new DredgeTracklet::Line(this->after_image_span, count_rate, slot_size);
+	}
+
+	if (this->realtime_lines[idx] == nullptr) {
+		this->realtime_lines[idx] = new DredgeTracklet::Line(this->after_image_span, count_rate, slot_size);
 	}
 }
 
@@ -253,32 +267,19 @@ void DredgeTracklet::update(long long count, long long interval, long long uptim
 	/* NOTE: Ensure that loading from data source after loading track.config */
 
 	if (this->ready()) {
-		long long limit = this->history_destination;
+		// loading history tracks
+		long long request_interval = this->after_image_span / 8;
+		long long request_earliest_s = this->after_image_end - this->after_image_span;
 
-		if (this->history_destination <= 0) {
-			limit = current_seconds();
-		}
+		this->history_outdated = false;
 
-		if (this->preview_config->after_image_period > this->last_after_image_period) {
-			// TODO: check thread-safty
-			this->clear_lines();
-
-			this->last_after_image_period = this->preview_config->after_image_period;
-			this->loading_timepoint = limit;
-		}
-
-		{ // load existed data
-			long long request_interval = this->history_span / 8;
-			long long request_earliest_s = limit - this->history_span;
-
-			if (this->loading_timepoint > request_earliest_s) {
-				if (this->data_source != nullptr) {
-					if (this->data_source->ready() && (!this->data_source->loading())) {
-						this->data_source->load(this, this->loading_timepoint, (this->loading_timepoint - request_interval));
-					}
-				} else {
-					this->on_maniplation_complete(this->loading_timepoint, (this->loading_timepoint - request_interval));
+		if (this->loading_after_image_timepoint > request_earliest_s) {
+			if (this->data_source != nullptr) {
+				if (this->data_source->ready() && (!this->data_source->loading())) {
+					this->data_source->load(this, this->loading_after_image_timepoint, (this->loading_after_image_timepoint - request_interval));
 				}
+			} else {
+				this->on_maniplation_complete(this->loading_after_image_timepoint, (this->loading_after_image_timepoint - request_interval));
 			}
 		}
 	}
@@ -290,7 +291,13 @@ void DredgeTracklet::on_appdata(Uri^ profile, DredgeTrack^ profile_config) {
 	// avoid updating raw instance accidently
 	this->preview_config = ref new DredgeTrack(this->track_config);
 
-	this->history_span = period_ms(this->track_config->after_image_period);
+	this->after_image_span = period_s(this->track_config->after_image_period);
+	this->interval_squared = flsqr(this->preview_config->subinterval);
+
+	// reload current history in case the after image period is changed. 
+	this->clear_history_lines();
+	this->loading_after_image_timepoint = this->after_image_end;
+	this->history_outdated = true;
 }
 
 bool DredgeTracklet::ready() {
@@ -305,54 +312,54 @@ void DredgeTracklet::fill_extent(float x, float y, float* w, float* h) {
 void DredgeTracklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	if (this->master != nullptr) {
 		if (this->preview_config != nullptr) {
+			double partition_squared = flsqr(this->preview_config->partition_distance);
+			long long now = current_milliseconds();
+			long long ai_end = this->after_image_end * 1000LL;
+			long long ai_span = this->after_image_span * 1000LL;
+
 			for (unsigned idx = 0; idx < _N(DredgeTrackType); idx++) {
 				if (this->preview_config->visibles[idx]) {
-					DredgeTracklet::Line* line = this->lines[idx];
-					double interval_squared = flsqr(this->preview_config->subinterval);
-					double partition_squared = flsqr(this->preview_config->partition_distance);
-					long long timepoint0 = current_milliseconds() - period_ms(this->track_config->after_image_period) * 1000LL;
-					double3 last_dot(flnan, 0.0, 0.0);
-					tsdouble3 cursor;
-
-					if (line != nullptr) {
-						float minimum_diff = this->preview_config->track_width * 0.5F;
-						float tolerance = this->preview_config->track_width;
-						float2 last_pos;
-
-						line->cursor_end();
-
-						while (line->cursor_step_backward(&cursor)) {
-							if ((cursor.timepoint > timepoint0) && (cursor.dot.z >= this->preview_config->depth0)) {
-								if (!isnan(last_dot.x)) {
-									double distance_squared = points_distance_squared(last_dot.x, last_dot.y, cursor.dot.x, cursor.dot.y);
-
-									if (distance_squared >= interval_squared) {
-										float2 self_pos = this->master->position_to_local(cursor.dot.x, cursor.dot.y, x, y);
-	
-										if ((flabs(last_pos.x - self_pos.x) > tolerance) || (flabs(self_pos.y - last_pos.y) > tolerance)) {
-											if (distance_squared <= partition_squared) {
-												ds->DrawLine(last_pos, self_pos, Colours::Chocolate, this->preview_config->track_width);
-											}
-
-											last_pos = self_pos;
-											last_dot = cursor.dot;
-										}
-									}
-								} else {
-									last_pos = this->master->position_to_local(cursor.dot.x, cursor.dot.y, x, y);
-									last_dot = cursor.dot;
-								}
-							}
-						}
-					}
+					this->draw_line(this->after_image_lines[idx], ds, x, y, ai_end - ai_span, ai_end, partition_squared);
+					this->draw_line(this->realtime_lines[idx], ds, x, y, now - ai_span, now, partition_squared);
 				}
 			}
 		}
-	} else {
-		ds->DrawRectangle(x, y, this->width, this->height, Colours::DodgerBlue, 1.0F);
 	}
 }
 
+void DredgeTracklet::draw_line(DredgeTracklet::Line* line, CanvasDrawingSession^ ds, float x, float y, long long start, long long end, double partition_squared) {
+	double3 last_dot(flnan, 0.0, 0.0);
+	tsdouble3 cursor;
+
+	if (line != nullptr) {
+		float minimum_diff = this->preview_config->track_width * 0.5F;
+		float tolerance = this->preview_config->track_width;
+		float2 last_pos;
+
+		line->cursor_end();
+
+		while (line->cursor_step_backward(&cursor)) {
+			if ((cursor.timepoint >= start) && (cursor.timepoint <= end)) {
+				if (!flisnan(last_dot.x)) {
+					double distance_squared = points_distance_squared(last_dot.x, last_dot.y, cursor.dot.x, cursor.dot.y);
+					float2 self_pos = this->master->position_to_local(cursor.dot.x, cursor.dot.y, x, y);
+
+					if ((flabs(last_pos.x - self_pos.x) > tolerance) || (flabs(self_pos.y - last_pos.y) > tolerance)) {
+						if (distance_squared <= partition_squared) {
+							ds->DrawLine(last_pos, self_pos, Colours::Chocolate, this->preview_config->track_width);
+						}
+
+						last_pos = self_pos;
+						last_dot = cursor.dot;
+					}
+				} else {
+					last_pos = this->master->position_to_local(cursor.dot.x, cursor.dot.y, x, y);
+					last_dot = cursor.dot;
+				}
+			}
+		}
+	}
+}
 
 void DredgeTracklet::attach_to_map(DigMaplet* master, bool force) {
 	if (master != nullptr) {
@@ -364,24 +371,41 @@ void DredgeTracklet::attach_to_map(DigMaplet* master, bool force) {
 	this->master = master;
 }
 
-void DredgeTracklet::push_track_dot(DredgeTrackType type, double3& dot, bool persistent, long long timepoint_ms) {
+void DredgeTracklet::filter_dredging_dot(DredgeTrackType type, double3& dot, bool persistent, long long timepoint_ms) {
 	if (this->ready()) {
 		long long timepoint = ((timepoint_ms <= 0) ? current_milliseconds() : timepoint_ms);
-		long long limit = ((this->history_destination <= 0) ? timepoint : (this->history_destination * 1000LL));
 
-		if ((timepoint <= limit) && (timepoint >= (limit - this->history_span * 1000LL))) {
-			unsigned int type_id = _I(type);
+		if (dot.z >= this->preview_config->depth0) {
+			if (this->is_key_dot(dot)) {
+				unsigned int type_id = _I(type);
 
-			this->construct_line_if_necessary(type_id);
-			this->lines[type_id]->push_back_value(timepoint, dot);
+				this->history_outdated = true;
 
-			if (persistent) {
+				this->construct_line_if_necessary(type_id);
+				this->realtime_lines[type_id]->push_back_value(timepoint, dot);
+
+				if (persistent) {
+					if ((this->data_source != nullptr) && this->data_source->ready()) {
+						this->data_source->save(timepoint, type_id, dot);
+					}
+				}
+
+				this->notify_updated();
+			}
+		} else {
+			if (this->history_outdated) {
 				if ((this->data_source != nullptr) && this->data_source->ready()) {
-					this->data_source->save(timepoint, type_id, dot);
+					if (!this->data_source->loading()) {
+						this->clear_realtime_lines();
+						this->clear_history_lines();
+
+						this->after_image_end = timepoint / 1000LL;
+						this->loading_after_image_timepoint = this->after_image_end;
+
+						this->notify_updated();
+					}
 				}
 			}
-
-			this->notify_updated();
 		}
 	}
 }
@@ -389,25 +413,41 @@ void DredgeTracklet::push_track_dot(DredgeTrackType type, double3& dot, bool per
 void DredgeTracklet::on_datum_values(long long open_s, long long timepoint_ms, long long type, double3& dot) {
 	/* NOTE: Ensure that loading from data source after loading configuration */
 
-	if (this->loading_timepoint == open_s) {
+	if (this->loading_after_image_timepoint == open_s) {
 		if (type < _N(DredgeTrackType)) {
 			this->construct_line_if_necessary((unsigned int)type);
-			this->lines[type]->push_front_value(timepoint_ms, dot);
+			this->after_image_lines[type]->push_front_value(timepoint_ms, dot);
 		}
 	}
 }
 
 void DredgeTracklet::on_maniplation_complete(long long open_s, long long close_s) {
-	if (this->loading_timepoint == open_s) {
-		this->loading_timepoint = close_s;
+	if (this->loading_after_image_timepoint == open_s) {
+		this->loading_after_image_timepoint = close_s;
 	}
 }
 
-void DredgeTracklet::clear_lines() {
+bool DredgeTracklet::is_key_dot(double3& dot) {
+	return flisnan(this->last_dot.x)
+		|| (points_distance_squared(last_dot.x, last_dot.y, dot.x, dot.y)
+			>= this->interval_squared);
+}
+
+void DredgeTracklet::clear_history_lines() {
 	for (unsigned int idx = 0; idx < _N(DredgeTrackType); idx++) {
-		if (this->lines[idx] != nullptr) {
-			delete this->lines[idx];
-			this->lines[idx] = nullptr;
+		if (this->after_image_lines[idx] != nullptr) {
+			delete this->after_image_lines[idx];
+			this->after_image_lines[idx] = nullptr;
+		}
+	}
+}
+
+void DredgeTracklet::clear_realtime_lines() {
+	for (unsigned int idx = 0; idx < _N(DredgeTrackType); idx++) {
+		if (this->realtime_lines[idx] != nullptr) {
+			delete this->realtime_lines[idx];
+			this->realtime_lines[idx] = nullptr;
+			this->last_dot.x = flnan;
 		}
 	}
 }
@@ -464,7 +504,6 @@ DredgeTrack^ DredgeTrack::load(Platform::String^ path) {
 					dt->partition_distance = read_flonum(src);
 				} else if (DT::Style.ToString()->Equals(wtype)) {
 					dt->track_width = float(read_flonum(src));
-					dt->track_color = (unsigned int)read_natural(src);
 				} else if (DT::Visibility.ToString()->Equals(wtype)) {
 					long long n = read_natural(src);
 
@@ -515,7 +554,7 @@ bool DredgeTrack::save(DredgeTrack^ self, Platform::String^ path) {
 		write_newline(v_config);
 
 		write_wtext(v_config, DT::Style);
-		v_config << " " << self->track_width << " " << self->track_color;
+		v_config << " " << self->track_width;
 		write_newline(v_config);
 
 		v_config.flush();
@@ -545,6 +584,5 @@ void DredgeTrack::refresh(DredgeTrack^ src) {
 		}
 
 		this->track_width = src->track_width;
-		this->track_color = src->track_color;
 	}
 }
