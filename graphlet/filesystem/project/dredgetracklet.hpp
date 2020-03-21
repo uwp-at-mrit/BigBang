@@ -42,12 +42,12 @@ namespace WarGrey::DTPM {
 	/************************************************************************************************/
 	private class ITrackDataReceiver abstract {
 	public:
-		virtual void begin_maniplation_sequence() {}
-		virtual void on_datum_values(long long open_s, long long timepoint_ms, long long type, WarGrey::SCADA::double3& dot) = 0;
-		virtual void end_maniplation_sequence() {}
+		virtual void begin_maniplation_sequence(uint8 id) {}
+		virtual void on_datum_values(uint8 id, long long open_s, long long timepoint_ms, long long type, WarGrey::SCADA::double3& dot) = 0;
+		virtual void end_maniplation_sequence(uint8 id) {}
 
 	public:
-		virtual void on_maniplation_complete(long long open_s, long long close_s) {}
+		virtual void on_maniplation_complete(uint8 id, long long open_s, long long close_s) {}
 	};
 
 	private class ITrackDataSource abstract : public WarGrey::SCADA::SharedObject {
@@ -57,7 +57,7 @@ namespace WarGrey::DTPM {
 		virtual void cancel() = 0;
 
 	public:
-		virtual void load(WarGrey::DTPM::ITrackDataReceiver* receiver, long long open_s, long long close_s) = 0;
+		virtual void load(WarGrey::DTPM::ITrackDataReceiver* receiver, uint8 id, long long open_s, long long close_s) = 0;
 		virtual void save(long long timepoint, long long type, WarGrey::SCADA::double3& dot) = 0;
 
 	protected:
@@ -93,8 +93,8 @@ namespace WarGrey::DTPM {
 		void filter_dredging_dot(WarGrey::DTPM::DredgeTrackType type, WarGrey::SCADA::double3& dot, bool persistent = true, long long timepoint_ms = 0LL);
 
 	public:
-		void on_datum_values(long long open_s, long long timepoint_ms, long long type, WarGrey::SCADA::double3& dot) override;
-		void on_maniplation_complete(long long open_s, long long close_s) override;
+		void on_datum_values(uint8 id, long long open_s, long long timepoint_ms, long long type, WarGrey::SCADA::double3& dot) override;
+		void on_maniplation_complete(uint8 id, long long open_s, long long close_s) override;
 
 	protected:
 		void on_appdata(Windows::Foundation::Uri^ track, WarGrey::DTPM::DredgeTrack^ track_config) override;
@@ -105,8 +105,7 @@ namespace WarGrey::DTPM {
 	private:
 		bool is_key_dot(WarGrey::SCADA::double3& dot);
 		void construct_line_if_necessary(unsigned int type);
-		void clear_history_lines();
-		void clear_realtime_lines();
+		void clear_lines(WarGrey::DTPM::DredgeTracklet::Line** lines);
 
 	private:
 		void draw_line(WarGrey::DTPM::DredgeTracklet::Line* line, Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
@@ -128,9 +127,11 @@ namespace WarGrey::DTPM {
 		WarGrey::DTPM::DigMaplet* master;
 		WarGrey::DTPM::DredgeTracklet::Line* after_image_lines[_N(DredgeTrackType)];
 		WarGrey::DTPM::DredgeTracklet::Line* realtime_lines[_N(DredgeTrackType)];
+		WarGrey::DTPM::DredgeTracklet::Line* history_lines[_N(DredgeTrackType)];
 
 	private:
 		WarGrey::DTPM::ITrackDataSource* data_source;
+		long long loading_history_timepoint;
 		long long loading_after_image_timepoint;
 		long long after_image_span;
 		long long after_image_end;
@@ -141,7 +142,7 @@ namespace WarGrey::DTPM {
 
 	private:
 		WarGrey::SCADA::double3 last_dot;
+		bool after_image_outdated;
 		double interval_squared;
-		bool history_outdated;
 	};
 }
