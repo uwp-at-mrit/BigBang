@@ -175,6 +175,7 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	if (this->track != nullptr) {
 		this->planet->insert(this->track, 0.0F, 0.0F);
 		this->track->attach_to_map(this->map);
+		this->track->set_color_schema(this->plot);
 	}
 
 	if (this->vessel != nullptr) {

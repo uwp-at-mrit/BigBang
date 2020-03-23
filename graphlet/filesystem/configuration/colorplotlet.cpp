@@ -88,6 +88,21 @@ bool ColorPlotlet::in_range(double depth) {
 		&& flin(this->plot_config->min_depth, depth, this->plot_config->max_depth));
 }
 
+CanvasSolidColorBrush^ ColorPlotlet::shallowest_color(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback) {
+	CanvasSolidColorBrush^ c = fallback;
+
+	if (this->plot_config != nullptr) {
+		for (int idx = 0; idx < ColorPlotSize; idx++) {
+			if (this->plot_config->enableds[idx] && (this->plot_config->colors[idx] != nullptr)) {
+				c = this->plot_config->colors[idx];
+				break;
+			}
+		}
+	}
+
+	return c;
+}
+
 CanvasSolidColorBrush^ ColorPlotlet::depth_color(double depth, CanvasSolidColorBrush^ fallback) {
 	CanvasSolidColorBrush^ c = fallback;
 
@@ -98,6 +113,21 @@ CanvasSolidColorBrush^ ColorPlotlet::depth_color(double depth, CanvasSolidColorB
 					c = this->plot_config->colors[idx];
 					break;
 				}
+			}
+		}
+	}
+
+	return c;
+}
+
+CanvasSolidColorBrush^ ColorPlotlet::deepest_color(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback) {
+	CanvasSolidColorBrush^ c = fallback;
+
+	if (this->plot_config != nullptr) {
+		for (int idx = ColorPlotSize - 1; idx >= 0; idx--) {
+			if (this->plot_config->enableds[idx] && (this->plot_config->colors[idx] != nullptr)) {
+				c = this->plot_config->colors[idx];
+				break;
 			}
 		}
 	}

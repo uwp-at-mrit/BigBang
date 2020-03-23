@@ -43,8 +43,9 @@ namespace WarGrey::DTPM {
 
 	public:
 		bool in_range(double depth);
-		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ depth_color(double depth,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback);
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ shallowest_color(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback);
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ deepest_color(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback);
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ depth_color(double depth, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback);
 
 	public:
 		WarGrey::DTPM::ColorPlot^ clone_plot(WarGrey::DTPM::ColorPlot^ dest = nullptr);

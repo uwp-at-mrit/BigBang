@@ -4,8 +4,11 @@
 
 #include "graphlet/filesystem/msappdatalet.hxx"
 #include "graphlet/filesystem/project/digmaplet.hpp"
+#include "graphlet/filesystem/configuration/colorplotlet.hpp"
 
 #include "datum/flonum.hpp"
+
+#include "brushes.hxx"
 
 namespace WarGrey::DTPM {
 	private enum class DredgeTrackType : unsigned int { // order matters
@@ -31,9 +34,12 @@ namespace WarGrey::DTPM {
 		double after_image_period;
 
 	internal:
+		bool visibles[_N(DredgeTrackType)];
+
+	internal:
 		long long begin_timepoint;
 		long long end_timepoint;
-		bool visibles[_N(DredgeTrackType)];
+		bool show_history;
 
 	internal:
 		float track_width;
@@ -90,6 +96,7 @@ namespace WarGrey::DTPM {
 
 	public:
 		void attach_to_map(WarGrey::DTPM::DigMaplet* master, bool force = false);
+		void set_color_schema(WarGrey::DTPM::ColorPlotlet* plot, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback = WarGrey::SCADA::Colours::Chocolate, bool force = false);
 		void filter_dredging_dot(WarGrey::DTPM::DredgeTrackType type, WarGrey::SCADA::double3& dot, bool persistent = true, long long timepoint_ms = 0LL);
 
 	public:
@@ -103,25 +110,24 @@ namespace WarGrey::DTPM {
 		class Line;
 
 	private:
-		bool is_key_dot(WarGrey::SCADA::double3& dot);
+		bool is_key_dot(WarGrey::SCADA::double3& dot, unsigned int id);
 		void construct_line_if_necessary(unsigned int type);
 		void clear_lines(WarGrey::DTPM::DredgeTracklet::Line** lines);
+		void clear_key_dots();
 
 	private:
 		void draw_line(WarGrey::DTPM::DredgeTracklet::Line* line, Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			float x, float y, long long start, long long end, double partition_squared);
-		
-	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hmarks;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ haxes;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ vmarks;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ vaxes;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ track;
+			float x, float y, long long start, long long end, double partition_squared,
+			bool plot_ready, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback);
 
 	private:
 		WarGrey::DTPM::DredgeTrack^ preview_config;
 		WarGrey::DTPM::DredgeTrack^ track_config;
 		Windows::Foundation::Uri^ ms_appdata_config;
+
+	private:
+		WarGrey::DTPM::ColorPlotlet* plot;
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback_color;
 
 	private:
 		WarGrey::DTPM::DigMaplet* master;
@@ -141,8 +147,7 @@ namespace WarGrey::DTPM {
 		float height;
 
 	private:
-		WarGrey::SCADA::double3 last_dot;
-		bool after_image_outdated;
+		WarGrey::SCADA::double3 sentries[_N(DredgeTrackType)];
 		double interval_squared;
 	};
 }
