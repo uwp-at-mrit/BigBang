@@ -76,6 +76,7 @@ static bool metric_value_equals(MetricValue& lv, MetricValue& rv) {
 		case MetricValueType::Flonum: eq = (lv.as.flonum == rv.as.flonum); break;
 		case MetricValueType::Fixnum: eq = (lv.as.fixnum == rv.as.fixnum); break;
 		case MetricValueType::Time:   eq = (lv.as.fixnum == rv.as.fixnum); break;
+		case MetricValueType::Period: eq = (lv.as.fixnum == rv.as.fixnum); break;
 		}
 	}
 
