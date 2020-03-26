@@ -16,7 +16,7 @@ namespace WarGrey::SCADA {
 		void fill_graphlets_boundary(float* x, float* y, float* width, float* height);
 		float sketch_to_application_width(float sketch_width);
 		float sketch_to_application_height(float sketch_height);
-		WarGrey::SCADA::Syslog* get_logger();
+		WarGrey::GYDM::Syslog* get_logger();
 
 	public:
 		virtual void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float X, float Y, float Width, float Height) {}

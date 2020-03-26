@@ -4,9 +4,11 @@
 #include "decorator/decorator.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 
 using namespace Microsoft::Graphics::Canvas;
 
+/*************************************************************************************************/
 Syslog* IPlanetDecorator::get_logger() {
 	Syslog* logger = default_logger();
 

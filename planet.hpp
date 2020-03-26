@@ -34,7 +34,7 @@ namespace WarGrey::SCADA {
 		Platform::String^ name();
 		Platform::String^ display_name();
 		WarGrey::SCADA::IScreen* master();
-		WarGrey::SCADA::Syslog* get_logger();
+		WarGrey::GYDM::Syslog* get_logger();
 
 	public:
 		bool shown();

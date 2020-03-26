@@ -15,12 +15,12 @@ namespace WarGrey::SCADA {
 		virtual void on_startover(long long departure_ms, long long destination_ms) {}
 		virtual void on_timestream(long long timepoint_ms, size_t addr0, size_t addrn,
 			uint8* data, size_t size, uint64 parcel_type, size_t parcel_size,
-			WarGrey::SCADA::Syslog* logger) = 0;
+			WarGrey::GYDM::Syslog* logger) = 0;
 	};
 
 	private class ITimeMachine abstract : public WarGrey::SCADA::IHamburger, public WarGrey::SCADA::IRotativeDirectory {
 	public:
-		ITimeMachine(Platform::String^ dirname, long long time_speed_mspf, int frame_rate, WarGrey::SCADA::Syslog* logger,
+		ITimeMachine(Platform::String^ dirname, long long time_speed_mspf, int frame_rate, WarGrey::GYDM::Syslog* logger,
 			Platform::String^ file_prefix, Platform::String^ file_suffix,
 			WarGrey::SCADA::RotationPeriod period, unsigned int period_count);
 
@@ -48,7 +48,7 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
-		WarGrey::SCADA::Syslog* get_logger();
+		WarGrey::GYDM::Syslog* get_logger();
 		long long get_time_speed();
 		unsigned int get_speed_shift();
 
@@ -77,7 +77,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~TimeMachine() noexcept;
 
-		TimeMachine(Platform::String^ dirname, long long time_speed, int frame_rate, WarGrey::SCADA::Syslog* logger = nullptr,
+		TimeMachine(Platform::String^ dirname, long long time_speed, int frame_rate, WarGrey::GYDM::Syslog* logger = nullptr,
 			Platform::String^ file_prefix = nullptr, Platform::String^ file_suffix = ".plc",
 			WarGrey::SCADA::RotationPeriod period = WarGrey::SCADA::RotationPeriod::Hourly,
 			unsigned int period_count = 1);

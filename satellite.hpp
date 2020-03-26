@@ -8,8 +8,8 @@
 namespace WarGrey::SCADA {
 	private class ISatellite abstract : public WarGrey::SCADA::IHamburger, public WarGrey::SCADA::IHeadUpPlanet {
 	public:
-		ISatellite(WarGrey::SCADA::Syslog* logger, Platform::String^ caption, unsigned int initial_mode = 0U);
-		ISatellite(WarGrey::SCADA::Log level, Platform::String^ caption, unsigned int initial_mode = 0U);
+		ISatellite(WarGrey::GYDM::Syslog* logger, Platform::String^ caption, unsigned int initial_mode = 0U);
+		ISatellite(WarGrey::GYDM::Log level, Platform::String^ caption, unsigned int initial_mode = 0U);
 		
 	public:
 		void notify_surface_ready() override;
@@ -29,10 +29,10 @@ namespace WarGrey::SCADA {
 	template<typename ID>
 	private class ICreditSatellite abstract : public WarGrey::SCADA::ISatellite {
 	public:
-		ICreditSatellite(WarGrey::SCADA::Syslog* logger, Platform::String^ caption, unsigned int initial_mode = 0U)
+		ICreditSatellite(WarGrey::GYDM::Syslog* logger, Platform::String^ caption, unsigned int initial_mode = 0U)
 			: ISatellite(logger, caption, initial_mode), pending(true) {}
 
-		ICreditSatellite(WarGrey::SCADA::Log level, Platform::String^ caption, unsigned int initial_mode = 0U)
+		ICreditSatellite(WarGrey::GYDM::Log level, Platform::String^ caption, unsigned int initial_mode = 0U)
 			: ISatellite(level, caption, initial_mode), pending(true) {}
 
 	public:

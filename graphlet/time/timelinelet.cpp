@@ -14,6 +14,7 @@
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 
 using namespace Windows::Foundation;
 using namespace Windows::System;
@@ -23,6 +24,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+/*************************************************************************************************/
 static CanvasTextFormat^ lines_default_font = make_bold_text_format(10.0F);
 
 static unsigned int default_speeds[] = { 1U, 2U, 3U, 4U, 5U };

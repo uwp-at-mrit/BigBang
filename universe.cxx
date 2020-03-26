@@ -21,6 +21,7 @@
 #include "colorspace.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 
 using namespace Concurrency;
 
@@ -50,6 +51,7 @@ using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+/*************************************************************************************************/
 #define PLANET_INFO(planet) (static_cast<LinkedPlanetInfo*>(planet->info))
 
 #define SHIFTED(vkms) ((vkms & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift)

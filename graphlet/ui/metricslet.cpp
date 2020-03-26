@@ -24,6 +24,7 @@
 
 using namespace WarGrey::SCADA;
 using namespace WarGrey::DTPM;
+using namespace WarGrey::GYDM;
 
 using namespace Windows::Foundation;
 
@@ -422,11 +423,11 @@ namespace {
 			this->metrics_config = ftobject;
 		}
 
-		Metrics^ on_appdata_not_found(Windows::Foundation::Uri^ ms_appdata) override {
+		Metrics^ on_appdata_not_found(Uri^ ms_appdata) override {
 			return ref new Metrics(this->master, this->slot_count);
 		}
 
-		void log_message(WarGrey::SCADA::Log level, Platform::String^ message) override {
+		void log_message(Log level, Platform::String^ message) override {
 			return this->get_logger()->log_message(level, message);
 		}
 

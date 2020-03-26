@@ -34,14 +34,14 @@ namespace WarGrey::SCADA {
 		virtual ~UniverseDisplay();
 
 	internal:
-		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr,
+		UniverseDisplay(WarGrey::GYDM::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
 			WarGrey::SCADA::IHeadUpPlanet* heads_up_planet = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
-			WarGrey::SCADA::Syslog* logger = nullptr,
+			WarGrey::GYDM::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
 			WarGrey::SCADA::IHeadUpPlanet* heads_up_planet = nullptr);
@@ -49,7 +49,7 @@ namespace WarGrey::SCADA {
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
 			float src_width, float src_height,
-			WarGrey::SCADA::Syslog* logger = nullptr,
+			WarGrey::GYDM::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
 			WarGrey::SCADA::IHeadUpPlanet* heads_up_planet = nullptr);

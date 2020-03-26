@@ -15,6 +15,7 @@
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 
 using namespace Windows::System;
 using namespace Windows::ApplicationModel;
@@ -23,6 +24,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+/*************************************************************************************************/
 static CanvasTextFormat^ status_font = nullptr;
 static float status_prefix_width = 0.0F;
 static float status_height = 0.0F;

@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 		virtual void sprite_construct() {} // pseudo constructor for special derived classes after constructing
 
 	public:
-		virtual WarGrey::SCADA::Syslog* get_logger() = 0;
+		virtual WarGrey::GYDM::Syslog* get_logger() = 0;
 
 	public:
 		virtual void construct() {}

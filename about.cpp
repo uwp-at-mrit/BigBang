@@ -12,6 +12,7 @@
 #include "graphlet/filesystem/bitmaplet.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 
 using namespace Windows::ApplicationModel;
 

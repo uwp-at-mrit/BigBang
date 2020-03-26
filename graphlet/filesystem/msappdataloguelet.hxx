@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 		}
 
 	protected:
-		void log_message(WarGrey::SCADA::Log level, Platform::String^ message) override {
+		void log_message(WarGrey::GYDM::Log level, Platform::String^ message) override {
 			return this->get_logger()->log_message(level, message);
 		}
 	};

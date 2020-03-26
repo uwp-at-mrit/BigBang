@@ -3,11 +3,13 @@
 #include "datum/time.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 
 using namespace Windows::Foundation;
 
 using namespace Windows::UI::Xaml;
 
+/*************************************************************************************************/
 Timer::Timer(ITimerListener^ callback, int rate, unsigned int shift) : target(callback), interval(0LL) {
 	this->timer = ref new DispatcherTimer();
 

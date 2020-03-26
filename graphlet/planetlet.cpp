@@ -8,6 +8,7 @@
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 
 using namespace Windows::System;
 using namespace Windows::Foundation;
@@ -20,6 +21,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 using namespace Windows::Foundation::Numerics;
 
+/*************************************************************************************************/
 namespace {
 	private class PlaceholderPlanet : public Planet {
 	public:

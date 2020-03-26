@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		WarGrey::SCADA::IPlanet* master();
-		WarGrey::SCADA::Syslog* get_logger() override;
+		WarGrey::GYDM::Syslog* get_logger() override;
 
 	public:
 		virtual void own_caret(bool is_own) {}

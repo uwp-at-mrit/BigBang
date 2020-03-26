@@ -8,7 +8,7 @@ namespace WarGrey::SCADA {
 
 	private class ThumbnailNavigator : public WarGrey::SCADA::IUniverseNavigator {
 	public:
-		ThumbnailNavigator(WarGrey::SCADA::Log level, Platform::String^ title,
+		ThumbnailNavigator(WarGrey::GYDM::Log level, Platform::String^ title,
 			float ratio, float cell_width = 128.0F, unsigned int column = 2U, float gapsize = 16.0F);
 
 	public:

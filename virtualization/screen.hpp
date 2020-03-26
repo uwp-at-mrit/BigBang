@@ -16,7 +16,7 @@ namespace WarGrey::SCADA {
 			float source_width = 0.0F, float source_height = 0.0F);
 
 	public:
-		virtual WarGrey::SCADA::Syslog* get_logger() = 0;
+		virtual WarGrey::GYDM::Syslog* get_logger() = 0;
 		virtual bool surface_ready() = 0;
 		virtual bool ui_thread_ready() = 0;
 		virtual bool shown() = 0;

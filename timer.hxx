@@ -11,7 +11,7 @@ namespace WarGrey::SCADA {
 		virtual void on_elapse(long long count, long long interval, long long uptime, long long span) {}
 
 	internal:
-		virtual WarGrey::SCADA::Syslog* get_logger() = 0;
+		virtual WarGrey::GYDM::Syslog* get_logger() = 0;
 	};
 
 	private ref class Timer sealed {
@@ -46,7 +46,7 @@ namespace WarGrey::SCADA {
 		void push_timer_listener(WarGrey::SCADA::ITimerListener^ receiver);
 
 	internal:
-		WarGrey::SCADA::Syslog* get_logger() override;
+		WarGrey::GYDM::Syslog* get_logger() override;
 
 	private:
 		std::list<WarGrey::SCADA::ITimerListener^> listeners;

@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 		virtual ~IDisplay();
 
 	internal:
-		IDisplay(WarGrey::SCADA::Syslog* logger);
+		IDisplay(WarGrey::GYDM::Syslog* logger);
 
 	public:
 		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
@@ -48,19 +48,19 @@ namespace WarGrey::SCADA {
 		void leave_critical_section();
 
 	internal:
-		virtual Windows::Foundation::Point global_to_local_point(IPlanet* p, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
-		virtual Windows::Foundation::Point local_to_global_point(IPlanet* p, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
-		virtual float planet_actual_width(IPlanet* p);
-		virtual float planet_actual_height(IPlanet* p);
+		virtual Windows::Foundation::Point global_to_local_point(WarGrey::SCADA::IPlanet* p, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
+		virtual Windows::Foundation::Point local_to_global_point(WarGrey::SCADA::IPlanet* p, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
+		virtual float planet_actual_width(WarGrey::SCADA::IPlanet* p);
+		virtual float planet_actual_height(WarGrey::SCADA::IPlanet* p);
 
 	internal:
 		virtual void refresh(WarGrey::SCADA::IPlanet* target) = 0;
 
 	internal:
-		WarGrey::SCADA::Syslog* get_logger() override;
+		WarGrey::GYDM::Syslog* get_logger() override;
 
 	private:
-		WarGrey::SCADA::Syslog* logger;
+		WarGrey::GYDM::Syslog* logger;
 		std::mutex section;
     };
 }

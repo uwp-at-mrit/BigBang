@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 	private class IKeyboard abstract : public WarGrey::SCADA::ISprite {
 	public:
 		IKeyboard(WarGrey::SCADA::IPlanet* master);
-		WarGrey::SCADA::Syslog* get_logger() override;
+		WarGrey::GYDM::Syslog* get_logger() override;
 
 	public:
 		void show(bool shown);

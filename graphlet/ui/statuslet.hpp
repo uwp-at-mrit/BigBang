@@ -35,9 +35,9 @@ namespace WarGrey::SCADA {
 		float retry_icon_size;
 	};
 
-	private class Statuslinelet : public virtual WarGrey::SCADA::IGraphlet, public WarGrey::SCADA::ISyslogReceiver {
+	private class Statuslinelet : public virtual WarGrey::SCADA::IGraphlet, public WarGrey::GYDM::ISyslogReceiver {
 	public:
-		Statuslinelet(WarGrey::SCADA::Log level, unsigned int lines = 1);
+		Statuslinelet(WarGrey::GYDM::Log level, unsigned int lines = 1);
 
 	public:
 		void construct() override;
@@ -45,9 +45,9 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
 	public:
-		void push_message(Platform::String^ message, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::_);
-		void on_log_message(WarGrey::SCADA::Log level, Platform::String^ message,
-			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic) override;
+		void push_message(Platform::String^ message, WarGrey::GYDM::Log level = WarGrey::GYDM::Log::_);
+		void on_log_message(WarGrey::GYDM::Log level, Platform::String^ message,
+			WarGrey::GYDM::SyslogMetainfo& data, Platform::String^ topic) override;
 
 	public:
 		void fix_width(float width);

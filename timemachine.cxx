@@ -16,6 +16,7 @@
 #include "module.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::GYDM;
 
 using namespace Windows::Foundation;
 using namespace Windows::Storage;
@@ -31,6 +32,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+/*************************************************************************************************/
 private enum class TMIcon : unsigned int { PrintScreen, BookMark, Quit, _ };
 private enum class TM : unsigned int { Departure, Destination, _ };
 
