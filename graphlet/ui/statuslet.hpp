@@ -47,7 +47,7 @@ namespace WarGrey::SCADA {
 	public:
 		void push_message(Platform::String^ message, WarGrey::GYDM::Log level = WarGrey::GYDM::Log::_);
 		void on_log_message(WarGrey::GYDM::Log level, Platform::String^ message,
-			WarGrey::GYDM::SyslogMetainfo& data, Platform::String^ topic) override;
+			WarGrey::GYDM::SyslogMetainfo* data, Platform::String^ topic) override;
 
 	public:
 		void fix_width(float width);

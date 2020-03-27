@@ -343,7 +343,7 @@ void Statuslinelet::push_message(Platform::String^ message, Log level) {
 	this->section.unlock();
 }
 
-void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
+void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo* data, Platform::String^ topic) {
 	this->push_message("[" + level.ToString() + "] " + string_first_line(message), level);
 }
 
