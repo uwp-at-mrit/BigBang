@@ -39,7 +39,7 @@ namespace {
 		}
 
 		void fill_extent(float* width, float* height) {
-			SET_BOX(width, 400.0F);
+			SET_BOX(width, 600.0F);
 			SET_BOX(height, 400.0F);
 		}
 
