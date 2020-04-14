@@ -3,6 +3,16 @@
 #include "graphlet/filesystem/project/digmaplet.hpp"
 
 namespace WarGrey::DTPM {
+	private struct AISPositionReport {
+		double longitude;
+		double latitude;
+		double turn;
+		double speed;
+		double course;
+		double heading;
+	};
+
+	/*********************************************************************************************/
 	private class AISlet : public WarGrey::SCADA::IGraphlet {
 	public:
 		AISlet();
