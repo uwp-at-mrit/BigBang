@@ -21,6 +21,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)display.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\aislet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.cpp" />
@@ -33,7 +34,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\gpslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\vessel\trailing_suction_dredgerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\projectlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\aislet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\dredgetracklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.cxx" />
@@ -139,6 +139,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\margin.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)display.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\aislet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.hpp" />
@@ -154,7 +155,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdatalet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappdataloguelet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\msappxlet.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\aislet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\dredgetracklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\profilet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\reader\depthlog.hxx" />

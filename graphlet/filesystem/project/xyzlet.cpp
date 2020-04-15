@@ -23,7 +23,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
-Xyzlet::Xyzlet(XyzDoc^ depths, float diff_ft_times) : doc_xyz(depths), master(nullptr), diff_multiple(diff_ft_times), default_color(Colours::GhostWhite) {
+Xyzlet::Xyzlet(XyzDoc^ depths, float diff_ft_times) : doc_xyz(depths), diff_multiple(diff_ft_times), default_color(Colours::GhostWhite) {
 	this->enable_resizing(false);
 	this->enable_events(false, false);
 	this->camouflage(true);
@@ -35,7 +35,7 @@ void Xyzlet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Xyzlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if ((this->master != nullptr) && (this->doc_xyz != nullptr)) {
+	if ((this->master_map != nullptr) && (this->doc_xyz != nullptr)) {
 		float ds_x = x - this->num_size;
 		float ds_y = y - this->num_size;
 		float ds_rx = x + Width + this->num_size;
@@ -47,7 +47,7 @@ void Xyzlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 
 		for (auto it = this->doc_xyz->depths.begin(); it != this->doc_xyz->depths.end(); it++) {
 			if ((this->plot == nullptr) || (this->plot->in_range(it->z))) {
-				float2 pos = this->master->position_to_local(it->x, it->y, x, y);
+				float2 pos = this->master_map->position_to_local(it->x, it->y, x, y);
 
 				if (flin(ds_x, pos.x, ds_rx) && flin(ds_y, pos.y, ds_by)) {
 					float distance = points_distance(last_pos, pos);
@@ -75,26 +75,24 @@ void Xyzlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 	}
 }
 
-void Xyzlet::attach_to_map(DigMaplet* master, bool force) {
-	if (master != nullptr) {
-		float ftsize = master->plain_font_size();
+void Xyzlet::on_map_updated() {
+	if (this->master_map != nullptr) {
+		float ftsize = this->master_map->plain_font_size();
 		TextExtent te;
-		
-		if (force || (this->font == nullptr) || (this->font->FontSize != ftsize)) {
+
+		if ((this->font == nullptr) || (this->font->FontSize != ftsize)) {
 			this->font = make_text_format("Arial", ftsize);
 			this->location = geometry_freeze(paragraph(".", this->font, &te));
 			this->loc_xoff = te.lspace * 0.5F + (te.width - te.rspace) * 0.5F;
 			this->loc_yoff = te.tspace * 0.5F + (te.height - te.bspace) * 0.5F;
 			this->num_size = te.height;
-			
+
 			this->wholes.clear();
 			this->fractions.clear();
-			
+
 			this->notify_updated();
 		}
 	}
-
-	this->master = master;
 }
 
 void Xyzlet::set_color_schema(ColorPlotlet* plot, CanvasSolidColorBrush^ fallback) {

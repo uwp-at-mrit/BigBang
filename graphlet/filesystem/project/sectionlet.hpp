@@ -10,7 +10,7 @@
 #include "datum/flonum.hpp"
 
 namespace WarGrey::DTPM {
-	private class Sectionlet : public virtual WarGrey::SCADA::IGraphlet {
+	private class Sectionlet : public virtual WarGrey::DTPM::MapObjectlet<WarGrey::SCADA::IGraphlet> {
 	public:
 		virtual ~Sectionlet() noexcept;
 		Sectionlet(WarGrey::DTPM::SecDoc^ sec, bool draw_slope_lines = false, float thickness = 1.0F,
@@ -24,7 +24,6 @@ namespace WarGrey::DTPM {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		
 	public:
-		void attach_to_map(WarGrey::DTPM::DigMaplet* master, bool force = false);
 		const WarGrey::DTPM::Outline* section(double x, double y);
 
 	private:
@@ -37,7 +36,6 @@ namespace WarGrey::DTPM {
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ section_color;
 
 	private:
-		WarGrey::DTPM::DigMaplet* master;
 		WarGrey::DTPM::SecDoc^ doc_sec;
 		std::deque<std::deque<std::pair<WarGrey::SCADA::double3, WarGrey::SCADA::double3>>> slope_segments;
 

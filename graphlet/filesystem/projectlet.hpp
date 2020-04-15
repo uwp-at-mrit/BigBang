@@ -26,11 +26,6 @@ namespace WarGrey::DTPM {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
 			Platform::String^ rootdir = "projects");
 
-		//Projectlet(WarGrey::DTPM::IVessellet* vessel, WarGrey::DTPM::DredgeTracklet* track, WarGrey::DTPM::ColorPlotlet* plot, WarGrey::DTPM::S63let* enchart,
-			//Platform::String^ project, float view_width, float view_height,
-			//Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background = nullptr,
-			//Platform::String^ rootdir = "projects");
-
 	public:
 		bool move_vessel(double x, double y, WarGrey::DTPM::SailingMode mode = SailingMode::VesselVisible);
 		WarGrey::SCADA::double2& vessel_position();
@@ -53,6 +48,9 @@ namespace WarGrey::DTPM {
 		bool on_character(unsigned int keycode) override;
 		bool on_wheel_translation(float x, float y, float delta, bool horizontal) override;
 		bool on_wheel_zoom(float x, float y, float delta) override;
+
+	public:
+		void push_managed_map_objects(MapObject* mapobj);
 
 	protected:
 		WarGrey::DTPM::ProjectDoctype filter_file(Platform::String^ dirpath, Platform::String^ file, Platform::String^ _ext) override;
@@ -88,6 +86,9 @@ namespace WarGrey::DTPM {
 		WarGrey::DTPM::Tracelinelet* jobs_dat;
 		WarGrey::DTPM::Sectionlet* front_sec;
 		std::deque<Platform::Object^> icons;
+
+	private: // the life cycle of map objects are not managed by Projectlet
+		std::deque<MapObject*> managed_mapects;
 
 	private:
 		Windows::Foundation::Size view_size;

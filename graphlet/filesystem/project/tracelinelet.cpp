@@ -23,7 +23,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 /*************************************************************************************************/
 Tracelinelet::Tracelinelet(JobDoc^ jobs, float handler_size, CanvasSolidColorBrush^ color, CanvasSolidColorBrush^ hicolor
 	, CanvasSolidColorBrush^ handler_color, CanvasSolidColorBrush^ handler_hicolor)
-	: jobs_dat(jobs), master(nullptr), handler_half_size(handler_size * 0.5F)
+	: jobs_dat(jobs), handler_half_size(handler_size * 0.5F)
 	, color(color), hicolor(hicolor), handler_color(handler_color), handler_hicolor(handler_hicolor) {
 	this->enable_resizing(false);
 	this->enable_events(true, false);
@@ -68,7 +68,7 @@ void Tracelinelet::on_tap(float local_x, float local_y) {
 }
 
 void Tracelinelet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if ((this->master != nullptr) && (this->jobs_dat != nullptr)) {
+	if ((this->master_map != nullptr) && (this->jobs_dat != nullptr)) {
 		float rx = x + Width;
 		float by = y + Height;
 		float handler_x, handler_y;
@@ -77,8 +77,8 @@ void Tracelinelet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, f
 			auto sections = jit->second;
 			
 			for (auto it = sections.begin(); it != sections.end(); it++) {
-				float2 spt = this->master->position_to_local(it->sx, it->sy, x, y);
-				float2 ept = this->master->position_to_local(it->ex, it->ey, x, y);
+				float2 spt = this->master_map->position_to_local(it->sx, it->sy, x, y);
+				float2 ept = this->master_map->position_to_local(it->ex, it->ey, x, y);
 
 				if (rectangle_overlay(x, y, rx, by, flmin(spt.x, ept.x), flmin(spt.y, ept.y), flmax(spt.x, ept.x), flmax(spt.y, ept.y))) {
 					line_point(spt, ept, 0.5, &handler_x, &handler_y);
@@ -99,16 +99,6 @@ void Tracelinelet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, f
 			}
 		}
 	}
-}
-
-void Tracelinelet::attach_to_map(DigMaplet* master, bool force) {
-	if (master != nullptr) {
-		if (force || (this->master != master)) {	
-			this->notify_updated();
-		}
-	}
-
-	this->master = master;
 }
 
 void Tracelinelet::on_vessel_move(double vessel_x, double vessel_y) {
@@ -150,15 +140,15 @@ int Tracelinelet::find_handler(float local_x, float local_y, int* group) {
 	float x, y;
 	int seq = -1;
 
-	if ((this->master != nullptr) && (this->jobs_dat != nullptr)) {
+	if ((this->master_map != nullptr) && (this->jobs_dat != nullptr)) {
 		this->fill_location(&x, &y);
 
 		for (auto jit = this->jobs_dat->jobs.begin(); jit != this->jobs_dat->jobs.end(); jit++) {
 			auto sections = jit->second;
 
 			for (auto it = sections.begin(); it != sections.end(); it++) {
-				float2 spt = this->master->position_to_local(it->sx, it->sy, x, y);
-				float2 ept = this->master->position_to_local(it->ex, it->ey, x, y);
+				float2 spt = this->master_map->position_to_local(it->sx, it->sy, x, y);
+				float2 ept = this->master_map->position_to_local(it->ex, it->ey, x, y);
 
 				line_point(spt, ept, 0.5, &handler_x, &handler_y);
 

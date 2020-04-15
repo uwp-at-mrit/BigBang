@@ -513,3 +513,18 @@ void DigMaplet::preshape(IDigDatum* dig) {
 	dig->rx = dig->lx - tbx.Width;
 	dig->by = dig->ty - tbx.Height;
 }
+
+/*************************************************************************************************/
+void MapObject::attach_to_map(WarGrey::DTPM::DigMaplet* map, bool force) {
+	if (this->master_map != nullptr) {
+		if (force || (this->master_map != map)) {
+			this->master_map = map;
+			this->on_map_updated();
+		}
+	} else {
+		if (map != nullptr) {
+			this->master_map = map;
+			this->on_map_updated();
+		}
+	}
+}

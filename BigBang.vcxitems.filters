@@ -331,8 +331,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\metricslet.cpp">
       <Filter>graphlet\ui</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\aislet.cpp">
-      <Filter>graphlet\filesystem\project</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\aislet.cpp">
+      <Filter>graphlet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -676,8 +676,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\metricslet.hpp">
       <Filter>graphlet\ui</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\project\aislet.hpp">
-      <Filter>graphlet\filesystem\project</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\aislet.hpp">
+      <Filter>graphlet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

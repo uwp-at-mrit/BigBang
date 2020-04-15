@@ -24,7 +24,7 @@ static Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ default_slope_s
 /*************************************************************************************************/
 Sectionlet::Sectionlet(SecDoc^ sec, bool draw_slope_lines, float thickness
 	, CanvasSolidColorBrush^ cl_color, CanvasSolidColorBrush^ sl_color, CanvasSolidColorBrush^ sec_color)
-	: doc_sec(sec), master(nullptr), thickness(thickness), draw_slope_lines(draw_slope_lines), plane(nullptr)
+	: doc_sec(sec), thickness(thickness), draw_slope_lines(draw_slope_lines), plane(nullptr)
 	, centerline_color(cl_color), sideline_color(sl_color), section_color(sec_color) {
 	this->enable_resizing(false);
 	this->camouflage(true);
@@ -100,7 +100,7 @@ void Sectionlet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Sectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if ((this->master != nullptr) && (this->doc_sec != nullptr)) {
+	if ((this->master_map != nullptr) && (this->doc_sec != nullptr)) {
 		float rx = x + Width;
 		float by = y + Height;
 
@@ -108,10 +108,10 @@ void Sectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, flo
 			size_t count = this->doc_sec->centerline.size();
 
 			if (count >= 2) {
-				float2 last_dot = this->master->position_to_local(this->doc_sec->centerline[0].x, this->doc_sec->centerline[0].y, x, y);
+				float2 last_dot = this->master_map->position_to_local(this->doc_sec->centerline[0].x, this->doc_sec->centerline[0].y, x, y);
 
 				for (size_t idx = 1; idx < count; idx++) {
-					float2 this_dot = this->master->position_to_local(this->doc_sec->centerline[idx].x, this->doc_sec->centerline[idx].y, x, y);
+					float2 this_dot = this->master_map->position_to_local(this->doc_sec->centerline[idx].x, this->doc_sec->centerline[idx].y, x, y);
 
 					ds->DrawLine(last_dot, this_dot, this->centerline_color, this->thickness);
 					last_dot = this_dot;
@@ -125,18 +125,18 @@ void Sectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, flo
 			size_t count = sideline.size();
 
 			if (count > 1) {
-				float2 last_dot = this->master->position_to_local(sideline[0].x, sideline[0].y, x, y);
+				float2 last_dot = this->master_map->position_to_local(sideline[0].x, sideline[0].y, x, y);
 
 				for (size_t dot = 1; dot < count; dot++) {
-					float2 this_dot = this->master->position_to_local(sideline[dot].x, sideline[dot].y, x, y);
+					float2 this_dot = this->master_map->position_to_local(sideline[dot].x, sideline[dot].y, x, y);
 
 					if (this->draw_slope_lines) {
 						double3 dot0 = segments[dot - 1].first;
 						double3 dot1 = segments[dot - 1].second;
 
 						if (!flisnan(dot0.x)) {
-							float2 seg_dot0 = this->master->position_to_local(dot0.x, dot0.y, x, y);
-							float2 seg_dot1 = this->master->position_to_local(dot1.x, dot1.y, x, y);
+							float2 seg_dot0 = this->master_map->position_to_local(dot0.x, dot0.y, x, y);
+							float2 seg_dot1 = this->master_map->position_to_local(dot1.x, dot1.y, x, y);
 
 							ds->DrawLine(seg_dot0, seg_dot1, this->sideline_color, this->thickness, this->slope_style);
 							ds->DrawLine(last_dot, seg_dot0, this->sideline_color, this->thickness, this->slope_style);
@@ -152,28 +152,18 @@ void Sectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, flo
 	}
 
 	if ((this->plane != nullptr) && (!flisnan(this->plane->center_foot.x))) {
-		float2 ray = this->master->position_to_local(this->plane->center_foot.x, this->plane->center_foot.y, x, y);
+		float2 ray = this->master_map->position_to_local(this->plane->center_foot.x, this->plane->center_foot.y, x, y);
 
 		if (!flisnan(this->ps_boundry.x)) {
-			ds->DrawLine(ray, this->master->position_to_local(this->ps_boundry.x, this->ps_boundry.y, x, y),
+			ds->DrawLine(ray, this->master_map->position_to_local(this->ps_boundry.x, this->ps_boundry.y, x, y),
 				this->section_color, this->thickness, this->slope_style);
 		}
 
 		if (!flisnan(this->sb_boundry.x)) {
-			ds->DrawLine(ray, this->master->position_to_local(this->sb_boundry.x, this->sb_boundry.y, x, y),
+			ds->DrawLine(ray, this->master_map->position_to_local(this->sb_boundry.x, this->sb_boundry.y, x, y),
 				this->section_color, this->thickness, this->slope_style);
 		}
 	}
-}
-
-void Sectionlet::attach_to_map(DigMaplet* master, bool force) {
-	if (master != nullptr) {
-		if (force || (this->master != master)) {
-			this->notify_updated();
-		}
-	}
-
-	this->master = master;
 }
 
 const Outline* Sectionlet::section(double x, double y) {

@@ -72,7 +72,7 @@ namespace WarGrey::DTPM {
 
 	/************************************************************************************************/
 	private class DredgeTracklet
-		: public virtual WarGrey::SCADA::IMsAppdatalet<WarGrey::DTPM::DredgeTrack, WarGrey::SCADA::IGraphlet>
+		: public virtual WarGrey::DTPM::MapObjectlet<WarGrey::SCADA::IMsAppdatalet<WarGrey::DTPM::DredgeTrack, WarGrey::SCADA::IGraphlet>>
 		, public virtual WarGrey::DTPM::ITrackDataReceiver {
 	public:
 		virtual ~DredgeTracklet() noexcept;
@@ -95,7 +95,6 @@ namespace WarGrey::DTPM {
 		void refresh(WarGrey::DTPM::DredgeTrack^ src);
 
 	public:
-		void attach_to_map(WarGrey::DTPM::DigMaplet* master, bool force = false);
 		void set_color_schema(WarGrey::DTPM::ColorPlotlet* plot, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback = WarGrey::SCADA::Colours::Chocolate, bool force = false);
 		void filter_dredging_dot(WarGrey::DTPM::DredgeTrackType type, WarGrey::SCADA::double3& dot, bool persistent = true, long long timepoint_ms = 0LL);
 
@@ -130,7 +129,6 @@ namespace WarGrey::DTPM {
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback_color;
 
 	private:
-		WarGrey::DTPM::DigMaplet* master;
 		WarGrey::DTPM::DredgeTracklet::Line* after_image_lines[_N(DredgeTrackType)];
 		WarGrey::DTPM::DredgeTracklet::Line* realtime_lines[_N(DredgeTrackType)];
 		WarGrey::DTPM::DredgeTracklet::Line* history_lines[_N(DredgeTrackType)];

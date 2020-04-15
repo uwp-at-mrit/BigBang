@@ -4,7 +4,7 @@
 #include "graphlet/filesystem/project/reader/jobdoc.hxx"
 
 namespace WarGrey::DTPM {
-	private class Tracelinelet : public WarGrey::SCADA::IGraphlet {
+	private class Tracelinelet : public WarGrey::DTPM::MapObjectlet<WarGrey::SCADA::IGraphlet> {
 	public:
 		Tracelinelet(WarGrey::DTPM::JobDoc^ jobs, float handler_size = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = nullptr,
@@ -20,7 +20,6 @@ namespace WarGrey::DTPM {
 		void on_tap(float local_x, float local_y) override;
 		
 	public:
-		void attach_to_map(WarGrey::DTPM::DigMaplet* master, bool force = false);
 		void on_vessel_move(double vessel_x, double vessel_y);
 
 	private:
@@ -36,7 +35,6 @@ namespace WarGrey::DTPM {
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ handler_hicolor;
 
 	private:
-		WarGrey::DTPM::DigMaplet* master;
 		WarGrey::DTPM::JobDoc^ jobs_dat;
 		float handler_half_size;
 	};

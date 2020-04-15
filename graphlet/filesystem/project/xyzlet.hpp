@@ -6,7 +6,7 @@
 #include "graphlet/filesystem/configuration/colorplotlet.hpp"
 
 namespace WarGrey::DTPM {
-	private class Xyzlet : public WarGrey::SCADA::IGraphlet {
+	private class Xyzlet : public WarGrey::DTPM::MapObjectlet<WarGrey::SCADA::IGraphlet> {
 	public:
 		Xyzlet(WarGrey::DTPM::XyzDoc^ depths, float diff_ft_times = 1.6F);
 
@@ -15,8 +15,10 @@ namespace WarGrey::DTPM {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void attach_to_map(WarGrey::DTPM::DigMaplet* master, bool force = false);
 		void set_color_schema(WarGrey::DTPM::ColorPlotlet* plot, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback = nullptr);
+
+	protected:
+		void on_map_updated() override;
 
 	private:
 		void find_or_create_depth_geometry(double depth, Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ gs[], float* whole_width);
@@ -29,7 +31,6 @@ namespace WarGrey::DTPM {
 		std::map<int, Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^> fractions;
 
 	private:
-		WarGrey::DTPM::DigMaplet* master;
 		WarGrey::DTPM::XyzDoc^ doc_xyz;
 		WarGrey::DTPM::ColorPlotlet* plot;
 		float diff_multiple;

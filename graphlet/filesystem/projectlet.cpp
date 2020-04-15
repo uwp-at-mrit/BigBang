@@ -54,11 +54,7 @@ namespace {
 }
 
 /*************************************************************************************************/
-//Projectlet::Projectlet(IVessellet* vessel, DredgeTracklet* track, ColorPlotlet* plot
-	//, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
-	//: Projectlet(vessel, track, plot, nullptr, project, view_width, view_height, background, rootdir) {}
-	
-Projectlet::Projectlet(IVessellet* vessel, DredgeTracklet* track, ColorPlotlet* plot/*, S63let* enchart */
+Projectlet::Projectlet(IVessellet* vessel, DredgeTracklet* track, ColorPlotlet* plot
 	, Platform::String^ project, float view_width, float view_height, ICanvasBrush^ background, Platform::String^ rootdir)
 	: Planetlet(new ProjectFrame(project), GraphletAnchor::LT, background)
 	, view_size(Size(view_width, view_height)), vessel(vessel), track(track), plot(plot), map(nullptr) {
@@ -70,14 +66,6 @@ Projectlet::Projectlet(IVessellet* vessel, DredgeTracklet* track, ColorPlotlet* 
 
 void Projectlet::construct() {
 	Planetlet::construct();
-
-	//if (this->enchart != nullptr) {
-	//	ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
-
-	//	frame->change_mode(ENChart);
-	//	this->planet->insert(this->enchart);
-	//	frame->change_mode(Dredger);
-	//}
 
 	this->font = make_bold_text_format(32.0F);
 	this->cd(this->ms_appdata_rootdir);
@@ -139,7 +127,6 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	 * The modifyDIG draw icons firstly.
 	 */
 	
-	//frame->change_mode(Dredger);
 	this->map = this->planet->insert_one(new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height));
 	
 	{ // make icons
@@ -170,8 +157,6 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 		}
 	}
 
-	//frame->change_mode(Dredger | ENChart);
-
 	if (this->track != nullptr) {
 		this->planet->insert(this->track, 0.0F, 0.0F);
 		this->track->attach_to_map(this->map);
@@ -197,7 +182,9 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 		this->front_sec->attach_to_map(this->map);
 	}
 
-	//frame->change_mode(Dredger);
+	for (auto it = this->managed_mapects.begin(); it != this->managed_mapects.end(); it++) {
+		(*it)->attach_to_map(this->map);
+	}
 
 	this->planet->end_update_sequence();
 
@@ -525,5 +512,15 @@ void Projectlet::on_appdata(Platform::String^ ms_appdata, ProjectDocument^ doc, 
 	case ProjectDoctype::Map_LOG:     this->on_map_logue(ms_appdata, doc); break;
 	case ProjectDoctype::Depth_LOG:   this->on_depth_logue(ms_appdata, doc); break;
 	case ProjectDoctype::Section_LOG: this->on_section_logue(ms_appdata, doc); break;
+	}
+}
+
+void Projectlet::push_managed_map_objects(MapObject* mapobj) {
+	if (mapobj != nullptr) {
+		this->managed_mapects.push_back(mapobj);
+
+		if (this->map != nullptr) {
+			mapobj->attach_to_map(this->map);
+		}
 	}
 }

@@ -331,7 +331,7 @@ void DredgeTracklet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void DredgeTracklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if (this->master != nullptr) {
+	if (this->master_map != nullptr) {
 		if (this->preview_config != nullptr) {
 			double partition_squared = flsqr(this->preview_config->partition_distance);
 			long long now = current_milliseconds();
@@ -379,7 +379,7 @@ void DredgeTracklet::draw_line(DredgeTracklet::Line* line, CanvasDrawingSession^
 			if ((cursor.timepoint >= start) && (cursor.timepoint <= end)) {
 				if (!flisnan(last_dot.x)) {
 					double distance_squared = points_distance_squared(last_dot.x, last_dot.y, cursor.dot.x, cursor.dot.y);
-					float2 self_pos = this->master->position_to_local(cursor.dot.x, cursor.dot.y, x, y);
+					float2 self_pos = this->master_map->position_to_local(cursor.dot.x, cursor.dot.y, x, y);
 
 					if ((flabs(last_pos.x - self_pos.x) > tolerance) || (flabs(self_pos.y - last_pos.y) > tolerance)) {
 						if (distance_squared <= partition_squared) {
@@ -394,19 +394,10 @@ void DredgeTracklet::draw_line(DredgeTracklet::Line* line, CanvasDrawingSession^
 						last_dot = cursor.dot;
 					}
 				} else {
-					last_pos = this->master->position_to_local(cursor.dot.x, cursor.dot.y, x, y);
+					last_pos = this->master_map->position_to_local(cursor.dot.x, cursor.dot.y, x, y);
 					last_dot = cursor.dot;
 				}
 			}
-		}
-	}
-}
-
-void DredgeTracklet::attach_to_map(DigMaplet* master, bool force) {
-	if (master != nullptr) {
-		if (force || (this->master != master)) {
-			this->master = master;
-			this->notify_updated();
 		}
 	}
 }

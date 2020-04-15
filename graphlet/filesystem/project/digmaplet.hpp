@@ -63,4 +63,25 @@ namespace WarGrey::DTPM {
 		double fstimes;
 		double _scale;
 	};
+
+	private class MapObject abstract {
+	public:
+		void attach_to_map(WarGrey::DTPM::DigMaplet* map, bool force = false);
+
+	protected:
+		virtual void on_map_updated() {}
+
+	protected:
+		WarGrey::DTPM::DigMaplet* master_map;
+	};
+
+	template<class Glet>
+	private class MapObjectlet : public virtual MapObject, public virtual Glet {
+		using Glet::Glet;
+
+	protected:
+		void on_map_updated() override {
+			this->notify_updated();
+		}
+	};
 }
