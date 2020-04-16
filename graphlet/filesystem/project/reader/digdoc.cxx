@@ -42,9 +42,9 @@ void DigDoc::push_back_item(WarGrey::DTPM::IDigDatum* item) {
 	this->by = flmax(this->by, item->by);
 }
 
-void DigDoc::append_map(DigDoc^ map) {
-	if (map != nullptr) {
-		for (auto it = map->items.begin(); it != map->items.end(); it++) {
+void DigDoc::append(DigDoc^ doc) {
+	if (doc != nullptr) {
+		for (auto it = doc->items.begin(); it != doc->items.end(); it++) {
 			this->push_back_item(*it);
 		}
 	}

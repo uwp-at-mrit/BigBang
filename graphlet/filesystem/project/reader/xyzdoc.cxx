@@ -18,3 +18,11 @@ XyzDoc::XyzDoc(std::filebuf& xyz) {
 		this->depths.push_back(depth);
 	}
 }
+
+void XyzDoc::append(WarGrey::DTPM::XyzDoc^ doc) {
+	if (doc != nullptr) {
+		for (auto it = doc->depths.begin(); it != doc->depths.end(); it ++) {
+			this->depths.push_back(*it);
+		}
+	}
+}

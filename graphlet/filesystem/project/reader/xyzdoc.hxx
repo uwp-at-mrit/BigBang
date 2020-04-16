@@ -11,6 +11,9 @@ namespace WarGrey::DTPM {
 	internal:
 		XyzDoc(std::filebuf& dig);
 
+	public:
+		void append(WarGrey::DTPM::XyzDoc^ doc);
+
 	internal:
 		std::deque<WarGrey::SCADA::double3> depths;
 	};

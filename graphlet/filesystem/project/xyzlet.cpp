@@ -23,10 +23,12 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
-Xyzlet::Xyzlet(XyzDoc^ depths, float diff_ft_times) : doc_xyz(depths), diff_multiple(diff_ft_times), default_color(Colours::GhostWhite) {
+Xyzlet::Xyzlet(XyzDoc^ depths, float diff_ft_times) : doc_xyz(nullptr), diff_multiple(diff_ft_times), default_color(Colours::GhostWhite) {
 	this->enable_resizing(false);
 	this->enable_events(false, false);
 	this->camouflage(true);
+
+	this->merge(depths);
 }
 
 void Xyzlet::fill_extent(float x, float y, float* width, float* height) {
@@ -104,6 +106,18 @@ void Xyzlet::set_color_schema(ColorPlotlet* plot, CanvasSolidColorBrush^ fallbac
 	if ((this->default_color != fallback) && (fallback != nullptr)) {
 		this->default_color = fallback;
 		this->notify_updated();
+	}
+}
+
+void Xyzlet::merge(XyzDoc^ depths) {
+	if (depths != nullptr) {
+		if (this->doc_xyz == nullptr) {
+			this->doc_xyz = depths;
+			this->notify_updated();
+		} else if (this->doc_xyz != depths) {
+			this->doc_xyz->append(depths);
+			this->notify_updated();
+		}
 	}
 }
 

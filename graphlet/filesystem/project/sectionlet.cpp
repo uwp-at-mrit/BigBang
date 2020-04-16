@@ -45,7 +45,10 @@ Sectionlet::~Sectionlet() {
 
 void Sectionlet::construct() {
 	this->slope_style = default_slope_style;
+	this->construct_plane();
+}
 
+void Sectionlet::construct_plane() {
 	if ((this->doc_sec != nullptr) && (this->doc_sec->centerline.size() > 1)) {
 		SectionDot cl0 = this->doc_sec->centerline[0];
 		SectionDot cl1 = this->doc_sec->centerline[1];
@@ -56,7 +59,7 @@ void Sectionlet::construct() {
 		for (auto slit = this->doc_sec->sidelines.begin(); slit != this->doc_sec->sidelines.end(); slit++) {
 			std::deque<std::pair<double3, double3>> segment;
 			size_t count = slit->size();
-			
+
 			if (count > 1) {
 				SectionDot* slope = &(*slit)[0];
 				bool has_slope = false;
@@ -67,7 +70,7 @@ void Sectionlet::construct() {
 					// only `flisnan(pt0.x)` works later.
 					pt0 = double3(flnan, flnan, slope->slope_depth);
 					pt1 = double3(flnan, flnan, self->slope_depth);
-					
+
 					if (self->grade > 0.0) {
 						parallel_segment(slope->x, slope->y, self->x, self->y,
 							(self->depth - self->slope_depth) * self->grade * self->position_sign,
@@ -88,6 +91,10 @@ void Sectionlet::construct() {
 			}
 
 			this->slope_segments.push_back(segment);
+		}
+
+		if (this->plane != nullptr) {
+			delete this->plane;
 		}
 
 		this->plane = new Outline(intersection_count, interslope_count);
@@ -284,6 +291,20 @@ void Sectionlet::section(double x, double y, double center_x, double center_y) {
 			}
 
 			section_idx += 1;
+		}
+	}
+}
+
+void Sectionlet::merge(SecDoc^ sec) {
+	if (sec != nullptr) {
+		if (this->doc_sec == nullptr) {
+			this->doc_sec = sec;
+			this->construct_plane();
+			this->notify_updated();
+		} else {
+			//this->doc_sec->append(sec);
+			//this->construct_plane();
+			//this->notify_updated();
 		}
 	}
 }

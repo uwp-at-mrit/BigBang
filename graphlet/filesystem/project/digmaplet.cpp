@@ -78,7 +78,7 @@ DigMaplet::DigMaplet(DigDoc^ map0, double width, double height, double fontsize_
 	 * Projectlet::on_appdata() requires the scale to locate icons.
 	 */
 
-	this->merge_map(map0);
+	this->merge(map0);
 	this->plainfont = make_text_format(plain_fontsize);
 
 	this->ztimes = get_preference(map_scale_key, 1.0);
@@ -514,15 +514,22 @@ void DigMaplet::preshape(IDigDatum* dig) {
 	dig->by = dig->ty - tbx.Height;
 }
 
-void DigMaplet::merge_map(DigDoc^ map) {
-	if (this->map == nullptr) {
-		this->map = map;
-	} else if (this->map != map) {
-		this->map->append_map(map);
+void DigMaplet::merge(DigDoc^ map) {
+	if (map != nullptr) {
+		if (this->map == nullptr) {
+			this->map = map;
+			this->on_map_updated();
+		} else if (this->map != map) {
+			this->map->append(map);
+			this->on_map_updated();
+		}
 	}
+}
 
+void DigMaplet::on_map_updated() {
 	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
 	this->_scale = flmin(this->width / this->geo_height, this->height / this->geo_width);
+
 	this->notify_updated();
 }
 

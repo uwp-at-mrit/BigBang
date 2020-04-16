@@ -36,11 +36,12 @@ namespace WarGrey::DTPM {
 		void transform(WarGrey::DTPM::MapMove move, float sx, float sy);
 
 	public:
-		void merge_map(WarGrey::DTPM::DigDoc^ map);
+		void merge(WarGrey::DTPM::DigDoc^ map);
 		
 	private:
 		void preshape(WarGrey::DTPM::IDigDatum* dig);
 		void scale_transform(double zoom, float anchor_x, float anchor_y);
+		void on_map_updated();
 		
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ plainfont;

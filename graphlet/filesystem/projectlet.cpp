@@ -161,9 +161,10 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 			(*it)->attach_to_map(self_map);
 		}
 
+		// NOTE: do not assign `self_map` to `this->map` directly, see `this->ready()`
 		this->map = self_map;
 	} else {
-		this->map->merge_map(doc_dig);
+		this->map->merge(doc_dig);
 		this->insert_icons(doc_dig);
 		this->relocate_icons();
 	}
@@ -174,19 +175,21 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	XyzDoc^ doc_xyz = static_cast<XyzDoc^>(doc);
 
-	this->depth_xyz = this->planet->insert_one(new Xyzlet(doc_xyz));
-	this->depth_xyz->set_color_schema(this->plot);
-	
-	if (this->map != nullptr) {
-		ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
-
-		frame->change_mode(Dredger | ENChart);
-		this->planet->begin_update_sequence();
-		this->planet->insert(this->depth_xyz, 0.0F, 0.0F);
+	if (this->depth_xyz == nullptr) {
+		this->depth_xyz = this->planet->insert_one(new Xyzlet(doc_xyz));
 		this->depth_xyz->set_color_schema(this->plot);
-		this->depth_xyz->attach_to_map(this->map);
-		this->planet->end_update_sequence();
-		frame->change_mode(Dredger);
+
+		if (this->map != nullptr) {
+			ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
+
+			this->planet->begin_update_sequence();
+			this->planet->insert(this->depth_xyz, 0.0F, 0.0F);
+			this->depth_xyz->set_color_schema(this->plot);
+			this->depth_xyz->attach_to_map(this->map);
+			this->planet->end_update_sequence();
+		}
+	} else {
+		this->depth_xyz->merge(doc_xyz);
 	}
 }
 
@@ -198,29 +201,29 @@ void Projectlet::on_traceline(Platform::String^ ms_appdata, ProjectDocument^ doc
 	if (this->map != nullptr) {
 		ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
 
-		frame->change_mode(Dredger | ENChart);
 		this->planet->begin_update_sequence();
 		this->planet->insert(this->jobs_dat, 0.0F, 0.0F);
 		this->jobs_dat->attach_to_map(this->map);
 		this->planet->end_update_sequence();
-		frame->change_mode(Dredger);
 	}
 }
 
 void Projectlet::on_sec(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	SecDoc^ doc_sec = static_cast<SecDoc^>(doc);
 
-	this->front_sec = new Sectionlet(doc_sec, true);
+	if (this->front_sec == nullptr) {
+		this->front_sec = new Sectionlet(doc_sec, true);
 
-	if (this->map != nullptr) {
-		ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
+		if (this->map != nullptr) {
+			ProjectFrame* frame = dynamic_cast<ProjectFrame*>(this->planet);
 
-		frame->change_mode(Dredger | ENChart);
-		this->planet->begin_update_sequence();
-		this->planet->insert(this->front_sec, 0.0F, 0.0F);
-		this->front_sec->attach_to_map(this->map);
-		this->planet->end_update_sequence();
-		frame->change_mode(Dredger);
+			this->planet->begin_update_sequence();
+			this->planet->insert(this->front_sec, 0.0F, 0.0F);
+			this->front_sec->attach_to_map(this->map);
+			this->planet->end_update_sequence();
+		}
+	} else {
+		this->front_sec->merge(doc_sec);
 	}
 }
 

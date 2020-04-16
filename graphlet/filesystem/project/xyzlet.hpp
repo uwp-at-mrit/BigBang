@@ -16,6 +16,7 @@ namespace WarGrey::DTPM {
 
 	public:
 		void set_color_schema(WarGrey::DTPM::ColorPlotlet* plot, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ fallback = nullptr);
+		void merge(WarGrey::DTPM::XyzDoc^ depths);
 
 	protected:
 		void on_map_updated() override;

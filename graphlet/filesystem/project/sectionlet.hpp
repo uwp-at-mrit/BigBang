@@ -25,9 +25,11 @@ namespace WarGrey::DTPM {
 		
 	public:
 		const WarGrey::DTPM::Outline* section(double x, double y);
+		void merge(WarGrey::DTPM::SecDoc^ sec);
 
 	private:
 		void section(double x, double y, double center_x, double center_y);
+		void construct_plane();
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ slope_style;
