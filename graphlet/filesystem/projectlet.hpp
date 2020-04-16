@@ -67,11 +67,9 @@ namespace WarGrey::DTPM {
 		void on_section_logue(Platform::String^ ms_appdata, WarGrey::DTPM::ProjectDocument^ doc_log);
 
 	private:
+		void insert_icons(WarGrey::DTPM::DigDoc^ doc_dig);
 		bool relocate_vessel(Windows::Foundation::Numerics::float2* vpos = nullptr);
 		void relocate_icons();
-
-	private:
-		WarGrey::DTPM::ProjectDocument^ graph_dig;
 
 	private:
 		Platform::String^ ms_appdata_rootdir;

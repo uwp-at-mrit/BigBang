@@ -34,6 +34,9 @@ namespace WarGrey::DTPM {
 		void zoom(float zx, float zy, float length);
 		void transform(WarGrey::DTPM::MapMove move);
 		void transform(WarGrey::DTPM::MapMove move, float sx, float sy);
+
+	public:
+		void merge_map(WarGrey::DTPM::DigDoc^ map);
 		
 	private:
 		void preshape(WarGrey::DTPM::IDigDatum* dig);

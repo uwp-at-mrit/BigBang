@@ -18,6 +18,9 @@ namespace WarGrey::DTPM {
 	public:
 		void fill_enclosing_box(double* x, double* y, double* width, double* height);
 
+	public:
+		void append_map(WarGrey::DTPM::DigDoc^ map);
+
 	internal:
 		void push_back_item(WarGrey::DTPM::IDigDatum* item);
 		void rewind();

@@ -5,6 +5,8 @@
 
 #include "forward.hpp"
 
+#include "datum/object.hpp"
+
 namespace WarGrey::DTPM {
 	private enum class DigDatumType {
 		Icon, Arc, Circle, Line, PolyLine, PolyBezier, ShoreLine, Rectangle, Text, Number, FontText,
@@ -21,8 +23,9 @@ namespace WarGrey::DTPM {
 		_
 	};
 
-	private struct IDigDatum abstract {
+	private struct IDigDatum abstract : public virtual WarGrey::SCADA::SharedObject {
 	protected:
+		virtual ~IDigDatum() noexcept {}
 		IDigDatum(WarGrey::DTPM::DigDatumType type) : type(type), name(nullptr) {}
 
 	public:
@@ -62,6 +65,7 @@ namespace WarGrey::DTPM {
 
 	private struct IMultilineDigDatum abstract : public WarGrey::DTPM::IDigDatum {
 	protected:
+		virtual ~IMultilineDigDatum() noexcept {}
 		IMultilineDigDatum(WarGrey::DTPM::DigDatumType type) : IDigDatum(type) {}
 
 	public:

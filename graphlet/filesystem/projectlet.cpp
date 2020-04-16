@@ -127,68 +127,48 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	 * The modifyDIG draw icons firstly.
 	 */
 	
-	this->map = this->planet->insert_one(new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height));
-	
-	{ // make icons
-		IDigDatum* dig = nullptr;
-		double x, y;
+	if (this->map == nullptr) {
+		auto self_map = this->planet->insert_one(new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height));
+		
+		this->insert_icons(doc_dig);
 
-		doc_dig->rewind();
-		while ((dig = doc_dig->step()) != nullptr) {
-			if (dig->type == DigDatumType::Icon) {
-				IGraphlet* icon = dig->make_graphlet(&x, &y);
-
-				if (icon != nullptr) {
-					icon->enable_resizing(false);
-
-					{ /** TODO
-					   * Find out the reason why some icons do not like their locations?
-					   * Nonetheless, icons will be relocated when the map is translated or scaled.
-					   */
-
-						DigIconEntity^ entity = ref new DigIconEntity(icon, x, y);
-						float2 ipos = this->map->position_to_local(x, y);
-
-						this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::CC);
-						this->icons.push_back(entity);
-					}
-				}
-			}
+		if (this->track != nullptr) {
+			this->planet->insert(this->track, 0.0F, 0.0F);
+			this->track->attach_to_map(self_map);
+			this->track->set_color_schema(this->plot);
 		}
-	}
 
-	if (this->track != nullptr) {
-		this->planet->insert(this->track, 0.0F, 0.0F);
-		this->track->attach_to_map(this->map);
-		this->track->set_color_schema(this->plot);
-	}
+		if (this->vessel != nullptr) {
+			this->planet->insert(this->vessel, this->view_size.Width * 0.5F, this->view_size.Height * 0.5F, GraphletAnchor::CC);
+		}
 
-	if (this->vessel != nullptr) {
-		this->planet->insert(this->vessel, this->view_size.Width * 0.5F, this->view_size.Height * 0.5F, GraphletAnchor::CC);
-	}
+		if (this->depth_xyz != nullptr) {
+			this->planet->insert(this->depth_xyz, 0.0F, 0.0F);
+			this->depth_xyz->attach_to_map(self_map);
+		}
 
-	if (this->depth_xyz != nullptr) {
-		this->planet->insert(this->depth_xyz, 0.0F, 0.0F);
-		this->depth_xyz->attach_to_map(this->map);
-	}
+		if (this->jobs_dat != nullptr) {
+			this->planet->insert(this->jobs_dat, 0.0F, 0.0F);
+			this->jobs_dat->attach_to_map(self_map);
+		}
 
-	if (this->jobs_dat != nullptr) {
-		this->planet->insert(this->jobs_dat, 0.0F, 0.0F);
-		this->jobs_dat->attach_to_map(this->map);
-	}
+		if (this->front_sec != nullptr) {
+			this->planet->insert(this->front_sec, 0.0F, 0.0F);
+			this->front_sec->attach_to_map(self_map);
+		}
 
-	if (this->front_sec != nullptr) {
-		this->planet->insert(this->front_sec, 0.0F, 0.0F);
-		this->front_sec->attach_to_map(this->map);
-	}
+		for (auto it = this->managed_mapects.begin(); it != this->managed_mapects.end(); it++) {
+			(*it)->attach_to_map(self_map);
+		}
 
-	for (auto it = this->managed_mapects.begin(); it != this->managed_mapects.end(); it++) {
-		(*it)->attach_to_map(this->map);
+		this->map = self_map;
+	} else {
+		this->map->merge_map(doc_dig);
+		this->insert_icons(doc_dig);
+		this->relocate_icons();
 	}
 
 	this->planet->end_update_sequence();
-
-	this->graph_dig = doc_dig;
 }
 
 void Projectlet::on_xyz(Platform::String^ ms_appdata, ProjectDocument^ doc) {
@@ -245,7 +225,7 @@ void Projectlet::on_sec(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 }
 
 bool Projectlet::ready() {
-	return (this->graph_dig != nullptr);
+	return (this->map != nullptr);
 }
 
 void Projectlet::fill_extent(float x, float y, float* w, float* h) {
@@ -405,6 +385,36 @@ bool Projectlet::on_wheel_zoom(float x, float y, float delta) {
 	}
 
 	return handled;
+}
+
+
+/*************************************************************************************************/
+void Projectlet::insert_icons(DigDoc^ doc_dig) { // make icons
+	IDigDatum* dig = nullptr;
+	double x, y;
+
+	doc_dig->rewind();
+	while ((dig = doc_dig->step()) != nullptr) {
+		if (dig->type == DigDatumType::Icon) {
+			IGraphlet* icon = dig->make_graphlet(&x, &y);
+
+			if (icon != nullptr) {
+				icon->enable_resizing(false);
+
+				{ /** TODO
+				   * Find out the reason why some icons do not like their locations?
+				   * Nonetheless, icons will be relocated when the map is translated or scaled.
+				   */
+
+					DigIconEntity^ entity = ref new DigIconEntity(icon, x, y);
+					float2 ipos = this->map->position_to_local(x, y);
+
+					this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::CC);
+					this->icons.push_back(entity);
+				}
+			}
+		}
+	}
 }
 
 bool Projectlet::relocate_vessel(float2* local_pos) {

@@ -25,13 +25,14 @@ DigDoc::~DigDoc() {
 	while (!this->items.empty()) {
 		auto it = this->items.begin();
 		
-		delete (*it);
-		
+		(*it)->destroy();
 		this->items.erase(it);
 	}
 }
 
 void DigDoc::push_back_item(WarGrey::DTPM::IDigDatum* item) {
+	item->reference();
+
 	this->items.push_back(item);
 	this->counters[item->type] = this->counters[item->type] + 1;
 
@@ -39,6 +40,14 @@ void DigDoc::push_back_item(WarGrey::DTPM::IDigDatum* item) {
 	this->rx = flmax(this->rx, item->rx);
 	this->ty = flmin(this->ty, item->ty);
 	this->by = flmax(this->by, item->by);
+}
+
+void DigDoc::append_map(DigDoc^ map) {
+	if (map != nullptr) {
+		for (auto it = map->items.begin(); it != map->items.end(); it++) {
+			this->push_back_item(*it);
+		}
+	}
 }
 
 void DigDoc::rewind() {

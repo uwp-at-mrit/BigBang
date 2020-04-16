@@ -68,8 +68,8 @@ static CanvasStrokeStyle^ vector_stroke_ref(long long idx) {
 }
 
 /*************************************************************************************************/
-DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_times, float plain_fontsize)
-	: map(map), width(float(width)), height(float(height)), fstimes(fontsize_times), tdelta(32.0F), zdelta(1.0618F) {
+DigMaplet::DigMaplet(DigDoc^ map0, double width, double height, double fontsize_times, float plain_fontsize)
+	: map(nullptr), width(float(width)), height(float(height)), fstimes(fontsize_times), tdelta(32.0F), zdelta(1.0618F) {
 	this->enable_resizing(false);
 	this->enable_events(false, false);
 	
@@ -78,8 +78,7 @@ DigMaplet::DigMaplet(DigDoc^ map, double width, double height, double fontsize_t
 	 * Projectlet::on_appdata() requires the scale to locate icons.
 	 */
 
-	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
-	this->_scale = flmin(this->width / this->geo_height, this->height / this->geo_width);
+	this->merge_map(map0);
 	this->plainfont = make_text_format(plain_fontsize);
 
 	this->ztimes = get_preference(map_scale_key, 1.0);
@@ -510,8 +509,21 @@ void DigMaplet::preshape(IDigDatum* dig) {
 	 *
 	 * see this::draw
 	 */
+
 	dig->rx = dig->lx - tbx.Width;
 	dig->by = dig->ty - tbx.Height;
+}
+
+void DigMaplet::merge_map(DigDoc^ map) {
+	if (this->map == nullptr) {
+		this->map = map;
+	} else if (this->map != map) {
+		this->map->append_map(map);
+	}
+
+	this->map->fill_enclosing_box(&this->geo_x, &this->geo_y, &this->geo_width, &this->geo_height);
+	this->_scale = flmin(this->width / this->geo_height, this->height / this->geo_width);
+	this->notify_updated();
 }
 
 /*************************************************************************************************/
