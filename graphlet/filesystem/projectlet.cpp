@@ -130,7 +130,7 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 	if (this->map == nullptr) {
 		auto self_map = this->planet->insert_one(new DigMaplet(doc_dig, this->view_size.Width, this->view_size.Height));
 		
-		this->insert_icons(doc_dig);
+		this->insert_icons(self_map, doc_dig);
 
 		if (this->track != nullptr) {
 			this->planet->insert(this->track, 0.0F, 0.0F);
@@ -165,7 +165,7 @@ void Projectlet::on_dig(Platform::String^ ms_appdata, ProjectDocument^ doc) {
 		this->map = self_map;
 	} else {
 		this->map->merge(doc_dig);
-		this->insert_icons(doc_dig);
+		this->insert_icons(this->map, doc_dig);
 		this->relocate_icons();
 	}
 
@@ -392,7 +392,7 @@ bool Projectlet::on_wheel_zoom(float x, float y, float delta) {
 
 
 /*************************************************************************************************/
-void Projectlet::insert_icons(DigDoc^ doc_dig) { // make icons
+void Projectlet::insert_icons(DigMaplet* map, DigDoc^ doc_dig) { // make icons
 	IDigDatum* dig = nullptr;
 	double x, y;
 
@@ -410,7 +410,7 @@ void Projectlet::insert_icons(DigDoc^ doc_dig) { // make icons
 				   */
 
 					DigIconEntity^ entity = ref new DigIconEntity(icon, x, y);
-					float2 ipos = this->map->position_to_local(x, y);
+					float2 ipos = map->position_to_local(x, y);
 
 					this->planet->insert(icon, ipos.x, ipos.y, GraphletAnchor::CC);
 					this->icons.push_back(entity);

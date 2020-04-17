@@ -12,7 +12,6 @@
 namespace WarGrey::DTPM {
 	private class Sectionlet : public virtual WarGrey::DTPM::MapObjectlet<WarGrey::SCADA::IGraphlet> {
 	public:
-		virtual ~Sectionlet() noexcept;
 		Sectionlet(WarGrey::DTPM::SecDoc^ sec, bool draw_slope_lines = false, float thickness = 1.0F,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ centerline_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ sideline_color = nullptr,
@@ -28,26 +27,44 @@ namespace WarGrey::DTPM {
 		void merge(WarGrey::DTPM::SecDoc^ sec);
 
 	private:
-		void section(double x, double y, double center_x, double center_y);
-		void construct_plane();
+		struct Style {
+		public:
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ slope_style;
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ centerline_color;
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ sideline_color;
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ section_color;
+
+		public:
+			float thickness;
+			bool draw_slope_lines;
+		};
+
+		struct Entity {
+		public:
+			~Entity() noexcept;
+			Entity(WarGrey::DTPM::SecDoc^ sec);
+
+		public:
+			void construct();
+			void draw(WarGrey::DTPM::DigMaplet* map, WarGrey::DTPM::Sectionlet::Style* style,
+				Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height);
+
+		public:
+			const Outline* Entity::section(double x, double y, bool need_slopes);
+			void section(double x, double y, double center_x, double center_y, bool need_slopes);
+
+		public:
+			WarGrey::DTPM::SecDoc^ doc_sec;
+			std::deque<std::deque<std::pair<WarGrey::SCADA::double3, WarGrey::SCADA::double3>>> slope_segments;
+
+		public:
+			WarGrey::DTPM::Outline* plane;
+			WarGrey::SCADA::double2 ps_boundry;
+			WarGrey::SCADA::double2 sb_boundry;
+		};
 
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ slope_style;
-		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ centerline_color;
-		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ sideline_color;
-		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ section_color;
-
-	private:
-		WarGrey::DTPM::SecDoc^ doc_sec;
-		std::deque<std::deque<std::pair<WarGrey::SCADA::double3, WarGrey::SCADA::double3>>> slope_segments;
-
-	private:
-		float thickness;
-		bool draw_slope_lines;
-
-	private:
-		WarGrey::DTPM::Outline* plane;
-		WarGrey::SCADA::double2 ps_boundry;
-		WarGrey::SCADA::double2 sb_boundry;
+		std::deque<WarGrey::DTPM::Sectionlet::Entity> sections;
+		WarGrey::DTPM::Sectionlet::Style style;
 	};
 }

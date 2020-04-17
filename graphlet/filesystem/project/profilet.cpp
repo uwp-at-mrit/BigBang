@@ -104,13 +104,18 @@ void Profilet::update_outline(const Outline* outline, double vessel_x, double ve
 	this->vessel_x = vessel_x;
 	this->vessel_y = vessel_y;
 
-	if ((outline != nullptr) && (this->preview_config != nullptr)) {
-		if (this->outline == nullptr) {
-			this->outline = new Outline(outline);
-			this->update_vertical_axes();
-		} else if ((this->outline->center_foot.x != outline->center_foot.x) || (this->outline->center_foot.y != outline->center_foot.y)) {
-			this->outline->clone_from(outline);
-			this->update_vertical_axes();
+	if (this->preview_config != nullptr) {
+		if (outline != nullptr) {
+			if (this->outline == nullptr) {
+				this->outline = new Outline(outline);
+				this->update_vertical_axes();
+			} else if ((this->outline->center_foot.x != outline->center_foot.x) || (this->outline->center_foot.y != outline->center_foot.y)) {
+				this->outline->clone_from(outline);
+				this->update_vertical_axes();
+			}
+		} else if (this->outline != nullptr) {
+			delete this->outline;
+			this->outline = nullptr;
 		}
 
 		this->update_outline();
@@ -126,9 +131,7 @@ void Profilet::on_appdata(Uri^ profile, Profile^ profile_config) {
 	this->update_horizontal_axes();
 	this->update_vertical_axes();
 
-	if (this->outline != nullptr) {
-		this->update_outline();
-	}
+	this->update_outline();
 }
 
 bool Profilet::ready() {
@@ -224,25 +227,28 @@ void Profilet::update_vertical_axes() {
 
 void Profilet::update_outline() {
 	CanvasPathBuilder^ secpath = nullptr;
-	double xscale, yscale;
-	float2 dotpos;
+	
+	if (this->outline != nullptr) {
+		double xscale, yscale;
+		float2 dotpos;
 
-	this->fill_scale(&xscale, &yscale);
+		this->fill_scale(&xscale, &yscale);
 
-	for (int idx = 0; idx < this->outline->side_count + this->outline->slope_count; idx++) {
-		ProfileDot* self = &this->outline->dots[idx];
+		for (int idx = 0; idx < this->outline->side_count + this->outline->slope_count; idx++) {
+			ProfileDot* self = &this->outline->dots[idx];
 
-		if (!flisnan(self->x)) {
-			dotpos = this->distance_to_local(self->distance, self->depth, xscale, yscale);
+			if (!flisnan(self->x)) {
+				dotpos = this->distance_to_local(self->distance, self->depth, xscale, yscale);
 
-			if (secpath == nullptr) {
-				secpath = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-				secpath->BeginFigure(dotpos);
-			} else {
-				secpath->AddLine(dotpos);
+				if (secpath == nullptr) {
+					secpath = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+					secpath->BeginFigure(dotpos);
+				} else {
+					secpath->AddLine(dotpos);
+				}
 			}
 		}
-  	}
+	}
 
 	if (secpath != nullptr) {
 		secpath->EndFigure(CanvasFigureLoop::Open);
