@@ -101,24 +101,26 @@ void Profilet::construct() {
 }
 
 void Profilet::update_outline(const Outline* outline, double vessel_x, double vessel_y) {
-	this->vessel_x = vessel_x;
-	this->vessel_y = vessel_y;
+	if ((!flisnan(vessel_x)) && (!flisnan(vessel_y))) {
+		this->vessel_x = vessel_x;
+		this->vessel_y = vessel_y;
 
-	if (this->preview_config != nullptr) {
-		if (outline != nullptr) {
-			if (this->outline == nullptr) {
-				this->outline = new Outline(outline);
-				this->update_vertical_axes();
-			} else if ((this->outline->center_foot.x != outline->center_foot.x) || (this->outline->center_foot.y != outline->center_foot.y)) {
-				this->outline->clone_from(outline);
-				this->update_vertical_axes();
+		if (this->preview_config != nullptr) {
+			if (outline != nullptr) {
+				if (this->outline == nullptr) {
+					this->outline = new Outline(outline);
+					this->update_vertical_axes();
+				} else if ((this->outline->center_foot.x != outline->center_foot.x) || (this->outline->center_foot.y != outline->center_foot.y)) {
+					this->outline->clone_from(outline);
+					this->update_vertical_axes();
+				}
+			} else if (this->outline != nullptr) {
+				delete this->outline;
+				this->outline = nullptr;
 			}
-		} else if (this->outline != nullptr) {
-			delete this->outline;
-			this->outline = nullptr;
-		}
 
-		this->update_outline();
+			this->update_outline();
+		}
 	}
 }
 
@@ -263,13 +265,16 @@ float2 Profilet::vessel_to_local(double x, double y, double depth) {
 	float2 pos(flnan_f, 0.0F);
 	double xscale, yscale;
 
+	this->fill_scale(&xscale, &yscale);
+
 	if (this->outline != nullptr) {
 		double distance = point_segment_distance(this->vessel_x, this->vessel_y,
 			this->outline->center_foot.x, this->outline->center_foot.y, this->outline->center_origin.x, this->outline->center_origin.y);
 		
 		// NOTE: this is the transverse section which display `y` and `z` and hence `x` is useless
-		this->fill_scale(&xscale, &yscale);
 		pos = distance_to_local(distance - y, depth, xscale, yscale);
+	} else {
+		pos = distance_to_local(y, depth, xscale, yscale);
 	}
 
 	return pos;

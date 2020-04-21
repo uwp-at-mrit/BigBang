@@ -311,12 +311,14 @@ void Sectionlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, flo
 const Outline* Sectionlet::section(double x, double y) {
 	const Outline* plane = nullptr;
 
-	for (auto it = this->sections.begin(); it != this->sections.end(); it++) {
-		const Outline* p = (*it).section(x, y, this->style.draw_slope_lines);
+	if ((!flisnan(x)) && (!flisnan(y))) {
+		for (auto it = this->sections.begin(); it != this->sections.end(); it++) {
+			const Outline* p = (*it).section(x, y, this->style.draw_slope_lines);
 
-		if (!flisnan(p->center_foot.x)) {
-			plane = p;
-			break;
+			if (!flisnan(p->center_foot.x)) {
+				plane = p;
+				break;
+			}
 		}
 	}
 

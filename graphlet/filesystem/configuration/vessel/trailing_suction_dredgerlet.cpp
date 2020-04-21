@@ -448,11 +448,13 @@ void TrailingSuctionDredgerlet::reconstruct() {
 /*************************************************************************************************/
 void TrailingSuctionDredgerlet::set_bow_direction(double degrees) {
 	if (this->ready()) {
-		if (this->bow_direction != degrees) {
-			this->bow_direction = degrees;
+		if (!flisnan(degrees)) {
+			if (this->bow_direction != degrees) {
+				this->bow_direction = degrees;
 
-			this->reconstruct();
-			this->notify_updated();
+				this->reconstruct();
+				this->notify_updated();
+			}
 		}
 	}
 }

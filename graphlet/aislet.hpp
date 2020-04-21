@@ -15,7 +15,7 @@ namespace WarGrey::DTPM {
 		double course;
 		double heading;
 		
-		WarGrey::SCADA::double2 geo_position;
+		WarGrey::SCADA::double2 geo;
 	};
 
 	/*********************************************************************************************/

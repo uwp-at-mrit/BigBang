@@ -45,7 +45,7 @@ void AISlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 	if (this->master_map != nullptr) {
 		for (auto it = this->positions.begin(); it != this->positions.end(); it++) {
 			AISPositionReport* pr = &(it->second);
-			float2 pos = this->master_map->position_to_local(pr->geo_position.x, pr->geo_position.y, x, y);
+			float2 pos = this->master_map->position_to_local(pr->geo.x, pr->geo.y, x, y);
 
 			ds->FillEllipse(pos, 5.0F, 8.0F, Colors::RoyalBlue);
 		}
