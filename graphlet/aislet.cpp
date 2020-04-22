@@ -1,7 +1,5 @@
 #include "graphlet/aislet.hpp"
 
-#include "datum/flonum.hpp"
-
 #include "geometry.hpp"
 #include "brushes.hxx"
 #include "shape.hpp"
@@ -19,6 +17,59 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
+
+#define DCAS(lv, rv) if (!flisnan(rv)) lv = (rv);
+
+/*************************************************************************************************/
+AISPositionReport::AISPositionReport(double lat, double lon) {
+	this->latitude = lat;
+	this->longitude = lon;
+	this->turn = flnan;
+	this->speed = flnan;
+	this->course = flnan;
+	this->heading = flnan;
+
+	this->geo.x = flnan;
+	this->geo.y = flnan;
+}
+
+AISPositionReport& AISPositionReport::operator=(const AISPositionReport& pr) {
+	DCAS(this->latitude, pr.latitude);
+	DCAS(this->longitude, pr.longitude);
+	DCAS(this->turn, pr.turn);
+	DCAS(this->speed, pr.speed);
+	DCAS(this->course, pr.course);
+	DCAS(this->heading, pr.heading);
+
+	DCAS(this->geo.x, pr.geo.x);
+	DCAS(this->geo.y, pr.geo.y);
+
+	return (*this);
+}
+
+AISVoyageReport::AISVoyageReport(std::string shipname, std::string callsign) {
+	this->shipname = shipname;
+	this->callsign = callsign;
+
+	this->mothership_mmsi = -1;
+	this->length = 0.0F;
+	this->width = 0.0F;
+	this->gps_fl = 0.0F;
+	this->gps_fw = 0.0F;
+}
+
+AISVoyageReport& AISVoyageReport::operator=(const AISVoyageReport& vr) {
+	this->shipname = vr.shipname;
+	this->callsign = vr.callsign;
+	this->mothership_mmsi = vr.mothership_mmsi;
+
+	DCAS(this->length, vr.length);
+	DCAS(this->width, vr.width);
+	DCAS(this->gps_fl, vr.gps_fl);
+	DCAS(this->gps_fw, vr.gps_fw);
+
+	return (*this);
+}
 
 /*************************************************************************************************/
 AISlet::AISlet(float width, float height) : width(width), height(height) {
@@ -52,7 +103,19 @@ void AISlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 	}
 }
 
+void AISlet::update_self_position(AISPositionReport* pos) {
+	this->self_position = (*pos);
+}
+
 void AISlet::update_position(uint16 mmsi, AISPositionReport* pos) {
 	this->positions[mmsi] = (*pos);
 	this->notify_updated();
+}
+
+void AISlet::update_voyage(uint16 mmsi, AISVoyageReport* voyage, bool force_update) {
+	this->voyages[mmsi] = (*voyage);
+
+	if (force_update) {
+		this->notify_updated();
+	}
 }
