@@ -7,7 +7,11 @@
 #include "datum/flonum.hpp"
 
 namespace WarGrey::DTPM {
+	private enum class AISType { A, B };
+
 	private struct AISPositionReport {
+		WarGrey::DTPM::AISType type;
+
 		double latitude;
 		double longitude;
 		double turn;
@@ -18,7 +22,7 @@ namespace WarGrey::DTPM {
 		WarGrey::SCADA::double2 geo;
 
 	public:
-		AISPositionReport(double lat = WarGrey::SCADA::flnan, double lon = WarGrey::SCADA::flnan);
+		AISPositionReport(WarGrey::DTPM::AISType type = AISType::A, double lat = WarGrey::SCADA::flnan, double lon = WarGrey::SCADA::flnan);
 
 	public:
 		WarGrey::DTPM::AISPositionReport& operator=(const WarGrey::DTPM::AISPositionReport& pr);
@@ -29,10 +33,10 @@ namespace WarGrey::DTPM {
 		std::string shipname;
 
 		int mothership_mmsi;
-		double length;
-		double width;
-		double gps_fl;
-		double gps_fw;
+		double to_bow;
+		double to_stern;
+		double to_port;
+		double to_starboard;
 
 	public:
 		AISVoyageReport(std::string shipname = "", std::string callsign = "");
@@ -54,17 +58,31 @@ namespace WarGrey::DTPM {
 		void on_tap(float local_x, float local_y) override;
 		
 	public:
-		void update_self_position(WarGrey::DTPM::AISPositionReport* pr);
+		void update_self_position(double geo_x, double geo_y);
 		void update_position(uint16 mmsi, WarGrey::DTPM::AISPositionReport* pr);
 		void update_voyage(uint16 mmsi, WarGrey::DTPM::AISVoyageReport* vr, bool force_update = false);
 
 	private:
-		WarGrey::DTPM::AISPositionReport self_position;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ make_ship_info(Platform::String^ name, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_ship_shape(WarGrey::DTPM::AISVoyageReport* voyage);
+		
+	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ caption_font;
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ distance_font;
+
+	private:
 		std::map<uint16, WarGrey::DTPM::AISPositionReport> positions;
 		std::map<uint16, WarGrey::DTPM::AISVoyageReport> voyages;
-
+		std::map<uint16, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> vessels;
+		std::map<uint16, Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^> captions;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ default_vessel;
+		
 	private:
 		float width;
 		float height;
+
+	private:
+		double geo_x;
+		double geo_y;
 	};
 }
