@@ -59,6 +59,9 @@ namespace WarGrey::DTPM {
 		
 	public:
 		void update_self_position(double geo_x, double geo_y);
+		void update_self_course(double degrees);
+
+	public:
 		void update_position(uint16 mmsi, WarGrey::DTPM::AISPositionReport* pr);
 		void update_voyage(uint16 mmsi, WarGrey::DTPM::AISVoyageReport* vr, bool force_update = false);
 
@@ -69,6 +72,7 @@ namespace WarGrey::DTPM {
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ caption_font;
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ distance_font;
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ metainfo_font;
 
 	private:
 		std::map<uint16, WarGrey::DTPM::AISPositionReport> positions;
@@ -80,9 +84,12 @@ namespace WarGrey::DTPM {
 	private:
 		float width;
 		float height;
+		float info_width;
+		float info_height;
 
 	private:
 		double geo_x;
 		double geo_y;
+		float course_rad;
 	};
 }

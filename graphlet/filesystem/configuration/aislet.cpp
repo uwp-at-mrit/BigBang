@@ -1,4 +1,4 @@
-#include "graphlet/aislet.hpp"
+#include "graphlet/filesystem/configuration/aislet.hpp"
 
 #include "datum/string.hpp"
 
@@ -27,6 +27,9 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 static CanvasSolidColorBrush^ default_vessel_color = Colours::GhostWhite;
 static CanvasSolidColorBrush^ vessel_class_a_color = Colours::Green;
 static CanvasSolidColorBrush^ vessel_class_b_color = Colours::Yellow;
+
+static const float defaut_vessel_half_length = 50.0F;
+static const float defaut_vessel_half_width = 20.0F;
 
 /*************************************************************************************************/
 AISPositionReport::AISPositionReport(AISType type, double lat, double lon) {
@@ -90,25 +93,22 @@ AISlet::AISlet(float width, float height) : width(width), height(height) {
 
 	this->geo_x = flnan;
 	this->geo_y = flnan;
+	this->course_rad = flnan_f;
 }
 
 void AISlet::construct() {
+	TextExtent metainfo_te;
+
 	this->caption_font = make_bold_text_format(10.0F);
 	this->distance_font = make_bold_text_format(10.0F);
+	this->metainfo_font = make_bold_text_format(10.0F);
 
-	this->default_vessel = polar_triangle(10.0F, 50.0F, -90.0);
+	this->default_vessel = polar_triangle(defaut_vessel_half_width, defaut_vessel_half_length, -90.0);
 }
 
 void AISlet::fill_extent(float x, float y, float* width, float* height) {
 	SET_BOX(width, this->width);
 	SET_BOX(height, this->height);
-}
-
-bool AISlet::is_colliding_with_mouse(float local_x, float local_y) {
-	return false;
-}
-
-void AISlet::on_tap(float local_x, float local_y) {
 }
 
 void AISlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -117,6 +117,11 @@ void AISlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 		float ds_y = y;
 		float ds_rx = x + Width;
 		float ds_by = y + Height;
+		double geo_ux, geo_uy;
+		float2 self_pos;
+
+		dot_unit_vector(this->geo_x, this->geo_y, this->course_rad, &geo_ux, &geo_uy);
+		self_pos = this->master_map->position_to_local(this->geo_x, this->geo_y, x, y);
 
 		for (auto it = this->positions.begin(); it != this->positions.end(); it++) {
 			AISPositionReport* pr = &(it->second);
@@ -138,32 +143,99 @@ void AISlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 				}
 
 				{ // display vessel
-					float s = float(this->master_map->actual_scale());
-					CanvasGeometry^ g = geometry_scale(geometry_rotate(vessel, pr->heading, 0.0F, 0.0F), s, s);
+					float scale = float(this->master_map->actual_scale());
+					double heading = pr->heading;
+					
+					if (flisnan(heading)) {
+						heading = (flisnan(pr->course) ? 0.0 : pr->course);
+					}
 
-					ds->DrawGeometry(g, pos, vessel_color);
+					ds->DrawGeometry(geometry_scale(geometry_rotate(vessel, heading, 0.0F, 0.0F), scale, scale), pos, vessel_color);
 				}
 
 				if (caption != this->captions.end()) {
 					ds->DrawCachedGeometry(caption->second, pos, vessel_color);
 				}
 
-				if (!flisnan(distance)) {
-					CanvasTextLayout^ d = make_text_layout(flstring(distance, 1), this->distance_font);
+				/*
+				if (!flisnan(pr->course)) {
+					double ux, uy, ix, iy, t1, t2;
 
-					ds->DrawTextLayout(d,
-						pos.x - d->LayoutBounds.Width * 0.5F,
-						pos.y + d->LayoutBounds.Height * 1.5F,
-						vessel_color);
+					dot_unit_vector(pr->geo.x, pr->geo.y, pr->course, &ux, &uy);
+
+					lines_intersection(this->geo_x, this->geo_y, geo_ux, geo_uy, pr->geo.x, pr->geo.y, ux, uy, &ix, &iy, &t1, &t2);
+
+					if ((t1 > 0.0) && (t2 > 0.0)) {
+						float2 intersection = this->master_map->position_to_local(ix, iy, x, y);
+
+						ds->DrawLine(pos.x, pos.y, intersection.x, intersection.y, Colours::Chocolate);
+						ds->DrawLine(self_pos.x, self_pos.y, intersection.x, intersection.y, Colours::Chocolate);
+					}
 				}
+				*/
 			}
 		}
 	}
 }
 
+bool AISlet::is_colliding_with_mouse(float local_x, float local_y) {
+	bool colliding = false;
+
+	/*
+	if (this->master_map != nullptr) {
+		float ds_x = 0.0;
+		float ds_y = 0.0;
+		float ds_rx = this->width;
+		float ds_by = this->height;
+		
+		for (auto it = this->positions.begin(); it != this->positions.end(); it++) {
+			AISPositionReport* pr = &(it->second);
+			float2 pos = this->master_map->position_to_local(pr->geo.x, pr->geo.y, 0.0F, 0.0F);
+
+			if (flin(ds_x, pos.x, ds_rx) && flin(ds_y, pos.y, ds_by)) {
+				auto shape = this->vessels.find(it->first);
+				
+				CanvasGeometry^ vessel = ((shape == this->vessels.end()) ? this->default_vessel : shape->second);
+				CanvasSolidColorBrush^ vessel_color = default_vessel_color;
+				float s = float(this->master_map->actual_scale());
+				CanvasGeometry^ g = geometry_scale(geometry_rotate(vessel, pr->heading, 0.0F, 0.0F), s, s);
+
+				if (g->FillContainsPoint(pos)) {
+					this->get_logger()->log_message(WarGrey::GYDM::Log::Info, L"Selected %u", it->first);
+					colliding = true;
+					break;
+				}
+			}
+		}
+	}
+	*/
+
+	return colliding;
+}
+
+void AISlet::on_tap(float local_x, float local_y) {
+
+}
+
 void AISlet::update_self_position(double x, double y) {
-	DCAS(this->geo_x, x);
-	DCAS(this->geo_y, y);
+	if ((!flisnan(x)) && (!flisnan(y))) {
+		if ((this->geo_x != x) || (this->geo_y != y)) {
+			this->geo_x = x;
+			this->geo_y = y;
+			this->notify_updated();
+		}
+	}
+}
+
+void AISlet::update_self_course(double degrees) {
+	if (!flisnan(degrees)) {
+		float radians = degrees_to_radians(degrees);
+
+		if (this->course_rad != radians) {
+			this->course_rad = radians;
+			this->notify_updated();
+		}
+	}
 }
 
 void AISlet::update_position(uint16 mmsi, AISPositionReport* pos) {
@@ -176,8 +248,12 @@ void AISlet::update_voyage(uint16 mmsi, AISVoyageReport* voyage, bool force_upda
 
 	if (this->vessels.find(mmsi) == this->vessels.end()) { // make shape
 		if (voyage->mothership_mmsi < 0) {
-			this->vessels[mmsi] = this->make_ship_shape(voyage);
-			force_update = true;
+			CanvasGeometry^ vessel = this->make_ship_shape(voyage);
+
+			if (vessel != nullptr) {
+				this->vessels[mmsi] = vessel;
+				force_update = true;
+			}
 		} else if (this->vessels.find(voyage->mothership_mmsi) != this->vessels.end()) {
 			this->vessels[mmsi] = this->vessels[voyage->mothership_mmsi];
 			force_update = true;
@@ -192,7 +268,7 @@ void AISlet::update_voyage(uint16 mmsi, AISVoyageReport* voyage, bool force_upda
 		} else if (voyage->callsign.size() > 0) {
 			name = make_wstring(voyage->callsign);
 		} else {
-			name = "_";
+			name = "[no name]";
 		}
 
 		if (name != nullptr) {
@@ -214,22 +290,27 @@ CanvasCachedGeometry^ AISlet::make_ship_info(Platform::String^ text, CanvasTextF
 }
 
 CanvasGeometry^ AISlet::make_ship_shape(AISVoyageReport* voyage) {
-	CanvasPathBuilder^ vessel = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-	float sb = float(voyage->to_starboard);
-	float bw = float(voyage->to_bow);
+	CanvasPathBuilder^ vessel = nullptr;
 	float ps = float(voyage->to_port);
 	float sn = float(voyage->to_stern);
-	float tx = (sb - ps) * 0.5F;
-	float ty = bw - (bw - sn) * 0.382F;
+	float sl = float(voyage->to_bow) + sn;
+	float sw = ps + float(voyage->to_starboard);
 
-	// NOTE: the y-axis of screen is downward
+	if ((sl > 0.0) && (sw > 0.0)) {
+		float tx = sw * 0.5F;
+		float ty = sl * 0.618F;
 
-	vessel->BeginFigure(sb, -ty);
-	vessel->AddLine(tx, -bw);
-	vessel->AddLine(-ps, -ty);
-	vessel->AddLine(-ps, sn);
-	vessel->AddLine(sb, sn);
-	vessel->EndFigure(CanvasFigureLoop::Closed);
+		vessel = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 
-	return CanvasGeometry::CreatePath(vessel);
+		// NOTE: the y-axis of win2d/direct2d is downward
+
+		vessel->BeginFigure(0.0F, 0.0F);
+		vessel->AddLine(sw, 0.0F);
+		vessel->AddLine(sw, -tx);
+		vessel->AddLine(tx, -sl);
+		vessel->AddLine(0.0F, -tx);
+		vessel->EndFigure(CanvasFigureLoop::Closed);
+	}
+
+	return (vessel == nullptr) ? this->default_vessel : geometry_translate(CanvasGeometry::CreatePath(vessel), -ps, -sn);
 }

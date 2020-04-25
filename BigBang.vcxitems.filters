@@ -331,8 +331,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\ui\metricslet.cpp">
       <Filter>graphlet\ui</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\aislet.cpp">
-      <Filter>graphlet</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\aislet.cpp">
+      <Filter>graphlet\filesystem\configuration</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -676,8 +676,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\ui\metricslet.hpp">
       <Filter>graphlet\ui</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\aislet.hpp">
-      <Filter>graphlet</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\filesystem\configuration\aislet.hpp">
+      <Filter>graphlet\filesystem\configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -786,6 +786,12 @@
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\metrics.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\aiship.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\aiship.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>
