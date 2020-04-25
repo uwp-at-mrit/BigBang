@@ -132,7 +132,7 @@ void AISlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 				auto shape = this->vessels.find(it->first);
 				auto caption = this->captions.find(it->first);
 				double distance = points_distance(pr->geo.x, pr->geo.y, this->geo_x, this->geo_y);
-				CanvasGeometry^ vessel = ((shape == this->vessels.end()) ? this->default_vessel : shape->second);
+				CanvasGeometry^ vessel_raw = ((shape == this->vessels.end()) ? this->default_vessel : shape->second);
 				CanvasSolidColorBrush^ vessel_color = default_vessel_color;
 
 				if (maybe_vr != this->voyages.end()) {
@@ -142,15 +142,18 @@ void AISlet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x
 					}
 				}
 
-				{ // display vessel
+				{ // NOTE: both heading and course can be NaN, ignored.
 					float scale = float(this->master_map->actual_scale());
+					CanvasGeometry^ vessel = geometry_scale(vessel_raw, scale, scale);
 					double heading = pr->heading;
 					
-					if (flisnan(heading)) {
-						heading = (flisnan(pr->course) ? 0.0 : pr->course);
+					if (pr->heading > 0.0) {
+						vessel = geometry_rotate(vessel, pr->heading, 0.0F, 0.0F);
+					} else if (pr->course > 0.0) {
+						vessel = geometry_rotate(vessel, pr->course, 0.0F, 0.0F);
 					}
 
-					ds->DrawGeometry(geometry_scale(geometry_rotate(vessel, heading, 0.0F, 0.0F), scale, scale), pos, vessel_color);
+					ds->DrawGeometry(vessel, pos, vessel_color);
 				}
 
 				if (caption != this->captions.end()) {
